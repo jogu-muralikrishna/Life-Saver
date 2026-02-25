@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Blood Donors</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a1941] text-white min-h-screen p-6">
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-10">
+            <a href="index.html" class="text-green-400 mb-4 block underline">← Back</a>
+            <h1 class="text-3xl font-bold">Blood Donor Services</h1>
+            <p class="text-gray-400">Find available donors to save lives</p>
+        </header>
+
+        <!-- Blood Group Selector -->
+        <section class="mb-12">
+            <h2 class="text-xl mb-4 font-semibold">Select Blood Group</h2>
+            <div id="groupFilters" class="flex flex-wrap gap-3">
+                <!-- Groups: O+, O-, A+, etc. -->
+                <button onclick="filterByGroup('O+')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">O+</button>
+                <button onclick="filterByGroup('O-')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">O-</button>
+                <button onclick="filterByGroup('A+')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">A+</button>
+                <button onclick="filterByGroup('A-')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">A-</button>
+                <button onclick="filterByGroup('B+')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">B+</button>
+                <button onclick="filterByGroup('B-')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">B-</button>
+                <button onclick="filterByGroup('AB+')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">AB+</button>
+                <button onclick="filterByGroup('AB-')" class="filter-btn bg-gray-700 px-6 py-2 rounded-lg hover:bg-red-600 transition">AB-</button>
+            </div>
+        </section>
+
+        <h2 id="resultsHeading" class="text-xl mb-6 font-semibold">Available Donors</h2>
+        <div id="donorList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Donor Cards will appear here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        // Same Config
+        const firebaseConfig = { 
+             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+         }; 
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.filterByGroup = (group) => {
+            // Update UI
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.replace('bg-red-600', 'bg-gray-700'));
+            event.target.classList.replace('bg-gray-700', 'bg-red-600');
+            document.getElementById('resultsHeading').innerText = `Available ${group} Donors`;
+
+            // Query Firebase
+            const donorsRef = ref(db, 'donors');
+            onValue(donorsRef, (snapshot) => {
+                const list = document.getElementById('donorList');
+                list.innerHTML = "";
+                const data = snapshot.val();
+                
+                let found = false;
+                for (let id in data) {
+                    if (data[id].bloodGroup === group && data[id].status === "Available") {
+                        found = true;
+                        list.innerHTML += `
+                            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-xl font-bold">${data[id].name}</h3>
+                                    <p class="text-gray-400 text-sm">📍 ${data[id].city}</p>
+                                </div>
+                                <div class="text-right">
+                                    <a href="tel:${data[id].phone}" class="bg-green-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                                        Call Now
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                if (!found) list.innerHTML = `<p class="col-span-2 text-center text-gray-500 py-10 italic">No donors currently available for ${group}</p>`;
+            });
+        };
+    </script>
+</body>
+</html>

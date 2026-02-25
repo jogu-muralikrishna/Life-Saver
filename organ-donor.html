@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate Organs & Body Parts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-50 pb-20">
+    <div class="max-w-3xl mx-auto p-6">
+        <header class="mb-8 text-center">
+            <a href="index.html" class="text-purple-600 flex items-center justify-center gap-1 mb-4">
+                <i data-lucide="arrow-left" size="16"></i> Back to Home
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900">Donate Organs & Body Parts</h1>
+            <p class="text-gray-500">Register today to be an organ donor and save up to 8 lives.</p>
+        </header>
+
+        <form id="organForm" class="bg-white rounded-2xl shadow-xl p-8 space-y-8 border border-purple-100">
+            
+            <!-- Step 1: Basic Info -->
+            <section>
+                <h3 class="flex items-center gap-2 font-bold text-purple-700 border-b pb-2 mb-4">
+                    <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span> Basic Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="name" placeholder="Full Name" required class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400">
+                    <input type="tel" id="mobile" placeholder="Mobile Number" required class="p-3 border rounded-lg outline-none focus:ring-2 focus:ring-purple-400">
+                    <input type="number" id="age" placeholder="Age" class="p-3 border rounded-lg outline-none">
+                    <select id="blood" class="p-3 border rounded-lg outline-none">
+                        <option>O+</option><option>O-</option><option>A+</option><option>B+</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Step 2: Organ Selection -->
+            <section>
+                <h3 class="flex items-center gap-2 font-bold text-purple-700 border-b pb-2 mb-4">
+                    <span class="bg-purple-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span> Organs to Donate
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Heart" class="w-4 h-4 accent-purple-600"> Heart
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Liver" class="w-4 h-4 accent-purple-600"> Liver
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Kidneys" class="w-4 h-4 accent-purple-600"> Kidneys
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Lungs" class="w-4 h-4 accent-purple-600"> Lungs
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Corneas" class="w-4 h-4 accent-purple-600"> Corneas
+                    </label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" name="organs" value="Skin" class="w-4 h-4 accent-purple-600"> Skin
+                    </label>
+                </div>
+            </section>
+
+            <!-- Step 3: Consent -->
+            <section class="bg-purple-50 p-4 rounded-lg">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" required class="mt-1 w-5 h-5 accent-purple-600">
+                    <span class="text-sm text-purple-900">I understand that I have provided accurate medical information and consent to organ donation to improve the lives of recipients.</span>
+                </label>
+            </section>
+
+            <button type="submit" class="w-full bg-purple-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-purple-700 transition">
+                Register as Organ Donor
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+         } ; // Use your config
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('organForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const checkedOrgans = Array.from(document.querySelectorAll('input[name="organs"]:checked')).map(cb => cb.value);
+            
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('mobile').value,
+                organs: checkedOrgans,
+                timestamp: new Date().toLocaleString()
+            };
+
+            push(ref(db, 'organ_registry'), data).then(() => {
+                alert("Thank you for your noble pledge!");
+                window.location.href = "index.html";
+            });
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>

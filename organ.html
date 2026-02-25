@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donate Organs & Body Parts - Life Saver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .form-section-title { color: #1e1b4b; font-weight: 700; display: flex; items-center: center; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+        .step-num { background: #7c3aed; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; items-center: center; justify-content: center; font-size: 12px; }
+        .organ-box { border: 1px solid #e5e7eb; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .organ-box:hover { background: #f5f3ff; border-color: #7c3aed; }
+        input[type="checkbox"]:checked + span { color: #7c3aed; font-weight: bold; }
+    </style>
+</head>
+<body class="pb-12">
+
+    <div class="max-w-4xl mx-auto p-4 md:p-8">
+        <header class="mb-6">
+            <a href="index.html" class="text-purple-600 flex items-center gap-1 mb-4 font-semibold">
+                <i data-lucide="arrow-left" size="18"></i> Back to Home
+            </a>
+            <h1 class="text-2xl font-bold text-gray-800">Donate Organs & Body Parts</h1>
+        </header>
+
+        <!-- Make a Difference Banner -->
+        <div class="bg-purple-50 border border-purple-200 p-4 rounded-xl mb-8 flex gap-4">
+            <div class="text-purple-600"><i data-lucide="gift"></i></div>
+            <div>
+                <h4 class="text-purple-800 font-bold text-sm">Make a Difference</h4>
+                <p class="text-purple-700 text-xs">One person can save up to 8 lives and improve the lives of many more through organ and tissue donation. Register today to be an organ donor.</p>
+            </div>
+        </div>
+
+        <form id="organRegistrationForm" class="bg-white shadow-xl rounded-2xl p-6 md:p-10 space-y-10">
+            
+            <!-- 1. Basic Information -->
+            <section>
+                <h3 class="form-section-title"><span class="step-num">1</span> Basic Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Mobile Number</label>
+                        <input type="tel" id="mobile" placeholder="10-digit mobile number" required class="w-full p-3 border rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Age</label>
+                        <input type="number" id="age" placeholder="18-80 years" class="w-full p-3 border rounded-lg outline-none">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Address</label>
+                        <input type="text" id="address" placeholder="City, Area, Postal Code" class="w-full p-3 border rounded-lg outline-none">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Organs Selection -->
+            <section>
+                <h3 class="form-section-title"><span class="step-num">2</span> Select Organs/Body Parts to Donate</h3>
+                <p class="text-xs text-gray-500 mb-4">Choose at least one:</p>
+                <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Heart" class="mr-2"> <span>Heart</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Lungs" class="mr-2"> <span>Lungs</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Liver" class="mr-2"> <span>Liver</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Kidneys" class="mr-2"> <span>Kidneys</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Pancreas" class="mr-2"> <span>Pancreas</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Corneas" class="mr-2"> <span>Corneas</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Skin" class="mr-2"> <span>Skin</span></label>
+                    <label class="organ-box"><input type="checkbox" name="organs" value="Bone" class="mr-2"> <span>Bone</span></label>
+                </div>
+            </section>
+
+            <!-- 3. Lifestyle Information -->
+            <section>
+                <h3 class="form-section-title"><span class="step-num">3</span> Lifestyle Information</h3>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-sm font-semibold mb-3">Smoking Habits</p>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="smoking" value="Never" checked> Never Smoked</label>
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="smoking" value="Former"> Former Smoker</label>
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="smoking" value="Current"> Current Smoker</label>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold mb-3">Alcohol Consumption</p>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="alcohol" value="Never" checked> Never</label>
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="alcohol" value="Occasional"> Occasional</label>
+                            <label class="text-sm flex items-center gap-2"><input type="radio" name="alcohol" value="Frequent"> Frequent</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Medical History -->
+            <section>
+                <h3 class="form-section-title"><span class="step-num">4</span> Medical History</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="Diabetes"> Diabetes</label>
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="Hypertension"> Hypertension</label>
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="Heart Disease"> Heart Disease</label>
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="Asthma"> Asthma</label>
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="Kidney Disease"> Kidney Disease</label>
+                    <label class="text-sm flex items-center gap-2"><input type="checkbox" name="medical" value="None"> None</label>
+                </div>
+                <div class="space-y-4">
+                    <textarea id="medications" rows="3" placeholder="Current Medications (List all current medications...)" class="w-full p-3 border rounded-lg text-sm outline-none"></textarea>
+                    <textarea id="familyHistory" rows="3" placeholder="Family Medical History (Any hereditary diseases...)" class="w-full p-3 border rounded-lg text-sm outline-none"></textarea>
+                </div>
+            </section>
+
+            <!-- Consent -->
+            <div class="bg-gray-50 p-4 rounded-lg border">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox" required class="mt-1 w-4 h-4 accent-purple-600">
+                    <div class="text-[11px] text-gray-500">
+                        <span class="font-bold text-gray-700 block mb-1">I understand and consent to organ and tissue donation</span>
+                        I acknowledge that I have provided accurate medical information and understand that my organs and tissues may be used to save lives or improve the quality of life of recipients. My family will be contacted to confirm this donation at the time of my death.
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" class="w-full bg-[#a855f7] text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition shadow-lg">
+                Register as Organ Donor
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        // Firebase Config (Keep same as index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('organRegistrationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const selectedOrgans = Array.from(document.querySelectorAll('input[name="organs"]:checked')).map(cb => cb.value);
+            const medicalConditions = Array.from(document.querySelectorAll('input[name="medical"]:checked')).map(cb => cb.value);
+
+            const formData = {
+                fullName: document.getElementById('fullName').value,
+                mobile: document.getElementById('mobile').value,
+                age: document.getElementById('age').value,
+                address: document.getElementById('address').value,
+                organs: selectedOrgans,
+                smoking: document.querySelector('input[name="smoking"]:checked').value,
+                alcohol: document.querySelector('input[name="alcohol"]:checked').value,
+                medicalConditions: medicalConditions,
+                medications: document.getElementById('medications').value,
+                familyHistory: document.getElementById('familyHistory').value,
+                timestamp: new Date().toISOString()
+            };
+
+            if(selectedOrgans.length === 0) {
+                alert("Please select at least one organ to donate.");
+                return;
+            }
+
+            push(ref(db, 'organ_donors'), formData).then(() => {
+                alert("Pledge Successful! You have taken a noble step towards saving lives.");
+                window.location.href = "index.html";
+            }).catch(err => alert("Error saving data: " + err.message));
+        });
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

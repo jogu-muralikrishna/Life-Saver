@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Blood Donor List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a1941] text-white p-6">
+    <div class="max-w-5xl mx-auto">
+        <a href="index.html" class="text-green-400">← Back</a>
+        <h1 class="text-3xl font-bold mt-4 mb-8">Available Blood Donors</h1>
+        
+        <div class="bg-white p-4 rounded-lg flex gap-4 mb-8">
+            <select id="bgFilter" class="bg-gray-100 p-2 text-black rounded flex-1">
+                <option value="All">All Blood Groups</option>
+                <option>O+</option><option>O-</option><option>A+</option><option>B+</option>
+                <option>A-</option><option>B-</option><option>AB+</option><option>AB-</option>
+            </select>
+            <button onclick="fetchDonors()" class="bg-red-600 px-6 py-2 rounded font-bold">Search</button>
+        </div>
+
+        <div id="donorsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+    // PASTE YOUR FIREBASE CONFIG HERE
+    const firebaseConfig = { 
+         apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+     }; 
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // FIX: Attach function to window so the button can see it
+    window.fetchDonors = function() {
+        const filter = document.getElementById('bgFilter').value;
+        const donorsRef = ref(db, 'donors');
+
+        onValue(donorsRef, (snapshot) => {
+            const data = snapshot.val();
+            const grid = document.getElementById('donorsGrid');
+            grid.innerHTML = "";
+
+            if (!data) {
+                grid.innerHTML = "<p class='col-span-full text-center py-10 opacity-50 italic'>No donors found in database.</p>";
+                return;
+            }
+
+            for (let id in data) {
+                const donor = data[id];
+                // Check if blood group matches filter or if 'All' is selected
+                if (filter === "All" || donor.bloodGroup === filter) {
+                    grid.innerHTML += `
+                    <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex justify-between items-center animate-fade-in">
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${donor.name}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="bg-red-900 text-red-200 px-2 py-0.5 rounded text-xs font-bold">${donor.bloodGroup}</span>
+                                <p class="text-sm text-gray-400">📍 ${donor.city}</p>
+                            </div>
+                        </div>
+                        <a href="tel:${donor.phone}" class="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg text-sm font-bold transition">
+                            Call Donor
+                        </a>
+                    </div>`;
+                }
+            }
+        });
+    };
+
+    // Load all donors initially
+    window.fetchDonors();
+    </script>
+</body>
+</html>

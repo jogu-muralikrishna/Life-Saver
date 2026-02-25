@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Hospitals - Life Saver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Maps API - Replace YOUR_API_KEY with your real key -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <header class="bg-[#0a1941] text-white p-10">
+        <div class="max-w-6xl mx-auto">
+            <a href="index.html" class="text-green-400 flex items-center gap-1 mb-4">
+                <i data-lucide="arrow-left" size="16"></i> Back to Home
+            </a>
+            <h1 class="text-3xl font-bold">Nearby Hospitals</h1>
+            <p class="text-gray-400">Showing real-time medical facilities based on your location</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 -mt-8">
+        <!-- Status Card -->
+        <div id="statusCard" class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 mb-8 flex justify-between items-center">
+            <div>
+                <h2 class="font-bold text-gray-800">Location Services</h2>
+                <p id="statusText" class="text-gray-500 text-sm">Please allow location access to find hospitals.</p>
+            </div>
+            <button onclick="getUserLocation()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2">
+                <i data-lucide="map-pin"></i> Locate Me
+            </button>
+        </div>
+
+        <!-- Real Hospitals Grid -->
+        <div id="hospitalGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading State -->
+            <div class="col-span-full text-center py-20 text-gray-400 italic">
+                No hospitals loaded yet. Click "Locate Me".
+            </div>
+        </div>
+    </main>
+
+   <!-- Update your script section in hospitals.html -->
+<script>
+    // No API Key needed for this version!
+    
+    async function getUserLocation() {
+        const statusText = document.getElementById('statusText');
+        statusText.innerText = "Accessing GPS...";
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                statusText.innerText = "Identifying your area...";
+                await getAreaName(lat, lng);
+                
+                statusText.innerText = "Searching for all nearby hospitals...";
+                await fetchFreeHospitals(lat, lng);
+            }, (error) => {
+                statusText.innerText = "Error: Please enable Location Access.";
+            });
+        }
+    }
+
+    // 1. REVERSE GEOCODING (Get Area Name from Lat/Lng) - FREE
+    async function getAreaName(lat, lng) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+            const area = data.address.suburb || data.address.neighbourhood || data.address.city_district || "your area";
+            const city = data.address.city || data.address.town || "";
+            
+            document.getElementById('statusText').innerHTML = `📍 Located in: <b>${area}, ${city}</b>`;
+        } catch (e) {
+            console.log("Could not fetch area name");
+        }
+    }
+
+    // 2. SEARCH ALL HOSPITALS (Using Overpass OpenData) - FREE
+    async function fetchFreeHospitals(lat, lng) {
+    const radius = 5000; // 5 kilometers
+    const hospitalGrid = document.getElementById('hospitalGrid');
+    
+    // Use backticks (`) for the query to avoid quote conflicts
+    const query = `[out:json][timeout:25];
+        (
+          node["amenity"="hospital"](around:${radius},${lat},${lng});
+          way["amenity"="hospital"](around:${radius},${lat},${lng});
+          node["healthcare"="hospital"](around:${radius},${lat},${lng});
+        );
+        out center;`;
+
+    // Try multiple mirrors in case one is busy
+    const mirrors = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://lz4.overpass-api.de/api/interpreter"
+    ];
+
+    let success = false;
+
+    for (let url of mirrors) {
+        if (success) break;
+
+        try {
+            console.log("Trying mirror: " + url);
+            const response = await fetch(url, {
+                method: 'POST', // POST is more reliable for long queries
+                body: "data=" + encodeURIComponent(query)
+            });
+
+            if (!response.ok) throw new Error("Server response not OK");
+
+            const data = await response.json();
+            renderHospitalData(data.elements);
+            success = true;
+            console.log("Success with: " + url);
+        } catch (error) {
+            console.error("Mirror failed: " + url, error);
+        }
+    }
+
+    if (!success) {
+        hospitalGrid.innerHTML = `
+            <div class="col-span-full text-center p-10 bg-red-50 rounded-xl border border-red-200">
+                <p class="text-red-600 font-bold">Public Medical Servers are currently busy.</p>
+                <p class="text-gray-500 text-sm mt-2">Please wait 10 seconds and click "Locate Me" again.</p>
+            </div>`;
+    }
+}
+
+// Separate function to handle the UI drawing
+function renderHospitalData(elements) {
+    const hospitalGrid = document.getElementById('hospitalGrid');
+    hospitalGrid.innerHTML = "";
+
+    if (!elements || elements.length === 0) {
+        hospitalGrid.innerHTML = "<p class='col-span-full text-center p-20 text-gray-400 italic'>No hospitals found within 5km of your location.</p>";
+        return;
+    }
+
+    elements.forEach(item => {
+        const hLat = item.lat || (item.center ? item.center.lat : null);
+        const hLng = item.lon || (item.center ? item.center.lng : null);
+        
+        if(!hLat || !hLng) return;
+
+        const name = item.tags.name || "Unnamed Medical Center";
+        const street = item.tags["addr:street"] || item.tags["addr:full"] || "Location details on map";
+
+        hospitalGrid.innerHTML += `
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition">
+                <div>
+                    <h3 class="font-bold text-lg text-[#0a1941] leading-tight mb-2 h-14 overflow-hidden">${name}</h3>
+                    <p class="text-xs text-gray-500 mb-4 flex items-center gap-1">
+                        <i data-lucide="map-pin" size="12"></i> ${street}
+                    </p>
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">PUBLIC DATA</span>
+                        <span class="text-gray-400 text-[10px]">Verified via OSM</span>
+                    </div>
+                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${hLat},${hLng}" 
+                   target="_blank" class="bg-blue-600 text-white text-center py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    Navigate to Hospital
+                </a>
+            </div>`;
+    });
+    lucide.createIcons();
+}
+</script>
+</body>
+</html>

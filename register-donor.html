@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become a Blood Donor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#f8fafc] min-h-screen">
+    <div class="max-w-2xl mx-auto p-6">
+        <a href="index.html" class="text-green-600 flex items-center gap-1 mb-6">
+            <i data-lucide="arrow-left" size="16"></i> Back to Home
+        </a>
+
+        <div class="text-center mb-8">
+            <i data-lucide="heart" class="mx-auto text-red-500 mb-2" size="32"></i>
+            <h1 class="text-3xl font-bold text-gray-900">Become a Blood Donor</h1>
+            <p class="text-gray-500">Register yourself and help save lives in your community</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+            <form id="donorForm" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold mb-2">Full Name</label>
+                    <input type="text" id="fullName" required placeholder="Enter your full name" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Blood Group</label>
+                        <select id="bloodGroup" class="w-full p-3 border rounded-lg outline-none">
+                            <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
+                            <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">Phone Number</label>
+                        <input type="tel" id="phone" required maxlength="10" placeholder="10-digit mobile number" class="w-full p-3 border rounded-lg outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-2">City</label>
+                    <select id="city" class="w-full p-3 border rounded-lg outline-none">
+                        <option>Hyderabad</option><option>Secunderabad</option><option>Warangal</option><option>Khammam</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-lg font-bold hover:bg-green-700 transition">
+                    Register as Donor
+                </button>
+            </form>
+
+            <!-- Eligibility Info Card -->
+            <div class="mt-8 bg-blue-50 p-6 rounded-lg border border-blue-100">
+                <h3 class="text-blue-800 font-bold mb-3">Who Can Donate?</h3>
+                <ul class="text-sm text-blue-700 space-y-2">
+                    <li>• Age between 18-65 years</li>
+                    <li>• Weight at least 50 kg</li>
+                    <li>• Generally healthy condition</li>
+                    <li>• No serious medical conditions</li>
+                    <li>• Can donate every 90 days</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        // Same Config as before
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        document.getElementById('donorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const donorData = {
+                name: document.getElementById('fullName').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                phone: document.getElementById('phone').value,
+                city: document.getElementById('city').value,
+                status: "Available", // Default status
+                registeredDate: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const donorsRef = ref(db, 'donors');
+                const newDonorRef = push(donorsRef);
+                await set(newDonorRef, donorData);
+                alert("Registration Successful! You are now a life saver.");
+                window.location.href = "index.html";
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>

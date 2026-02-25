@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Admin Login - Life Saver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0a1941] flex items-center justify-center min-h-screen p-6">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Admin Access</h1>
+            <p class="text-gray-500 text-sm">Please sign in to manage services</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <input type="email" id="email" placeholder="Admin Email" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="password" id="password" placeholder="Password" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                Sign In
+            </button>
+        </form>
+        <a href="index.html" class="block text-center mt-6 text-sm text-gray-400 hover:text-blue-600">Back to Home</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+         };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // 1. Authenticate with Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const uid = userCredential.user.uid;
+
+                // 2. Check Database for isAdmin: true
+                const adminRef = ref(db, `admins/${uid}`);
+                const snapshot = await get(adminRef);
+
+                if (snapshot.exists() && snapshot.val().isAdmin === true) {
+                    // Success! Redirect to admin dashboard
+                    window.location.href = "admin.html";
+                } else {
+                    throw new Error("Access Denied: Not an authorized admin.");
+                }
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+                window.location.href = "index.html";
+            }
+        });
+    </script>
+</body>
+</html>

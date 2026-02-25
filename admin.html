@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Life Saver</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0a1941; font-family: 'Inter', sans-serif; display: none; } /* Hidden by default for protection */
+        .stat-card { background: white; border-radius: 12px; padding: 24px; }
+        .badge-green { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 99px; font-size: 12px; }
+        .badge-red { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 99px; font-size: 12px; }
+    </style>
+</head>
+<body class="text-gray-800 pb-10">
+
+    <!-- Header Section -->
+    <header class="p-8 text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <a href="index.html" class="text-green-400 flex items-center gap-1 text-sm">
+                    <i data-lucide="arrow-left" size="14"></i> Back to Home
+                </a>
+                <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-4 py-1 rounded text-xs font-bold transition">Logout</button>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <i data-lucide="users" size="32" class="text-green-400"></i>
+                <div>
+                    <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+                    <p class="text-gray-400 text-sm">Manage blood donor registrations and availability</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-8">
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card border-l-8 border-green-500 shadow-lg">
+                <p class="text-gray-500 font-semibold text-sm uppercase">Total Donors</p>
+                <h2 id="totalCount" class="text-4xl font-bold mt-2">0</h2>
+            </div>
+            <div class="stat-card border-l-8 border-blue-500 shadow-lg">
+                <p class="text-gray-500 font-semibold text-sm uppercase">Available</p>
+                <h2 id="availableCount" class="text-4xl font-bold mt-2 text-blue-600">0</h2>
+            </div>
+            <div class="stat-card border-l-8 border-red-500 shadow-lg">
+                <p class="text-gray-500 font-semibold text-sm uppercase">Unavailable</p>
+                <h2 id="unavailableCount" class="text-4xl font-bold mt-2 text-red-600">0</h2>
+            </div>
+        </div>
+
+        <!-- Data Table: Blood Donors -->
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden mb-12">
+            <div class="p-4 bg-gray-50 border-b font-bold text-gray-700">Blood Donor Management</div>
+            <table class="w-full text-left">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="p-4 font-semibold text-sm">Name</th>
+                        <th class="p-4 font-semibold text-sm">Blood</th>
+                        <th class="p-4 font-semibold text-sm">Phone</th>
+                        <th class="p-4 font-semibold text-sm">City</th>
+                        <th class="p-4 font-semibold text-sm text-center">Status</th>
+                        <th class="p-4 font-semibold text-sm text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody" class="divide-y text-sm"></tbody>
+            </table>
+            <div id="tableLoader" class="p-10 text-center text-gray-400">Loading donor data...</div>
+        </div>
+        
+        <!-- Data Table: Organ Donors -->
+        <h2 class="text-2xl font-bold text-white mb-4">Organ Donation Registry</h2>
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden mb-10">
+            <table class="w-full text-left">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="p-4 font-semibold text-sm">Name</th>
+                        <th class="p-4 font-semibold text-sm">Organs Pledged</th>
+                        <th class="p-4 font-semibold text-sm">Phone</th>
+                        <th class="p-4 font-semibold text-sm text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="organTableBody" class="divide-y text-sm"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // --- 1. ADMIN PROTECTION LOGIC ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const adminRef = ref(db, `admins/${user.uid}`);
+                const snapshot = await get(adminRef);
+                
+                if (snapshot.exists() && snapshot.val().isAdmin === true) {
+                    document.body.style.display = "block";
+                    startDataListeners(); // Only load data if admin verified
+                } else {
+                    window.location.href = "index.html?error=unauthorized";
+                }
+            } else {
+                window.location.href = "admin-login.html";
+            }
+        });
+
+        // --- 2. DATA LOADING LOGIC ---
+        function startDataListeners() {
+            // Blood Donors Listener
+            onValue(ref(db, 'donors'), (snapshot) => {
+                const data = snapshot.val();
+                const tableBody = document.getElementById('adminTableBody');
+                document.getElementById('tableLoader').classList.add('hidden');
+                tableBody.innerHTML = "";
+
+                let total = 0, avail = 0, unavail = 0;
+                for (let id in data) {
+                    total++;
+                    const d = data[id];
+                    if(d.status === "Available") avail++; else unavail++;
+
+                    tableBody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4 font-medium">${d.name}</td>
+                            <td class="p-4"><span class="bg-red-50 text-red-600 px-2 py-0.5 rounded text-xs font-bold">${d.bloodGroup}</span></td>
+                            <td class="p-4 text-gray-500">${d.phone}</td>
+                            <td class="p-4 text-gray-500">${d.city}</td>
+                            <td class="p-4 text-center">
+                                <span class="${d.status === 'Available' ? 'badge-green' : 'badge-red'}">${d.status}</span>
+                            </td>
+                            <td class="p-4 text-center">
+                                <div class="flex justify-center gap-4">
+                                    <button onclick="toggleStatus('${id}', '${d.status}')" class="text-blue-500 hover:scale-110 transition"><i data-lucide="refresh-cw" size="16"></i></button>
+                                    <button onclick="deleteDonor('${id}')" class="text-red-500 hover:scale-110 transition"><i data-lucide="trash-2" size="16"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                }
+                document.getElementById('totalCount').innerText = total;
+                document.getElementById('availableCount').innerText = avail;
+                document.getElementById('unavailableCount').innerText = unavail;
+                lucide.createIcons();
+            });
+
+            // Organ Donors Listener
+            onValue(ref(db, 'organ_donors'), (snapshot) => {
+                const data = snapshot.val();
+                const tbody = document.getElementById('organTableBody');
+                tbody.innerHTML = "";
+                for(let id in data) {
+                    const organs = Array.isArray(data[id].organs) ? data[id].organs.join(', ') : "Pledged";
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-4 font-bold text-gray-700">${data[id].fullName}</td>
+                            <td class="p-4"><span class="text-purple-600 font-medium">${organs}</span></td>
+                            <td class="p-4 text-gray-500">${data[id].mobile}</td>
+                            <td class="p-4 text-center">
+                                <button onclick="deleteRecord('organ_donors', '${id}')" class="text-red-500 hover:scale-110 transition"><i data-lucide="trash-2" size="16"></i></button>
+                            </td>
+                        </tr>`;
+                }
+                lucide.createIcons();
+            });
+        }
+
+        // --- 3. EXPOSE ACTIONS TO WINDOW ---
+        window.deleteDonor = (id) => {
+            if(confirm("Delete this blood donor record?")) remove(ref(db, `donors/${id}`));
+        };
+
+        window.deleteRecord = (node, id) => {
+            if(confirm("Delete this organ donor record?")) remove(ref(db, `${node}/${id}`));
+        };
+
+        window.toggleStatus = (id, currentStatus) => {
+            const newStatus = currentStatus === "Available" ? "Unavailable" : "Available";
+            update(ref(db, `donors/${id}`), { status: newStatus });
+        };
+
+        window.adminLogout = () => {
+            signOut(auth).then(() => window.location.href = "index.html");
+        };
+
+        // Attach logout event
+        document.getElementById('logoutBtn').addEventListener('click', window.adminLogout);
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
