@@ -27,15 +27,16 @@
         <p class="text-gray-300 mb-8">Find hospitals, donate blood, locate ambulances - save lives near you</p>
 
         <!-- Global Search Bar -->
-        <div class="relative max-w-3xl mb-6">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                <i data-lucide="search" size="20"></i>
-            </span>
-            <input type="text" id="globalSearch" 
-                placeholder='Try: "Hospital near me", "Blood donor O+", "Ambulance emergency"...' 
-                class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-lg shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <p class="text-xs text-gray-400 mt-2 ml-1 italic">💡 Natural language queries work too. Try typing a blood group or city!</p>
-        </div>
+<div class="relative max-w-3xl mb-6 mx-auto">
+    <!-- Icon fix: centered vertically inside the relative parent -->
+    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <i data-lucide="search" class="text-gray-400" size="20"></i>
+    </div>
+    <input type="text" id="globalSearch" 
+        placeholder='Try: "O+ in Hyderabad", "Ambulance near me", "Hospitals"...' 
+        class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none transition-all">
+</div>
+
 
         <div class="flex gap-4">
             <button onclick="location.href='register-donor.html'" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
@@ -157,25 +158,47 @@
         const db = getDatabase(app);
 
         // --- GLOBAL SEARCH LOGIC ---
-        const searchInput = document.getElementById('globalSearch');
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = searchInput.value.toLowerCase();
-                
-                if (query.includes('blood') || query.includes('+') || query.includes('-')) {
-                    window.location.href = `blood-donor.html?search=${query}`;
-                } else if (query.includes('ambulance') || query.includes('driver')) {
-                    window.location.href = `ambulance.html`;
-                } else if (query.includes('hospital') || query.includes('near me')) {
-                    window.location.href = `hospitals.html`;
-                } else if (query.includes('organ')) {
-                    window.location.href = `organ-donor.html`;
-                } else {
-                    alert("Try searching for: 'O+', 'Ambulance', or 'Hospital'");
-                }
+    const searchInput = document.getElementById('globalSearch');
+    
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value.toLowerCase().trim();
+            if(!query) return;
+
+            // Better Logic: Keyword Matching
+            const bloodGroups = ["o+", "o-", "a+", "a-", "b+", "b-", "ab+", "ab-"];
+            const cities = ["hyderabad", "secunderabad", "warangal", "vizag"];
+            
+            // 1. Check for Blood Groups
+            const foundBG = bloodGroups.find(bg => query.includes(bg));
+            // 2. Check for Cities
+            const foundCity = cities.find(city => query.includes(city));
+
+            if (foundBG || query.includes('blood') || query.includes('donor')) {
+                let url = `blood.html?`;
+                if(foundBG) url += `bg=${encodeURIComponent(foundBG)}&`;
+                if(foundCity) url += `city=${foundCity}`;
+                window.location.href = url;
+            } 
+            else if (query.includes('ambulance') || query.includes('driver') || query.includes('call')) {
+                window.location.href = `ambulance.html`;
+            } 
+            else if (query.includes('hospital') || query.includes('clinic') || query.includes('near me')) {
+                window.location.href = `hospitals.html`;
+            } 
+            else if (query.includes('organ') || query.includes('heart') || query.includes('kidney')) {
+                window.location.href = `organ.html`;
+            } 
+            else if (query.includes('emergency') || query.includes('police') || query.includes('fire')) {
+                window.location.href = `emergency.html`;
             }
-        });
-    </script>
+            else {
+                // If no specific match, try searching blood donors by that name/city anyway
+                window.location.href = `blood.html?search=${query}`;
+            }
+        }
+    });
+</script>
 
     <script>
         // UI Helpers
@@ -210,4 +233,5 @@
         }
     </script>
 </body>
+
 </html>
