@@ -3,81 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Become a Blood Donor</title>
+    <title>Register - Verified Blood Donor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#f8fafc] min-h-screen">
-    <div class="max-w-2xl mx-auto p-6">
-        <a href="index.html" class="text-green-600 flex items-center gap-1 mb-6">
-            <i data-lucide="arrow-left" size="16"></i> Back to Home
-        </a>
+<body class="bg-[#f8fafc] min-h-screen p-4">
+    <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-10">
+        <header class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-gray-800">Become a Verified Donor</h1>
+            <p class="text-gray-500 text-sm">OTP verification is required to prevent fake entries</p>
+        </header>
 
-        <div class="text-center mb-8">
-            <i data-lucide="heart" class="mx-auto text-red-500 mb-2" size="32"></i>
-            <h1 class="text-3xl font-bold text-gray-900">Become a Blood Donor</h1>
-            <p class="text-gray-500">Register yourself and help save lives in your community</p>
-        </div>
+        <form id="donorForm" class="space-y-5">
+            <!-- Basic Info -->
+            <input type="text" id="fullName" placeholder="Full Name" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <select id="bloodGroup" class="p-3 border rounded-lg outline-none">
+                    <option>O+</option><option>O-</option><option>A+</option><option>B+</option>
+                </select>
+                <select id="city" class="p-3 border rounded-lg outline-none">
+                    <option>Hyderabad</option><option>Secunderabad</option>
+                </select>
+            </div>
 
-        <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
-            <form id="donorForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-semibold mb-2">Full Name</label>
-                    <input type="text" id="fullName" required placeholder="Enter your full name" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none">
+            <!-- Phone & OTP Section -->
+            <div class="border-t pt-5">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Phone Verification</label>
+                <div class="flex gap-2">
+                    <input type="tel" id="phone" value="+91" class="flex-1 p-3 border rounded-lg outline-none font-mono">
+                    <button type="button" id="sendOtpBtn" class="bg-blue-600 text-white px-4 rounded-lg text-xs font-bold uppercase">Send OTP</button>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Blood Group</label>
-                        <select id="bloodGroup" class="w-full p-3 border rounded-lg outline-none">
-                            <option>O+</option><option>O-</option><option>A+</option><option>A-</option>
-                            <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold mb-2">Phone Number</label>
-                        <input type="tel" id="phone" required maxlength="10" placeholder="10-digit mobile number" class="w-full p-3 border rounded-lg outline-none">
-                    </div>
+                <!-- Hidden reCAPTCHA container -->
+                <div id="recaptcha-container" class="mt-4"></div>
+
+                <!-- OTP Input (Hidden initially) -->
+                <div id="otpBox" class="hidden mt-4 animate-pulse">
+                    <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" class="w-full p-3 border-2 border-blue-400 rounded-lg outline-none text-center tracking-widest font-bold">
+                    <p class="text-[10px] text-blue-600 mt-1">Check your SMS for the code</p>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-semibold mb-2">City</label>
-                    <select id="city" class="w-full p-3 border rounded-lg outline-none">
-                        
-                       <option>Adilabad</option><option>Bhadradri Kothagudem</option><option>Hanumakonda</option><option>Hyderabad</option><option>Jagtial</option>
-                        <option>Jangaon</option><option>Jayashankar Bhupalpally</option><option>Jogulamba Gadwal</option><option>Kamareddy</option><option>Karimnagar</option>
-                       <option>Khammam</option><option>Komaram Bheem Asifabad</option><option>Mahabubabad</option><option>Mahabubnagar</option><option>Mancherial</option>
-                        <option>Medak</option><option>Medchal- Malkajgiri</option><option>Mulugu</option><option>Nagarkurnool</option><option>Nalgonda</option>
-                        <option>Narayanpet</option><option>Nirmal</option><option>Nizamabad</option><option>Peddapalli</option><option>Rajanna Sircilla</option>
-                        <option>Rangareddy</option><option>Sangareddy</option><option>Siddipet</option><option>Suryapet</option><option>Vikarabad</option>
-                        <option>Wanaparthy</option><option>Warangal</option><option>Yadadri Bhuvanagiri</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-lg font-bold hover:bg-green-700 transition">
-                    Register as Donor
-                </button>
-            </form>
-
-            <!-- Eligibility Info Card -->
-            <div class="mt-8 bg-blue-50 p-6 rounded-lg border border-blue-100">
-                <h3 class="text-blue-800 font-bold mb-3">Who Can Donate?</h3>
-                <ul class="text-sm text-blue-700 space-y-2">
-                    <li>• Age between 18-65 years</li>
-                    <li>• Weight at least 50 kg</li>
-                    <li>• Generally healthy condition</li>
-                    <li>• No serious medical conditions</li>
-                    <li>• Can donate every 90 days</li>
-                </ul>
             </div>
-        </div>
+
+            <!-- Submit Button (Enabled only after OTP) -->
+            <button type="submit" id="submitBtn" disabled class="w-full bg-gray-400 text-white py-4 rounded-xl font-bold transition-all cursor-not-allowed">
+                Verify & Register
+            </button>
+        </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        // Same Config as before
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
             authDomain: "life-saver-be5cf.firebaseapp.com",
@@ -89,32 +68,71 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        document.getElementById('donorForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const donorData = {
-                name: document.getElementById('fullName').value,
-                bloodGroup: document.getElementById('bloodGroup').value,
-                phone: document.getElementById('phone').value,
-                city: document.getElementById('city').value,
-                status: "Available", // Default status
-                registeredDate: new Date().toISOString().split('T')[0]
-            };
+        let confirmationResult;
+
+        // 1. Setup reCAPTCHA
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'normal', // Can use 'invisible' later
+            'callback': (response) => { console.log("reCAPTCHA solved"); }
+        });
+
+        // 2. Send OTP Logic
+        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+            const phoneNumber = document.getElementById('phone').value;
+            if(phoneNumber.length < 13) { alert("Enter valid number with +91"); return; }
 
             try {
-                const donorsRef = ref(db, 'donors');
-                const newDonorRef = push(donorsRef);
-                await set(newDonorRef, donorData);
-                alert("Registration Successful! You are now a life saver.");
-                window.location.href = "index.html";
+                const appVerifier = window.recaptchaVerifier;
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+                
+                document.getElementById('otpBox').classList.remove('hidden');
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').classList.replace('bg-gray-400', 'bg-green-600');
+                document.getElementById('submitBtn').classList.remove('cursor-not-allowed');
+                alert("OTP Sent to " + phoneNumber);
             } catch (error) {
                 alert("Error: " + error.message);
+                // Reset reCAPTCHA if it fails
+                window.recaptchaVerifier.render().then(widgetId => { grecaptcha.reset(widgetId); });
             }
         });
+
+        // 3. Verify OTP & Save Data Logic
+        document.getElementById('donorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('otpCode').value;
+
+            try {
+                // Verify the OTP
+                const result = await confirmationResult.confirm(code);
+                const user = result.user; // This is the VERIFIED user with a UID
+
+                // Create the data object
+                const donorData = {
+                    name: document.getElementById('fullName').value,
+                    bloodGroup: document.getElementById('bloodGroup').value,
+                    city: document.getElementById('city').value,
+                    phone: user.phoneNumber,
+                    status: "Available",
+                    verified: true,
+                    timestamp: new Date().toISOString()
+                };
+
+                // SAVE TO DATABASE under the UID (This is the secure part)
+                await set(ref(db, 'donors/' + user.uid), donorData);
+                
+                alert("Verified Registration Successful!");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                alert("Invalid OTP Code. Please try again.");
+            }
+        });
+
         lucide.createIcons();
     </script>
 </body>
-
 </html>
