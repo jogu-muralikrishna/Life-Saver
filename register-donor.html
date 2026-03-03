@@ -88,7 +88,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-emailjs.init("YOUR_PUBLIC_KEY");
+emailjs.init(e01E864mHAh1Vy6xn);
+
 
 let generatedOTP;
 let isVerified = false;
@@ -113,7 +114,7 @@ document.getElementById('sendOtpBtn').addEventListener('click', function () {
 
     this.innerText = "Sending...";
 
-    emailjs.send("YOUR_SERVICE_ID", "template_k4pl15w", params)
+    emailjs.send("service_5z0f2my", "template_k4pl15w", params)
         .then(() => {
             alert("OTP Sent Successfully");
             document.getElementById('otpBox').classList.remove('hidden');
@@ -178,3 +179,4 @@ lucide.createIcons();
 
 </body>
 </html>
+
