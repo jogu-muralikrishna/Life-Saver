@@ -6,16 +6,20 @@
     <title>Register - Verified Blood Donor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body class="bg-[#f8fafc] min-h-screen p-4">
     <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-10">
         <header class="text-center mb-8">
+            <a href="index.html" class="text-green-600 flex items-center justify-center gap-1 mb-2 text-sm">
+                <i data-lucide="arrow-left" size="14"></i> Back to Home
+            </a>
             <h1 class="text-2xl font-bold text-gray-800">Become a Verified Donor</h1>
-            <p class="text-gray-500 text-sm">OTP verification is required to prevent fake entries</p>
+            <p class="text-gray-500 text-sm">Email OTP verification is required to prevent fake entries</p>
         </header>
 
         <form id="donorForm" class="space-y-5">
-            <!-- Basic Info -->
             <input type="text" id="fullName" placeholder="Full Name" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
             
             <div class="grid grid-cols-2 gap-4">
@@ -27,36 +31,36 @@
                 </select>
             </div>
 
-            <!-- Phone & OTP Section -->
+            <!-- Email & OTP Section -->
             <div class="border-t pt-5">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Phone Verification</label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Email Verification</label>
                 <div class="flex gap-2">
-                    <input type="tel" id="phone" value="+91" class="flex-1 p-3 border rounded-lg outline-none font-mono">
+                    <input type="email" id="email" placeholder="yourname@gmail.com" required class="flex-1 p-3 border rounded-lg outline-none">
                     <button type="button" id="sendOtpBtn" class="bg-blue-600 text-white px-4 rounded-lg text-xs font-bold uppercase">Send OTP</button>
                 </div>
-                
-                <!-- Hidden reCAPTCHA container -->
-                <div id="recaptcha-container" class="mt-4"></div>
 
                 <!-- OTP Input (Hidden initially) -->
-                <div id="otpBox" class="hidden mt-4 animate-pulse">
-                    <input type="text" id="otpCode" placeholder="Enter 6-digit OTP" class="w-full p-3 border-2 border-blue-400 rounded-lg outline-none text-center tracking-widest font-bold">
-                    <p class="text-[10px] text-blue-600 mt-1">Check your SMS for the code</p>
+                <div id="otpBox" class="hidden mt-4">
+                    <div class="flex gap-2">
+                        <input type="text" id="otpInput" placeholder="Enter 6-digit Code" class="flex-1 p-3 border-2 border-blue-400 rounded-lg outline-none text-center font-bold tracking-widest">
+                        <button type="button" id="verifyBtn" class="bg-green-600 text-white px-6 rounded-lg font-bold">Verify</button>
+                    </div>
+                    <p class="text-[10px] text-blue-600 mt-2">Check your email inbox (and spam folder) for the code.</p>
                 </div>
             </div>
 
             <!-- Submit Button (Enabled only after OTP) -->
-            <button type="submit" id="submitBtn" disabled class="w-full bg-gray-400 text-white py-4 rounded-xl font-bold transition-all cursor-not-allowed">
-                Verify & Register
+            <button type="submit" id="submitBtn" disabled class="w-full bg-gray-400 text-white py-4 rounded-xl font-bold transition-all cursor-not-allowed mt-6">
+                Register as Verified Donor
             </button>
         </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
             authDomain: "life-saver-be5cf.firebaseapp.com",
@@ -66,70 +70,84 @@
             messagingSenderId: "549675407162",
             appId: "1:549675407162:web:ba3c8878834cb4123ba203"
         };
-
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        let confirmationResult;
+        // EmailJS Initialization (REPLACE WITH YOUR PUBLIC KEY)
+        emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
 
-        // 1. Setup reCAPTCHA
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            'size': 'normal', // Can use 'invisible' later
-            'callback': (response) => { console.log("reCAPTCHA solved"); }
+        let generatedOTP;
+        let isVerified = false;
+
+        // 1. Send OTP Logic
+        document.getElementById('sendOtpBtn').addEventListener('click', function() {
+            const email = document.getElementById('email').value;
+            const name = document.getElementById('fullName').value;
+
+            if(!email || !name) { alert("Please enter Name and Email first!"); return; }
+
+            // Generate 6-digit OTP
+            generatedOTP = Math.floor(100000 + Math.random() * 900000);
+
+            // Send via EmailJS
+            const templateParams = {
+                user_name: name,
+                user_email: email,
+                otp_code: generatedOTP
+            };
+
+            this.innerText = "Sending...";
+            
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+                .then(() => {
+                    alert("OTP sent to your email!");
+                    document.getElementById('otpBox').classList.remove('hidden');
+                    this.innerText = "Resend OTP";
+                }, (error) => {
+                    alert("Failed to send email. Check your EmailJS keys.");
+                    this.innerText = "Send OTP";
+                });
         });
 
-        // 2. Send OTP Logic
-        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-            const phoneNumber = document.getElementById('phone').value;
-            if(phoneNumber.length < 13) { alert("Enter valid number with +91"); return; }
+        // 2. Verify Logic
+        document.getElementById('verifyBtn').addEventListener('click', function() {
+            const userInput = document.getElementById('otpInput').value;
 
-            try {
-                const appVerifier = window.recaptchaVerifier;
-                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-                
-                document.getElementById('otpBox').classList.remove('hidden');
+            if(userInput == generatedOTP) {
+                isVerified = true;
+                alert("Verification Successful!");
                 document.getElementById('submitBtn').disabled = false;
                 document.getElementById('submitBtn').classList.replace('bg-gray-400', 'bg-green-600');
                 document.getElementById('submitBtn').classList.remove('cursor-not-allowed');
-                alert("OTP Sent to " + phoneNumber);
-            } catch (error) {
-                alert("Error: " + error.message);
-                // Reset reCAPTCHA if it fails
-                window.recaptchaVerifier.render().then(widgetId => { grecaptcha.reset(widgetId); });
+                document.getElementById('otpBox').classList.add('hidden');
+                document.getElementById('email').readOnly = true;
+                document.getElementById('sendOtpBtn').disabled = true;
+            } else {
+                alert("Invalid OTP. Please check your email again.");
             }
         });
 
-        // 3. Verify OTP & Save Data Logic
-        document.getElementById('donorForm').addEventListener('submit', async (e) => {
+        // 3. Save to Firebase
+        document.getElementById('donorForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const code = document.getElementById('otpCode').value;
+            if(!isVerified) return;
 
-            try {
-                // Verify the OTP
-                const result = await confirmationResult.confirm(code);
-                const user = result.user; // This is the VERIFIED user with a UID
+            const donorData = {
+                name: document.getElementById('fullName').value,
+                bloodGroup: document.getElementById('bloodGroup').value,
+                city: document.getElementById('city').value,
+                email: document.getElementById('email').value,
+                status: "Available",
+                verified: "Email",
+                timestamp: new Date().toISOString()
+            };
 
-                // Create the data object
-                const donorData = {
-                    name: document.getElementById('fullName').value,
-                    bloodGroup: document.getElementById('bloodGroup').value,
-                    city: document.getElementById('city').value,
-                    phone: user.phoneNumber,
-                    status: "Available",
-                    verified: true,
-                    timestamp: new Date().toISOString()
-                };
-
-                // SAVE TO DATABASE under the UID (This is the secure part)
-                await set(ref(db, 'donors/' + user.uid), donorData);
-                
-                alert("Verified Registration Successful!");
+            // Use push for blood donors so multiple people can register
+            const donorsRef = ref(db, 'donors');
+            push(donorsRef, donorData).then(() => {
+                alert("Registration Complete!");
                 window.location.href = "index.html";
-
-            } catch (error) {
-                alert("Invalid OTP Code. Please try again.");
-            }
+            });
         });
 
         lucide.createIcons();
