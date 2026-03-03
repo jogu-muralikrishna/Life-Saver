@@ -88,123 +88,169 @@
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+   <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getDatabase, ref, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-            authDomain: "life-saver-be5cf.firebaseapp.com",
-            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "life-saver-be5cf",
-            storageBucket: "life-saver-be5cf.firebasestorage.app",
-            messagingSenderId: "549675407162",
-            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
-        };
+/* -------------------- 1. FIREBASE CONFIG -------------------- */
+const firebaseConfig = {
+    apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+    authDomain: "life-saver-be5cf.firebaseapp.com",
+    databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "life-saver-be5cf",
+    storageBucket: "life-saver-be5cf.firebasestorage.app",
+    messagingSenderId: "549675407162",
+    appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-        // --- 1. ADMIN PROTECTION LOGIC ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const adminRef = ref(db, `admins/${user.uid}`);
-                const snapshot = await get(adminRef);
-                
-                if (snapshot.exists() && snapshot.val().isAdmin === true) {
-                    document.body.style.display = "block";
-                    startDataListeners(); // Only load data if admin verified
-                } else {
-                    window.location.href = "index.html?error=unauthorized";
-                }
-            } else {
-                window.location.href = "admin-login.html";
-            }
+/* -------------------- 2. AUTH CHECK -------------------- */
+onAuthStateChanged(auth, async (user) => {
+
+    if (!user) {
+        window.location.href = "admin-login.html";
+        return;
+    }
+
+    const adminRef = ref(db, `admins/${user.uid}`);
+    const snapshot = await get(adminRef);
+
+    if (snapshot.exists() && snapshot.val().isAdmin === true) {
+        document.body.style.display = "block";
+        loadBloodDonors();
+        loadOrganDonors();
+    } else {
+        window.location.href = "index.html?error=unauthorized";
+    }
+});
+
+
+/* -------------------- 3. BLOOD DONOR TABLE -------------------- */
+function loadBloodDonors() {
+
+    onValue(ref(db, 'donors'), (snapshot) => {
+
+        const data = snapshot.val();
+        const tableBody = document.getElementById('adminTableBody');
+        const loader = document.getElementById('tableLoader');
+
+        tableBody.innerHTML = "";
+        loader.classList.add('hidden');
+
+        if (!data) return;
+
+        let total = 0, available = 0, unavailable = 0;
+
+        Object.keys(data).forEach(id => {
+
+            total++;
+            const donor = data[id];
+
+            if (donor.status === "Available") available++;
+            else unavailable++;
+
+            tableBody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4 font-medium">${donor.name}</td>
+                    <td class="p-4">
+                        <span class="bg-red-50 text-red-600 px-2 py-0.5 rounded text-xs font-bold">
+                            ${donor.bloodGroup}
+                        </span>
+                    </td>
+                    <td class="p-4 text-gray-500">${donor.phone}</td>
+                    <td class="p-4 text-gray-500">${donor.city}</td>
+                    <td class="p-4 text-center">
+                        <span class="${donor.status === 'Available' ? 'badge-green' : 'badge-red'}">
+                            ${donor.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-4">
+                            <button onclick="toggleStatus('${id}', '${donor.status}')" class="text-blue-500">
+                                Refresh
+                            </button>
+                            <button onclick="deleteDonor('${id}')" class="text-red-500">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         });
 
-        // --- 2. DATA LOADING LOGIC ---
-        function startDataListeners() {
-            // Blood Donors Listener
-            onValue(ref(db, 'donors'), (snapshot) => {
-                const data = snapshot.val();
-                const tableBody = document.getElementById('adminTableBody');
-                document.getElementById('tableLoader').classList.add('hidden');
-                tableBody.innerHTML = "";
+        document.getElementById('totalCount').innerText = total;
+        document.getElementById('availableCount').innerText = available;
+        document.getElementById('unavailableCount').innerText = unavailable;
+    });
+}
 
-                let total = 0, avail = 0, unavail = 0;
-                for (let id in data) {
-                    total++;
-                    const d = data[id];
-                    if(d.status === "Available") avail++; else unavail++;
 
-                    tableBody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-4 font-medium">${d.name}</td>
-                            <td class="p-4"><span class="bg-red-50 text-red-600 px-2 py-0.5 rounded text-xs font-bold">${d.bloodGroup}</span></td>
-                            <td class="p-4 text-gray-500">${d.phone}</td>
-                            <td class="p-4 text-gray-500">${d.city}</td>
-                            <td class="p-4 text-center">
-                                <span class="${d.status === 'Available' ? 'badge-green' : 'badge-red'}">${d.status}</span>
-                            </td>
-                            <td class="p-4 text-center">
-                                <div class="flex justify-center gap-4">
-                                    <button onclick="toggleStatus('${id}', '${d.status}')" class="text-blue-500 hover:scale-110 transition"><i data-lucide="refresh-cw" size="16"></i></button>
-                                    <button onclick="deleteDonor('${id}')" class="text-red-500 hover:scale-110 transition"><i data-lucide="trash-2" size="16"></i></button>
-                                </div>
-                            </td>
-                        </tr>`;
-                }
-                document.getElementById('totalCount').innerText = total;
-                document.getElementById('availableCount').innerText = avail;
-                document.getElementById('unavailableCount').innerText = unavail;
-                lucide.createIcons();
-            });
+/* -------------------- 4. ORGAN DONOR TABLE -------------------- */
+function loadOrganDonors() {
 
-            // Organ Donors Listener
-            onValue(ref(db, 'organ_donors'), (snapshot) => {
-                const data = snapshot.val();
-                const tbody = document.getElementById('organTableBody');
-                tbody.innerHTML = "";
-                for(let id in data) {
-                    const organs = Array.isArray(data[id].organs) ? data[id].organs.join(', ') : "Pledged";
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="p-4 font-bold text-gray-700">${data[id].fullName}</td>
-                            <td class="p-4"><span class="text-purple-600 font-medium">${organs}</span></td>
-                            <td class="p-4 text-gray-500">${data[id].mobile}</td>
-                            <td class="p-4 text-center">
-                                <button onclick="deleteRecord('organ_donors', '${id}')" class="text-red-500 hover:scale-110 transition"><i data-lucide="trash-2" size="16"></i></button>
-                            </td>
-                        </tr>`;
-                }
-                lucide.createIcons();
-            });
-        }
+    onValue(ref(db, 'organ_donors'), (snapshot) => {
 
-        // --- 3. EXPOSE ACTIONS TO WINDOW ---
-        window.deleteDonor = (id) => {
-            if(confirm("Delete this blood donor record?")) remove(ref(db, `donors/${id}`));
-        };
+        const data = snapshot.val();
+        const tbody = document.getElementById('organTableBody');
 
-        window.deleteRecord = (node, id) => {
-            if(confirm("Delete this organ donor record?")) remove(ref(db, `${node}/${id}`));
-        };
+        tbody.innerHTML = "";
 
-        window.toggleStatus = (id, currentStatus) => {
-            const newStatus = currentStatus === "Available" ? "Unavailable" : "Available";
-            update(ref(db, `donors/${id}`), { status: newStatus });
-        };
+        if (!data) return;
 
-        window.adminLogout = () => {
-            signOut(auth).then(() => window.location.href = "index.html");
-        };
+        Object.keys(data).forEach(id => {
 
-        // Attach logout event
-        document.getElementById('logoutBtn').addEventListener('click', window.adminLogout);
+            const organs = Array.isArray(data[id].organs)
+                ? data[id].organs.join(', ')
+                : "Pledged";
 
-        lucide.createIcons();
-    </script>
+            tbody.innerHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4 font-bold text-gray-700">${data[id].fullName}</td>
+                    <td class="p-4 text-purple-600 font-medium">${organs}</td>
+                    <td class="p-4 text-gray-500">${data[id].mobile}</td>
+                    <td class="p-4 text-center">
+                        <button onclick="deleteRecord('organ_donors','${id}')" class="text-red-500">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    });
+}
+
+
+/* -------------------- 5. ACTIONS -------------------- */
+window.deleteDonor = (id) => {
+    if (confirm("Delete this blood donor record?")) {
+        remove(ref(db, `donors/${id}`));
+    }
+};
+
+window.deleteRecord = (node, id) => {
+    if (confirm("Delete this organ donor record?")) {
+        remove(ref(db, `${node}/${id}`));
+    }
+};
+
+window.toggleStatus = (id, currentStatus) => {
+    const newStatus = currentStatus === "Available"
+        ? "Unavailable"
+        : "Available";
+
+    update(ref(db, `donors/${id}`), { status: newStatus });
+};
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
+    });
+});
+</script>
 </body>
 </html>
+
