@@ -2,24 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Verified Blood Donor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- EmailJS CDN -->
+    <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
-    <!-- Initialize EmailJS OUTSIDE module -->
     <script>
-        emailjs.init("e01E864mHAh1Vy6xn");
+        emailjs.init("e01E864mHAh1Vy6xn");  <!-- Your Public Key -->
     </script>
 </head>
 
 <body class="bg-[#f8fafc] min-h-screen p-4">
 
 <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-10">
+
     <header class="text-center mb-8">
         <a href="index.html" class="text-green-600 flex items-center justify-center gap-1 mb-2 text-sm">
             <i data-lucide="arrow-left" size="14"></i> Back to Home
@@ -29,8 +28,20 @@
     </header>
 
     <form id="donorForm" class="space-y-5">
-        <input type="text" id="fullName" placeholder="Full Name" required class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
 
+        <!-- Full Name -->
+        <input type="text" id="fullName"
+            placeholder="Full Name"
+            required
+            class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+
+        <!-- Phone Number (NEW ADDED) -->
+        <input type="tel" id="phone"
+            placeholder="10-digit Mobile Number"
+            required
+            class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+
+        <!-- Blood + City -->
         <div class="grid grid-cols-2 gap-4">
             <select id="bloodGroup" class="p-3 border rounded-lg outline-none">
                 <option>O+</option>
@@ -44,25 +55,70 @@
             </select>
 
             <select id="city" class="p-3 border rounded-lg outline-none">
-                <option>Hyderabad</option>
-                <option>Secunderabad</option>
+    <option>Adilabad</option>
+    <option>Bhadradri Kothagudem</option>
+    <option>Hanamkonda</option>
+    <option>Hyderabad</option>
+    <option>Jagtial</option>
+    <option>Jangaon</option>
+    <option>Jayashankar Bhupalpally</option>
+    <option>Jogulamba Gadwal</option>
+    <option>Kamareddy</option>
+    <option>Karimnagar</option>
+    <option>Khammam</option>
+    <option>Kumuram Bheem Asifabad</option>
+    <option>Mahabubabad</option>
+    <option>Mahabubnagar</option>
+    <option>Mancherial</option>
+    <option>Medak</option>
+    <option>Medchal-Malkajgiri</option>
+    <option>Mulugu</option>
+    <option>Nagarkurnool</option>
+    <option>Nalgonda</option>
+    <option>Narayanpet</option>
+    <option>Nirmal</option>
+    <option>Nizamabad</option>
+    <option>Peddapalli</option>
+    <option>Rajanna Sircilla</option>
+    <option>Ranga Reddy</option>
+    <option>Sangareddy</option>
+    <option>Siddipet</option>
+    <option>Suryapet</option>
+    <option>Vikarabad</option>
+    <option>Wanaparthy</option>
+    <option>Warangal</option>
+    <option>Yadadri Bhuvanagiri</option>
             </select>
         </div>
 
+        <!-- Email Verification -->
         <div class="border-t pt-5">
-            <label class="block text-sm font-bold text-gray-700 mb-2">Email Verification</label>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+                Email Verification
+            </label>
+
             <div class="flex gap-2">
-                <input type="email" id="email" placeholder="yourname@gmail.com" required class="flex-1 p-3 border rounded-lg outline-none">
-                <button type="button" id="sendOtpBtn" class="bg-blue-600 text-white px-4 rounded-lg text-xs font-bold uppercase">
+                <input type="email" id="email"
+                    placeholder="yourname@gmail.com"
+                    required
+                    class="flex-1 p-3 border rounded-lg outline-none">
+
+                <button type="button"
+                    id="sendOtpBtn"
+                    class="bg-blue-600 text-white px-4 rounded-lg text-xs font-bold uppercase">
                     Send OTP
                 </button>
             </div>
 
             <div id="otpBox" class="hidden mt-4">
                 <div class="flex gap-2">
-                    <input type="text" id="otpInput" placeholder="Enter 6-digit Code"
-                        class="flex-1 p-3 border-2 border-blue-400 rounded-lg outline-none text-center font-bold tracking-widest">
-                    <button type="button" id="verifyBtn"
+                    <input type="text"
+                        id="otpInput"
+                        placeholder="Enter 6-digit Code"
+                        class="flex-1 p-3 border-2 border-blue-400 rounded-lg text-center font-bold">
+
+                    <button type="button"
+                        id="verifyBtn"
                         class="bg-green-600 text-white px-6 rounded-lg font-bold">
                         Verify
                     </button>
@@ -70,14 +126,18 @@
             </div>
         </div>
 
-        <button type="submit" id="submitBtn" disabled
-            class="w-full bg-gray-400 text-white py-4 rounded-xl font-bold transition-all cursor-not-allowed mt-6">
+        <!-- Submit -->
+        <button type="submit"
+            id="submitBtn"
+            disabled
+            class="w-full bg-gray-400 text-white py-4 rounded-xl font-bold cursor-not-allowed mt-6">
             Register as Verified Donor
         </button>
+
     </form>
 </div>
 
-<!-- Firebase Script -->
+<!-- Firebase + Logic -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -99,6 +159,7 @@ const db = getDatabase(app);
 let generatedOTP;
 let isVerified = false;
 
+/* SEND OTP */
 document.getElementById('sendOtpBtn').addEventListener('click', function () {
 
     const email = document.getElementById('email').value;
@@ -131,11 +192,13 @@ document.getElementById('sendOtpBtn').addEventListener('click', function () {
         });
 });
 
+/* VERIFY OTP */
 document.getElementById('verifyBtn').addEventListener('click', function () {
 
     const enteredOtp = document.getElementById('otpInput').value;
 
     if (enteredOtp == generatedOTP) {
+
         isVerified = true;
         alert("Verification Successful");
 
@@ -147,11 +210,13 @@ document.getElementById('verifyBtn').addEventListener('click', function () {
         document.getElementById('otpBox').classList.add('hidden');
         document.getElementById('email').readOnly = true;
         document.getElementById('sendOtpBtn').disabled = true;
+
     } else {
         alert("Invalid OTP");
     }
 });
 
+/* SUBMIT */
 document.getElementById('donorForm').addEventListener('submit', function (e) {
 
     e.preventDefault();
@@ -163,6 +228,7 @@ document.getElementById('donorForm').addEventListener('submit', function (e) {
 
     const donorData = {
         name: document.getElementById('fullName').value,
+        phone: document.getElementById('phone').value,   // ✅ FIXED
         bloodGroup: document.getElementById('bloodGroup').value,
         city: document.getElementById('city').value,
         email: document.getElementById('email').value,
