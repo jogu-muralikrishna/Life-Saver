@@ -468,6 +468,114 @@ alert(error.message);
 
 });
 
+  /* =========================
+TAB SWITCH (LOGIN / REGISTER)
+========================= */
+
+const tabLogin = document.getElementById("tabLogin");
+const tabRegister = document.getElementById("tabRegister");
+
+const loginPanel = document.getElementById("loginPanel");
+const registerPanel = document.getElementById("registerPanel");
+
+const goRegister = document.getElementById("goRegister");
+const goLogin = document.getElementById("goLogin");
+
+function openLogin(){
+loginPanel.classList.add("active");
+registerPanel.classList.remove("active");
+
+tabLogin.classList.add("active");
+tabRegister.classList.remove("active");
+}
+
+function openRegister(){
+registerPanel.classList.add("active");
+loginPanel.classList.remove("active");
+
+tabRegister.classList.add("active");
+tabLogin.classList.remove("active");
+}
+
+tabLogin.onclick = openLogin;
+tabRegister.onclick = openRegister;
+
+if(goRegister) goRegister.onclick = openRegister;
+if(goLogin) goLogin.onclick = openLogin;
+
+
+
+/* =========================
+REGISTER STEP NAVIGATION
+========================= */
+
+function goStep(n){
+
+document.querySelectorAll(".step").forEach((step,i)=>{
+step.classList.toggle("active", i === n-1);
+});
+
+const dots=[1,2,3];
+
+dots.forEach(i=>{
+
+const dot=document.getElementById("dot"+i);
+
+if(!dot) return;
+
+if(i<n){
+dot.className="step-dot done";
+dot.textContent="✓";
+}
+else if(i===n){
+dot.className="step-dot active";
+dot.textContent=i;
+}
+else{
+dot.className="step-dot pending";
+dot.textContent=i;
+}
+
+});
+
+}
+
+/* Step buttons */
+
+const next1=document.getElementById("nextToStep2");
+const next2=document.getElementById("nextToStep3");
+
+const back1=document.getElementById("backToStep1");
+const back2=document.getElementById("backToStep2");
+
+if(next1){
+next1.onclick=()=>{
+
+const name=document.getElementById("fullName").value.trim();
+const phone=document.getElementById("phone").value.trim();
+const dob=document.getElementById("dob").value;
+
+if(!name || !phone || !dob){
+alert("Please fill all fields");
+return;
+}
+
+goStep(2);
+
+};
+}
+
+if(back1){
+back1.onclick=()=>goStep(1);
+}
+
+if(next2){
+next2.onclick=()=>goStep(3);
+}
+
+if(back2){
+back2.onclick=()=>goStep(2);
+}
 
 /* Google login button */
 document.getElementById("googleBtn").addEventListener("click", () => {
