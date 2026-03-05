@@ -409,6 +409,67 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+  /* ======================
+OTP SYSTEM
+====================== */
+
+let generatedOTP;
+let emailVerified = false;
+
+document.getElementById("sendOtpBtn").onclick = () => {
+
+const email = document.getElementById("regEmail").value.trim();
+const name = document.getElementById("fullName").value.trim();
+
+if(!email){
+alert("Enter email first");
+return;
+}
+
+generatedOTP = Math.floor(100000 + Math.random()*900000);
+
+emailjs.send("service_5z0f2my","template_k4pl15w",{
+user_name:name,
+user_email:email,
+otp_code:generatedOTP
+}).then(()=>{
+
+document.getElementById("otpBox").style.display="block";
+alert("OTP sent to your email");
+
+}).catch((error)=>{
+
+alert("Email error: "+error.text);
+
+});
+
+};
+
+
+
+document.getElementById("verifyBtn").onclick = () => {
+
+const entered = document.getElementById("otpInput").value;
+
+if(entered == generatedOTP){
+
+emailVerified = true;
+
+document.getElementById("verifiedBadge").classList.add("show");
+
+document.getElementById("otpBox").style.display="none";
+
+document.getElementById("nextToStep3").disabled=false;
+
+document.getElementById("nextToStep3").style.opacity="1";
+
+}else{
+
+alert("Invalid OTP");
+
+}
+
+};
 /* ======================
 TAB SWITCH
 ====================== */
