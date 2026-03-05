@@ -2,368 +2,210 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login / Signup - Blood Donor</title>
+<title>LifeSaver - Login & Register</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init("e01E864mHAh1Vy6xn");</script>
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --red: #e63946;
-    --red-dark: #c1121f;
-    --bg: #0d0d0d;
-    --card: #161616;
-    --border: #2a2a2a;
-    --text: #f1f1f1;
-    --muted: #888;
-    --green: #2dc653;
-  }
+:root {
+  --red: #e63946;
+  --red-dark: #c1121f;
+  --bg: #0d0d0d;
+  --card: #161616;
+  --border: #2a2a2a;
+  --text: #f1f1f1;
+  --muted: #888;
+  --green: #2dc653;
+}
 
-  body {
-    font-family: 'Sora', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    overflow: hidden;
-  }
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
 
-  /* Animated background blobs */
-  .blob {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
-    animation: float 8s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .blob-1 { width: 400px; height: 400px; background: var(--red); top: -100px; left: -100px; animation-delay: 0s; }
-  .blob-2 { width: 300px; height: 300px; background: #ff6b6b; bottom: -80px; right: -80px; animation-delay: 3s; }
-  .blob-3 { width: 200px; height: 200px; background: var(--red-dark); top: 50%; left: 50%; animation-delay: 5s; }
+/* Blobs */
+.blob { position:fixed; border-radius:50%; filter:blur(80px); opacity:0.15; animation:float 8s ease-in-out infinite; pointer-events:none; z-index:0; }
+.blob-1 { width:400px; height:400px; background:var(--red);    top:-100px;  left:-100px; animation-delay:0s; }
+.blob-2 { width:300px; height:300px; background:#ff6b6b;       bottom:-80px; right:-80px; animation-delay:3s; }
+.blob-3 { width:200px; height:200px; background:var(--red-dark); top:50%; left:50%; animation-delay:5s; }
+@keyframes float { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.05)} }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-30px) scale(1.05); }
-  }
+/* Card */
+.card {
+  position:relative; z-index:1;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:40px;
+  width:100%; max-width:460px;
+  box-shadow:0 40px 80px rgba(0,0,0,0.6);
+  animation:slideUp 0.5s ease;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
 
-  .card {
-    position: relative;
-    z-index: 1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-    animation: slideUp 0.5s ease;
-  }
+/* Logo */
+.logo { display:flex; align-items:center; gap:10px; margin-bottom:24px; justify-content:center; }
+.logo-icon { width:40px; height:40px; background:var(--red); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 20px rgba(230,57,70,0.5); }
+.logo span { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+/* Tabs */
+.tabs { display:flex; background:#1e1e1e; border-radius:12px; padding:4px; margin-bottom:24px; }
+.tab { flex:1; padding:10px; border:none; background:transparent; color:var(--muted); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; transition:all 0.25s; }
+.tab.active { background:var(--red); color:white; box-shadow:0 4px 15px rgba(230,57,70,0.4); }
 
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
-    justify-content: center;
-  }
+/* Panels */
+.panel { display:none; }
+.panel.active { display:block; animation:fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
 
-  .logo-icon {
-    width: 40px; height: 40px;
-    background: var(--red);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    box-shadow: 0 0 20px rgba(230,57,70,0.5);
-  }
+/* Steps (inside register panel) */
+.step { display:none; }
+.step.active { display:block; animation:fadeIn 0.3s ease; }
 
-  .logo span {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
+/* Step progress */
+.step-progress { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:20px; }
+.step-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; transition:all 0.3s; }
+.step-dot.done    { background:var(--green); color:#000; }
+.step-dot.active  { background:var(--red);   color:#fff; box-shadow:0 0 12px rgba(230,57,70,0.5); }
+.step-dot.pending { background:#2a2a2a;       color:var(--muted); }
+.step-line { flex:1; max-width:30px; height:2px; background:#2a2a2a; border-radius:2px; }
+.step-line.done { background:var(--green); }
 
-  /* Tab switcher */
-  .tabs {
-    display: flex;
-    background: #1e1e1e;
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 28px;
-  }
+/* Fields */
+.field { margin-bottom:14px; }
+label { display:block; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px; }
+input, select {
+  width:100%; background:#1e1e1e; border:1px solid var(--border);
+  color:var(--text); font-family:'Sora',sans-serif; font-size:13px;
+  padding:11px 14px; border-radius:10px; outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(230,57,70,0.15); }
+input::placeholder { color:#444; }
+select option { background:#1e1e1e; }
 
-  .tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-family: 'Sora', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.25s;
-  }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-  .tab.active {
-    background: var(--red);
-    color: white;
-    box-shadow: 0 4px 15px rgba(230,57,70,0.4);
-  }
+/* Password eye */
+.password-wrap { position:relative; }
+.password-wrap input { padding-right:44px; }
+.eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:4px; }
 
-  /* Form panels */
-  .panel { display: none; animation: fadeIn 0.3s ease; }
-  .panel.active { display: block; }
+/* Buttons */
+.btn { width:100%; padding:13px; border:none; border-radius:12px; font-family:'Sora',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s; margin-top:6px; }
+.btn-primary { background:var(--red); color:white; box-shadow:0 4px 20px rgba(230,57,70,0.35); }
+.btn-primary:hover { background:var(--red-dark); transform:translateY(-1px); box-shadow:0 8px 25px rgba(230,57,70,0.45); }
+.btn-primary:disabled { background:#333; color:#666; box-shadow:none; transform:none; cursor:not-allowed; }
+.btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn-outline:hover { background:#1e1e1e; border-color:#444; }
+.btn-green { background:var(--green); color:#000; box-shadow:0 4px 20px rgba(45,198,83,0.3); }
+.btn-green:hover { background:#25a845; transform:translateY(-1px); }
+.btn-sm { padding:9px 16px; font-size:12px; border-radius:9px; border:none; font-family:'Sora',sans-serif; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.btn-blue { background:#2563eb; color:white; }
+.btn-blue:hover { background:#1d4ed8; }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
+.row-btns { display:flex; gap:10px; margin-top:6px; }
+.row-btns .btn { margin-top:0; }
 
-  .field { margin-bottom: 16px; }
+/* Forgot */
+.forgot { display:block; text-align:right; font-size:11px; color:var(--muted); margin-top:-6px; margin-bottom:14px; cursor:pointer; transition:color 0.2s; }
+.forgot:hover { color:var(--red); }
 
-  label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 6px;
-  }
+/* Divider */
+.divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--muted); font-size:11px; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-  input {
-    width: 100%;
-    background: #1e1e1e;
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Sora', sans-serif;
-    font-size: 14px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
+/* Google btn */
+.btn-google { width:100%; padding:11px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.2s; }
+.btn-google:hover { background:#1e1e1e; border-color:#444; }
 
-  input:focus {
-    border-color: var(--red);
-    box-shadow: 0 0 0 3px rgba(230,57,70,0.15);
-  }
+/* Messages */
+.msg { display:none; border-radius:10px; padding:11px 14px; font-size:12px; font-weight:500; margin-top:12px; line-height:1.5; }
+.msg.error   { background:rgba(230,57,70,0.12); border:1px solid rgba(230,57,70,0.3); color:#ff6b6b; }
+.msg.success { background:rgba(45,198,83,0.12); border:1px solid rgba(45,198,83,0.3); color:var(--green); }
+.msg.info    { background:rgba(37,99,235,0.12); border:1px solid rgba(37,99,235,0.3); color:#60a5fa; }
+.msg.show    { display:block; animation:fadeIn 0.3s ease; }
 
-  input::placeholder { color: #444; }
+/* Age error */
+.age-error { display:none; background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.3); border-radius:10px; padding:10px 14px; font-size:12px; color:#ff6b6b; margin-top:6px; line-height:1.6; }
+.age-error.show { display:block; }
 
-  .password-wrap {
-    position: relative;
-  }
+/* OTP box */
+.otp-row { display:flex; gap:8px; margin-top:10px; }
+.otp-row input { text-align:center; font-weight:700; font-size:18px; letter-spacing:4px; border:2px solid #2563eb; }
+.otp-row input:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(230,57,70,0.15); }
 
-  .password-wrap input { padding-right: 44px; }
+/* Verified badge */
+.verified-badge { background:rgba(45,198,83,0.1); border:1px solid rgba(45,198,83,0.3); border-radius:10px; padding:10px 14px; font-size:12px; color:var(--green); text-align:center; font-weight:600; display:none; }
+.verified-badge.show { display:block; }
 
-  .eye-btn {
-    position: absolute;
-    right: 12px; top: 50%;
-    transform: translateY(-50%);
-    background: none; border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-  }
+/* Summary box */
+.summary-box { background:#1a1a1a; border:1px solid var(--border); border-radius:12px; padding:14px; font-size:12px; color:var(--muted); margin-top:14px; line-height:2; }
+.summary-box strong { color:var(--text); }
 
-  .btn {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Sora', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-  }
+/* Password strength */
+.strength-bar  { height:3px; border-radius:3px; background:#2a2a2a; margin-top:6px; overflow:hidden; }
+.strength-fill { height:100%; width:0%; border-radius:3px; transition:width 0.3s,background 0.3s; }
+.strength-label{ font-size:11px; color:var(--muted); margin-top:3px; text-align:right; }
+.match-msg { font-size:11px; margin-top:4px; }
 
-  .btn-primary {
-    background: var(--red);
-    color: white;
-    box-shadow: 0 4px 20px rgba(230,57,70,0.35);
-  }
+/* Spinner */
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
+@keyframes spin { to{transform:rotate(360deg)} }
 
-  .btn-primary:hover {
-    background: var(--red-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 25px rgba(230,57,70,0.45);
-  }
+/* Overlay */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.overlay-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; width:100%; max-width:360px; animation:slideUp 0.3s ease; position:relative; }
+.overlay-card h3 { font-size:17px; margin-bottom:6px; }
+.overlay-card p  { font-size:12px; color:var(--muted); margin-bottom:18px; }
+.overlay-close { position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px; }
 
-  .btn-primary:disabled {
-    background: #333;
-    color: #666;
-    box-shadow: none;
-    transform: none;
-    cursor: not-allowed;
-  }
+/* Switch link */
+.switch-link { text-align:center; font-size:12px; color:var(--muted); margin-top:16px; }
+.switch-link span { color:var(--red); cursor:pointer; font-weight:600; }
+.switch-link span:hover { text-decoration:underline; }
 
-  /* Forgot password */
-  .forgot {
-    display: block;
-    text-align: right;
-    font-size: 12px;
-    color: var(--muted);
-    text-decoration: none;
-    margin-top: -8px;
-    margin-bottom: 16px;
-    transition: color 0.2s;
-    cursor: pointer;
-  }
-  .forgot:hover { color: var(--red); }
-
-  /* Message box */
-  .msg {
-    display: none;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 14px;
-    line-height: 1.5;
-  }
-  .msg.error   { background: rgba(230,57,70,0.12); border: 1px solid rgba(230,57,70,0.3); color: #ff6b6b; }
-  .msg.success { background: rgba(45,198,83,0.12); border: 1px solid rgba(45,198,83,0.3); color: var(--green); }
-  .msg.show { display: block; animation: fadeIn 0.3s ease; }
-
-  /* Password strength */
-  .strength-bar {
-    height: 3px;
-    border-radius: 3px;
-    background: #2a2a2a;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-  .strength-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 3px;
-    transition: width 0.3s, background 0.3s;
-  }
-  .strength-label {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-    text-align: right;
-  }
-
-  /* Divider */
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 20px 0;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .divider::before, .divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* Google button */
-  .btn-google {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text);
-    font-family: 'Sora', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.2s;
-  }
-  .btn-google:hover { background: #1e1e1e; border-color: #444; }
-
-  .spinner {
-    display: inline-block;
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Reset password overlay */
-  .overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(4px);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .overlay.show { display: flex; }
-  .overlay-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px;
-    width: 100%;
-    max-width: 360px;
-    animation: slideUp 0.3s ease;
-  }
-  .overlay-card h3 { font-size: 18px; margin-bottom: 6px; }
-  .overlay-card p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .overlay-close {
-    position: absolute;
-    top: 16px; right: 16px;
-    background: none; border: none;
-    color: var(--muted); font-size: 20px;
-    cursor: pointer; padding: 4px;
-  }
-  .overlay-card { position: relative; }
+@media(max-width:480px){ .card{padding:24px;} .grid2{grid-template-columns:1fr;} }
 </style>
 </head>
-<body>
 
+<body>
 <div class="blob blob-1"></div>
 <div class="blob blob-2"></div>
 <div class="blob blob-3"></div>
 
 <div class="card">
 
+  <!-- LOGO -->
   <div class="logo">
     <div class="logo-icon">🩸</div>
     <span>LifeSaver</span>
   </div>
 
+  <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('login')">Login</button>
-    <button class="tab" onclick="switchTab('signup')">Sign Up</button>
+    <button class="tab active" id="tabLogin">Login</button>
+    <button class="tab"        id="tabRegister">Register as Donor</button>
   </div>
 
-  <!-- LOGIN PANEL -->
+  <!-- ══════════════════════════════
+       LOGIN PANEL
+  ══════════════════════════════ -->
   <div class="panel active" id="loginPanel">
 
     <div class="field">
-      <label>Email</label>
+      <label>Email Address</label>
       <input type="email" id="loginEmail" placeholder="yourname@gmail.com">
     </div>
 
@@ -371,68 +213,156 @@
       <label>Password</label>
       <div class="password-wrap">
         <input type="password" id="loginPassword" placeholder="Enter your password">
-        <button class="eye-btn" onclick="togglePwd('loginPassword', this)">👁</button>
+        <button class="eye-btn" data-target="loginPassword">👁</button>
       </div>
     </div>
 
     <span class="forgot" id="forgotBtn">Forgot password?</span>
 
-    <button class="btn btn-primary" id="loginBtn">Login</button>
+    <button class="btn btn-primary" id="loginBtn">Login to My Account</button>
 
     <div class="divider">or</div>
 
     <button class="btn-google" id="googleBtn">
-      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.1l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3.2-11.3-7.8l-6.5 5C9.5 39.5 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.2 5.2C36.8 36.2 44 31 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 48 48">
+        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.1l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3.2-11.3-7.8l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
+        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.2 5.2C36.8 36.2 44 31 44 24c0-1.3-.1-2.6-.4-3.9z"/>
+      </svg>
       Continue with Google
     </button>
 
     <div class="msg" id="loginMsg"></div>
-  </div>
 
-  <!-- SIGNUP PANEL -->
-  <div class="panel" id="signupPanel">
+    <div class="switch-link">New donor? <span id="goRegister">Register here</span></div>
 
-    <div class="field">
-      <label>Full Name</label>
-      <input type="text" id="signupName" placeholder="Your full name">
+  </div><!-- end loginPanel -->
+
+  <!-- ══════════════════════════════
+       REGISTER PANEL
+  ══════════════════════════════ -->
+  <div class="panel" id="registerPanel">
+
+    <!-- Step progress -->
+    <div class="step-progress">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line"       id="line1"></div>
+      <div class="step-dot pending" id="dot2">2</div>
+      <div class="step-line"       id="line2"></div>
+      <div class="step-dot pending" id="dot3">3</div>
     </div>
 
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="signupEmail" placeholder="yourname@gmail.com">
-    </div>
-
-    <div class="field">
-      <label>Password</label>
-      <div class="password-wrap">
-        <input type="password" id="signupPassword" placeholder="Min. 6 characters" oninput="checkStrength(this.value)">
-        <button class="eye-btn" onclick="togglePwd('signupPassword', this)">👁</button>
+    <!-- ── STEP 1: Personal Info ── -->
+    <div class="step active" id="step1">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="fullName" placeholder="Your full name">
       </div>
-      <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-      <div class="strength-label" id="strengthLabel"></div>
+      <div class="field">
+        <label>Mobile Number (without +91)</label>
+        <input type="tel" id="phone" placeholder="10-digit number">
+      </div>
+      <div class="field">
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+        <div class="age-error" id="ageError"><p id="ageErrorMsg"></p></div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Blood Group</label>
+          <select id="bloodGroup">
+            <option>O+</option><option>O-</option>
+            <option>A+</option><option>A-</option>
+            <option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>City</label>
+          <select id="city">
+            <option>Hyderabad</option><option>Warangal</option>
+            <option>Karimnagar</option><option>Nizamabad</option>
+            <option>Khammam</option><option>Mahabubnagar</option>
+            <option>Nalgonda</option><option>Adilabad</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="nextToStep2">Continue →</button>
+      <div class="switch-link">Already registered? <span id="goLogin">Login here</span></div>
     </div>
 
-    <div class="field">
-      <label>Confirm Password</label>
-      <div class="password-wrap">
-        <input type="password" id="signupConfirm" placeholder="Repeat password">
-        <button class="eye-btn" onclick="togglePwd('signupConfirm', this)">👁</button>
+    <!-- ── STEP 2: Email + OTP ── -->
+    <div class="step" id="step2">
+      <div class="field">
+        <label>Email Address</label>
+        <div style="display:flex;gap:8px;">
+          <input type="email" id="regEmail" placeholder="yourname@gmail.com" style="flex:1">
+          <button class="btn-sm btn-blue" id="sendOtpBtn">Send OTP</button>
+        </div>
+      </div>
+      <div id="otpBox" style="display:none;">
+        <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;">Enter OTP</label>
+        <div class="otp-row">
+          <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6">
+          <button class="btn-sm btn-green" id="verifyBtn" style="white-space:nowrap;">✓ Verify</button>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:6px;">Check inbox &amp; spam folder</p>
+      </div>
+      <div class="verified-badge" id="verifiedBadge">✅ Email Verified Successfully!</div>
+      <div class="msg" id="otpMsg"></div>
+      <div class="row-btns" style="margin-top:14px;">
+        <button class="btn btn-outline" id="backToStep1">← Back</button>
+        <button class="btn btn-primary" id="nextToStep3" disabled style="opacity:0.4;cursor:not-allowed;">Continue →</button>
       </div>
     </div>
 
-    <button class="btn btn-primary" id="signupBtn">Create Account</button>
+    <!-- ── STEP 3: Password ── -->
+    <div class="step" id="step3">
+      <div class="field">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input type="password" id="regPassword" placeholder="Min. 6 characters">
+          <button class="eye-btn" data-target="regPassword">👁</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+        <div class="strength-label" id="strengthLabel"></div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="password-wrap">
+          <input type="password" id="regConfirm" placeholder="Repeat your password">
+          <button class="eye-btn" data-target="regConfirm">👁</button>
+        </div>
+        <div class="match-msg" id="matchMsg"></div>
+      </div>
 
-    <div class="msg" id="signupMsg"></div>
-  </div>
+      <!-- Summary -->
+      <div class="summary-box">
+        <div>👤 <strong id="sName">—</strong></div>
+        <div>📞 <strong id="sPhone">—</strong></div>
+        <div>🩸 <strong id="sBlood">—</strong> &nbsp;|&nbsp; 📍 <strong id="sCity">—</strong></div>
+        <div>📧 <strong id="sEmail">—</strong></div>
+      </div>
 
-</div>
+      <div class="msg" id="registerMsg"></div>
+
+      <div class="row-btns" style="margin-top:14px;">
+        <button class="btn btn-outline" id="backToStep2">← Back</button>
+        <button class="btn btn-green"   id="submitBtn">🩸 Register Now</button>
+      </div>
+    </div>
+
+  </div><!-- end registerPanel -->
+
+</div><!-- end card -->
 
 <!-- FORGOT PASSWORD OVERLAY -->
 <div class="overlay" id="resetOverlay">
   <div class="overlay-card">
     <button class="overlay-close" id="closeResetBtn">✕</button>
-    <h3>Reset Password</h3>
-    <p>Enter your email and we'll send you a reset link.</p>
+    <h3>🔐 Reset Password</h3>
+    <p>Enter your email and we'll send a reset link.</p>
     <div class="field">
       <label>Email</label>
       <input type="email" id="resetEmail" placeholder="yourname@gmail.com">
@@ -442,202 +372,352 @@
   </div>
 </div>
 
-
+<!-- ══════════════════════════════════════
+     FIREBASE + ALL LOGIC
+══════════════════════════════════════ -->
 <script type="module">
-import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, set }  from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, push, set, get, query, orderByChild, equalTo }
+  from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
-  updateProfile
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  sendPasswordResetEmail, updateProfile, fetchSignInMethodsForEmail,
+  GoogleAuthProvider, signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+/* ── Firebase init ── */
 const firebaseConfig = {
-  apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-  authDomain: "life-saver-be5cf.firebaseapp.com",
-  databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "life-saver-be5cf",
-  storageBucket: "life-saver-be5cf.firebasestorage.app",
+  apiKey:            "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+  authDomain:        "life-saver-be5cf.firebaseapp.com",
+  databaseURL:       "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "life-saver-be5cf",
+  storageBucket:     "life-saver-be5cf.firebasestorage.app",
   messagingSenderId: "549675407162",
-  appId: "1:549675407142:web:ba3c8878834cb4123ba203"
+  appId:             "1:549675407162:web:ba3c8878834cb4123ba203"
 };
-
 const app      = initializeApp(firebaseConfig);
-const auth     = getAuth(app);
 const db       = getDatabase(app);
+const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-/* ---- helpers ---- */
+let generatedOTP, isVerified = false;
+
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
   el.textContent = text;
   el.className = `msg ${type} show`;
 }
 
-function setLoading(btnId, label, loading) {
-  const btn = document.getElementById(btnId);
-  if (loading) {
-    btn.innerHTML = `<span class="spinner"></span> Please wait...`;
-    btn.disabled = true;
-  } else {
-    btn.innerHTML = label;
-    btn.disabled = false;
-  }
+function setLoading(id, label, loading) {
+  const btn = document.getElementById(id);
+  btn.innerHTML = loading ? `<span class="spinner"></span> Please wait...` : label;
+  btn.disabled  = loading;
 }
 
-function checkStrength(val) {
-  const fill  = document.getElementById('strengthFill');
-  const label = document.getElementById('strengthLabel');
-  let score = 0;
-  if (val.length >= 6)  score++;
-  if (val.length >= 10) score++;
-  if (/[A-Z]/.test(val)) score++;
-  if (/[0-9]/.test(val)) score++;
-  if (/[^A-Za-z0-9]/.test(val)) score++;
-  const levels = [
-    { w: '20%', c: '#e63946', t: 'Very Weak' },
-    { w: '40%', c: '#ff6b35', t: 'Weak' },
-    { w: '60%', c: '#f7c59f', t: 'Fair' },
-    { w: '80%', c: '#a8dadc', t: 'Strong' },
-    { w: '100%', c: '#2dc653', t: 'Very Strong' },
-  ];
-  const l = levels[Math.max(0, score - 1)] || levels[0];
-  fill.style.width = val ? l.w : '0%';
-  fill.style.background = l.c;
-  label.textContent = val ? l.t : '';
-  label.style.color = l.c;
+/* ══════════════════════════════
+   TAB SWITCHING
+══════════════════════════════ */
+function switchTab(tab) {
+  const toLogin = tab === 'login';
+  document.getElementById('loginPanel').classList.toggle('active', toLogin);
+  document.getElementById('registerPanel').classList.toggle('active', !toLogin);
+  document.getElementById('tabLogin').classList.toggle('active', toLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !toLogin);
+}
+document.getElementById('tabLogin').addEventListener('click',    () => switchTab('login'));
+document.getElementById('tabRegister').addEventListener('click', () => switchTab('register'));
+document.getElementById('goRegister').addEventListener('click',  () => switchTab('register'));
+document.getElementById('goLogin').addEventListener('click',     () => switchTab('login'));
+
+/* ══════════════════════════════
+   EYE TOGGLE
+══════════════════════════════ */
+document.querySelectorAll('.eye-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const inp = document.getElementById(this.dataset.target);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    this.textContent = inp.type === 'password' ? '👁' : '🙈';
+  });
+});
+
+/* ══════════════════════════════
+   STEP NAVIGATION
+══════════════════════════════ */
+function goStep(n) {
+  document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  [1, 2, 3].forEach(i => {
+    const dot  = document.getElementById('dot' + i);
+    if (i < n)       { dot.className = 'step-dot done';    dot.textContent = '✓'; }
+    else if (i === n){ dot.className = 'step-dot active';  dot.textContent = i; }
+    else             { dot.className = 'step-dot pending'; dot.textContent = i; }
+    if (i < 3) {
+      const line = document.getElementById('line' + i);
+      line.className = 'step-line' + (i < n ? ' done' : '');
+    }
+  });
 }
 
-/* ---- SIGNUP ---- */
-async function signupUser() {
-  const name     = document.getElementById('signupName').value.trim();
-  const email    = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirm  = document.getElementById('signupConfirm').value;
-
-  if (!name || !email || !password || !confirm)
-    return showMsg('signupMsg', '⚠️ Please fill in all fields.', 'error');
-  if (password.length < 6)
-    return showMsg('signupMsg', '⚠️ Password must be at least 6 characters.', 'error');
-  if (password !== confirm)
-    return showMsg('signupMsg', '⚠️ Passwords do not match.', 'error');
-
-  setLoading('signupBtn', 'Create Account', true);
+/* ══════════════════════════════
+   LOGIN — Email / Password
+══════════════════════════════ */
+document.getElementById('loginBtn').addEventListener('click', async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  if (!email || !pass) { showMsg('loginMsg', '⚠️ Please enter your email and password.', 'error'); return; }
+  setLoading('loginBtn', 'Login to My Account', true);
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
-    await set(ref(db, 'users/' + cred.user.uid), {
-      name, email, createdAt: new Date().toISOString()
-    });
-    showMsg('signupMsg', '✅ Account created successfully! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'register.html', 1800);
-  } catch (err) {
-    const msgs = {
-      'auth/email-already-in-use': '⚠️ This email is already registered. Try logging in.',
-      'auth/invalid-email':        '⚠️ Invalid email address.',
-      'auth/weak-password':        '⚠️ Password is too weak.',
-    };
-    showMsg('signupMsg', msgs[err.code] || '❌ ' + err.message, 'error');
-  } finally {
-    setLoading('signupBtn', 'Create Account', false);
-  }
-}
-
-/* ---- LOGIN ---- */
-async function loginUser() {
-  const email    = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-
-  if (!email || !password)
-    return showMsg('loginMsg', '⚠️ Please enter your email and password.', 'error');
-
-  setLoading('loginBtn', 'Login', true);
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email, pass);
     showMsg('loginMsg', '✅ Login successful! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'register.html', 1500);
-  } catch (err) {
-    const msgs = {
-      'auth/user-not-found':     '⚠️ No account found with this email.',
-      'auth/wrong-password':     '⚠️ Incorrect password. Try again.',
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  } catch(err) {
+    const m = {
+      'auth/user-not-found':     '⚠️ No account found. Please register first.',
+      'auth/wrong-password':     '⚠️ Incorrect password.',
       'auth/invalid-credential': '⚠️ Invalid email or password.',
-      'auth/too-many-requests':  '⚠️ Too many attempts. Please wait a moment.',
+      'auth/too-many-requests':  '⚠️ Too many attempts. Please wait.',
     };
-    showMsg('loginMsg', msgs[err.code] || '❌ ' + err.message, 'error');
-  } finally {
-    setLoading('loginBtn', 'Login', false);
+    showMsg('loginMsg', m[err.code] || '❌ ' + err.message, 'error');
+    setLoading('loginBtn', 'Login to My Account', false);
   }
-}
+});
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
 
-/* ---- GOOGLE LOGIN ---- */
-async function loginGoogle() {
+/* ══════════════════════════════
+   LOGIN — Google
+══════════════════════════════ */
+document.getElementById('googleBtn').addEventListener('click', async function() {
   try {
     const result = await signInWithPopup(auth, provider);
     const user   = result.user;
     await set(ref(db, 'users/' + user.uid), {
       name: user.displayName, email: user.email,
-      photo: user.photoURL, createdAt: new Date().toISOString()
+      photo: user.photoURL, lastLogin: new Date().toISOString()
     });
     showMsg('loginMsg', '✅ Google login successful! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'register.html', 1500);
-  } catch (err) {
-    showMsg('loginMsg', '❌ Google login failed: ' + err.message, 'error');
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  } catch(err) {
+    const m = {
+      'auth/popup-closed-by-user': '⚠️ Sign-in cancelled.',
+      'auth/popup-blocked':        '⚠️ Popup blocked. Allow popups for this site.',
+      'auth/unauthorized-domain':  '⚠️ Add this domain in Firebase → Auth → Authorized Domains.',
+    };
+    showMsg('loginMsg', m[err.code] || '❌ ' + err.message, 'error');
   }
-}
+});
 
-/* ---- FORGOT PASSWORD ---- */
-function openReset()  { document.getElementById('resetOverlay').classList.add('show'); }
-function closeReset() { document.getElementById('resetOverlay').classList.remove('show'); }
-
-async function sendReset() {
+/* ══════════════════════════════
+   FORGOT PASSWORD
+══════════════════════════════ */
+document.getElementById('forgotBtn').addEventListener('click', () => {
+  const e = document.getElementById('loginEmail').value.trim();
+  if (e) document.getElementById('resetEmail').value = e;
+  document.getElementById('resetOverlay').classList.add('show');
+});
+document.getElementById('closeResetBtn').addEventListener('click', () => {
+  document.getElementById('resetOverlay').classList.remove('show');
+  document.getElementById('resetMsg').className = 'msg';
+});
+document.getElementById('resetOverlay').addEventListener('click', function(e) {
+  if (e.target === this) { this.classList.remove('show'); document.getElementById('resetMsg').className='msg'; }
+});
+document.getElementById('sendResetBtn').addEventListener('click', async function() {
   const email = document.getElementById('resetEmail').value.trim();
-  if (!email) return showMsg('resetMsg', '⚠️ Enter your email.', 'error');
+  if (!email) { showMsg('resetMsg', '⚠️ Enter your email.', 'error'); return; }
+  setLoading('sendResetBtn', 'Send Reset Link', true);
   try {
     await sendPasswordResetEmail(auth, email);
     showMsg('resetMsg', '✅ Reset link sent! Check your inbox.', 'success');
-  } catch (err) {
-    showMsg('resetMsg', '❌ ' + err.message, 'error');
+  } catch(err) {
+    const m = { 'auth/user-not-found':'⚠️ No account found.', 'auth/invalid-email':'⚠️ Invalid email.' };
+    showMsg('resetMsg', m[err.code] || '❌ ' + err.message, 'error');
   }
+  setLoading('sendResetBtn', 'Send Reset Link', false);
+});
+
+/* ══════════════════════════════
+   REGISTER — STEP 1 Age check
+══════════════════════════════ */
+document.getElementById('dob').addEventListener('change', function() {
+  const bd = new Date(this.value), now = new Date();
+  let age  = now.getFullYear() - bd.getFullYear();
+  const md = now.getMonth() - bd.getMonth();
+  if (md < 0 || (md === 0 && now.getDate() < bd.getDate())) age--;
+  const box = document.getElementById('ageError');
+  const msg = document.getElementById('ageErrorMsg');
+  if (age < 18) {
+    const yrs = 18 - age, ed = new Date(bd);
+    ed.setFullYear(ed.getFullYear() + 18);
+    msg.innerHTML = `⚠️ <strong>Not eligible yet.</strong> Wait <strong>${yrs} more ${yrs===1?'year':'years'}</strong> — eligible from <strong>${ed.toLocaleString('default',{month:'long'})} ${ed.getFullYear()}</strong>. 🩸 Thank you!`;
+    box.classList.add('show');
+  } else { box.classList.remove('show'); }
+});
+
+/* REGISTER — STEP 1 → STEP 2 */
+document.getElementById('nextToStep2').addEventListener('click', async function() {
+  const name  = document.getElementById('fullName').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const dob   = document.getElementById('dob').value;
+  if (!name || !phone || !dob)      { showMsg('registerMsg','⚠️ Please fill in all fields.','error'); return; }
+  if (!/^\d{10}$/.test(phone))      { showMsg('registerMsg','⚠️ Enter a valid 10-digit number without +91.','error'); return; }
+  if (document.getElementById('ageError').classList.contains('show')) { showMsg('registerMsg','⚠️ You must be at least 18 years old.','error'); return; }
+
+  setLoading('nextToStep2', 'Continue →', true);
+  try {
+    const snap = await get(query(ref(db,'donors'), orderByChild('phone'), equalTo(phone)));
+    if (snap.exists()) {
+      showMsg('registerMsg','⚠️ This mobile number is already registered. Only one account per phone number allowed.','error');
+      setLoading('nextToStep2','Continue →',false); return;
+    }
+  } catch(e) {}
+  setLoading('nextToStep2','Continue →',false);
+  // clear any old msg
+  document.getElementById('registerMsg').className = 'msg';
+  goStep(2);
+});
+
+document.getElementById('backToStep1').addEventListener('click', () => goStep(1));
+
+/* ══════════════════════════════
+   REGISTER — STEP 2 Send OTP
+══════════════════════════════ */
+document.getElementById('sendOtpBtn').addEventListener('click', async function() {
+  const email = document.getElementById('regEmail').value.trim();
+  const name  = document.getElementById('fullName').value.trim();
+  if (!email) { showMsg('otpMsg','⚠️ Enter your email first.','error'); return; }
+
+  this.textContent = 'Checking...'; this.disabled = true;
+  try {
+    const methods = await fetchSignInMethodsForEmail(auth, email);
+    if (methods && methods.length > 0) {
+      showMsg('otpMsg','⚠️ This email is already registered. Please login instead.','error');
+      this.textContent = 'Send OTP'; this.disabled = false; return;
+    }
+  } catch(e) {}
+
+  generatedOTP = Math.floor(100000 + Math.random() * 900000);
+  this.textContent = 'Sending...';
+  emailjs.send("service_5z0f2my","template_k4pl15w",{
+    user_name: name, user_email: email, otp_code: generatedOTP
+  }).then(() => {
+    document.getElementById('otpBox').style.display = 'block';
+    showMsg('otpMsg','✅ OTP sent! Check your inbox and spam folder.','success');
+    this.textContent = 'Resend'; this.disabled = false;
+  }).catch(err => {
+    showMsg('otpMsg','❌ Email Error: ' + err.text,'error');
+    this.textContent = 'Send OTP'; this.disabled = false;
+  });
+});
+
+/* REGISTER — STEP 2 Verify OTP */
+document.getElementById('verifyBtn').addEventListener('click', function() {
+  if (document.getElementById('otpInput').value == generatedOTP) {
+    isVerified = true;
+    document.getElementById('otpBox').style.display = 'none';
+    document.getElementById('verifiedBadge').classList.add('show');
+    document.getElementById('regEmail').readOnly = true;
+    document.getElementById('sendOtpBtn').disabled = true;
+    showMsg('otpMsg','✅ Email verified! Click Continue to set your password.','success');
+    const btn = document.getElementById('nextToStep3');
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+  } else {
+    showMsg('otpMsg','❌ Invalid OTP. Please try again.','error');
+  }
+});
+
+/* REGISTER — STEP 2 → STEP 3 */
+document.getElementById('nextToStep3').addEventListener('click', function() {
+  if (!isVerified) { showMsg('otpMsg','⚠️ Please verify your email first.','error'); return; }
+  document.getElementById('sName').textContent  = document.getElementById('fullName').value;
+  document.getElementById('sPhone').textContent = document.getElementById('phone').value;
+  document.getElementById('sBlood').textContent = document.getElementById('bloodGroup').value;
+  document.getElementById('sCity').textContent  = document.getElementById('city').value;
+  document.getElementById('sEmail').textContent = document.getElementById('regEmail').value;
+  goStep(3);
+});
+
+document.getElementById('backToStep2').addEventListener('click', () => goStep(2));
+
+/* ══════════════════════════════
+   REGISTER — STEP 3 Password strength
+══════════════════════════════ */
+document.getElementById('regPassword').addEventListener('input', function() {
+  const val = this.value;
+  const fill = document.getElementById('strengthFill');
+  const lbl  = document.getElementById('strengthLabel');
+  let score = 0;
+  if (val.length>=6) score++; if (val.length>=10) score++;
+  if (/[A-Z]/.test(val)) score++; if (/[0-9]/.test(val)) score++; if (/[^A-Za-z0-9]/.test(val)) score++;
+  const levels = [
+    {w:'20%',c:'#e63946',t:'Very Weak'},{w:'40%',c:'#ff6b35',t:'Weak'},
+    {w:'60%',c:'#f7c59f',t:'Fair'},{w:'80%',c:'#a8dadc',t:'Strong'},{w:'100%',c:'#2dc653',t:'Very Strong'}
+  ];
+  const l = levels[Math.max(0,score-1)];
+  fill.style.width = val?l.w:'0%'; fill.style.background = l.c;
+  lbl.textContent = val?l.t:''; lbl.style.color = l.c;
+  checkMatch();
+});
+document.getElementById('regConfirm').addEventListener('input', checkMatch);
+function checkMatch() {
+  const p1=document.getElementById('regPassword').value, p2=document.getElementById('regConfirm').value;
+  const msg=document.getElementById('matchMsg');
+  if (!p2) { msg.textContent=''; return; }
+  if (p1===p2) { msg.textContent='✅ Passwords match'; msg.style.color='#2dc653'; }
+  else         { msg.textContent='❌ Passwords do not match'; msg.style.color='#ff6b6b'; }
 }
 
-/* ---- TAB SWITCH ---- */
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'?i===0:i===1)));
-  document.getElementById('loginPanel').classList.toggle('active', tab==='login');
-  document.getElementById('signupPanel').classList.toggle('active', tab==='signup');
-}
+/* ══════════════════════════════
+   REGISTER — SUBMIT
+══════════════════════════════ */
+document.getElementById('submitBtn').addEventListener('click', async function() {
+  const password = document.getElementById('regPassword').value;
+  const confirm  = document.getElementById('regConfirm').value;
+  const email    = document.getElementById('regEmail').value.trim();
+  const name     = document.getElementById('fullName').value.trim();
 
-/* ---- WIRE UP ALL BUTTONS via addEventListener ---- */
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('loginBtn').addEventListener('click', loginUser);
-  document.getElementById('signupBtn').addEventListener('click', signupUser);
-  document.getElementById('googleBtn').addEventListener('click', loginGoogle);
-  document.getElementById('forgotBtn').addEventListener('click', openReset);
-  document.getElementById('closeResetBtn').addEventListener('click', closeReset);
-  document.getElementById('sendResetBtn').addEventListener('click', sendReset);
+  if (!password || password.length < 6) { showMsg('registerMsg','⚠️ Password must be at least 6 characters.','error'); return; }
+  if (password !== confirm)             { showMsg('registerMsg','⚠️ Passwords do not match.','error'); return; }
 
-  // Tab buttons
-  document.querySelectorAll('.tab').forEach((btn, i) => {
-    btn.addEventListener('click', () => switchTab(i === 0 ? 'login' : 'signup'));
-  });
+  setLoading('submitBtn','🩸 Register Now', true);
+  try {
+    /* 1️⃣ Create Firebase Auth account — email + password stored securely */
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: name });
 
-  // Password strength
-  document.getElementById('signupPassword').addEventListener('input', function() {
-    checkStrength(this.value);
-  });
-
-  // Toggle password eyes
-  document.querySelectorAll('.eye-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const input = this.previousElementSibling;
-      input.type = input.type === 'password' ? 'text' : 'password';
-      this.textContent = input.type === 'password' ? '👁' : '🙈';
+    /* 2️⃣ Save user profile */
+    await set(ref(db,'users/'+cred.user.uid), {
+      name, email, createdAt: new Date().toISOString()
     });
-  });
+
+    /* 3️⃣ Save donor record */
+    await push(ref(db,'donors'), {
+      uid:       cred.user.uid,
+      name,
+      phone:     document.getElementById('phone').value,
+      dob:       document.getElementById('dob').value,
+      bloodGroup:document.getElementById('bloodGroup').value,
+      city:      document.getElementById('city').value,
+      email,
+      status:   'Available',
+      verified: 'Email',
+      timestamp: new Date().toISOString()
+    });
+
+    showMsg('registerMsg','✅ Registration complete! Welcome, '+name+'! Redirecting...','success');
+    setTimeout(() => window.location.href = 'index.html', 2000);
+  } catch(err) {
+    const m = {
+      'auth/email-already-in-use': '⚠️ Email already has an account. Please login instead.',
+      'auth/invalid-email':        '⚠️ Invalid email address.',
+      'auth/weak-password':        '⚠️ Password too weak. Use at least 6 characters.',
+    };
+    showMsg('registerMsg', m[err.code]||'❌ '+err.message, 'error');
+    setLoading('submitBtn','🩸 Register Now', false);
+  }
 });
 </script>
 
