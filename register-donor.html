@@ -38,11 +38,16 @@ placeholder="10-digit Mobile Number"
 required
 class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
 
-<!-- DATE OF BIRTH ADDED -->
+<!-- DATE OF BIRTH -->
 <input type="date"
 id="dob"
 required
 class="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500">
+
+<!-- Age error message box (hidden by default) -->
+<div id="ageError" class="hidden bg-red-50 border border-red-300 text-red-700 rounded-lg p-4 text-sm">
+  <p id="ageErrorMsg"></p>
+</div>
 
 <div class="grid grid-cols-2 gap-4">
 
@@ -144,6 +149,45 @@ const db = getDatabase(app);
 let generatedOTP;
 let isVerified = false;
 
+/* LIVE AGE CHECK ON DOB CHANGE */
+document.getElementById('dob').addEventListener('change', function () {
+  const dobVal = this.value;
+  if (!dobVal) return;
+
+  const birthDate = new Date(dobVal);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  const ageError = document.getElementById('ageError');
+  const ageErrorMsg = document.getElementById('ageErrorMsg');
+
+  if (age < 18) {
+    const yearsLeft = 18 - age;
+
+    // Calculate exact eligible month & year
+    const eligibleDate = new Date(birthDate);
+    eligibleDate.setFullYear(eligibleDate.getFullYear() + 18);
+    const eligibleMonth = eligibleDate.toLocaleString('default', { month: 'long' });
+    const eligibleYear = eligibleDate.getFullYear();
+
+    const yearWord = yearsLeft === 1 ? 'year' : 'years';
+
+    ageErrorMsg.innerHTML = `
+      ⚠️ You are <strong>not eligible yet</strong> to donate blood.<br><br>
+      You need to wait <strong>${yearsLeft} more ${yearWord}</strong>.<br>
+      You will be eligible from <strong>${eligibleMonth} ${eligibleYear}</strong>.<br><br>
+      🩸 Thank you for your willingness to save lives!
+    `;
+    ageError.classList.remove('hidden');
+  } else {
+    ageError.classList.add('hidden');
+  }
+});
+
 /* SEND OTP */
 document.getElementById('sendOtpBtn').addEventListener('click', function () {
 
@@ -226,8 +270,15 @@ age--;
 }
 
 if (age < 18) {
-alert("You must be at least 18 years old to donate blood.");
-return;
+  const yearsLeft = 18 - age;
+  const eligibleDate = new Date(birthDate);
+  eligibleDate.setFullYear(eligibleDate.getFullYear() + 18);
+  const eligibleMonth = eligibleDate.toLocaleString('default', { month: 'long' });
+  const eligibleYear = eligibleDate.getFullYear();
+  const yearWord = yearsLeft === 1 ? 'year' : 'years';
+
+  alert(`You are not eligible yet!\n\nPlease wait ${yearsLeft} more ${yearWord} (until ${eligibleMonth} ${eligibleYear}) to register as a blood donor.\n\n🩸 Thank you for your willingness to save lives!`);
+  return;
 }
 
 const donorData = {
