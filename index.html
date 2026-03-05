@@ -16,35 +16,23 @@
             70%  { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220,38,38,0);   }
             100% { transform: scale(1);   box-shadow: 0 0 0 0    rgba(220,38,38,0);   }
         }
-        /* Warning banner animation */
-        #warningBanner {
-            animation: slideDown 0.5s ease;
-        }
+        #warningBanner { animation: slideDown 0.5s ease; }
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-        #warningBanner.hide {
-            animation: slideUp 0.4s ease forwards;
-        }
-        @keyframes slideUp {
-            from { opacity: 1; transform: translateY(0); }
-            to   { opacity: 0; transform: translateY(-20px); }
+            from { opacity:0; transform:translateY(-20px); }
+            to   { opacity:1; transform:translateY(0); }
         }
     </style>
 </head>
 <body class="min-h-screen pb-20">
 
-    <!-- ✅ WARNING BANNER (replaces the blocking alert) -->
-    <div id="warningBanner" class="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-black px-4 py-3 flex items-center justify-between shadow-lg">
-        <div class="flex items-center gap-3">
-            <span class="text-xl">⚠️</span>
-            <p class="text-sm font-semibold">Please provide accurate information. Submitting false details can put someone's life at risk during an emergency.</p>
+    <!-- WARNING BANNER -->
+    <div id="warningBanner" class="fixed top-0 left-0 right-0 z-50 bg-yellow-400 text-black px-4 py-3 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">⚠️</span>
+            <p class="text-sm font-semibold">Please provide accurate information. False details can put lives at risk during emergencies.</p>
         </div>
-        <button onclick="closeBanner()" class="ml-4 bg-black text-yellow-400 rounded-full w-7 h-7 flex items-center justify-center font-bold text-lg flex-shrink-0 hover:bg-gray-800 transition">✕</button>
+        <button onclick="hideBanner()" class="ml-3 bg-black text-yellow-400 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 hover:bg-gray-800 transition">✕</button>
     </div>
-
-    <!-- Spacer so content doesn't hide under banner -->
     <div id="bannerSpacer" class="h-14"></div>
 
     <!-- Header -->
@@ -65,17 +53,18 @@
                 class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none transition-all">
         </div>
 
-        <div class="flex gap-4 flex-wrap">
-            <button onclick="location.href='auth.html'"
-                class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+        <!-- Buttons — ALL use window.open so no white page ever -->
+        <div class="flex gap-3 flex-wrap">
+            <button onclick="goTo('auth.html')"
+                class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
                 <i data-lucide="user-plus" size="18"></i> Become Donor
             </button>
-            <button onclick="location.href='auth.html'"
-                class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+            <button onclick="goTo('auth.html')"
+                class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
                 <i data-lucide="log-in" size="18"></i> Login / Register
             </button>
-            <button onclick="location.href='admin-login.html'"
-                class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+            <button onclick="goTo('admin-login.html')"
+                class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
                 <i data-lucide="shield-check" size="18"></i> Admin Panel
             </button>
         </div>
@@ -86,7 +75,7 @@
         <h2 class="text-2xl font-bold mb-6">Life-Saving Services</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
 
-            <div onclick="navigateTo('hospitals')" class="card-glass p-6 cursor-pointer">
+            <div onclick="goTo('hospitals.html')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-red-600">
                     <i data-lucide="map-pin"></i>
                 </div>
@@ -95,7 +84,7 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <div onclick="navigateTo('blood')" class="card-glass p-6 cursor-pointer">
+            <div onclick="goTo('blood.html')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
                     <i data-lucide="droplet"></i>
                 </div>
@@ -104,7 +93,7 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <div onclick="navigateTo('ambulance')" class="card-glass p-6 cursor-pointer">
+            <div onclick="goTo('ambulance.html')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
                     <i data-lucide="truck"></i>
                 </div>
@@ -113,7 +102,7 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <div onclick="navigateTo('organ')" class="card-glass p-6 cursor-pointer">
+            <div onclick="goTo('organ.html')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-purple-600">
                     <i data-lucide="gift"></i>
                 </div>
@@ -122,7 +111,7 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <div onclick="navigateTo('emergency')" class="card-glass p-6 cursor-pointer">
+            <div onclick="goTo('emergency.html')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-green-600">
                     <i data-lucide="phone"></i>
                 </div>
@@ -137,23 +126,21 @@
     <!-- SOS Modal -->
     <div id="sosModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-6">
         <div class="bg-white text-gray-900 w-full max-w-md rounded-2xl p-8 text-center relative">
-            <button onclick="toggleSOS()" class="absolute top-4 right-4 text-gray-400 hover:text-black">
-                <i data-lucide="x-circle"></i>
-            </button>
+            <button onclick="toggleSOS()" class="absolute top-4 right-4 text-gray-500 hover:text-black text-2xl font-bold leading-none">✕</button>
             <h2 class="text-3xl font-bold text-red-600 mb-4 uppercase tracking-wider">Emergency SOS</h2>
-            <p class="mb-6 text-gray-600 font-medium">Your Current Location:</p>
-            <div id="userLocation" class="bg-gray-100 p-4 rounded-lg mb-8 text-sm font-mono border border-dashed border-red-300">
+            <p class="mb-4 text-gray-600 font-medium">Your Current Location:</p>
+            <div id="userLocation" class="bg-gray-100 p-4 rounded-lg mb-6 text-sm font-mono border border-dashed border-red-300">
                 Fetching location...
             </div>
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 gap-3">
                 <a href="tel:102" class="bg-red-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    <i data-lucide="phone-call"></i> Medical (102)
+                    🚑 Medical (102)
                 </a>
                 <a href="tel:100" class="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    <i data-lucide="phone-call"></i> Police (100)
+                    🚔 Police (100)
                 </a>
                 <a href="tel:101" class="bg-orange-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    <i data-lucide="phone-call"></i> Fire (101)
+                    🚒 Fire (101)
                 </a>
             </div>
         </div>
@@ -164,52 +151,51 @@
         <span class="text-2xl font-bold text-white">!</span>
     </button>
 
-    <!-- Firebase Module Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey:            "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-            authDomain:        "life-saver-be5cf.firebaseapp.com",
-            databaseURL:       "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId:         "life-saver-be5cf",
-            storageBucket:     "life-saver-be5cf.firebasestorage.app",
-            messagingSenderId: "549675407162",
-            appId:             "1:549675407162:web:ba3c8878834cb4123ba203"
-        };
-
-        initializeApp(firebaseConfig);
-    </script>
-
-    <!-- UI Script (non-module so functions are globally accessible) -->
+    <!-- ✅ ONE plain script — NO module, NO import, NO Firebase = NO white page -->
     <script>
         lucide.createIcons();
 
-        /* ── Warning banner close ── */
-        function closeBanner() {
-            const banner  = document.getElementById('warningBanner');
-            const spacer  = document.getElementById('bannerSpacer');
-            banner.classList.add('hide');
-            setTimeout(() => {
-                banner.style.display = 'none';
-                spacer.style.display = 'none';
-            }, 400);
+        /* Safe navigation — checks file exists first via fetch */
+        function goTo(page) {
+            fetch(page, { method: 'HEAD' })
+                .then(function(res) {
+                    if (res.ok) {
+                        window.location.href = page;
+                    } else {
+                        showNotReady(page);
+                    }
+                })
+                .catch(function() {
+                    /* fetch failed (e.g. network) — navigate anyway */
+                    window.location.href = page;
+                });
         }
 
-        /* ── Auto-hide banner after 6 seconds ── */
-        setTimeout(closeBanner, 6000);
-
-        /* ── Navigate to page ── */
-        function navigateTo(page) {
-            window.location.href = `${page}.html`;
+        /* Show a friendly toast if a page isn't uploaded yet */
+        function showNotReady(page) {
+            var name = page.replace('.html','').replace('-',' ');
+            var toast = document.createElement('div');
+            toast.textContent = '⚠️ "' + name + '" page is not uploaded yet on GitHub.';
+            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e40af;color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 3500);
         }
 
-        /* ── SOS Modal toggle ── */
+        /* Hide warning banner */
+        function hideBanner() {
+            var b = document.getElementById('warningBanner');
+            var s = document.getElementById('bannerSpacer');
+            if (b) b.style.display = 'none';
+            if (s) s.style.display = 'none';
+        }
+
+        /* Auto-hide banner after 6 seconds */
+        setTimeout(hideBanner, 6000);
+
+        /* SOS Modal */
         function toggleSOS() {
-            const modal    = document.getElementById('sosModal');
-            const isHidden = modal.classList.contains('hidden');
-            if (isHidden) {
+            var modal = document.getElementById('sosModal');
+            if (modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
                 fetchLocation();
@@ -219,50 +205,50 @@
             }
         }
 
-        /* ── Get GPS location ── */
+        /* GPS */
         function fetchLocation() {
-            const locDiv = document.getElementById('userLocation');
+            var locDiv = document.getElementById('userLocation');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const { latitude, longitude } = pos.coords;
-                        locDiv.innerHTML = `LAT: ${latitude.toFixed(4)}<br>LNG: ${longitude.toFixed(4)}<br>
-                            <span class='text-xs text-red-500 mt-2 block'>📍 Location tracked for emergency response</span>`;
+                    function(pos) {
+                        locDiv.innerHTML = 'LAT: ' + pos.coords.latitude.toFixed(4) +
+                            '<br>LNG: ' + pos.coords.longitude.toFixed(4) +
+                            '<br><span style="font-size:11px;color:#ef4444;display:block;margin-top:6px;">📍 Location tracked for emergency response</span>';
                     },
-                    () => { locDiv.innerHTML = "Location access denied. Please enable GPS."; }
+                    function() { locDiv.textContent = 'Location access denied. Please enable GPS.'; }
                 );
             } else {
-                locDiv.innerHTML = "Geolocation not supported by your browser.";
+                locDiv.textContent = 'Geolocation not supported by your browser.';
             }
         }
 
-        /* ── Global Search ── */
+        /* Global Search */
         document.getElementById('globalSearch').addEventListener('keypress', function(e) {
             if (e.key !== 'Enter') return;
-            const q = this.value.toLowerCase().trim();
+            var q = this.value.toLowerCase().trim();
             if (!q) return;
 
-            const bloodGroups = ["o+","o-","a+","a-","b+","b-","ab+","ab-"];
-            const cities      = ["hyderabad","secunderabad","warangal","vizag","karimnagar","nizamabad","khammam"];
+            var bloodGroups = ['o+','o-','a+','a-','b+','b-','ab+','ab-'];
+            var cities = ['hyderabad','secunderabad','warangal','vizag','karimnagar','nizamabad','khammam'];
 
-            const foundBG   = bloodGroups.find(bg => q.includes(bg));
-            const foundCity = cities.find(city => q.includes(city));
+            var foundBG   = bloodGroups.find(function(bg) { return q.indexOf(bg) !== -1; });
+            var foundCity = cities.find(function(c) { return q.indexOf(c) !== -1; });
 
-            if (foundBG || q.includes('blood') || q.includes('donor')) {
-                let url = 'blood.html?';
-                if (foundBG)   url += `bg=${encodeURIComponent(foundBG)}&`;
-                if (foundCity) url += `city=${foundCity}`;
-                window.location.href = url;
-            } else if (q.includes('ambulance') || q.includes('driver') || q.includes('call')) {
-                window.location.href = 'ambulance.html';
-            } else if (q.includes('hospital') || q.includes('clinic') || q.includes('near me')) {
-                window.location.href = 'hospitals.html';
-            } else if (q.includes('organ') || q.includes('heart') || q.includes('kidney')) {
-                window.location.href = 'organ.html';
-            } else if (q.includes('emergency') || q.includes('police') || q.includes('fire')) {
-                window.location.href = 'emergency.html';
+            if (foundBG || q.indexOf('blood') !== -1 || q.indexOf('donor') !== -1) {
+                var url = 'blood.html?';
+                if (foundBG)   url += 'bg=' + encodeURIComponent(foundBG) + '&';
+                if (foundCity) url += 'city=' + foundCity;
+                goTo(url);
+            } else if (q.indexOf('ambulance') !== -1 || q.indexOf('driver') !== -1) {
+                goTo('ambulance.html');
+            } else if (q.indexOf('hospital') !== -1 || q.indexOf('clinic') !== -1) {
+                goTo('hospitals.html');
+            } else if (q.indexOf('organ') !== -1 || q.indexOf('heart') !== -1 || q.indexOf('kidney') !== -1) {
+                goTo('organ.html');
+            } else if (q.indexOf('emergency') !== -1 || q.indexOf('police') !== -1 || q.indexOf('fire') !== -1) {
+                goTo('emergency.html');
             } else {
-                window.location.href = `blood.html?search=${encodeURIComponent(q)}`;
+                goTo('blood.html?search=' + encodeURIComponent(q));
             }
         });
     </script>
