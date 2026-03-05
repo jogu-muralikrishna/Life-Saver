@@ -376,349 +376,190 @@ select option { background:#1e1e1e; }
      FIREBASE + ALL LOGIC
 ══════════════════════════════════════ -->
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getDatabase, ref, push, set, get, query, orderByChild, equalTo }
-  from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
 import {
-  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  sendPasswordResetEmail, updateProfile, fetchSignInMethodsForEmail,
-  GoogleAuthProvider, signInWithPopup
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+sendPasswordResetEmail,
+updateProfile,
+fetchSignInMethodsForEmail,
+GoogleAuthProvider,
+signInWithRedirect,
+getRedirectResult
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-/* ── Firebase init ── */
+
+/* Firebase Config */
 const firebaseConfig = {
-  apiKey:            "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-  authDomain:        "life-saver-be5cf.firebaseapp.com",
-  databaseURL:       "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "life-saver-be5cf",
-  storageBucket:     "life-saver-be5cf.firebasestorage.app",
-  messagingSenderId: "549675407162",
-  appId:             "1:549675407162:web:ba3c8878834cb4123ba203"
+apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+authDomain: "life-saver-be5cf.firebaseapp.com",
+databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "life-saver-be5cf",
+storageBucket: "life-saver-be5cf.firebasestorage.app",
+messagingSenderId: "549675407162",
+appId: "1:549675407162:web:ba3c8878834cb4123ba203"
 };
-const app      = initializeApp(firebaseConfig);
-const db       = getDatabase(app);
-const auth     = getAuth(app);
+
+
+/* Initialize Firebase */
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-let generatedOTP, isVerified = false;
 
-/* ══════════════════════════════
-   HELPERS
-══════════════════════════════ */
-function showMsg(id, text, type) {
-  const el = document.getElementById(id);
-  el.textContent = text;
-  el.className = `msg ${type} show`;
+/* Handle Google redirect login */
+getRedirectResult(auth)
+.then(async (result) => {
+
+if (!result) return;
+
+const user = result.user;
+
+await set(ref(db, 'users/' + user.uid), {
+name: user.displayName,
+email: user.email,
+photo: user.photoURL,
+lastLogin: new Date().toISOString()
+});
+
+alert("Google Login Successful");
+
+window.location.href = "index.html";
+
+})
+.catch((error) => {
+
+console.log(error);
+alert("Google Login Failed: " + error.message);
+
+});
+
+
+/* Email login */
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+const email = document.getElementById("loginEmail").value.trim();
+const password = document.getElementById("loginPassword").value;
+
+if(!email || !password){
+alert("Enter email and password");
+return;
 }
 
-function setLoading(id, label, loading) {
-  const btn = document.getElementById(id);
-  btn.innerHTML = loading ? `<span class="spinner"></span> Please wait...` : label;
-  btn.disabled  = loading;
+try{
+
+await signInWithEmailAndPassword(auth,email,password);
+
+alert("Login successful");
+
+window.location.href="index.html";
+
+}catch(error){
+
+alert(error.message);
+
 }
 
-/* ══════════════════════════════
-   TAB SWITCHING
-══════════════════════════════ */
-function switchTab(tab) {
-  const toLogin = tab === 'login';
-  document.getElementById('loginPanel').classList.toggle('active', toLogin);
-  document.getElementById('registerPanel').classList.toggle('active', !toLogin);
-  document.getElementById('tabLogin').classList.toggle('active', toLogin);
-  document.getElementById('tabRegister').classList.toggle('active', !toLogin);
-}
-document.getElementById('tabLogin').addEventListener('click',    () => switchTab('login'));
-document.getElementById('tabRegister').addEventListener('click', () => switchTab('register'));
-document.getElementById('goRegister').addEventListener('click',  () => switchTab('register'));
-document.getElementById('goLogin').addEventListener('click',     () => switchTab('login'));
-
-/* ══════════════════════════════
-   EYE TOGGLE
-══════════════════════════════ */
-document.querySelectorAll('.eye-btn').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const inp = document.getElementById(this.dataset.target);
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-    this.textContent = inp.type === 'password' ? '👁' : '🙈';
-  });
 });
 
-/* ══════════════════════════════
-   STEP NAVIGATION
-══════════════════════════════ */
-function goStep(n) {
-  document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('active', i === n - 1));
-  [1, 2, 3].forEach(i => {
-    const dot  = document.getElementById('dot' + i);
-    if (i < n)       { dot.className = 'step-dot done';    dot.textContent = '✓'; }
-    else if (i === n){ dot.className = 'step-dot active';  dot.textContent = i; }
-    else             { dot.className = 'step-dot pending'; dot.textContent = i; }
-    if (i < 3) {
-      const line = document.getElementById('line' + i);
-      line.className = 'step-line' + (i < n ? ' done' : '');
-    }
-  });
+
+/* Google login button */
+document.getElementById("googleBtn").addEventListener("click", () => {
+
+signInWithRedirect(auth, provider);
+
+});
+
+
+/* Password reset */
+document.getElementById("sendResetBtn").addEventListener("click", async () => {
+
+const email = document.getElementById("resetEmail").value.trim();
+
+if(!email){
+alert("Enter email");
+return;
 }
 
-/* ══════════════════════════════
-   LOGIN — Email / Password
-══════════════════════════════ */
-document.getElementById('loginBtn').addEventListener('click', async function() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value;
-  if (!email || !pass) { showMsg('loginMsg', '⚠️ Please enter your email and password.', 'error'); return; }
-  setLoading('loginBtn', 'Login to My Account', true);
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showMsg('loginMsg', '✅ Login successful! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'index.html', 1500);
-  } catch(err) {
-    const m = {
-      'auth/user-not-found':     '⚠️ No account found. Please register first.',
-      'auth/wrong-password':     '⚠️ Incorrect password.',
-      'auth/invalid-credential': '⚠️ Invalid email or password.',
-      'auth/too-many-requests':  '⚠️ Too many attempts. Please wait.',
-    };
-    showMsg('loginMsg', m[err.code] || '❌ ' + err.message, 'error');
-    setLoading('loginBtn', 'Login to My Account', false);
-  }
-});
-document.getElementById('loginPassword').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('loginBtn').click();
-});
+try{
 
-/* ══════════════════════════════
-   LOGIN — Google
-══════════════════════════════ */
-document.getElementById('googleBtn').addEventListener('click', async function() {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user   = result.user;
-    await set(ref(db, 'users/' + user.uid), {
-      name: user.displayName, email: user.email,
-      photo: user.photoURL, lastLogin: new Date().toISOString()
-    });
-    showMsg('loginMsg', '✅ Google login successful! Redirecting...', 'success');
-    setTimeout(() => window.location.href = 'index.html', 1500);
-  } catch(err) {
-    const m = {
-      'auth/popup-closed-by-user': '⚠️ Sign-in cancelled.',
-      'auth/popup-blocked':        '⚠️ Popup blocked. Allow popups for this site.',
-      'auth/unauthorized-domain':  '⚠️ Add this domain in Firebase → Auth → Authorized Domains.',
-    };
-    showMsg('loginMsg', m[err.code] || '❌ ' + err.message, 'error');
-  }
-});
+await sendPasswordResetEmail(auth,email);
 
-/* ══════════════════════════════
-   FORGOT PASSWORD
-══════════════════════════════ */
-document.getElementById('forgotBtn').addEventListener('click', () => {
-  const e = document.getElementById('loginEmail').value.trim();
-  if (e) document.getElementById('resetEmail').value = e;
-  document.getElementById('resetOverlay').classList.add('show');
-});
-document.getElementById('closeResetBtn').addEventListener('click', () => {
-  document.getElementById('resetOverlay').classList.remove('show');
-  document.getElementById('resetMsg').className = 'msg';
-});
-document.getElementById('resetOverlay').addEventListener('click', function(e) {
-  if (e.target === this) { this.classList.remove('show'); document.getElementById('resetMsg').className='msg'; }
-});
-document.getElementById('sendResetBtn').addEventListener('click', async function() {
-  const email = document.getElementById('resetEmail').value.trim();
-  if (!email) { showMsg('resetMsg', '⚠️ Enter your email.', 'error'); return; }
-  setLoading('sendResetBtn', 'Send Reset Link', true);
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showMsg('resetMsg', '✅ Reset link sent! Check your inbox.', 'success');
-  } catch(err) {
-    const m = { 'auth/user-not-found':'⚠️ No account found.', 'auth/invalid-email':'⚠️ Invalid email.' };
-    showMsg('resetMsg', m[err.code] || '❌ ' + err.message, 'error');
-  }
-  setLoading('sendResetBtn', 'Send Reset Link', false);
-});
+alert("Password reset email sent");
 
-/* ══════════════════════════════
-   REGISTER — STEP 1 Age check
-══════════════════════════════ */
-document.getElementById('dob').addEventListener('change', function() {
-  const bd = new Date(this.value), now = new Date();
-  let age  = now.getFullYear() - bd.getFullYear();
-  const md = now.getMonth() - bd.getMonth();
-  if (md < 0 || (md === 0 && now.getDate() < bd.getDate())) age--;
-  const box = document.getElementById('ageError');
-  const msg = document.getElementById('ageErrorMsg');
-  if (age < 18) {
-    const yrs = 18 - age, ed = new Date(bd);
-    ed.setFullYear(ed.getFullYear() + 18);
-    msg.innerHTML = `⚠️ <strong>Not eligible yet.</strong> Wait <strong>${yrs} more ${yrs===1?'year':'years'}</strong> — eligible from <strong>${ed.toLocaleString('default',{month:'long'})} ${ed.getFullYear()}</strong>. 🩸 Thank you!`;
-    box.classList.add('show');
-  } else { box.classList.remove('show'); }
-});
+}catch(error){
 
-/* REGISTER — STEP 1 → STEP 2 */
-document.getElementById('nextToStep2').addEventListener('click', async function() {
-  const name  = document.getElementById('fullName').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const dob   = document.getElementById('dob').value;
-  if (!name || !phone || !dob)      { showMsg('registerMsg','⚠️ Please fill in all fields.','error'); return; }
-  if (!/^\d{10}$/.test(phone))      { showMsg('registerMsg','⚠️ Enter a valid 10-digit number without +91.','error'); return; }
-  if (document.getElementById('ageError').classList.contains('show')) { showMsg('registerMsg','⚠️ You must be at least 18 years old.','error'); return; }
+alert(error.message);
 
-  setLoading('nextToStep2', 'Continue →', true);
-  try {
-    const snap = await get(query(ref(db,'donors'), orderByChild('phone'), equalTo(phone)));
-    if (snap.exists()) {
-      showMsg('registerMsg','⚠️ This mobile number is already registered. Only one account per phone number allowed.','error');
-      setLoading('nextToStep2','Continue →',false); return;
-    }
-  } catch(e) {}
-  setLoading('nextToStep2','Continue →',false);
-  // clear any old msg
-  document.getElementById('registerMsg').className = 'msg';
-  goStep(2);
-});
-
-document.getElementById('backToStep1').addEventListener('click', () => goStep(1));
-
-/* ══════════════════════════════
-   REGISTER — STEP 2 Send OTP
-══════════════════════════════ */
-document.getElementById('sendOtpBtn').addEventListener('click', async function() {
-  const email = document.getElementById('regEmail').value.trim();
-  const name  = document.getElementById('fullName').value.trim();
-  if (!email) { showMsg('otpMsg','⚠️ Enter your email first.','error'); return; }
-
-  this.textContent = 'Checking...'; this.disabled = true;
-  try {
-    const methods = await fetchSignInMethodsForEmail(auth, email);
-    if (methods && methods.length > 0) {
-      showMsg('otpMsg','⚠️ This email is already registered. Please login instead.','error');
-      this.textContent = 'Send OTP'; this.disabled = false; return;
-    }
-  } catch(e) {}
-
-  generatedOTP = Math.floor(100000 + Math.random() * 900000);
-  this.textContent = 'Sending...';
-  emailjs.send("service_5z0f2my","template_k4pl15w",{
-    user_name: name, user_email: email, otp_code: generatedOTP
-  }).then(() => {
-    document.getElementById('otpBox').style.display = 'block';
-    showMsg('otpMsg','✅ OTP sent! Check your inbox and spam folder.','success');
-    this.textContent = 'Resend'; this.disabled = false;
-  }).catch(err => {
-    showMsg('otpMsg','❌ Email Error: ' + err.text,'error');
-    this.textContent = 'Send OTP'; this.disabled = false;
-  });
-});
-
-/* REGISTER — STEP 2 Verify OTP */
-document.getElementById('verifyBtn').addEventListener('click', function() {
-  if (document.getElementById('otpInput').value == generatedOTP) {
-    isVerified = true;
-    document.getElementById('otpBox').style.display = 'none';
-    document.getElementById('verifiedBadge').classList.add('show');
-    document.getElementById('regEmail').readOnly = true;
-    document.getElementById('sendOtpBtn').disabled = true;
-    showMsg('otpMsg','✅ Email verified! Click Continue to set your password.','success');
-    const btn = document.getElementById('nextToStep3');
-    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-  } else {
-    showMsg('otpMsg','❌ Invalid OTP. Please try again.','error');
-  }
-});
-
-/* REGISTER — STEP 2 → STEP 3 */
-document.getElementById('nextToStep3').addEventListener('click', function() {
-  if (!isVerified) { showMsg('otpMsg','⚠️ Please verify your email first.','error'); return; }
-  document.getElementById('sName').textContent  = document.getElementById('fullName').value;
-  document.getElementById('sPhone').textContent = document.getElementById('phone').value;
-  document.getElementById('sBlood').textContent = document.getElementById('bloodGroup').value;
-  document.getElementById('sCity').textContent  = document.getElementById('city').value;
-  document.getElementById('sEmail').textContent = document.getElementById('regEmail').value;
-  goStep(3);
-});
-
-document.getElementById('backToStep2').addEventListener('click', () => goStep(2));
-
-/* ══════════════════════════════
-   REGISTER — STEP 3 Password strength
-══════════════════════════════ */
-document.getElementById('regPassword').addEventListener('input', function() {
-  const val = this.value;
-  const fill = document.getElementById('strengthFill');
-  const lbl  = document.getElementById('strengthLabel');
-  let score = 0;
-  if (val.length>=6) score++; if (val.length>=10) score++;
-  if (/[A-Z]/.test(val)) score++; if (/[0-9]/.test(val)) score++; if (/[^A-Za-z0-9]/.test(val)) score++;
-  const levels = [
-    {w:'20%',c:'#e63946',t:'Very Weak'},{w:'40%',c:'#ff6b35',t:'Weak'},
-    {w:'60%',c:'#f7c59f',t:'Fair'},{w:'80%',c:'#a8dadc',t:'Strong'},{w:'100%',c:'#2dc653',t:'Very Strong'}
-  ];
-  const l = levels[Math.max(0,score-1)];
-  fill.style.width = val?l.w:'0%'; fill.style.background = l.c;
-  lbl.textContent = val?l.t:''; lbl.style.color = l.c;
-  checkMatch();
-});
-document.getElementById('regConfirm').addEventListener('input', checkMatch);
-function checkMatch() {
-  const p1=document.getElementById('regPassword').value, p2=document.getElementById('regConfirm').value;
-  const msg=document.getElementById('matchMsg');
-  if (!p2) { msg.textContent=''; return; }
-  if (p1===p2) { msg.textContent='✅ Passwords match'; msg.style.color='#2dc653'; }
-  else         { msg.textContent='❌ Passwords do not match'; msg.style.color='#ff6b6b'; }
 }
 
-/* ══════════════════════════════
-   REGISTER — SUBMIT
-══════════════════════════════ */
-document.getElementById('submitBtn').addEventListener('click', async function() {
-  const password = document.getElementById('regPassword').value;
-  const confirm  = document.getElementById('regConfirm').value;
-  const email    = document.getElementById('regEmail').value.trim();
-  const name     = document.getElementById('fullName').value.trim();
-
-  if (!password || password.length < 6) { showMsg('registerMsg','⚠️ Password must be at least 6 characters.','error'); return; }
-  if (password !== confirm)             { showMsg('registerMsg','⚠️ Passwords do not match.','error'); return; }
-
-  setLoading('submitBtn','🩸 Register Now', true);
-  try {
-    /* 1️⃣ Create Firebase Auth account — email + password stored securely */
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
-
-    /* 2️⃣ Save user profile */
-    await set(ref(db,'users/'+cred.user.uid), {
-      name, email, createdAt: new Date().toISOString()
-    });
-
-    /* 3️⃣ Save donor record */
-    await push(ref(db,'donors'), {
-      uid:       cred.user.uid,
-      name,
-      phone:     document.getElementById('phone').value,
-      dob:       document.getElementById('dob').value,
-      bloodGroup:document.getElementById('bloodGroup').value,
-      city:      document.getElementById('city').value,
-      email,
-      status:   'Available',
-      verified: 'Email',
-      timestamp: new Date().toISOString()
-    });
-
-    showMsg('registerMsg','✅ Registration complete! Welcome, '+name+'! Redirecting...','success');
-    setTimeout(() => window.location.href = 'index.html', 2000);
-  } catch(err) {
-    const m = {
-      'auth/email-already-in-use': '⚠️ Email already has an account. Please login instead.',
-      'auth/invalid-email':        '⚠️ Invalid email address.',
-      'auth/weak-password':        '⚠️ Password too weak. Use at least 6 characters.',
-    };
-    showMsg('registerMsg', m[err.code]||'❌ '+err.message, 'error');
-    setLoading('submitBtn','🩸 Register Now', false);
-  }
 });
+
+
+/* Registration */
+document.getElementById("submitBtn").addEventListener("click", async () => {
+
+const name = document.getElementById("fullName").value.trim();
+const email = document.getElementById("regEmail").value.trim();
+const password = document.getElementById("regPassword").value;
+
+const phone = document.getElementById("phone").value;
+const dob = document.getElementById("dob").value;
+const blood = document.getElementById("bloodGroup").value;
+const city = document.getElementById("city").value;
+
+if(!name || !email || !password){
+alert("Fill all fields");
+return;
+}
+
+try{
+
+const cred = await createUserWithEmailAndPassword(auth,email,password);
+
+await updateProfile(cred.user,{
+displayName:name
+});
+
+
+await set(ref(db,'users/'+cred.user.uid),{
+name:name,
+email:email,
+createdAt:new Date().toISOString()
+});
+
+
+await push(ref(db,'donors'),{
+uid:cred.user.uid,
+name:name,
+phone:phone,
+dob:dob,
+bloodGroup:blood,
+city:city,
+email:email,
+status:"Available",
+verified:"Email",
+timestamp:new Date().toISOString()
+});
+
+alert("Registration Successful");
+
+window.location.href="index.html";
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+});
+
 </script>
 
 </body>
