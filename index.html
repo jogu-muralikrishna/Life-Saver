@@ -1,257 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Saver - Emergency Services</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { background-color: #0a1941; color: white; font-family: 'Inter', sans-serif; }
-        .card-glass { background: white; color: #0a1941; border-radius: 1rem; transition: transform 0.2s; }
-        .card-glass:hover { transform: translateY(-5px); }
-        .sos-btn { animation: pulse-sos 2s infinite; }
-        @keyframes pulse-sos {
-            0%   { transform: scale(1);   box-shadow: 0 0 0 0    rgba(220,38,38,0.7); }
-            70%  { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220,38,38,0);   }
-            100% { transform: scale(1);   box-shadow: 0 0 0 0    rgba(220,38,38,0);   }
-        }
-        #warningBanner { animation: slideDown 0.5s ease; }
-        @keyframes slideDown {
-            from { opacity:0; transform:translateY(-20px); }
-            to   { opacity:1; transform:translateY(0); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Saver - Emergency Services</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+body{
+background:#0a1941;
+color:white;
+font-family:Inter,sans-serif;
+}
+
+.card-glass{
+background:white;
+color:#0a1941;
+border-radius:1rem;
+transition:transform .2s;
+}
+
+.card-glass:hover{
+transform:translateY(-5px);
+}
+
+.sos-btn{
+animation:pulse-sos 2s infinite;
+}
+
+@keyframes pulse-sos{
+0%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,.7);}
+70%{transform:scale(1.1);box-shadow:0 0 0 15px rgba(220,38,38,0);}
+100%{transform:scale(1);box-shadow:0 0 0 0 rgba(220,38,38,0);}
+}
+
+#warningBanner{
+animation:slideDown .5s ease;
+}
+
+@keyframes slideDown{
+from{opacity:0;transform:translateY(-20px);}
+to{opacity:1;transform:translateY(0);}
+}
+</style>
 </head>
+
+
 <body class="min-h-screen pb-20">
 
-    <!-- WARNING BANNER -->
-    <div id="warningBanner" class="fixed top-0 left-0 right-0 z-50 bg-yellow-400 text-black px-4 py-3 flex items-center justify-between shadow-lg">
-        <div class="flex items-center gap-2">
-            <span class="text-lg">⚠️</span>
-            <p class="text-sm font-semibold">Please provide accurate information. False details can put lives at risk during emergencies.</p>
-        </div>
-        <button onclick="hideBanner()" class="ml-3 bg-black text-yellow-400 rounded-full w-7 h-7 flex items-center justify-center font-bold flex-shrink-0 hover:bg-gray-800 transition">✕</button>
-    </div>
-    <div id="bannerSpacer" class="h-14"></div>
+<!-- WARNING -->
+<div id="warningBanner"
+class="fixed top-0 left-0 right-0 z-50 bg-yellow-400 text-black px-4 py-3 flex items-center justify-between shadow-lg">
 
-    <!-- Header -->
-    <header class="p-6 md:p-12 max-w-7xl mx-auto">
-        <div class="flex items-center gap-3 mb-2 text-red-400">
-            <i data-lucide="heart" class="fill-current"></i>
-            <h1 class="text-3xl font-bold">Become a <span class="text-green-400">Life Saver</span></h1>
-        </div>
-        <p class="text-gray-300 mb-8">Find hospitals, donate blood, locate ambulances - save lives near you</p>
+<div class="flex items-center gap-2">
+<span class="text-lg">⚠️</span>
+<p class="text-sm font-semibold">
+Please provide accurate information. False details can put lives at risk during emergencies.
+</p>
+</div>
 
-        <!-- Search Bar -->
-        <div class="relative max-w-3xl mb-6 mx-auto">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <i data-lucide="search" class="text-gray-400" size="20"></i>
-            </div>
-            <input type="text" id="globalSearch"
-                placeholder='Try: "O+ in Hyderabad", "Ambulance near me", "Hospitals"...'
-                class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none transition-all">
-        </div>
+<button onclick="hideBanner()"
+class="ml-3 bg-black text-yellow-400 rounded-full w-7 h-7 flex items-center justify-center font-bold">
+✕
+</button>
 
-        <!-- Buttons — ALL use window.open so no white page ever -->
-        <div class="flex gap-3 flex-wrap">
-            <button onclick="goTo('auth.html')"
-                class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
-                <i data-lucide="user-plus" size="18"></i> Become Donor
-            </button>
-            <button onclick="goTo('auth.html')"
-                class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
-                <i data-lucide="log-in" size="18"></i> Login / Register
-            </button>
-            <button onclick="goTo('admin-login.html')"
-                class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 transition font-semibold">
-                <i data-lucide="shield-check" size="18"></i> Admin Panel
-            </button>
-        </div>
-    </header>
+</div>
 
-    <!-- Service Grid -->
-    <main class="max-w-7xl mx-auto px-6 py-10">
-        <h2 class="text-2xl font-bold mb-6">Life-Saving Services</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+<div id="bannerSpacer" class="h-14"></div>
 
-            <div onclick="goTo('hospitals.html')" class="card-glass p-6 cursor-pointer">
-                <div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-red-600">
-                    <i data-lucide="map-pin"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-2">Find Hospitals</h3>
-                <p class="text-sm text-gray-600 mb-4">Locate nearby hospitals with real-time navigation</p>
-                <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
-            </div>
 
-            <div onclick="goTo('blood.html')" class="card-glass p-6 cursor-pointer">
-                <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
-                    <i data-lucide="droplet"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-2">Donate Blood</h3>
-                <p class="text-sm text-gray-600 mb-4">Register as a blood donor and save lives</p>
-                <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
-            </div>
 
-            <div onclick="goTo('ambulance.html')" class="card-glass p-6 cursor-pointer">
-                <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
-                    <i data-lucide="truck"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-2">Call Ambulance</h3>
-                <p class="text-sm text-gray-600 mb-4">Find nearby ambulances for emergency transport</p>
-                <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
-            </div>
+<!-- HEADER -->
+<header class="p-6 md:p-12 max-w-7xl mx-auto">
 
-            <div onclick="goTo('organ.html')" class="card-glass p-6 cursor-pointer">
-                <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-purple-600">
-                    <i data-lucide="gift"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-2">Donate Organs</h3>
-                <p class="text-sm text-gray-600 mb-4">Register to donate organs and body parts</p>
-                <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
-            </div>
+<div class="flex items-center gap-3 mb-2 text-red-400">
+<i data-lucide="heart" class="fill-current"></i>
+<h1 class="text-3xl font-bold">
+Become a <span class="text-green-400">Life Saver</span>
+</h1>
+</div>
 
-            <div onclick="goTo('emergency.html')" class="card-glass p-6 cursor-pointer">
-                <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-green-600">
-                    <i data-lucide="phone"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-2">Emergency</h3>
-                <p class="text-sm text-gray-600 mb-4">Quick access to emergency helpline numbers</p>
-                <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
-            </div>
+<p class="text-gray-300 mb-8">
+Find hospitals, donate blood, locate ambulances - save lives near you
+</p>
 
-        </div>
-    </main>
 
-    <!-- SOS Modal -->
-    <div id="sosModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-6">
-        <div class="bg-white text-gray-900 w-full max-w-md rounded-2xl p-8 text-center relative">
-            <button onclick="toggleSOS()" class="absolute top-4 right-4 text-gray-500 hover:text-black text-2xl font-bold leading-none">✕</button>
-            <h2 class="text-3xl font-bold text-red-600 mb-4 uppercase tracking-wider">Emergency SOS</h2>
-            <p class="mb-4 text-gray-600 font-medium">Your Current Location:</p>
-            <div id="userLocation" class="bg-gray-100 p-4 rounded-lg mb-6 text-sm font-mono border border-dashed border-red-300">
-                Fetching location...
-            </div>
-            <div class="grid grid-cols-1 gap-3">
-                <a href="tel:102" class="bg-red-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    🚑 Medical (102)
-                </a>
-                <a href="tel:100" class="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    🚔 Police (100)
-                </a>
-                <a href="tel:101" class="bg-orange-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
-                    🚒 Fire (101)
-                </a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Floating SOS Button -->
-    <button onclick="toggleSOS()" class="sos-btn fixed bottom-8 right-8 bg-red-600 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-40 border-4 border-white">
-        <span class="text-2xl font-bold text-white">!</span>
-    </button>
+<!-- SEARCH -->
+<div class="relative max-w-3xl mb-6 mx-auto">
 
-    <!-- ✅ ONE plain script — NO module, NO import, NO Firebase = NO white page -->
-    <script>
-        lucide.createIcons();
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<i data-lucide="search" class="text-gray-400"></i>
+</div>
 
-        /* Safe navigation — checks file exists first via fetch */
-        function goTo(page) {
-            fetch(page, { method: 'HEAD' })
-                .then(function(res) {
-                    if (res.ok) {
-                        window.location.href = page;
-                    } else {
-                        showNotReady(page);
-                    }
-                })
-                .catch(function() {
-                    /* fetch failed (e.g. network) — navigate anyway */
-                    window.location.href = page;
-                });
-        }
+<input
+type="text"
+id="globalSearch"
+placeholder='Try: "O+ in Hyderabad", "Ambulance near me", "Hospitals"...'
+class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none">
 
-        /* Show a friendly toast if a page isn't uploaded yet */
-        function showNotReady(page) {
-            var name = page.replace('.html','').replace('-',' ');
-            var toast = document.createElement('div');
-            toast.textContent = '⚠️ "' + name + '" page is not uploaded yet on GitHub.';
-            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e40af;color:white;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.4);';
-            document.body.appendChild(toast);
-            setTimeout(function() { toast.remove(); }, 3500);
-        }
+</div>
 
-        /* Hide warning banner */
-        function hideBanner() {
-            var b = document.getElementById('warningBanner');
-            var s = document.getElementById('bannerSpacer');
-            if (b) b.style.display = 'none';
-            if (s) s.style.display = 'none';
-        }
 
-        /* Auto-hide banner after 6 seconds */
-        setTimeout(hideBanner, 6000);
 
-        /* SOS Modal */
-        function toggleSOS() {
-            var modal = document.getElementById('sosModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                fetchLocation();
-            } else {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-        }
+<!-- BUTTONS -->
+<div class="flex gap-3 flex-wrap">
 
-        /* GPS */
-        function fetchLocation() {
-            var locDiv = document.getElementById('userLocation');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(pos) {
-                        locDiv.innerHTML = 'LAT: ' + pos.coords.latitude.toFixed(4) +
-                            '<br>LNG: ' + pos.coords.longitude.toFixed(4) +
-                            '<br><span style="font-size:11px;color:#ef4444;display:block;margin-top:6px;">📍 Location tracked for emergency response</span>';
-                    },
-                    function() { locDiv.textContent = 'Location access denied. Please enable GPS.'; }
-                );
-            } else {
-                locDiv.textContent = 'Geolocation not supported by your browser.';
-            }
-        }
+<button onclick="goTo('auth.html')"
+class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 font-semibold">
+<i data-lucide="user-plus"></i>
+Become Donor
+</button>
 
-        /* Global Search */
-        document.getElementById('globalSearch').addEventListener('keypress', function(e) {
-            if (e.key !== 'Enter') return;
-            var q = this.value.toLowerCase().trim();
-            if (!q) return;
+<button onclick="goTo('auth.html')"
+class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg flex items-center gap-2 font-semibold">
+<i data-lucide="log-in"></i>
+Login / Register
+</button>
 
-            var bloodGroups = ['o+','o-','a+','a-','b+','b-','ab+','ab-'];
-            var cities = ['hyderabad','secunderabad','warangal','vizag','karimnagar','nizamabad','khammam'];
+<button onclick="goTo('admin-login.html')"
+class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 font-semibold">
+<i data-lucide="shield-check"></i>
+Admin Panel
+</button>
 
-            var foundBG   = bloodGroups.find(function(bg) { return q.indexOf(bg) !== -1; });
-            var foundCity = cities.find(function(c) { return q.indexOf(c) !== -1; });
+</div>
+</header>
 
-            if (foundBG || q.indexOf('blood') !== -1 || q.indexOf('donor') !== -1) {
-                var url = 'blood.html?';
-                if (foundBG)   url += 'bg=' + encodeURIComponent(foundBG) + '&';
-                if (foundCity) url += 'city=' + foundCity;
-                goTo(url);
-            } else if (q.indexOf('ambulance') !== -1 || q.indexOf('driver') !== -1) {
-                goTo('ambulance.html');
-            } else if (q.indexOf('hospital') !== -1 || q.indexOf('clinic') !== -1) {
-                goTo('hospitals.html');
-            } else if (q.indexOf('organ') !== -1 || q.indexOf('heart') !== -1 || q.indexOf('kidney') !== -1) {
-                goTo('organ.html');
-            } else if (q.indexOf('emergency') !== -1 || q.indexOf('police') !== -1 || q.indexOf('fire') !== -1) {
-                goTo('emergency.html');
-            } else {
-                goTo('blood.html?search=' + encodeURIComponent(q));
-            }
-        });
-    </script>
+
+
+
+<!-- SERVICES -->
+<main class="max-w-7xl mx-auto px-6 py-10">
+
+<h2 class="text-2xl font-bold mb-6">
+Life-Saving Services
+</h2>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+
+
+<!-- Hospitals -->
+<div onclick="goTo('hospitals.html')" class="card-glass p-6 cursor-pointer">
+
+<div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-red-600">
+<i data-lucide="map-pin"></i>
+</div>
+
+<h3 class="font-bold text-lg mb-2">Find Hospitals</h3>
+<p class="text-sm text-gray-600 mb-4">
+Locate nearby hospitals with real-time navigation
+</p>
+
+<span class="text-green-600 font-semibold text-sm">
+Access Service →
+</span>
+
+</div>
+
+
+
+<!-- Blood -->
+<div onclick="goTo('blood.html')" class="card-glass p-6 cursor-pointer">
+
+<div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
+<i data-lucide="droplet"></i>
+</div>
+
+<h3 class="font-bold text-lg mb-2">Donate Blood</h3>
+<p class="text-sm text-gray-600 mb-4">
+Register as a blood donor and save lives
+</p>
+
+<span class="text-green-600 font-semibold text-sm">
+Access Service →
+</span>
+
+</div>
+
+
+
+<!-- Ambulance -->
+<div onclick="goTo('ambulance.html')" class="card-glass p-6 cursor-pointer">
+
+<div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
+<i data-lucide="truck"></i>
+</div>
+
+<h3 class="font-bold text-lg mb-2">Call Ambulance</h3>
+<p class="text-sm text-gray-600 mb-4">
+Find nearby ambulances for emergency transport
+</p>
+
+<span class="text-green-600 font-semibold text-sm">
+Access Service →
+</span>
+
+</div>
+
+
+
+<!-- Organ -->
+<div onclick="goTo('organ.html')" class="card-glass p-6 cursor-pointer">
+
+<div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-purple-600">
+<i data-lucide="gift"></i>
+</div>
+
+<h3 class="font-bold text-lg mb-2">Donate Organs</h3>
+<p class="text-sm text-gray-600 mb-4">
+Register to donate organs and body parts
+</p>
+
+<span class="text-green-600 font-semibold text-sm">
+Access Service →
+</span>
+
+</div>
+
+
+
+<!-- Emergency -->
+<div onclick="goTo('emergency.html')" class="card-glass p-6 cursor-pointer">
+
+<div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-green-600">
+<i data-lucide="phone"></i>
+</div>
+
+<h3 class="font-bold text-lg mb-2">Emergency</h3>
+<p class="text-sm text-gray-600 mb-4">
+Quick access to emergency helpline numbers
+</p>
+
+<span class="text-green-600 font-semibold text-sm">
+Access Service →
+</span>
+
+</div>
+
+</div>
+</main>
+
+
+
+
+<!-- SOS MODAL -->
+<div id="sosModal"
+class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-6">
+
+<div class="bg-white text-gray-900 w-full max-w-md rounded-2xl p-8 text-center relative">
+
+<button onclick="toggleSOS()"
+class="absolute top-4 right-4 text-gray-500 text-2xl font-bold">✕</button>
+
+<h2 class="text-3xl font-bold text-red-600 mb-4">Emergency SOS</h2>
+
+<p class="mb-4 text-gray-600">Your Current Location:</p>
+
+<div id="userLocation"
+class="bg-gray-100 p-4 rounded-lg mb-6 text-sm font-mono border border-dashed border-red-300">
+
+Fetching location...
+
+</div>
+
+<div class="grid gap-3">
+
+<a href="tel:102"
+class="bg-red-600 text-white py-4 rounded-xl font-bold text-xl">
+🚑 Medical (102)
+</a>
+
+<a href="tel:100"
+class="bg-blue-600 text-white py-4 rounded-xl font-bold text-xl">
+🚔 Police (100)
+</a>
+
+<a href="tel:101"
+class="bg-orange-600 text-white py-4 rounded-xl font-bold text-xl">
+🚒 Fire (101)
+</a>
+
+</div>
+</div>
+</div>
+
+
+
+
+<!-- SOS BUTTON -->
+<button onclick="toggleSOS()"
+class="sos-btn fixed bottom-8 right-8 bg-red-600 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl border-4 border-white">
+
+<span class="text-2xl font-bold text-white">!</span>
+
+</button>
+
+
+
+
+<script>
+
+lucide.createIcons();
+
+/* navigation */
+function goTo(page){
+window.location.href = page;
+}
+
+/* hide banner */
+function hideBanner(){
+document.getElementById("warningBanner").style.display="none";
+document.getElementById("bannerSpacer").style.display="none";
+}
+
+setTimeout(hideBanner,6000);
+
+/* SOS modal */
+function toggleSOS(){
+
+var modal=document.getElementById("sosModal");
+
+if(modal.classList.contains("hidden")){
+modal.classList.remove("hidden");
+modal.classList.add("flex");
+fetchLocation();
+}else{
+modal.classList.add("hidden");
+modal.classList.remove("flex");
+}
+
+}
+
+/* location */
+function fetchLocation(){
+
+var loc=document.getElementById("userLocation");
+
+if(navigator.geolocation){
+
+navigator.geolocation.getCurrentPosition(function(pos){
+
+loc.innerHTML=
+"LAT: "+pos.coords.latitude.toFixed(4)+
+"<br>LNG: "+pos.coords.longitude.toFixed(4);
+
+});
+
+}else{
+
+loc.textContent="Geolocation not supported";
+
+}
+
+}
+
+</script>
 
 </body>
 </html>
