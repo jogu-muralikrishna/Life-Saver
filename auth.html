@@ -378,7 +378,7 @@ select option { background:#1e1e1e; }
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, push, set, get, query, orderByChild, equalTo }
+import { getDatabase, ref, push, set }
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
 import {
@@ -387,14 +387,12 @@ createUserWithEmailAndPassword,
 signInWithEmailAndPassword,
 sendPasswordResetEmail,
 updateProfile,
-fetchSignInMethodsForEmail,
 GoogleAuthProvider,
 signInWithRedirect,
 getRedirectResult
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-
-/* Firebase Config */
+/* Firebase config */
 const firebaseConfig = {
 apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
 authDomain: "life-saver-be5cf.firebaseapp.com",
@@ -405,47 +403,90 @@ messagingSenderId: "549675407162",
 appId: "1:549675407162:web:ba3c8878834cb4123ba203"
 };
 
-
 /* Initialize Firebase */
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+/* ======================
+TAB SWITCH
+====================== */
 
-/* Handle Google redirect login */
-getRedirectResult(auth)
-.then(async (result) => {
+const tabLogin = document.getElementById("tabLogin");
+const tabRegister = document.getElementById("tabRegister");
 
-if (!result) return;
+const loginPanel = document.getElementById("loginPanel");
+const registerPanel = document.getElementById("registerPanel");
+
+tabLogin.onclick = () => {
+loginPanel.classList.add("active");
+registerPanel.classList.remove("active");
+tabLogin.classList.add("active");
+tabRegister.classList.remove("active");
+};
+
+tabRegister.onclick = () => {
+registerPanel.classList.add("active");
+loginPanel.classList.remove("active");
+tabRegister.classList.add("active");
+tabLogin.classList.remove("active");
+};
+
+document.getElementById("goRegister").onclick = () => tabRegister.click();
+document.getElementById("goLogin").onclick = () => tabLogin.click();
+
+/* ======================
+STEP NAVIGATION
+====================== */
+
+function goStep(step){
+document.querySelectorAll(".step").forEach((s,i)=>{
+s.classList.toggle("active", i === step-1);
+});
+}
+
+document.getElementById("nextToStep2").onclick = () => goStep(2);
+document.getElementById("nextToStep3").onclick = () => goStep(3);
+
+document.getElementById("backToStep1").onclick = () => goStep(1);
+document.getElementById("backToStep2").onclick = () => goStep(2);
+
+/* ======================
+GOOGLE LOGIN
+====================== */
+
+document.getElementById("googleBtn").onclick = () => {
+signInWithRedirect(auth, provider);
+};
+
+getRedirectResult(auth).then(async (result)=>{
+
+if(!result) return;
 
 const user = result.user;
 
-await set(ref(db, 'users/' + user.uid), {
-name: user.displayName,
-email: user.email,
-photo: user.photoURL,
-lastLogin: new Date().toISOString()
+await set(ref(db,"users/"+user.uid),{
+name:user.displayName,
+email:user.email,
+photo:user.photoURL,
+lastLogin:new Date().toISOString()
 });
 
-alert("Google Login Successful");
+window.location.href="index.html";
 
-window.location.href = "index.html";
-
-})
-.catch((error) => {
-
-console.log(error);
-alert("Google Login Failed: " + error.message);
-
+}).catch(err=>{
+alert(err.message);
 });
 
+/* ======================
+EMAIL LOGIN
+====================== */
 
-/* Email login */
-document.getElementById("loginBtn").addEventListener("click", async () => {
+document.getElementById("loginBtn").onclick = async ()=>{
 
-const email = document.getElementById("loginEmail").value.trim();
-const password = document.getElementById("loginPassword").value;
+const email=document.getElementById("loginEmail").value.trim();
+const password=document.getElementById("loginPassword").value;
 
 if(!email || !password){
 alert("Enter email and password");
@@ -455,140 +496,23 @@ return;
 try{
 
 await signInWithEmailAndPassword(auth,email,password);
-
-alert("Login successful");
-
 window.location.href="index.html";
 
-}catch(error){
+}catch(err){
 
-alert(error.message);
-
-}
-
-});
-
-  /* =========================
-TAB SWITCH (LOGIN / REGISTER)
-========================= */
-
-const tabLogin = document.getElementById("tabLogin");
-const tabRegister = document.getElementById("tabRegister");
-
-const loginPanel = document.getElementById("loginPanel");
-const registerPanel = document.getElementById("registerPanel");
-
-const goRegister = document.getElementById("goRegister");
-const goLogin = document.getElementById("goLogin");
-
-function openLogin(){
-loginPanel.classList.add("active");
-registerPanel.classList.remove("active");
-
-tabLogin.classList.add("active");
-tabRegister.classList.remove("active");
-}
-
-function openRegister(){
-registerPanel.classList.add("active");
-loginPanel.classList.remove("active");
-
-tabRegister.classList.add("active");
-tabLogin.classList.remove("active");
-}
-
-tabLogin.onclick = openLogin;
-tabRegister.onclick = openRegister;
-
-if(goRegister) goRegister.onclick = openRegister;
-if(goLogin) goLogin.onclick = openLogin;
-
-
-
-/* =========================
-REGISTER STEP NAVIGATION
-========================= */
-
-function goStep(n){
-
-document.querySelectorAll(".step").forEach((step,i)=>{
-step.classList.toggle("active", i === n-1);
-});
-
-const dots=[1,2,3];
-
-dots.forEach(i=>{
-
-const dot=document.getElementById("dot"+i);
-
-if(!dot) return;
-
-if(i<n){
-dot.className="step-dot done";
-dot.textContent="✓";
-}
-else if(i===n){
-dot.className="step-dot active";
-dot.textContent=i;
-}
-else{
-dot.className="step-dot pending";
-dot.textContent=i;
-}
-
-});
+alert(err.message);
 
 }
-
-/* Step buttons */
-
-const next1=document.getElementById("nextToStep2");
-const next2=document.getElementById("nextToStep3");
-
-const back1=document.getElementById("backToStep1");
-const back2=document.getElementById("backToStep2");
-
-if(next1){
-next1.onclick=()=>{
-
-const name=document.getElementById("fullName").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const dob=document.getElementById("dob").value;
-
-if(!name || !phone || !dob){
-alert("Please fill all fields");
-return;
-}
-
-goStep(2);
 
 };
-}
 
-if(back1){
-back1.onclick=()=>goStep(1);
-}
+/* ======================
+PASSWORD RESET
+====================== */
 
-if(next2){
-next2.onclick=()=>goStep(3);
-}
+document.getElementById("sendResetBtn").onclick = async ()=>{
 
-if(back2){
-back2.onclick=()=>goStep(2);
-}
-
-/* Google login button */
-document.getElementById("googleBtn").addEventListener("click", () => {
-
-signInWithRedirect(auth, provider);
-
-});
-
-
-/* Password reset */
-document.getElementById("sendResetBtn").addEventListener("click", async () => {
-
-const email = document.getElementById("resetEmail").value.trim();
+const email=document.getElementById("resetEmail").value.trim();
 
 if(!email){
 alert("Enter email");
@@ -598,29 +522,30 @@ return;
 try{
 
 await sendPasswordResetEmail(auth,email);
+alert("Reset link sent");
 
-alert("Password reset email sent");
+}catch(err){
 
-}catch(error){
-
-alert(error.message);
+alert(err.message);
 
 }
 
-});
+};
 
+/* ======================
+REGISTER USER
+====================== */
 
-/* Registration */
-document.getElementById("submitBtn").addEventListener("click", async () => {
+document.getElementById("submitBtn").onclick = async ()=>{
 
-const name = document.getElementById("fullName").value.trim();
-const email = document.getElementById("regEmail").value.trim();
-const password = document.getElementById("regPassword").value;
+const name=document.getElementById("fullName").value.trim();
+const email=document.getElementById("regEmail").value.trim();
+const password=document.getElementById("regPassword").value;
 
-const phone = document.getElementById("phone").value;
-const dob = document.getElementById("dob").value;
-const blood = document.getElementById("bloodGroup").value;
-const city = document.getElementById("city").value;
+const phone=document.getElementById("phone").value;
+const dob=document.getElementById("dob").value;
+const blood=document.getElementById("bloodGroup").value;
+const city=document.getElementById("city").value;
 
 if(!name || !email || !password){
 alert("Fill all fields");
@@ -635,22 +560,20 @@ await updateProfile(cred.user,{
 displayName:name
 });
 
-
-await set(ref(db,'users/'+cred.user.uid),{
-name:name,
-email:email,
+await set(ref(db,"users/"+cred.user.uid),{
+name,
+email,
 createdAt:new Date().toISOString()
 });
 
-
-await push(ref(db,'donors'),{
+await push(ref(db,"donors"),{
 uid:cred.user.uid,
-name:name,
-phone:phone,
-dob:dob,
+name,
+phone,
+dob,
 bloodGroup:blood,
-city:city,
-email:email,
+city,
+email,
 status:"Available",
 verified:"Email",
 timestamp:new Date().toISOString()
@@ -660,13 +583,13 @@ alert("Registration Successful");
 
 window.location.href="index.html";
 
-}catch(error){
+}catch(err){
 
-alert(error.message);
+alert(err.message);
 
 }
 
-});
+};
 
 </script>
 
