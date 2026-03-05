@@ -508,7 +508,16 @@ s.classList.toggle("active", i === step-1);
 }
 
 document.getElementById("nextToStep2").onclick = () => goStep(2);
-document.getElementById("nextToStep3").onclick = () => goStep(3);
+document.getElementById("nextToStep3").onclick = () => {
+
+if(!emailVerified){
+alert("Please verify email first");
+return;
+}
+
+goStep(3);
+
+};
 
 document.getElementById("backToStep1").onclick = () => goStep(1);
 document.getElementById("backToStep2").onclick = () => goStep(2);
