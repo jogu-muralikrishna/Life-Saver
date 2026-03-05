@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Life Saver - Emergency Services</title>
-    <!-- Tailwind CSS for modern design and responsiveness -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { background-color: #0a1941; color: white; font-family: 'Inter', sans-serif; }
         .card-glass { background: white; color: #0a1941; border-radius: 1rem; transition: transform 0.2s; }
         .card-glass:hover { transform: translateY(-5px); }
         .sos-btn { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220, 38, 38, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+        @keyframes pulse {
+            0%   { transform: scale(1);   box-shadow: 0 0 0 0   rgba(220,38,38,0.7); }
+            70%  { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(220,38,38,0);   }
+            100% { transform: scale(1);   box-shadow: 0 0 0 0   rgba(220,38,38,0);   }
+        }
     </style>
 </head>
 <body class="min-h-screen pb-20">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <header class="p-6 md:p-12 max-w-7xl mx-auto">
         <div class="flex items-center gap-3 mb-2 text-red-400">
             <i data-lucide="heart" class="fill-current"></i>
@@ -26,23 +28,27 @@
         </div>
         <p class="text-gray-300 mb-8">Find hospitals, donate blood, locate ambulances - save lives near you</p>
 
-        <!-- Global Search Bar -->
-<div class="relative max-w-3xl mb-6 mx-auto">
-    <!-- Icon fix: centered vertically inside the relative parent -->
-    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <i data-lucide="search" class="text-gray-400" size="20"></i>
-    </div>
-    <input type="text" id="globalSearch" 
-        placeholder='Try: "O+ in Hyderabad", "Ambulance near me", "Hospitals"...' 
-        class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none transition-all">
-</div>
+        <!-- Search Bar -->
+        <div class="relative max-w-3xl mb-6 mx-auto">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <i data-lucide="search" class="text-gray-400" size="20"></i>
+            </div>
+            <input type="text" id="globalSearch"
+                placeholder='Try: "O+ in Hyderabad", "Ambulance near me", "Hospitals"...'
+                class="w-full bg-white text-gray-800 py-4 pl-12 pr-4 rounded-xl shadow-2xl border-2 border-transparent focus:border-blue-500 focus:outline-none transition-all">
+        </div>
 
-
-        <div class="flex gap-4">
-            <button onclick="location.href='register-donor.html'" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+        <div class="flex gap-4 flex-wrap">
+            <button onclick="location.href='auth.html?tab=register'"
+                class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
                 <i data-lucide="user-plus" size="18"></i> Become Donor
             </button>
-            <button onclick="location.href='admin-login.html'" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+            <button onclick="location.href='auth.html'"
+                class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
+                <i data-lucide="log-in" size="18"></i> Login / Register
+            </button>
+            <button onclick="location.href='admin-login.html'"
+                class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg flex items-center gap-2 transition">
                 <i data-lucide="shield-check" size="18"></i> Admin Panel
             </button>
         </div>
@@ -52,8 +58,7 @@
     <main class="max-w-7xl mx-auto px-6 py-10">
         <h2 class="text-2xl font-bold mb-6">Life-Saving Services</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            
-            <!-- Find Hospitals -->
+
             <div onclick="navigateTo('hospitals')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-red-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-red-600">
                     <i data-lucide="map-pin"></i>
@@ -63,7 +68,6 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <!-- Donate Blood -->
             <div onclick="navigateTo('blood')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
                     <i data-lucide="droplet"></i>
@@ -73,7 +77,6 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <!-- Ambulance -->
             <div onclick="navigateTo('ambulance')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-orange-600">
                     <i data-lucide="truck"></i>
@@ -83,7 +86,6 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <!-- Organ Donation -->
             <div onclick="navigateTo('organ')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-purple-600">
                     <i data-lucide="gift"></i>
@@ -93,7 +95,6 @@
                 <span class="text-green-600 font-semibold text-sm">Access Service &rarr;</span>
             </div>
 
-            <!-- Emergency -->
             <div onclick="navigateTo('emergency')" class="card-glass p-6 cursor-pointer">
                 <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-green-600">
                     <i data-lucide="phone"></i>
@@ -107,7 +108,7 @@
     </main>
 
     <!-- SOS Modal -->
-    <div id="sosModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-6">
+    <div id="sosModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center p-6">
         <div class="bg-white text-gray-900 w-full max-w-md rounded-2xl p-8 text-center relative">
             <button onclick="toggleSOS()" class="absolute top-4 right-4 text-gray-400 hover:text-black">
                 <i data-lucide="x-circle"></i>
@@ -117,7 +118,6 @@
             <div id="userLocation" class="bg-gray-100 p-4 rounded-lg mb-8 text-sm font-mono border border-dashed border-red-300">
                 Fetching location...
             </div>
-            
             <div class="grid grid-cols-1 gap-4">
                 <a href="tel:102" class="bg-red-600 text-white py-4 rounded-xl font-bold text-xl flex items-center justify-center gap-3">
                     <i data-lucide="phone-call"></i> Medical (102)
@@ -134,74 +134,68 @@
 
     <!-- Floating SOS Button -->
     <button onclick="toggleSOS()" class="sos-btn fixed bottom-8 right-8 bg-red-600 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-40 border-4 border-white">
-        <span class="text-2xl font-bold">!</span>
+        <span class="text-2xl font-bold text-white">!</span>
     </button>
 
-    <!-- SCRIPTS -->
+    <!-- ✅ FIX 1: alert() moved OUT of module script into a regular script -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            alert("⚠️ Please provide accurate information. Submitting false details can put someone's life at risk during an emergency. ⚠️");
+        });
+    </script>
+
+    <!-- ✅ FIX 2: imports are now at the TOP of the module -->
     <script type="module">
-        alert("⚠️ Please provide accurate information. Submitting false details can put someone's life at risk during an emergency. ⚠️");
-        // --- FIREBASE INITIALIZATION ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-            authDomain: "life-saver-be5cf.firebaseapp.com",
-            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "life-saver-be5cf",
-            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            apiKey:            "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain:        "life-saver-be5cf.firebaseapp.com",
+            databaseURL:       "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId:         "life-saver-be5cf",
+            storageBucket:     "life-saver-be5cf.firebasestorage.app",
             messagingSenderId: "549675407162",
-            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+            appId:             "1:549675407162:web:ba3c8878834cb4123ba203"
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const db  = getDatabase(app);
 
-        // --- GLOBAL SEARCH LOGIC ---
-    const searchInput = document.getElementById('globalSearch');
-    
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const query = searchInput.value.toLowerCase().trim();
-            if(!query) return;
+        // Global Search
+        const searchInput = document.getElementById('globalSearch');
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key !== 'Enter') return;
+            const q = searchInput.value.toLowerCase().trim();
+            if (!q) return;
 
-            // Better Logic: Keyword Matching
-            const bloodGroups = ["o+", "o-", "a+", "a-", "b+", "b-", "ab+", "ab-"];
-            const cities = ["hyderabad", "secunderabad", "warangal", "vizag"];
-            
-            // 1. Check for Blood Groups
-            const foundBG = bloodGroups.find(bg => query.includes(bg));
-            // 2. Check for Cities
-            const foundCity = cities.find(city => query.includes(city));
+            const bloodGroups = ["o+","o-","a+","a-","b+","b-","ab+","ab-"];
+            const cities      = ["hyderabad","secunderabad","warangal","vizag","karimnagar","nizamabad","khammam"];
 
-            if (foundBG || query.includes('blood') || query.includes('donor')) {
-                let url = `blood.html?`;
-                if(foundBG) url += `bg=${encodeURIComponent(foundBG)}&`;
-                if(foundCity) url += `city=${foundCity}`;
+            const foundBG   = bloodGroups.find(bg => q.includes(bg));
+            const foundCity = cities.find(city => q.includes(city));
+
+            if (foundBG || q.includes('blood') || q.includes('donor')) {
+                let url = 'blood.html?';
+                if (foundBG)   url += `bg=${encodeURIComponent(foundBG)}&`;
+                if (foundCity) url += `city=${foundCity}`;
                 window.location.href = url;
-            } 
-            else if (query.includes('ambulance') || query.includes('driver') || query.includes('call')) {
-                window.location.href = `ambulance.html`;
-            } 
-            else if (query.includes('hospital') || query.includes('clinic') || query.includes('near me')) {
-                window.location.href = `hospitals.html`;
-            } 
-            else if (query.includes('organ') || query.includes('heart') || query.includes('kidney')) {
-                window.location.href = `organ.html`;
-            } 
-            else if (query.includes('emergency') || query.includes('police') || query.includes('fire')) {
-                window.location.href = `emergency.html`;
+            } else if (q.includes('ambulance') || q.includes('driver') || q.includes('call')) {
+                window.location.href = 'ambulance.html';
+            } else if (q.includes('hospital') || q.includes('clinic') || q.includes('near me')) {
+                window.location.href = 'hospitals.html';
+            } else if (q.includes('organ') || q.includes('heart') || q.includes('kidney')) {
+                window.location.href = 'organ.html';
+            } else if (q.includes('emergency') || q.includes('police') || q.includes('fire')) {
+                window.location.href = 'emergency.html';
+            } else {
+                window.location.href = `blood.html?search=${encodeURIComponent(q)}`;
             }
-            else {
-                // If no specific match, try searching blood donors by that name/city anyway
-                window.location.href = `blood.html?search=${query}`;
-            }
-        }
-    });
-</script>
+        });
+    </script>
 
+    <!-- ✅ FIX 3: Regular script for UI functions (lucide, navigateTo, toggleSOS) -->
     <script>
-        // UI Helpers
         lucide.createIcons();
 
         function navigateTo(page) {
@@ -210,10 +204,14 @@
 
         function toggleSOS() {
             const modal = document.getElementById('sosModal');
-            modal.classList.toggle('hidden');
-            
-            if (!modal.classList.contains('hidden')) {
+            const isHidden = modal.classList.contains('hidden');
+            if (isHidden) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
                 fetchLocation();
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }
         }
 
@@ -221,17 +219,18 @@
             const locDiv = document.getElementById('userLocation');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const { latitude, longitude } = position.coords;
-                        locDiv.innerHTML = `LAT: ${latitude.toFixed(4)} <br> LNG: ${longitude.toFixed(4)} <br><span class='text-xs text-red-500 mt-2 block'>📍 Location tracked for emergency response</span>`;
+                    (pos) => {
+                        const { latitude, longitude } = pos.coords;
+                        locDiv.innerHTML = `LAT: ${latitude.toFixed(4)}<br>LNG: ${longitude.toFixed(4)}<br>
+                        <span class='text-xs text-red-500 mt-2 block'>📍 Location tracked for emergency response</span>`;
                     },
                     () => { locDiv.innerHTML = "Location access denied. Please enable GPS."; }
                 );
             } else {
-                locDiv.innerHTML = "Geolocation not supported.";
+                locDiv.innerHTML = "Geolocation not supported by your browser.";
             }
         }
     </script>
-</body>
 
+</body>
 </html>
