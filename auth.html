@@ -1,221 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>LifeSaver - Login & Register</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script>emailjs.init("e01E864mHAh1Vy6xn");</script>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --red: #e63946;
-  --red-dark: #c1121f;
-  --bg: #0d0d0d;
-  --card: #161616;
-  --border: #2a2a2a;
-  --text: #f1f1f1;
-  --muted: #888;
-  --green: #2dc653;
-}
-body {
-  font-family: 'Sora', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.blob { position:fixed; border-radius:50%; filter:blur(80px); opacity:0.15; animation:float 8s ease-in-out infinite; pointer-events:none; z-index:0; }
-.blob-1 { width:400px; height:400px; background:var(--red); top:-100px; left:-100px; animation-delay:0s; }
-.blob-2 { width:300px; height:300px; background:#ff6b6b; bottom:-80px; right:-80px; animation-delay:3s; }
-.blob-3 { width:200px; height:200px; background:var(--red-dark); top:50%; left:50%; animation-delay:5s; }
-@keyframes float { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.05)} }
-.card {
-  position:relative; z-index:1;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:24px;
-  padding:40px;
-  width:100%; max-width:460px;
-  box-shadow:0 40px 80px rgba(0,0,0,0.6);
-  animation:slideUp 0.5s ease;
-}
-@keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-.logo { display:flex; align-items:center; gap:10px; margin-bottom:24px; justify-content:center; }
-.logo-icon { width:40px; height:40px; background:var(--red); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 0 20px rgba(230,57,70,0.5); }
-.logo span { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
-.tabs { display:flex; background:#1e1e1e; border-radius:12px; padding:4px; margin-bottom:24px; }
-.tab { flex:1; padding:10px; border:none; background:transparent; color:var(--muted); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; border-radius:9px; cursor:pointer; transition:all 0.25s; }
-.tab.active { background:var(--red); color:white; box-shadow:0 4px 15px rgba(230,57,70,0.4); }
-.panel { display:none; }
-.panel.active { display:block; animation:fadeIn 0.3s ease; }
-@keyframes fadeIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
-.step { display:none; }
-.step.active { display:block; animation:fadeIn 0.3s ease; }
-.step-progress { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:20px; }
-.step-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; transition:all 0.3s; }
-.step-dot.done { background:var(--green); color:#000; }
-.step-dot.active { background:var(--red); color:#fff; box-shadow:0 0 12px rgba(230,57,70,0.5); }
-.step-dot.pending { background:#2a2a2a; color:var(--muted); }
-.step-line { flex:1; max-width:30px; height:2px; background:#2a2a2a; border-radius:2px; }
-.step-line.done { background:var(--green); }
-.field { margin-bottom:14px; }
-label { display:block; font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px; }
-input, select {
-  width:100%; background:#1e1e1e; border:1px solid var(--border);
-  color:var(--text); font-family:'Sora',sans-serif; font-size:13px;
-  padding:11px 14px; border-radius:10px; outline:none;
-  transition:border-color 0.2s, box-shadow 0.2s;
-}
-input:focus, select:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(230,57,70,0.15); }
-input::placeholder { color:#444; }
-select option { background:#1e1e1e; }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.password-wrap { position:relative; }
-.password-wrap input { padding-right:44px; }
-.eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px; padding:4px; }
-.btn { width:100%; padding:13px; border:none; border-radius:12px; font-family:'Sora',sans-serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.2s; margin-top:6px; }
-.btn-primary { background:var(--red); color:white; box-shadow:0 4px 20px rgba(230,57,70,0.35); }
-.btn-primary:hover { background:var(--red-dark); transform:translateY(-1px); box-shadow:0 8px 25px rgba(230,57,70,0.45); }
-.btn-primary:disabled { background:#333; color:#666; box-shadow:none; transform:none; cursor:not-allowed; }
-.btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
-.btn-outline:hover { background:#1e1e1e; border-color:#444; }
-.btn-green { background:var(--green); color:#000; box-shadow:0 4px 20px rgba(45,198,83,0.3); }
-.btn-green:hover { background:#25a845; transform:translateY(-1px); }
-.btn-sm { padding:9px 16px; font-size:12px; border-radius:9px; border:none; font-family:'Sora',sans-serif; font-weight:700; cursor:pointer; transition:all 0.2s; }
-.btn-blue { background:#2563eb; color:white; }
-.btn-blue:hover { background:#1d4ed8; }
-.row-btns { display:flex; gap:10px; margin-top:6px; }
-.row-btns .btn { margin-top:0; }
-.forgot { display:block; text-align:right; font-size:11px; color:var(--muted); margin-top:-6px; margin-bottom:14px; cursor:pointer; transition:color 0.2s; }
-.forgot:hover { color:var(--red); }
-.divider { display:flex; align-items:center; gap:12px; margin:16px 0; color:var(--muted); font-size:11px; }
-.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
-.btn-google { width:100%; padding:11px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--text); font-family:'Sora',sans-serif; font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:all 0.2s; }
-.btn-google:hover { background:#1e1e1e; border-color:#444; }
-.msg { display:none; border-radius:10px; padding:11px 14px; font-size:12px; font-weight:500; margin-top:12px; line-height:1.5; }
-.msg.error { background:rgba(230,57,70,0.12); border:1px solid rgba(230,57,70,0.3); color:#ff6b6b; }
-.msg.success { background:rgba(45,198,83,0.12); border:1px solid rgba(45,198,83,0.3); color:var(--green); }
-.msg.info { background:rgba(37,99,235,0.12); border:1px solid rgba(37,99,235,0.3); color:#60a5fa; }
-.msg.show { display:block; animation:fadeIn 0.3s ease; }
-.age-error { display:none; background:rgba(230,57,70,0.1); border:1px solid rgba(230,57,70,0.3); border-radius:10px; padding:10px 14px; font-size:12px; color:#ff6b6b; margin-top:6px; line-height:1.6; }
-.age-error.show { display:block; }
-.otp-row { display:flex; gap:8px; margin-top:10px; }
-.otp-row input { text-align:center; font-weight:700; font-size:18px; letter-spacing:4px; border:2px solid #2563eb; }
-.otp-row input:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(230,57,70,0.15); }
-.verified-badge { background:rgba(45,198,83,0.1); border:1px solid rgba(45,198,83,0.3); border-radius:10px; padding:10px 14px; font-size:12px; color:var(--green); text-align:center; font-weight:600; display:none; }
-.verified-badge.show { display:block; }
-.summary-box { background:#1a1a1a; border:1px solid var(--border); border-radius:12px; padding:14px; font-size:12px; color:var(--muted); margin-top:14px; line-height:2; }
-.summary-box strong { color:var(--text); }
-.strength-bar { height:3px; border-radius:3px; background:#2a2a2a; margin-top:6px; overflow:hidden; }
-.strength-fill { height:100%; width:0%; border-radius:3px; transition:width 0.3s,background 0.3s; }
-.strength-label{ font-size:11px; color:var(--muted); margin-top:3px; text-align:right; }
-.match-msg { font-size:11px; margin-top:4px; }
-.spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:6px; }
-@keyframes spin { to{transform:rotate(360deg)} }
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; }
-.overlay.show { display:flex; }
-.overlay-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:32px; width:100%; max-width:360px; animation:slideUp 0.3s ease; position:relative; }
-.overlay-card h3 { font-size:17px; margin-bottom:6px; }
-.overlay-card p { font-size:12px; color:var(--muted); margin-bottom:18px; }
-.overlay-close { position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; padding:4px; }
-.switch-link { text-align:center; font-size:12px; color:var(--muted); margin-top:16px; }
-.switch-link span { color:var(--red); cursor:pointer; font-weight:600; }
-.switch-link span:hover { text-decoration:underline; }
-.logged-in-banner { background:rgba(45,198,83,0.15); border:1px solid var(--green); border-radius:12px; padding:12px; margin-bottom:20px; text-align:center; font-size:14px; }
-.logged-in-banner button { margin-top:12px; padding:10px 20px; font-size:14px; }
-@media(max-width:480px){ .card{padding:24px;} .grid2{grid-template-columns:1fr;} }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Become a Donor - LifeSaver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    :root {
+      --red: #e63946;
+      --red-dark: #c1121f;
+      --green: #2dc653;
+      --bg: #0d0d0d;
+      --card: #161616;
+      --border: #2a2a2a;
+      --text: #f1f1f1;
+      --muted: #888;
+    }
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+    }
+    .heart {
+      color: #ff4d6d;
+      font-size: 2.8rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      margin-bottom: 40px;
+    }
+    .step-progress {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: all 0.3s;
+    }
+    .step-dot.active {
+      background: var(--red);
+      color: white;
+      box-shadow: 0 0 16px rgba(230,57,70,0.5);
+    }
+    .step-dot.done {
+      background: var(--green);
+      color: black;
+    }
+    .step-line {
+      height: 3px;
+      flex: 1;
+      max-width: 80px;
+      background: #2a2a2a;
+      align-self: center;
+      border-radius: 2px;
+    }
+    .step-line.done {
+      background: var(--green);
+    }
+    .step { display: none; }
+    .step.active { display: block; animation: fadeIn 0.4s; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .field {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1e1e1e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(230,57,70,0.2);
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.25s;
+    }
+    .btn-primary {
+      background: var(--red);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+    }
+    .btn-green {
+      background: var(--green);
+      color: black;
+    }
+    .btn-green:hover {
+      background: #25a845;
+      transform: translateY(-2px);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: white;
+    }
+    .btn-outline:hover {
+      background: #1e1e1e;
+    }
+    .row-btns {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .msg {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .msg.success { background: rgba(45,198,83,0.15); color: var(--green); }
+    .msg.error   { background: rgba(230,57,70,0.15); color: #ff7582; }
+    .strength-bar {
+      height: 4px;
+      background: #2a2a2a;
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.4s, background 0.4s;
+    }
+    .match-msg {
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="blob blob-1"></div>
-<div class="blob blob-2"></div>
-<div class="blob blob-3"></div>
+<div class="container">
 
-<div class="card">
+  <h1><span class="heart">♥</span> Become a Life Saver</h1>
+  <p class="subtitle">Register as a blood donor and help save lives in Hyderabad and nearby areas</p>
 
-  <!-- LOGO -->
-  <div class="logo">
-    <div class="logo-icon">🩸</div>
-    <span>LifeSaver</span>
-  </div>
+  <div class="card">
 
-  <!-- Logged-in notification banner -->
-  <div id="loggedInBanner" class="logged-in-banner" style="display:none;">
-    <strong>You are already signed in</strong><br>
-    <span id="userNameDisplay"></span>
-    <button class="btn btn-outline" id="signOutBtn">Sign Out</button>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" id="tabLogin">Login</button>
-    <button class="tab" id="tabRegister">Register as Donor</button>
-  </div>
-
-  <!-- LOGIN PANEL -->
-  <div class="panel active" id="loginPanel">
-    <div class="field">
-      <label>Email Address</label>
-      <input type="email" id="loginEmail" placeholder="yourname@gmail.com">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <div class="password-wrap">
-        <input type="password" id="loginPassword" placeholder="Enter your password">
-        <button class="eye-btn" data-target="loginPassword">👁</button>
-      </div>
-    </div>
-    <span class="forgot" id="forgotBtn">Forgot password?</span>
-    <button class="btn btn-primary" id="loginBtn">Login to My Account</button>
-    <div class="divider">or</div>
-    <button class="btn-google" id="googleBtn">
-      <svg width="18" height="18" viewBox="0 0 48 48">
-        <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/>
-        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.5 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
-        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.1l-6.2-5.2C29.4 35.5 26.8 36 24 36c-5.2 0-9.6-3.2-11.3-7.8l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
-        <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.9 2.4-2.5 4.4-4.6 5.8l6.2 5.2C36.8 36.2 44 31 44 24c0-1.3-.1-2.6-.4-3.9z"/>
-      </svg>
-      Continue with Google
-    </button>
-    <div class="msg" id="loginMsg"></div>
-    <div class="switch-link">New donor? <span id="goRegister">Register here</span></div>
-  </div>
-
-  <!-- ══════════════════════════════ REGISTER PANEL ══════════════════════════════ -->
-  <div class="panel" id="registerPanel">
+    <!-- Step Progress -->
     <div class="step-progress">
       <div class="step-dot active" id="dot1">1</div>
       <div class="step-line" id="line1"></div>
-      <div class="step-dot pending" id="dot2">2</div>
+      <div class="step-dot" id="dot2">2</div>
       <div class="step-line" id="line2"></div>
-      <div class="step-dot pending" id="dot3">3</div>
+      <div class="step-dot" id="dot3">3</div>
     </div>
 
-    <!-- STEP 1 -->
+    <!-- STEP 1: Personal Details -->
     <div class="step active" id="step1">
       <div class="field">
-        <label>Full Name</label>
-        <input type="text" id="fullName" placeholder="Your full name">
+        <label>Full Name *</label>
+        <input type="text" id="fullName" placeholder="Enter your full name" required/>
       </div>
-      <div class="field">
-        <label>Mobile Number (without +91)</label>
-        <input type="tel" id="phone" placeholder="10-digit number">
-      </div>
-      <div class="field">
-        <label>Date of Birth</label>
-        <input type="date" id="dob">
-        <div class="age-error" id="ageError"><p id="ageErrorMsg"></p></div>
-      </div>
-      <div class="grid2">
+
+      <div class="grid-2">
         <div class="field">
-          <label>Blood Group</label>
-          <select id="bloodGroup">
+          <label>Gender *</label>
+          <select id="gender" required>
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date of Birth *</label>
+          <input type="date" id="dob" required/>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Blood Group *</label>
+          <select id="bloodGroup" required>
+            <option value="">Select blood group</option>
             <option>O+</option><option>O-</option>
             <option>A+</option><option>A-</option>
             <option>B+</option><option>B-</option>
@@ -223,305 +246,189 @@ select option { background:#1e1e1e; }
           </select>
         </div>
         <div class="field">
-          <label>City</label>
-          <select id="city">
-            <option>Hyderabad</option><option>Warangal</option>
-            <option>Karimnagar</option><option>Nizamabad</option>
-            <option>Khammam</option><option>Mahabubnagar</option>
-            <option>Nalgonda</option><option>Adilabad</option>
-          </select>
+          <label>Weight (kg) *</label>
+          <input type="number" id="weight" min="45" placeholder="Minimum 45 kg" required/>
         </div>
       </div>
-      <button class="btn btn-primary" id="nextToStep2">Continue →</button>
-      <div class="switch-link">Already registered? <span id="goLogin">Login here</span></div>
+
+      <div class="field">
+        <label>City / Area *</label>
+        <select id="city" required>
+          <option value="">Select your city/area</option>
+          <option>Hyderabad</option><option>Secunderabad</option>
+          <option>Warangal</option><option>Karimnagar</option>
+          <option>Nizamabad</option><option>Khammam</option>
+          <option>Mahabubnagar</option><option>Nalgonda</option>
+          <option>Other (Telangana)</option>
+        </select>
+      </div>
+
+      <div style="text-align:right; margin-top:24px;">
+        <button class="btn btn-primary" id="next1">Continue →</button>
+      </div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- STEP 2: Contact & Health -->
     <div class="step" id="step2">
       <div class="field">
-        <label>Email Address</label>
-        <div style="display:flex;gap:8px;">
-          <input type="email" id="regEmail" placeholder="yourname@gmail.com" style="flex:1">
-          <button class="btn-sm btn-blue" id="sendOtpBtn">Send OTP</button>
-        </div>
+        <label>Mobile Number *</label>
+        <input type="tel" id="phone" placeholder="10-digit number (without +91)" maxlength="10" required/>
       </div>
-      <div id="otpBox" style="display:none;">
-        <label style="display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;">Enter OTP</label>
-        <div class="otp-row">
-          <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6">
-          <button class="btn-sm btn-green" id="verifyBtn" style="white-space:nowrap;">✓ Verify</button>
-        </div>
-        <p style="font-size:11px;color:var(--muted);margin-top:6px;">Check inbox &amp; spam folder</p>
+
+      <div class="field">
+        <label>Email Address *</label>
+        <input type="email" id="email" placeholder="you@example.com" required/>
       </div>
-      <div class="verified-badge" id="verifiedBadge">✅ Email Verified Successfully!</div>
-      <div class="msg" id="otpMsg"></div>
-      <div class="row-btns" style="margin-top:14px;">
-        <button class="btn btn-outline" id="backToStep1">← Back</button>
-        <button class="btn btn-primary" id="nextToStep3" disabled style="opacity:0.4;cursor:not-allowed;">Continue →</button>
+
+      <div class="field">
+        <label>When did you last donate blood? (if ever)</label>
+        <input type="date" id="lastDonation"/>
+        <p style="font-size:0.85rem; color:var(--muted); margin-top:6px;">
+          (We recommend at least 3 months gap for men, 4 months for women)
+        </p>
+      </div>
+
+      <div class="field">
+        <label>Any medical conditions we should know? (optional)</label>
+        <textarea id="medicalNotes" rows="3" placeholder="e.g. diabetes, BP, recent surgery, medications..."></textarea>
+      </div>
+
+      <div class="row-btns">
+        <button class="btn btn-outline" id="back2">← Back</button>
+        <button class="btn btn-primary" id="next2">Continue →</button>
       </div>
     </div>
 
-    <!-- STEP 3 -->
+    <!-- STEP 3: Account & Password -->
     <div class="step" id="step3">
       <div class="field">
-        <label>Password</label>
-        <div class="password-wrap">
-          <input type="password" id="regPassword" placeholder="Min. 6 characters">
-          <button class="eye-btn" data-target="regPassword">👁</button>
-        </div>
+        <label>Create Password *</label>
+        <input type="password" id="password" placeholder="Minimum 6 characters" required/>
         <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-        <div class="strength-label" id="strengthLabel"></div>
+        <div id="strengthLabel" style="font-size:0.85rem; color:var(--muted); text-align:right; margin-top:4px;">No password</div>
       </div>
+
       <div class="field">
-        <label>Confirm Password</label>
-        <div class="password-wrap">
-          <input type="password" id="regConfirm" placeholder="Repeat your password">
-          <button class="eye-btn" data-target="regConfirm">👁</button>
-        </div>
-        <div class="match-msg" id="matchMsg"></div>
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPassword" required/>
+        <div id="matchMsg" class="match-msg"></div>
       </div>
-      <div class="summary-box">
-        <div>👤 <strong id="sName">—</strong></div>
-        <div>📞 <strong id="sPhone">—</strong></div>
-        <div>🩸 <strong id="sBlood">—</strong> &nbsp;|&nbsp; 📍 <strong id="sCity">—</strong></div>
-        <div>📧 <strong id="sEmail">—</strong></div>
+
+      <div class="field" style="font-size:0.9rem; color:var(--muted);">
+        <label style="display:inline; text-transform:none; font-weight:normal;">
+          <input type="checkbox" id="agree" required/> I agree to the terms & confirm I am eligible to donate blood
+        </label>
       </div>
-      <div class="msg" id="registerMsg"></div>
-      <div class="row-btns" style="margin-top:14px;">
-        <button class="btn btn-outline" id="backToStep2">← Back</button>
-        <button class="btn btn-green" id="submitBtn">🩸 Register Now</button>
+
+      <div class="row-btns">
+        <button class="btn btn-outline" id="back3">← Back</button>
+        <button class="btn btn-green" id="submitDonor">🩸 Register as Donor</button>
       </div>
+
+      <div id="registerMsg" class="msg"></div>
     </div>
+
   </div>
+
 </div>
 
-<!-- FORGOT PASSWORD OVERLAY -->
-<div class="overlay" id="resetOverlay">
-  <div class="overlay-card">
-    <button class="overlay-close" id="closeResetBtn">✕</button>
-    <h3>🔐 Reset Password</h3>
-    <p>Enter your email and we'll send a reset link.</p>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="resetEmail" placeholder="yourname@gmail.com">
-    </div>
-    <button class="btn btn-primary" id="sendResetBtn">Send Reset Link</button>
-    <div class="msg" id="resetMsg"></div>
-  </div>
-</div>
+<script>
+// Step navigation
+const steps = document.querySelectorAll('.step');
+const dots = document.querySelectorAll('.step-dot');
+const lines = document.querySelectorAll('.step-line');
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-  authDomain: "life-saver-be5cf.firebaseapp.com",
-  databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "life-saver-be5cf",
-  storageBucket: "life-saver-be5cf.firebasestorage.app",
-  messagingSenderId: "549675407162",
-  appId: "1:549675407162:web:ba3c8878834cb4123ba203"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-// ────────────────────────────────────────────────
-// Show banner if already logged in - but keep forms visible
-// ────────────────────────────────────────────────
-const loggedInBanner = document.getElementById("loggedInBanner");
-const userNameDisplay = document.getElementById("userNameDisplay");
-const signOutBtn = document.getElementById("signOutBtn");
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    loggedInBanner.style.display = "block";
-    userNameDisplay.textContent = user.displayName ? `as ${user.displayName}` : "";
-  } else {
-    loggedInBanner.style.display = "none";
-  }
-});
-
-signOutBtn.onclick = () => {
-  signOut(auth).then(() => {
-    location.reload();
-  }).catch(err => alert("Sign out failed: " + err.message));
-};
-
-// ────────────────────────────────────────────────
-// OTP SYSTEM
-// ────────────────────────────────────────────────
-let generatedOTP;
-let emailVerified = false;
-
-document.getElementById("sendOtpBtn").onclick = () => {
-  const email = document.getElementById("regEmail").value.trim();
-  const name = document.getElementById("fullName").value.trim();
-  if(!email) return alert("Enter email first");
-  generatedOTP = Math.floor(100000 + Math.random()*900000);
-  emailjs.send("service_5z0f2my","template_k4pl15w",{
-    user_name: name,
-    user_email: email,
-    otp_code: generatedOTP
-  }).then(() => {
-    document.getElementById("otpBox").style.display = "block";
-    alert("OTP sent to your email");
-  }).catch(err => alert("Email sending failed: " + err.text));
-};
-
-document.getElementById("verifyBtn").onclick = () => {
-  const entered = document.getElementById("otpInput").value.trim();
-  if (entered === generatedOTP.toString()) {
-    emailVerified = true;
-    document.getElementById("verifiedBadge").classList.add("show");
-    document.getElementById("otpBox").style.display = "none";
-    document.getElementById("nextToStep3").disabled = false;
-    document.getElementById("nextToStep3").style.opacity = "1";
-  } else {
-    alert("Invalid OTP");
-  }
-};
-
-// ────────────────────────────────────────────────
-// TAB SWITCH + STEP NAVIGATION (unchanged)
-// ────────────────────────────────────────────────
-const tabLogin = document.getElementById("tabLogin");
-const tabRegister = document.getElementById("tabRegister");
-const loginPanel = document.getElementById("loginPanel");
-const registerPanel = document.getElementById("registerPanel");
-
-tabLogin.onclick = () => {
-  loginPanel.classList.add("active"); registerPanel.classList.remove("active");
-  tabLogin.classList.add("active"); tabRegister.classList.remove("active");
-};
-tabRegister.onclick = () => {
-  registerPanel.classList.add("active"); loginPanel.classList.remove("active");
-  tabRegister.classList.add("active"); tabLogin.classList.remove("active");
-};
-
-document.getElementById("goRegister").onclick = () => tabRegister.click();
-document.getElementById("goLogin").onclick = () => tabLogin.click();
-
-function goStep(step) {
-  document.querySelectorAll(".step").forEach((s,i) => {
-    s.classList.toggle("active", i === step-1);
+function goToStep(n) {
+  steps.forEach((s,i) => s.classList.toggle('active', i === n-1));
+  dots.forEach((d,i) => {
+    d.classList.toggle('active', i === n-1);
+    d.classList.toggle('done', i < n-1);
   });
-  document.querySelectorAll(".step-dot").forEach((dot, idx) => {
-    dot.classList.toggle("active", idx === step-1);
-    dot.classList.toggle("done", idx < step-1);
-  });
+  lines.forEach((l,i) => l.classList.toggle('done', i < n-1));
 }
 
-document.getElementById("nextToStep2").onclick = () => goStep(2);
-document.getElementById("nextToStep3").onclick = () => {
-  if (!emailVerified) return alert("Please verify email first");
-  goStep(3);
-};
-document.getElementById("backToStep1").onclick = () => goStep(1);
-document.getElementById("backToStep2").onclick = () => goStep(2);
-
-// ────────────────────────────────────────────────
-// GOOGLE + EMAIL LOGIN + REGISTER (redirect only on success)
-// ────────────────────────────────────────────────
-document.getElementById("googleBtn").onclick = () => signInWithRedirect(auth, provider);
-
-getRedirectResult(auth).then(async (result) => {
-  if (!result) return;
-  const user = result.user;
-  await set(ref(db, "users/" + user.uid), {
-    name: user.displayName,
-    email: user.email,
-    photo: user.photoURL || null,
-    lastLogin: new Date().toISOString()
-  });
-  window.location.href = "index.html";
-}).catch(err => alert(err.message));
-
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  if (!email || !password) return alert("Enter email and password");
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "index.html";
-  } catch (err) {
-    alert(err.message);
+document.getElementById('next1').onclick = () => {
+  if (!document.getElementById('fullName').value.trim() ||
+      !document.getElementById('gender').value ||
+      !document.getElementById('dob').value ||
+      !document.getElementById('bloodGroup').value ||
+      !document.getElementById('weight').value ||
+      !document.getElementById('city').value) {
+    alert("Please fill all required fields in Step 1");
+    return;
   }
+  goToStep(2);
 };
 
-document.getElementById("submitBtn").onclick = async () => {
-  const name    = document.getElementById("fullName").value.trim();
-  const email   = document.getElementById("regEmail").value.trim();
-  const password = document.getElementById("regPassword").value;
-  const phone   = document.getElementById("phone").value.trim();
-  const dob     = document.getElementById("dob").value;
-  const blood   = document.getElementById("bloodGroup").value;
-  const city    = document.getElementById("city").value;
-
-  if (!name || !email || !password || !phone || !dob) {
-    return alert("Please fill all required fields");
+document.getElementById('next2').onclick = () => {
+  if (!document.getElementById('phone').value.trim() ||
+      !document.getElementById('email').value.trim()) {
+    alert("Please fill mobile and email");
+    return;
   }
-
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
-
-    await set(ref(db, "users/" + cred.user.uid), {
-      name, email, createdAt: new Date().toISOString()
-    });
-
-    await push(ref(db, "donors"), {
-      uid: cred.user.uid, name, phone, dob, bloodGroup: blood, city, email,
-      status: "Available", verified: "Email", timestamp: new Date().toISOString()
-    });
-
-    alert("Registration Successful");
-    window.location.href = "index.html";
-  } catch (err) {
-    alert(err.message);
-  }
+  goToStep(3);
 };
 
-// ────────────────────────────────────────────────
-// Forgot Password + Eye toggle (unchanged)
-// ────────────────────────────────────────────────
-document.getElementById("forgotBtn").onclick = () => document.getElementById("resetOverlay").classList.add("show");
-document.getElementById("closeResetBtn").onclick = () => document.getElementById("resetOverlay").classList.remove("show");
+document.getElementById('back2').onclick = () => goToStep(1);
+document.getElementById('back3').onclick = () => goToStep(2);
 
-document.getElementById("sendResetBtn").onclick = async () => {
-  const email = document.getElementById("resetEmail").value.trim();
-  if (!email) return alert("Enter email");
-  try {
-    await sendPasswordResetEmail(auth, email);
-    alert("Reset link sent! Check inbox & spam.");
-    document.getElementById("resetOverlay").classList.remove("show");
-  } catch (err) {
-    alert(err.message);
-  }
-};
+// Password strength & match
+const pw = document.getElementById('password');
+const cpw = document.getElementById('confirmPassword');
+const fill = document.getElementById('strengthFill');
+const label = document.getElementById('strengthLabel');
+const match = document.getElementById('matchMsg');
 
-document.querySelectorAll('.eye-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const input = document.getElementById(btn.dataset.target);
-    input.type = input.type === 'password' ? 'text' : 'password';
-    btn.textContent = input.type === 'password' ? '👁' : '🙈';
-  });
+pw.addEventListener('input', () => {
+  const v = pw.value;
+  let score = 0;
+  if (v.length >= 6) score += 30;
+  if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score += 25;
+  if (/\d/.test(v)) score += 20;
+  if (/[^a-zA-Z\d]/.test(v)) score += 25;
+
+  fill.style.width = score + '%';
+  fill.style.background = score < 40 ? '#ff7582' : score < 70 ? '#ffaa00' : '#2dc653';
+  label.textContent = score === 0 ? 'No password' : score < 40 ? 'Weak' : score < 70 ? 'Medium' : 'Strong';
 });
+
+cpw.addEventListener('input', () => {
+  if (pw.value && cpw.value) {
+    const ok = pw.value === cpw.value;
+    match.textContent = ok ? 'Passwords match ✓' : 'Passwords do not match ✗';
+    match.style.color = ok ? 'var(--green)' : '#ff7582';
+  } else {
+    match.textContent = '';
+  }
+});
+
+// Submit (you can connect to Firebase here later)
+document.getElementById('submitDonor').onclick = () => {
+  const agree = document.getElementById('agree').checked;
+  if (!agree) return alert("Please agree to the terms");
+
+  if (pw.value !== cpw.value) return alert("Passwords do not match");
+
+  const data = {
+    name: document.getElementById('fullName').value.trim(),
+    gender: document.getElementById('gender').value,
+    dob: document.getElementById('dob').value,
+    bloodGroup: document.getElementById('bloodGroup').value,
+    weight: document.getElementById('weight').value,
+    city: document.getElementById('city').value,
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    lastDonation: document.getElementById('lastDonation').value || null,
+    notes: document.getElementById('medicalNotes').value.trim(),
+    registeredAt: new Date().toISOString()
+  };
+
+  alert("Thank you! Your donor registration has been submitted.\n\n(You can connect this to Firebase / backend now)");
+
+  // Example: console.log(data);
+  // Here you would normally do: createUserWithEmailAndPassword(...) + save to database
+  // window.location.href = "index.html";
+};
 
 </script>
 </body>
