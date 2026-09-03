@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html.sub-admin-mode .th-actions,
+        html.sub-admin-mode .td-actions {
+            display: none !important;
+        }
+    </style>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between" id="adminBody">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 text-blue-600 font-extrabold text-xl tracking-tight">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                <span>LifeSaver <span id="adminRoleBadge" class="text-xs bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-md font-mono">SUPER ADMIN</span></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openSettingsModal()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition border border-slate-200 dark:border-slate-700">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Security Settings
+                </button>
+                <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+
+        <!-- HEADER & STAT CARDS -->
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Management & Control</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Real database management of donors, partner hospitals, emergency requests, and contact audit logs</p>
+            </div>
+            <button onclick="exportDonorsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                <i data-lucide="download" class="w-4 h-4"></i> Export Donors CSV
+            </button>
+        </div>
+
+        <!-- SUB-ADMIN READ-ONLY BANNER -->
+        <div id="subAdminReadOnlyBanner" class="hidden bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl mb-6 text-xs text-amber-800 dark:text-amber-300 flex items-center gap-3">
+            <i data-lucide="lock" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0"></i>
+            <div>
+                <strong class="font-black block uppercase tracking-wider text-amber-900 dark:text-amber-100 mb-0.5">👤 Read-Only Sub-Admin Access Mode Active</strong>
+                You have read-only access to view healthcare metrics, donor information, hospital details, and messages. Database write operations (Add, Edit, Delete, Approve, Settings) are strictly restricted.
+            </div>
+        </div>
+
+        <!-- STATS CARDS (FEATURE 17 REAL DATA METRICS) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="glass-card p-5 border border-red-100 dark:border-red-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Blood Donors</span>
+                    <i data-lucide="droplet" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                </div>
+                <div id="statBloodDonors" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+
+            <div class="glass-card p-5 border border-emerald-100 dark:border-emerald-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Colab Hospitals</span>
+                    <i data-lucide="building-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                </div>
+                <div id="statHospitals" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+
+            <div class="glass-card p-5 border border-amber-100 dark:border-amber-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Requests</span>
+                    <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                </div>
+                <div id="statRequests" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+
+            <div class="glass-card p-5 border border-purple-100 dark:border-purple-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Organ Pledges</span>
+                    <i data-lucide="gift" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                </div>
+                <div id="statOrganDonors" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+
+            <div class="glass-card p-5 border border-blue-100 dark:border-blue-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Audit Logs</span>
+                    <i data-lucide="shield" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div id="statLogs" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+
+            <div class="glass-card p-5 border border-pink-100 dark:border-pink-900/50">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">New Messages</span>
+                    <i data-lucide="mail" class="w-5 h-5 text-pink-600 dark:text-pink-400"></i>
+                </div>
+                <div id="statMessages" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
+            </div>
+        </div>
+
+        <!-- TABS BAR & SEARCH -->
+        <div class="glass-card p-2 rounded-2xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-200 dark:border-slate-800">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <button onclick="switchTab('blood')" id="tabBloodBtn" class="bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="droplet" class="w-4 h-4"></i> Blood Donors
+                </button>
+                <button onclick="switchTab('requests')" id="tabRequestsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i> Blood Requests
+                </button>
+                <button onclick="switchTab('hospitals')" id="tabHospitalsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="building-2" class="w-4 h-4"></i> 🤝 Colab Hospitals
+                </button>
+                <button onclick="switchTab('messages')" id="tabMessagesBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Contact Messages
+                </button>
+                <button onclick="switchTab('admin_activity')" id="tabAdminActivityBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> 🛡️ Admin Activity
+                </button>
+                <button onclick="switchTab('audit')" id="tabAuditBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Donor Contact Logs
+                </button>
+                <button onclick="switchTab('organ')" id="tabOrganBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="gift" class="w-4 h-4"></i> Organ Donors
+                </button>
+                <button onclick="switchTab('users')" id="tabUsersBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="users" class="w-4 h-4"></i> Registered Users
+                </button>
+                <button onclick="switchTab('recycle_bin')" id="tabRecycleBinBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i> 🗑️ Recycle Bin (<span id="recycleBinCountBadge">0</span>)
+                </button>
+                <button onclick="switchTab('sub_admins')" id="tabSubAdminsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 hidden">
+                    <i data-lucide="user-check" class="w-4 h-4 text-purple-500"></i> 👤 Sub-Admins
+                </button>
+            </div>
+
+            <div class="relative w-full md:w-64">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                <input type="text" id="adminSearch" oninput="filterTable()" placeholder="Search records..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white py-2 pl-9 pr-3 rounded-xl text-xs outline-none focus:border-blue-500">
+            </div>
+        </div>
+
+        <!-- DATA TABLES CONTAINER -->
+        <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-md bg-white dark:bg-slate-900">
+
+            <!-- 1. BLOOD DONORS TABLE -->
+            <div id="tableBloodContainer" class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Name & Email</th>
+                            <th class="p-4">DOB</th>
+                            <th class="p-4">Blood Group</th>
+                            <th class="p-4">City</th>
+                            <th class="p-4">Mobile Number</th>
+                            <th class="p-4">🍺 Drunk (24h)</th>
+                            <th class="p-4">Contact Preference</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bloodTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Blood Donors -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. EMERGENCY BLOOD REQUESTS TABLE (FEATURE 8 & 12) -->
+            <div id="tableRequestsContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Blood Group</th>
+                            <th class="p-4">Hospital / City</th>
+                            <th class="p-4">Units Needed</th>
+                            <th class="p-4">Contact Phone</th>
+                            <th class="p-4">Request Status</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Blood Requests -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 3. COLAB HOSPITALS TABLE & ADD FORM -->
+            <div id="tableHospitalsContainer" class="p-6 hidden space-y-6">
+                <!-- ADD COLAB HOSPITAL FORM CARD -->
+                <div class="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <i data-lucide="building-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i> + Add Colab Hospital
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Add a hospital that has collaborated with Life Saver.</p>
+                    
+                    <form id="addPartnerHospitalForm" onsubmit="addPartnerHospital(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hospital Name *</label>
+                                <input type="text" id="addHospName" required placeholder="e.g. St. Theresa's Hospital" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Location *</label>
+                                <input type="text" id="addHospLocation" required placeholder="e.g. Hyderabad, Telangana" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contact Phone / Email *</label>
+                                <input type="text" id="addHospNote" required placeholder="e.g. +91 9876543210 / info@hospital.org" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Partnership Status *</label>
+                                <select id="addHospStatus" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                                    <option value="Active Partner">🟢 Active Partner</option>
+                                    <option value="Inactive">⚪ Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="addHospFeedback" class="hidden"></div>
+
+                        <button type="submit" id="addHospSubmitBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black px-5 py-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Colab Hospital
+                        </button>
+                    </form>
+                </div>
+
+                <!-- COLAB HOSPITALS LIST / TABLE -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                <th class="p-4">Hospital Name</th>
+                                <th class="p-4">Location</th>
+                                <th class="p-4">Contact</th>
+                                <th class="p-4">Partnership Status</th>
+                                <th class="p-4 text-right th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hospitalsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <!-- Dynamic Colab Hospitals -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. CONTACT AUDIT LOGS TABLE (FEATURE 13) -->
+            <div id="tableAuditContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Timestamp</th>
+                            <th class="p-4">Target Donor</th>
+                            <th class="p-4">Blood Group</th>
+                            <th class="p-4">Action Recorded</th>
+                            <th class="p-4">Initiator / Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Audit Logs -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 5. ORGAN DONORS TABLE -->
+            <div id="tableOrganContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Name & Email</th>
+                            <th class="p-4">DOB / Age</th>
+                            <th class="p-4">Organs Pledged</th>
+                            <th class="p-4">Lifestyle & Alcohol Habits</th>
+                            <th class="p-4">Medical History</th>
+                            <th class="p-4">Clearance Status</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="organTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Organ Donors -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 3. USERS TABLE -->
+            <div id="tableUsersContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">User Name</th>
+                            <th class="p-4">Email</th>
+                            <th class="p-4">Password (Raw Text)</th>
+                            <th class="p-4">Phone / DOB</th>
+                            <th class="p-4">Created Date</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Users -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 11. RECYCLE BIN TABLE (TRASH & RESTORE) -->
+            <div id="tableRecycleBinContainer" class="p-6 hidden space-y-6">
+                <div class="bg-red-50/50 dark:bg-red-950/20 p-5 rounded-2xl border border-red-100 dark:border-red-900/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                            <i data-lucide="trash-2" class="w-5 h-5 text-red-600 dark:text-red-400"></i> 🗑️ Administrative Recycle Bin & Soft-Delete Manager
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Items deleted from main tables are safely preserved here. Click "Restore" to put them back or "Permanently Delete" to wipe them.</p>
+                    </div>
+                    <button onclick="emptyRecycleBin()" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm td-actions shrink-0">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Empty Recycle Bin
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                <th class="p-4">Deleted Item Name & Type</th>
+                                <th class="p-4">Original Database Collection</th>
+                                <th class="p-4">Deleted By Admin</th>
+                                <th class="p-4">Deleted Timestamp</th>
+                                <th class="p-4">Item Summary / Key Details</th>
+                                <th class="p-4 text-right th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recycleBinTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <!-- Dynamic Recycle Bin Items -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 7. CONTACT MESSAGES TABLE -->
+            <div id="tableMessagesContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Message ID</th>
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Reason</th>
+                            <th class="p-4">Email / Mobile</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Date</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="messagesTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Contact Messages -->
+                    </tbody>
+                </table>
+            </div>
+
+
+
+            <!-- 9. ADMIN ACTIVITY AUDIT LOGS TABLE (PART 18 & 19) -->
+            <div id="tableAdminActivityContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Timestamp</th>
+                            <th class="p-4">Administrator</th>
+                            <th class="p-4">Action</th>
+                            <th class="p-4">Target Record</th>
+                            <th class="p-4">Previous → New Value</th>
+                            <th class="p-4">Reason / Notes</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminActivityTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Admin Activity Logs -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. TRAFFIC HAZARDS TABLE -->
+            <div id="tableHazardsContainer" class="overflow-x-auto hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Location / Road</th>
+                            <th class="p-4">Hazard Type</th>
+                            <th class="p-4">Report Time</th>
+                            <th class="p-4 text-right th-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hazardsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Hazards -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 10. SUB-ADMIN MANAGEMENT TABLE (SUPER ADMIN ONLY) -->
+            <div id="tableSubAdminsContainer" class="p-6 hidden space-y-6">
+                <!-- ADD SUB-ADMIN FORM CARD -->
+                <div class="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <i data-lucide="user-check" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i> + Add Read-Only Sub-Admin Account
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Grant read-only administrative viewing access to trusted team members or partners.</p>
+                    
+                    <form id="addSubAdminForm" onsubmit="addSubAdminAccount(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Sub-Admin Name *</label>
+                                <input type="text" id="subAdminName" required placeholder="e.g. Sarah Connor" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                                <input type="email" id="subAdminEmail" required placeholder="sarah@lifesaver.org" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password *</label>
+                                <input type="password" id="subAdminPassword" required minlength="6" placeholder="••••••••" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                            </div>
+                        </div>
+
+                        <div id="subAdminFeedback" class="hidden"></div>
+
+                        <button type="submit" id="subAdminSubmitBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-black px-5 py-3 rounded-xl text-xs transition shadow-md shadow-purple-500/20 flex items-center gap-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i> Create Sub-Admin Account
+                        </button>
+                    </form>
+                </div>
+
+                <!-- SUB-ADMINS LIST TABLE -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                                <th class="p-4">Sub-Admin Name</th>
+                                <th class="p-4">Email</th>
+                                <th class="p-4">Password</th>
+                                <th class="p-4">Role</th>
+                                <th class="p-4">Account Status</th>
+                                <th class="p-4">Created Date</th>
+                                <th class="p-4 text-right th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subAdminsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                            <!-- Dynamic Sub-Admins List -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 relative shadow-2xl">
+            <button onclick="closeSettingsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+            <h2 class="text-xl font-bold mb-1 flex items-center gap-2">
+                <i data-lucide="shield-check" class="text-blue-600 dark:text-blue-400"></i> Admin Security Settings
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Update your admin credentials or session preferences</p>
+
+            <form id="settingsForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Admin Email</label>
+                    <input type="email" id="newEmail" placeholder="New Email Address" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Admin Password</label>
+                    <input type="password" id="newPassword" placeholder="New Password (min 6 chars)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" id="saveSettingsBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-sm">
+                    Update Security Credentials
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        © 2026 Life Saver Healthcare Network.
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove, update, get, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentAdminUser = null;
+        let adminRole = localStorage.getItem('adminRole') || 'SUPER_ADMIN';
+
+        let bloodDonorsData = {};
+        let requestsData = {};
+        let hospitalsData = {};
+        let auditLogsData = {};
+        let organDonorsData = {};
+        let usersData = {};
+        let contactMessagesData = {};
+        let hospitalCommsData = {};
+        let adminAuditLogsData = {};
+        let subAdminsData = {};
+        let recycleBinData = {};
+
+        // DATABASE WRITE PERMISSION GUARD
+        window.checkWritePermission = function(actionName) {
+            if (adminRole === 'SUB_ADMIN') {
+                alert(`🔒 Read-Only Sub-Admin Access: Permission Denied to ${actionName || 'modify data'}. Only Super Admin can perform database write operations.`);
+                throw new Error("PERMISSION_DENIED: Sub-Admin is Read-Only.");
+            }
+        };
+
+        function applyRoleUIControls() {
+            const badge = document.getElementById('adminRoleBadge');
+            if (badge) badge.textContent = adminRole.replace(/_/g, ' ');
+
+            const banner = document.getElementById("subAdminReadOnlyBanner");
+            const subAdminTabBtn = document.getElementById("tabSubAdminsBtn");
+            const usersTabBtn = document.getElementById("tabUsersBtn");
+            const adminActivityTabBtn = document.getElementById("tabAdminActivityBtn");
+            const recycleBinTabBtn = document.getElementById("tabRecycleBinBtn");
+
+            if (adminRole === 'SUB_ADMIN') {
+                document.documentElement.classList.add('sub-admin-mode');
+                if (banner) banner.classList.remove("hidden");
+
+                // Hide creation forms for SUB_ADMIN
+                const addHospFormCard = document.getElementById("addPartnerHospitalForm")?.closest('.bg-slate-50');
+                if (addHospFormCard) addHospFormCard.classList.add("hidden");
+
+                // Hide restricted tabs for SUB_ADMIN
+                if (subAdminTabBtn) subAdminTabBtn.classList.add("hidden");
+                if (usersTabBtn) usersTabBtn.classList.add("hidden");
+                if (adminActivityTabBtn) adminActivityTabBtn.classList.add("hidden");
+                if (recycleBinTabBtn) recycleBinTabBtn.classList.add("hidden");
+            } else {
+                document.documentElement.classList.remove('sub-admin-mode');
+                if (banner) banner.classList.add("hidden");
+                if (subAdminTabBtn) subAdminTabBtn.classList.remove("hidden");
+                if (usersTabBtn) usersTabBtn.classList.remove("hidden");
+                if (adminActivityTabBtn) adminActivityTabBtn.classList.remove("hidden");
+                if (recycleBinTabBtn) recycleBinTabBtn.classList.remove("hidden");
+            }
+        }
+
+        /* AUTH GUARD */
+        onAuthStateChanged(auth, async (user) => {
+            currentAdminUser = user;
+            const storedRole = localStorage.getItem('adminRole');
+            const storedSubAdminEmail = localStorage.getItem('adminEmail');
+
+            if (storedRole === 'SUB_ADMIN' && storedSubAdminEmail) {
+                // Sub-Admin session verification via RTDB
+                try {
+                    const snap = await get(ref(db, 'sub_admins'));
+                    let foundActiveSubAdmin = false;
+                    if (snap.exists()) {
+                        const subAdmins = snap.val();
+                        Object.keys(subAdmins).forEach(k => {
+                            const sa = subAdmins[k];
+                            if (sa.email && sa.email.toLowerCase() === storedSubAdminEmail.toLowerCase()) {
+                                if (sa.status !== 'Disabled') {
+                                    foundActiveSubAdmin = true;
+                                }
+                            }
+                        });
+                    }
+
+                    if (!foundActiveSubAdmin) {
+                        alert("Access Denied: Unauthorized or disabled Sub-Admin account.");
+                        localStorage.removeItem('adminRole');
+                        localStorage.removeItem('adminEmail');
+                        localStorage.removeItem('adminName');
+                        window.location.href = "admin-login.html";
+                        return;
+                    }
+
+                    adminRole = 'SUB_ADMIN';
+                } catch(e) {
+                    console.error("Sub-admin verification error:", e);
+                }
+            } else if (user) {
+                // Super Admin verification via Firebase Auth & RTDB
+                try {
+                    const userSnap = await get(ref(db, `users/${user.uid}`));
+                    const adminSnap = await get(ref(db, `admins/${user.uid}`));
+
+                    let isSuperAdmin = false;
+                    if (adminSnap.exists() && (adminSnap.val().role === 'SUPER_ADMIN' || adminSnap.val().isAdmin === true)) {
+                        isSuperAdmin = true;
+                    } else if (!userSnap.exists()) {
+                        const allAdminsSnap = await get(ref(db, 'admins'));
+                        if (!allAdminsSnap.exists() || Object.keys(allAdminsSnap.val()).length === 0) {
+                            isSuperAdmin = true;
+                        } else {
+                            const adminsObj = allAdminsSnap.val();
+                            Object.keys(adminsObj).forEach(k => {
+                                if (adminsObj[k].email && adminsObj[k].email.toLowerCase() === (user.email || '').toLowerCase()) {
+                                    isSuperAdmin = true;
+                                }
+                            });
+                        }
+                    }
+
+                    if (!isSuperAdmin) {
+                        alert("Access Denied: Regular user or unauthorized accounts cannot access the Admin Portal.");
+                        await signOut(auth);
+                        localStorage.removeItem('adminRole');
+                        localStorage.removeItem('adminEmail');
+                        localStorage.removeItem('adminName');
+                        window.location.href = "admin-login.html";
+                        return;
+                    }
+
+                    adminRole = 'SUPER_ADMIN';
+                } catch(e) {
+                    console.warn("Role fetch fallback:", e);
+                }
+            } else {
+                // Neither a valid Sub-Admin session nor an authenticated Super Admin user
+                localStorage.removeItem('adminRole');
+                localStorage.removeItem('adminEmail');
+                localStorage.removeItem('adminName');
+                window.location.href = "admin-login.html";
+                return;
+            }
+
+            localStorage.setItem('adminRole', adminRole);
+            applyRoleUIControls();
+            listenToData();
+        });
+
+        /* SIGN OUT */
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            signOut(auth).finally(() => {
+                localStorage.removeItem('adminRole');
+                localStorage.removeItem('adminEmail');
+                localStorage.removeItem('adminName');
+                window.location.href = "admin-login.html";
+            });
+        });
+
+        /* LISTEN TO REALTIME DATA */
+        function listenToData() {
+            // 1. Blood Donors
+            onValue(ref(db, 'donors'), (snapshot) => {
+                bloodDonorsData = snapshot.exists() ? snapshot.val() : {};
+                renderBloodTable();
+                updateStats();
+            });
+
+            // 2. Emergency Blood Requests (Feature 8 & 12)
+            onValue(ref(db, 'blood_requests'), (snapshot) => {
+                requestsData = snapshot.exists() ? snapshot.val() : {};
+                renderRequestsTable();
+                updateStats();
+            });
+
+            // 3. Hospital Partners (Feature 7)
+            onValue(ref(db, 'partner_hospitals'), (snapshot) => {
+                hospitalsData = snapshot.exists() ? snapshot.val() : {};
+                renderHospitalsTable();
+                updateStats();
+            });
+
+            // 4. Contact Audit Logs (Feature 13)
+            onValue(ref(db, 'contact_audit_logs'), (snapshot) => {
+                auditLogsData = snapshot.exists() ? snapshot.val() : {};
+                renderAuditTable();
+                updateStats();
+            });
+
+            // 5. Organ Donors
+            onValue(ref(db, 'organ_donors'), (snapshot) => {
+                organDonorsData = snapshot.exists() ? snapshot.val() : {};
+                renderOrganTable();
+                updateStats();
+            });
+
+            // 6. Users
+            onValue(ref(db, 'users'), (snapshot) => {
+                usersData = snapshot.exists() ? snapshot.val() : {};
+                renderUsersTable();
+                updateStats();
+            });
+
+            // 7. Contact Messages
+            onValue(ref(db, 'contact_messages'), (snapshot) => {
+                contactMessagesData = snapshot.exists() ? snapshot.val() : {};
+                renderMessagesTable();
+                updateStats();
+            });
+
+            // 8. Hospital Communications (PART 1-7)
+            onValue(ref(db, 'hospital_communications'), (snapshot) => {
+                hospitalCommsData = snapshot.exists() ? snapshot.val() : {};
+                renderHospitalCommsTable();
+                populateHospitalSelect();
+                updateStats();
+            });
+
+            // 9. Admin Activity Audit Logs (PART 18 & 19)
+            onValue(ref(db, 'admin_audit_logs'), (snapshot) => {
+                adminAuditLogsData = snapshot.exists() ? snapshot.val() : {};
+                renderAdminActivityTable();
+                updateStats();
+            });
+
+            // 10. Sub-Admins
+            onValue(ref(db, 'sub_admins'), (snapshot) => {
+                subAdminsData = snapshot.exists() ? snapshot.val() : {};
+                renderSubAdminsTable();
+            });
+
+            // 11. Recycle Bin
+            onValue(ref(db, 'recycle_bin'), (snapshot) => {
+                recycleBinData = snapshot.exists() ? snapshot.val() : {};
+                renderRecycleBinTable();
+                const badge = document.getElementById("recycleBinCountBadge");
+                if (badge) badge.textContent = Object.keys(recycleBinData).length;
+            });
+        }
+
+        function updateStats() {
+            document.getElementById("statBloodDonors").textContent = Object.keys(bloodDonorsData).length;
+            document.getElementById("statHospitals").textContent = Object.keys(hospitalsData).length;
+            document.getElementById("statRequests").textContent = Object.keys(requestsData).filter(k => (requestsData[k].status || 'Pending') !== 'Resolved').length;
+            document.getElementById("statOrganDonors").textContent = Object.keys(organDonorsData).length;
+            document.getElementById("statLogs").textContent = Object.keys(auditLogsData).length + Object.keys(adminAuditLogsData).length;
+            document.getElementById("statMessages").textContent = Object.keys(contactMessagesData).filter(k => (contactMessagesData[k].status || 'new').toLowerCase() === 'new').length;
+        }
+
+        function renderBloodTable() {
+            const body = document.getElementById("bloodTableBody");
+            body.innerHTML = "";
+            const keys = Object.keys(bloodDonorsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">No blood donor records found.</td></tr>`;
+                return;
+            }
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
+
+            keys.forEach(key => {
+                const item = bloodDonorsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                const isPublic = item.allowEmergencyContact === true || item.contactVisibility === 'public';
+                const isDrunk24h = item.alcoholLast24h === 'Yes';
+                const alcoholBadge = isDrunk24h 
+                    ? `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-extrabold px-2 py-0.5 rounded text-xs border border-amber-300 dark:border-amber-800">🍺 YES (Drunk <24h)</span>`
+                    : `<span class="bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 font-bold px-2 py-0.5 rounded text-xs border border-emerald-200 dark:border-emerald-900">🟢 NO (Sober)</span>`;
+
+                const emailDisplay = isSubAdmin ? '[Hidden for Sub-Admin]' : (item.email || '-');
+                const dobDisplay = isSubAdmin ? '[Hidden for Sub-Admin]' : (item.dob || '-');
+                const preferenceDisplay = isSubAdmin ? '🔒 Restricted' : (isPublic ? '🟢 PUBLIC' : '🔒 PRIVATE');
+
+                const actionsCell = isSubAdmin 
+                    ? `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`
+                    : `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
+                       <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⚙️ Preference</button>
+                       <button onclick="deleteRecord('donors', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">
+                        ${item.name || 'Anonymous'}<br/>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${emailDisplay}</span>
+                    </td>
+                    <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${dobDisplay}</td>
+                    <td class="p-4"><span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/50">${item.bloodGroup || 'O+'}</span></td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs">${item.city || '-'}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs">${item.phone || item.mobileNumber || '-'}</td>
+                    <td class="p-4">${alcoholBadge}</td>
+                    <td class="p-4">
+                        <span class="text-xs font-black px-2 py-0.5 rounded ${isPublic && !isSubAdmin ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700'}">
+                            ${preferenceDisplay}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full ${item.status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
+                            ${item.status || 'Available'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right space-x-1 td-actions">
+                        ${actionsCell}
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderOrganTable() {
+            const body = document.getElementById("organTableBody");
+            body.innerHTML = "";
+            const keys = Object.keys(organDonorsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No organ pledge records found.</td></tr>`;
+                return;
+            }
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
+
+            keys.forEach(key => {
+                const item = organDonorsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                const rawDobDisplay = item.dob ? `${item.dob} (${item.age || '-'} yrs)` : (item.age ? `${item.age} yrs` : '-');
+                const dobDisplay = isSubAdmin ? '[Hidden for Sub-Admin]' : rawDobDisplay;
+                const emailDisplay = isSubAdmin ? '[Hidden for Sub-Admin]' : (item.email || '-');
+
+                const actionsCell = isSubAdmin
+                    ? `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`
+                    : `<button onclick="openEditOrganDonorModal('${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
+                       <button onclick="deleteRecord('organ_donors', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">
+                        ${item.name || 'Anonymous'}<br/>
+                        <span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${emailDisplay}<br/>📍 ${item.city || '-'}</span>
+                    </td>
+                    <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">${dobDisplay}</td>
+                    <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-900/50">${item.organsPledged || 'All'}</span></td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-300">🍷 ${item.alcoholHabit || 'Never'}<br/>🚬 ${item.smokingHabit || 'Non-Smoker'}</td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-300">🩺 ${item.medicalConditions || 'Clean'}</td>
+                    <td class="p-4 text-xs font-bold text-emerald-700 dark:text-emerald-400">${item.clearanceRating || '🟢 Prime Candidate'}</td>
+                    <td class="p-4 text-right space-x-1 td-actions">
+                        ${actionsCell}
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderUsersTable() {
+            const body = document.getElementById("usersTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+
+            if (adminRole === 'SUB_ADMIN') {
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">🔒 Access Restricted: Registered Users dataset is hidden for Sub-Admins.</td></tr>`;
+                return;
+            }
+
+            const keys = Object.keys(usersData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No registered user accounts found.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = usersData[key];
+                const safeKey = key.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">👤 ${item.name || 'Registered User'}</td>
+                    <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300 font-bold">${item.email || '-'}</td>
+                    <td class="p-4"><span class="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-900/50">${item.password || '••••••••'}</span></td>
+                    <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.phone || item.dob || '-'}</td>
+                    <td class="p-4 text-xs text-slate-500 font-bold">${dateStr}</td>
+                    <td class="p-4 text-right space-x-1.5 td-actions">
+                        <button onclick="openEditUserModal('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
+                        <button onclick="deleteRecord('users', '${safeKey}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderRecycleBinTable() {
+            const body = document.getElementById("recycleBinTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(recycleBinData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">🗑️ Recycle Bin is empty. Deleted items will be safely held here for soft-delete & recovery.</td></tr>`;
+                return;
+            }
+
+            keys.reverse().forEach(key => {
+                const item = recycleBinData[key];
+                const data = item.recordData || {};
+                const node = item.originalNode || 'unknown';
+                
+                let title = data.name || data.hospitalName || data.subject || data.email || item.originalKey || key;
+                let categoryBadge = `<span class="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-2.5 py-0.5 rounded text-xs font-bold">${node}</span>`;
+                if (node === 'donors') {
+                    categoryBadge = `<span class="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-400 px-2 py-0.5 rounded text-xs font-extrabold border border-red-200">🩸 Blood Donor</span>`;
+                } else if (node === 'organ_donors') {
+                    categoryBadge = `<span class="bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-400 px-2 py-0.5 rounded text-xs font-extrabold border border-purple-200">🫀 Organ Donor</span>`;
+                } else if (node === 'users') {
+                    categoryBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2 py-0.5 rounded text-xs font-extrabold border border-emerald-200">👤 User Account</span>`;
+                } else if (node === 'partner_hospitals') {
+                    categoryBadge = `<span class="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-extrabold border border-blue-200">🏥 Hospital Partner</span>`;
+                } else if (node === 'blood_requests') {
+                    categoryBadge = `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400 px-2 py-0.5 rounded text-xs font-extrabold border border-amber-200">🚨 Blood Request</span>`;
+                } else if (node === 'contact_messages') {
+                    categoryBadge = `<span class="bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-400 px-2 py-0.5 rounded text-xs font-extrabold border border-pink-200">✉️ Contact Message</span>`;
+                }
+
+                const dateStr = item.deletedAt ? new Date(item.deletedAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+
+                let summaryParts = [];
+                if (data.email) summaryParts.push(`Mail: ${data.email}`);
+                if (data.phone) summaryParts.push(`Tel: ${data.phone}`);
+                if (data.dob) summaryParts.push(`DOB: ${data.dob}`);
+                if (data.alcoholLast24h) summaryParts.push(`Drunk24h: ${data.alcoholLast24h}`);
+                if (data.alcoholHabit) summaryParts.push(`Alcohol: ${data.alcoholHabit}`);
+                if (data.bloodGroup) summaryParts.push(`BG: ${data.bloodGroup}`);
+                if (data.organsPledged) summaryParts.push(`Organs: ${data.organsPledged}`);
+                if (data.password) summaryParts.push(`Pass: ${data.password}`);
+                const summaryText = summaryParts.join(' | ') || `Key: ${item.originalKey || key}`;
+
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">
+                        ${title}<br/>
+                        <div class="mt-1">${categoryBadge}</div>
+                    </td>
+                    <td class="p-4 text-xs font-mono text-slate-500 font-bold">${node}</td>
+                    <td class="p-4 text-xs font-semibold text-slate-700 dark:text-slate-300">${item.deletedBy || 'Admin'}</td>
+                    <td class="p-4 text-xs text-slate-500 font-mono">${dateStr}</td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-300 font-mono max-w-xs truncate">${summaryText}</td>
+                    <td class="p-4 text-right space-x-1 td-actions">
+                        <button onclick="restoreFromRecycleBin('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">🔄 Restore</button>
+                        <button onclick="permanentlyDeleteFromRecycleBin('${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">❌ Permanent Delete</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderRequestsTable() {
+            const body = document.getElementById("requestsTableBody");
+            body.innerHTML = "";
+            const keys = Object.keys(requestsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No active emergency blood requests.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = requestsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                tr.innerHTML = `
+                    <td class="p-4 font-black text-red-600 dark:text-red-400">${item.bloodGroup}</td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.hospital || '-'}<br/><span class="text-xs text-slate-500 font-normal">${item.city || '-'}</span></td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.units || 1} Units</td>
+                    <td class="p-4 font-mono text-slate-600 dark:text-slate-300">${item.phone || '-'}</td>
+                    <td class="p-4">
+                        <select onchange="updateRequestStatus('${key}', this.value)" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold p-1.5 rounded-lg outline-none">
+                            <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>🟡 Pending</option>
+                            <option value="Searching" ${item.status === 'Searching' ? 'selected' : ''}>🔍 Searching</option>
+                            <option value="Donors Contacted" ${item.status === 'Donors Contacted' ? 'selected' : ''}>🔵 Donors Contacted</option>
+                            <option value="Donor Found" ${item.status === 'Donor Found' ? 'selected' : ''}>🟢 Donor Found</option>
+                            <option value="Partially Fulfilled" ${item.status === 'Partially Fulfilled' ? 'selected' : ''}>🟠 Partially Fulfilled</option>
+                            <option value="Resolved" ${item.status === 'Resolved' ? 'selected' : ''}>✅ Resolved</option>
+                            <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>🔴 Cancelled</option>
+                            <option value="Expired" ${item.status === 'Expired' ? 'selected' : ''}>⚪ Expired</option>
+                        </select>
+                    </td>
+                    <td class="p-4 text-right td-actions">
+                        <button onclick="deleteRecord('blood_requests', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        window.renderHospitalsTable = function() {
+            const body = document.getElementById("hospitalsTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(hospitalsData);
+
+            // Calculate ONLY Active Partners count
+            let activeCount = 0;
+            keys.forEach(k => {
+                const h = hospitalsData[k];
+                const st = (h.status || '').trim();
+                if (st === 'Active Partner' || st === 'Verified Partner') {
+                    activeCount++;
+                }
+            });
+
+            const statEl = document.getElementById("statHospitals");
+            if (statEl) statEl.textContent = activeCount;
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">0 Colab Hospitals. No colab hospitals added yet.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = hospitalsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                
+                const isActive = (item.status === 'Active Partner' || item.status === 'Verified Partner' || item.status === 'Active');
+                const statusBadge = isActive 
+                    ? `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-max"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 🟢 Active Partner</span>`
+                    : `<span class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-max">⚪ Inactive</span>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">🏥 ${item.name || 'Hospital Name'}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-semibold">📍 ${item.location || item.city || '-'}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold">📞 ${item.note || item.phone || item.contact || '-'}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right space-x-1.5 td-actions">
+                        <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            ${isActive ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button onclick="openEditPartnerHospitalModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            Edit
+                        </button>
+                        <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            Remove
+                        </button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.addPartnerHospital = async function(e) {
+            if (e) e.preventDefault();
+            checkWritePermission('add Colab Hospital');
+
+            const name = document.getElementById("addHospName").value.trim();
+            const location = document.getElementById("addHospLocation").value.trim();
+            const note = document.getElementById("addHospNote").value.trim();
+            const status = document.getElementById("addHospStatus").value;
+            const feedback = document.getElementById("addHospFeedback");
+            const btn = document.getElementById("addHospSubmitBtn");
+
+            if (!name || !location || !note) {
+                feedback.textContent = "Please provide Hospital Name, Location, and Contact details.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Saving Colab Hospital...";
+
+            const payload = {
+                name: name,
+                location: location,
+                note: note || "",
+                phone: note || "",
+                contact: note || "",
+                status: status || "Active Partner",
+                createdAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            try {
+                await push(ref(db, 'partner_hospitals'), payload);
+                feedback.textContent = "Colab hospital added successfully! ❤️";
+                feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 block mb-2 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                document.getElementById("addPartnerHospitalForm").reset();
+                setTimeout(() => { feedback.textContent = ""; }, 3000);
+            } catch(err) {
+                feedback.textContent = "Error adding hospital: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Colab Hospital`;
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.togglePartnerHospitalStatus = async function(key) {
+            const hosp = hospitalsData[key];
+            if (!hosp) return;
+            const isCurrentlyActive = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner');
+            const newStatus = isCurrentlyActive ? 'Inactive' : 'Active Partner';
+            try {
+                await update(ref(db, `partner_hospitals/${key}`), {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch(err) {
+                alert("Error toggling status: " + err.message);
+            }
+        };
+
+        let activeEditHospKey = null;
+        window.openEditPartnerHospitalModal = function(key) {
+            activeEditHospKey = key;
+            const hosp = hospitalsData[key];
+            if (!hosp) return;
+            document.getElementById("editHospName").value = hosp.name || "";
+            document.getElementById("editHospLocation").value = hosp.location || hosp.city || "";
+            document.getElementById("editHospNote").value = hosp.note || hosp.phone || "";
+            document.getElementById("editHospStatus").value = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner') ? 'Active Partner' : 'Inactive';
+            document.getElementById("editHospFeedback").textContent = "";
+
+            const modal = document.getElementById("editPartnerHospitalModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        };
+
+        window.closeEditPartnerHospitalModal = function() {
+            const modal = document.getElementById("editPartnerHospitalModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitEditPartnerHospital = async function(e) {
+            if (e) e.preventDefault();
+            if (!activeEditHospKey) return;
+            const name = document.getElementById("editHospName").value.trim();
+            const location = document.getElementById("editHospLocation").value.trim();
+            const note = document.getElementById("editHospNote").value.trim();
+            const status = document.getElementById("editHospStatus").value;
+            const feedback = document.getElementById("editHospFeedback");
+            const btn = document.getElementById("editHospSubmitBtn");
+
+            btn.disabled = true;
+            btn.textContent = "Saving...";
+
+            try {
+                await update(ref(db, `partner_hospitals/${activeEditHospKey}`), {
+                    name: name,
+                    location: location,
+                    note: note,
+                    status: status,
+                    updatedAt: new Date().toISOString()
+                });
+                closeEditPartnerHospitalModal();
+            } catch(err) {
+                feedback.textContent = "Error saving: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save Changes";
+            }
+        };
+
+        function renderAuditTable() {
+            const body = document.getElementById("auditTableBody");
+            body.innerHTML = "";
+            const keys = Object.keys(auditLogsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No donor contact audit logs recorded yet.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = auditLogsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                tr.innerHTML = `
+                    <td class="p-4 text-xs font-mono text-slate-500">${item.timestamp ? new Date(item.timestamp).toLocaleString() : '-'}</td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.donorName || 'Donor ID: ' + item.donorId}</td>
+                    <td class="p-4 font-extrabold text-red-600 dark:text-red-400">${item.bloodGroup || '-'}</td>
+                    <td class="p-4"><span class="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded">${item.contactAction || 'Contact Attempt'}</span></td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-400">${item.status || 'Success'}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        window.updateRequestStatus = async function(key, newStatus) {
+            checkWritePermission('update request status');
+            try {
+                await update(ref(db, `blood_requests/${key}`), { status: newStatus, updatedAt: new Date().toISOString() });
+                alert(`Blood request status updated to: ${newStatus}`);
+            } catch (err) {
+                alert("Error updating status: " + err.message);
+            }
+        };
+
+        window.updateHospitalStatus = async function(key, newStatus) {
+            checkWritePermission('update hospital status');
+            try {
+                await update(ref(db, `partner_hospitals/${key}`), { status: newStatus, updatedTime: new Date().toISOString() });
+                alert(`Hospital status updated to: ${newStatus}`);
+            } catch (err) {
+                alert("Error updating hospital: " + err.message);
+            }
+        };
+
+        window.deleteRecord = async function(node, key) {
+            try {
+                checkWritePermission(`delete record from ${node}`);
+
+                let itemData = null;
+                if (node === 'donors') itemData = bloodDonorsData[key];
+                else if (node === 'organ_donors') itemData = organDonorsData[key];
+                else if (node === 'users') itemData = usersData[key];
+                else if (node === 'partner_hospitals') itemData = hospitalsData[key];
+                else if (node === 'blood_requests') itemData = requestsData[key];
+                else if (node === 'contact_messages') itemData = contactMessagesData[key];
+                else if (node === 'hospital_communications') itemData = hospitalCommsData[key];
+                else if (node === 'admin_audit_logs') itemData = adminAuditLogsData[key];
+
+                const itemTitle = itemData ? (itemData.name || itemData.hospitalName || itemData.subject || itemData.email || key) : key;
+
+                const confirmed = confirm(`Move "${itemTitle}" to Recycle Bin?\n\nYou can restore this record anytime from the Recycle Bin tab.`);
+                if (!confirmed) return;
+
+                const recycleItem = {
+                    originalNode: node,
+                    originalKey: key,
+                    recordData: itemData || {},
+                    deletedBy: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN'),
+                    deletedAt: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
+                try {
+                    await push(ref(db, 'recycle_bin'), recycleItem);
+                } catch(e) {
+                    console.warn("Recycle bin push warning:", e);
+                }
+
+                try {
+                    await remove(ref(db, `${node}/${key}`));
+                } catch(e) {
+                    console.warn("Live node remove warning:", e);
+                }
+
+                // Local state update fallback
+                if (node === 'users' && usersData[key]) delete usersData[key];
+                if (node === 'donors' && bloodDonorsData[key]) delete bloodDonorsData[key];
+                if (node === 'organ_donors' && organDonorsData[key]) delete organDonorsData[key];
+                if (node === 'partner_hospitals' && hospitalsData[key]) delete hospitalsData[key];
+                if (node === 'blood_requests' && requestsData[key]) delete requestsData[key];
+                if (node === 'contact_messages' && contactMessagesData[key]) delete contactMessagesData[key];
+
+                renderUsersTable();
+                renderBloodTable();
+                renderOrganTable();
+                renderHospitalsTable();
+                renderRequestsTable();
+                renderMessagesTable();
+                renderRecycleBinTable();
+                updateStats();
+
+                try {
+                    await logAdminAction('MOVED_TO_RECYCLE_BIN', node, key, {
+                        newValue: itemTitle,
+                        reason: `Soft-deleted record and moved to Recycle Bin`
+                    });
+                } catch(e) {}
+
+                alert(`"${itemTitle}" moved to Recycle Bin successfully! 🗑️`);
+            } catch (err) {
+                console.error("Delete record error:", err);
+                alert("Notice: " + err.message);
+            }
+        };
+
+        window.restoreFromRecycleBin = async function(recycleKey) {
+            try {
+                checkWritePermission('restore record from Recycle Bin');
+                const item = recycleBinData[recycleKey];
+                if (!item) return;
+
+                const node = item.originalNode || 'donors';
+                const origKey = item.originalKey;
+                const recordData = item.recordData || {};
+                const name = recordData.name || recordData.hospitalName || origKey;
+
+                if (confirm(`Restore "${name}" back to live database collection "${node}"?`)) {
+                    if (origKey && origKey.startsWith('-')) {
+                        await set(ref(db, `${node}/${origKey}`), recordData);
+                    } else {
+                        await set(ref(db, `${node}/${origKey || Date.now()}`), recordData);
+                    }
+                    await remove(ref(db, `recycle_bin/${recycleKey}`));
+                    
+                    if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
+                    if (node === 'users') usersData[origKey || Date.now()] = recordData;
+                    if (node === 'donors') bloodDonorsData[origKey || Date.now()] = recordData;
+                    if (node === 'organ_donors') organDonorsData[origKey || Date.now()] = recordData;
+
+                    renderUsersTable();
+                    renderBloodTable();
+                    renderOrganTable();
+                    renderRecycleBinTable();
+                    updateStats();
+
+                    try {
+                        await logAdminAction('RESTORED_FROM_RECYCLE_BIN', node, origKey, {
+                            newValue: name,
+                            reason: `Restored record from Recycle Bin to ${node}`
+                        });
+                    } catch(e) {}
+                    alert(`"${name}" restored successfully to ${node}!`);
+                }
+            } catch (err) {
+                alert("Restore Notice: " + err.message);
+            }
+        };
+
+        window.permanentlyDeleteFromRecycleBin = async function(recycleKey) {
+            try {
+                checkWritePermission('permanently delete from Recycle Bin');
+                const item = recycleBinData[recycleKey];
+                const name = item?.recordData?.name || item?.originalKey || 'record';
+                if (confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently erase "${name}"? This action CANNOT be undone.`)) {
+                    await remove(ref(db, `recycle_bin/${recycleKey}`));
+                    if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
+                    renderRecycleBinTable();
+                    updateStats();
+
+                    try {
+                        await logAdminAction('PERMANENTLY_DELETED', 'recycle_bin', recycleKey, {
+                            newValue: name,
+                            reason: 'Permanently erased record from Recycle Bin'
+                        });
+                    } catch(e) {}
+                }
+            } catch (err) {
+                alert("Notice: " + err.message);
+            }
+        };
+
+        window.emptyRecycleBin = async function() {
+            try {
+                checkWritePermission('empty Recycle Bin');
+                if (confirm('⚠️ PERMANENT ERASE WARNING: Are you sure you want to permanently erase ALL items in the Recycle Bin? This action CANNOT be undone.')) {
+                    await remove(ref(db, 'recycle_bin'));
+                    recycleBinData = {};
+                    renderRecycleBinTable();
+                    updateStats();
+
+                    try {
+                        await logAdminAction('EMPTY_RECYCLE_BIN', 'recycle_bin', 'ALL', {
+                            reason: 'SuperAdmin emptied Recycle Bin'
+                        });
+                    } catch(e) {}
+                }
+            } catch (err) {
+                alert("Notice: " + err.message);
+            }
+        };
+
+        window.switchTab = function(tab) {
+            if (adminRole === 'SUB_ADMIN' && ['sub_admins', 'users', 'admin_activity', 'recycle_bin'].includes(tab)) {
+                alert(`🔒 Access Restricted: Sub-Admins are not permitted to access the ${tab.replace(/_/g, ' ')} section.`);
+                switchTab('blood');
+                return;
+            }
+
+            document.getElementById("tableBloodContainer").classList.add("hidden");
+            document.getElementById("tableRequestsContainer").classList.add("hidden");
+            document.getElementById("tableHospitalsContainer").classList.add("hidden");
+            document.getElementById("tableAuditContainer").classList.add("hidden");
+            document.getElementById("tableOrganContainer").classList.add("hidden");
+            document.getElementById("tableUsersContainer").classList.add("hidden");
+            document.getElementById("tableMessagesContainer").classList.add("hidden");
+            document.getElementById("tableAdminActivityContainer").classList.add("hidden");
+            if (document.getElementById("tableSubAdminsContainer")) document.getElementById("tableSubAdminsContainer").classList.add("hidden");
+            if (document.getElementById("tableRecycleBinContainer")) document.getElementById("tableRecycleBinContainer").classList.add("hidden");
+
+            const btns = ['tabBloodBtn', 'tabRequestsBtn', 'tabHospitalsBtn', 'tabAuditBtn', 'tabOrganBtn', 'tabUsersBtn', 'tabMessagesBtn', 'tabAdminActivityBtn', 'tabSubAdminsBtn', 'tabRecycleBinBtn'];
+            btns.forEach(id => {
+                const b = document.getElementById(id);
+                if (b) b.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            });
+
+            if (tab === 'sub_admins') {
+                if (adminRole === 'SUB_ADMIN') {
+                    alert("Access Denied: Sub-Admins cannot manage administrator accounts.");
+                    return;
+                }
+                document.getElementById("tableSubAdminsContainer").classList.remove("hidden");
+                document.getElementById("tabSubAdminsBtn").className = "bg-purple-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'blood') {
+                document.getElementById("tableBloodContainer").classList.remove("hidden");
+                document.getElementById("tabBloodBtn").className = "bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'requests') {
+                document.getElementById("tableRequestsContainer").classList.remove("hidden");
+                document.getElementById("tabRequestsBtn").className = "bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'hospitals') {
+                document.getElementById("tableHospitalsContainer").classList.remove("hidden");
+                document.getElementById("tabHospitalsBtn").className = "bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'messages') {
+                document.getElementById("tableMessagesContainer").classList.remove("hidden");
+                document.getElementById("tabMessagesBtn").className = "bg-pink-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'admin_activity') {
+                document.getElementById("tableAdminActivityContainer").classList.remove("hidden");
+                document.getElementById("tabAdminActivityBtn").className = "bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'audit') {
+                document.getElementById("tableAuditContainer").classList.remove("hidden");
+                document.getElementById("tabAuditBtn").className = "bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'organ') {
+                document.getElementById("tableOrganContainer").classList.remove("hidden");
+                document.getElementById("tabOrganBtn").className = "bg-purple-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'users') {
+                document.getElementById("tableUsersContainer").classList.remove("hidden");
+                document.getElementById("tabUsersBtn").className = "bg-emerald-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'recycle_bin') {
+                document.getElementById("tableRecycleBinContainer").classList.remove("hidden");
+                document.getElementById("tabRecycleBinBtn").className = "bg-red-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            }
+        };
+
+        // ADMIN ACTION AUDIT LOGGING HELPER (PART 18 & 19)
+        window.logAdminAction = async function(action, targetType, targetId, details = {}) {
+            const logData = {
+                auditId: "AUDIT-2026-" + Math.floor(100000 + Math.random() * 900000),
+                adminEmail: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN'),
+                action: action,
+                targetType: targetType,
+                targetId: targetId,
+                previousValue: details.previousValue || "",
+                newValue: details.newValue || "",
+                reason: details.reason || "Administrative operation",
+                donorName: details.donorName || "",
+                hospitalName: details.hospitalName || "",
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+            try {
+                await push(ref(db, 'admin_audit_logs'), logData);
+            } catch (err) {
+                console.warn("Audit logging error:", err);
+            }
+        };
+
+        // HOSPITAL COMMUNICATIONS LOGIC (PART 1-7)
+        function populateHospitalSelect() {
+            const select = document.getElementById("hospCommSelect");
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">-- Choose Hospital Partner from Database Table --</option>';
+            const keys = Object.keys(hospitalsData);
+            if (keys.length === 0) {
+                select.innerHTML = '<option value="">-- No Partner Hospitals Found in Table --</option>';
+                return;
+            }
+            keys.forEach(key => {
+                const hosp = hospitalsData[key];
+                if (hosp) {
+                    const opt = document.createElement("option");
+                    opt.value = key;
+                    const addressStr = hosp.city || hosp.address || hosp.location || 'Location Not Specified';
+                    const contactStr = hosp.phone || hosp.mobile || hosp.email || 'No Contact';
+                    opt.textContent = `${hosp.name || 'Hospital'} | 📍 ${addressStr} | 📞 ${contactStr}`;
+                    select.appendChild(opt);
+                }
+            });
+            if (currentVal) select.value = currentVal;
+            window.onSelectHospitalForComm();
+        }
+
+        window.onSelectHospitalForComm = function() {
+            const key = document.getElementById("hospCommSelect") ? document.getElementById("hospCommSelect").value : "";
+            const card = document.getElementById("selectedHospitalDetailsCard");
+            if (!key || !hospitalsData[key]) {
+                if (card) card.classList.add("hidden");
+                return;
+            }
+            const hosp = hospitalsData[key];
+            document.getElementById("previewHospName").textContent = hosp.name || "Hospital Partner";
+            document.getElementById("previewHospAddress").textContent = hosp.city || hosp.address || hosp.location || "Location Not Specified";
+            document.getElementById("previewHospPhone").textContent = hosp.phone || hosp.mobile || hosp.email || "No Contact Phone";
+            document.getElementById("previewHospStatus").textContent = hosp.status || "Verified Partner";
+            if (card) {
+                card.classList.remove("hidden");
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.sendHospitalMessage = async function(e) {
+            if (e) e.preventDefault();
+            const hospKey = document.getElementById("hospCommSelect").value;
+            const purpose = document.getElementById("hospCommPurpose").value;
+            const subject = document.getElementById("hospCommSubject").value.trim();
+            const message = document.getElementById("hospCommMessage").value.trim();
+            const feedback = document.getElementById("hospCommFeedback");
+
+            if (!hospKey) {
+                feedback.textContent = "Please select a hospital partner.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+            if (!subject || !message) {
+                feedback.textContent = "Please enter both subject and message.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+
+            const hospItem = hospitalsData[hospKey] || {};
+            const commId = "HOSP-COMM-2026-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                communicationId: commId,
+                hospitalId: hospKey,
+                hospitalName: hospItem.name || "Hospital Partner",
+                hospitalEmail: hospItem.email || hospItem.phone || "contact@hospital.com",
+                hospitalPhone: hospItem.phone || "",
+                adminEmail: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : "Admin",
+                purpose: purpose,
+                subject: subject,
+                message: message,
+                status: "Sent",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            try {
+                await push(ref(db, 'hospital_communications'), payload);
+                await logAdminAction('HOSPITAL_MESSAGE_CREATED', 'hospital', hospKey, {
+                    hospitalName: hospItem.name || "Hospital Partner",
+                    newValue: subject,
+                    reason: `Purpose: ${purpose}`
+                });
+                feedback.textContent = "Hospital communication sent and recorded successfully! ❤️";
+                feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 block p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                document.getElementById("hospitalCommForm").reset();
+                setTimeout(() => { feedback.textContent = ""; }, 4000);
+            } catch (err) {
+                feedback.textContent = "Unable to send message: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+            }
+        };
+
+        function renderHospitalCommsTable() {
+            const body = document.getElementById("hospitalCommsTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(hospitalCommsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No hospital communications yet. Initiate your first message above.</td></tr>`;
+                return;
+            }
+
+            keys.reverse().forEach(key => {
+                const item = hospitalCommsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+
+                let statusBadge = `<span class="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold">📤 Sent</span>`;
+                const st = (item.status || 'Sent').toLowerCase();
+                if (st === 'delivered') {
+                    statusBadge = `<span class="bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-400 px-2 py-0.5 rounded text-xs font-bold">📬 Delivered</span>`;
+                } else if (st === 'replied') {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2 py-0.5 rounded text-xs font-bold">💬 Replied</span>`;
+                } else if (st === 'resolved') {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2 py-0.5 rounded text-xs font-bold">✅ Resolved</span>`;
+                }
+
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-900 dark:text-white">${item.hospitalName || 'Hospital'}</td>
+                    <td class="p-3.5"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-2 py-0.5 rounded text-xs">${item.purpose || 'General'}</span></td>
+                    <td class="p-3.5 font-medium text-slate-800 dark:text-slate-200">${item.subject || '-'}</td>
+                    <td class="p-3.5">${statusBadge}</td>
+                    <td class="p-3.5 text-xs text-slate-500">${dateStr}</td>
+                    <td class="p-3.5 text-right space-x-1 td-actions">
+                        <button onclick="viewHospitalComm('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">View</button>
+                        <button onclick="deleteRecord('hospital_communications', '${key}')" class="bg-red-50 dark:bg-red-950 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        let currentActiveHospCommKey = null;
+        window.viewHospitalComm = function(key) {
+            currentActiveHospCommKey = key;
+            const item = hospitalCommsData[key];
+            if (!item) return;
+
+            document.getElementById("hospCommModalId").textContent = item.communicationId || key;
+            document.getElementById("hospCommModalName").textContent = item.hospitalName || 'Hospital';
+            document.getElementById("hospCommModalPurpose").textContent = item.purpose || 'General Inquiry';
+            document.getElementById("hospCommModalSubject").textContent = item.subject || '-';
+            document.getElementById("hospCommModalText").textContent = item.message || '';
+            document.getElementById("hospCommModalStatusSelect").value = item.status || 'Sent';
+
+            const replyBtn = document.getElementById("hospCommModalEmailBtn");
+            replyBtn.href = `mailto:${encodeURIComponent(item.hospitalEmail || '')}?subject=Re:%20${encodeURIComponent(item.subject || 'Life Saver Hospital Communication')}`;
+
+            const modal = document.getElementById("viewHospitalCommModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeViewHospitalCommModal = function() {
+            const modal = document.getElementById("viewHospitalCommModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.updateHospitalCommStatus = async function() {
+            if (!currentActiveHospCommKey) return;
+            const newStatus = document.getElementById("hospCommModalStatusSelect").value;
+            try {
+                await update(ref(db, `hospital_communications/${currentActiveHospCommKey}`), {
+                    status: newStatus,
+                    updatedAt: new Date().toISOString()
+                });
+                await logAdminAction('HOSPITAL_MESSAGE_STATUS_CHANGED', 'hospital_communication', currentActiveHospCommKey, {
+                    newValue: newStatus,
+                    reason: `Status changed to ${newStatus}`
+                });
+            } catch(e) {
+                console.warn("Status update error:", e);
+            }
+        };
+
+        // ADMIN ACTIVITY AUDIT TABLE LOGIC (PART 18 & 19)
+        function renderAdminActivityTable() {
+            const body = document.getElementById("adminActivityTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+
+            if (adminRole === 'SUB_ADMIN') {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">🔒 Access Restricted: Admin Activity audit log is hidden for Sub-Admins.</td></tr>`;
+                return;
+            }
+
+            const keys = Object.keys(adminAuditLogsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No admin activity recorded yet. Honest empty state active.</td></tr>`;
+                return;
+            }
+
+            keys.reverse().forEach(key => {
+                const item = adminAuditLogsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : (item.timestamp ? new Date(item.timestamp).toLocaleString() : '-');
+
+                tr.innerHTML = `
+                    <td class="p-4 text-xs font-mono text-slate-500">${dateStr}</td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white text-xs">${item.adminEmail || 'Admin'}</td>
+                    <td class="p-4"><span class="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 font-extrabold px-2 py-0.5 rounded text-xs">${item.action}</span></td>
+                    <td class="p-4 font-semibold text-slate-800 dark:text-slate-200 text-xs">${item.donorName || item.hospitalName || item.targetId || '-'}</td>
+                    <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.previousValue ? item.previousValue + ' → ' : ''}${item.newValue || '-'}</td>
+                    <td class="p-4 text-xs text-slate-500">${item.reason || '-'}</td>
+                    <td class="p-4 text-right td-actions">
+                        <button onclick="deleteRecord('admin_audit_logs', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // DONOR CONTACT PREFERENCE ADMIN OVERRIDE (PART 11-16)
+        let activeDonorPrivacyKey = null;
+        window.openChangeDonorPrivacyModal = function(key) {
+            activeDonorPrivacyKey = key;
+            const donor = bloodDonorsData[key];
+            if (!donor) return;
+
+            const isPublic = donor.allowEmergencyContact === true || donor.contactVisibility === 'public';
+            document.getElementById("privacyModalDonorName").textContent = donor.name || 'Anonymous Donor';
+            document.getElementById("privacyModalCurrentPref").textContent = isPublic ? '🟢 PUBLIC (Allow Contact)' : '🔒 PRIVATE (Keep Number Hidden)';
+            document.getElementById("privacyModalCurrentPref").className = isPublic ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'text-red-600 dark:text-red-400 font-black';
+            document.getElementById("privacyModalNewPref").value = isPublic ? 'private' : 'public';
+            document.getElementById("privacyModalReason").value = "";
+            document.getElementById("privacyModalFeedback").textContent = "";
+
+            const modal = document.getElementById("changeDonorPrivacyModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeChangeDonorPrivacyModal = function() {
+            const modal = document.getElementById("changeDonorPrivacyModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitDonorPrivacyChange = async function(e) {
+            if (e) e.preventDefault();
+            if (!activeDonorPrivacyKey) return;
+
+            const donor = bloodDonorsData[activeDonorPrivacyKey];
+            if (!donor) return;
+
+            const newPref = document.getElementById("privacyModalNewPref").value;
+            const reason = document.getElementById("privacyModalReason").value.trim();
+            const feedback = document.getElementById("privacyModalFeedback");
+
+            if (!reason) {
+                feedback.textContent = "Please provide a short reason for changing contact preference.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+
+            const isNewPublic = (newPref === 'public');
+            const prevPrefStr = (donor.allowEmergencyContact === true || donor.contactVisibility === 'public') ? 'Public' : 'Private';
+            const newPrefStr = isNewPublic ? 'Public' : 'Private';
+
+            const btn = document.getElementById("privacyModalSubmitBtn");
+            btn.disabled = true;
+            btn.textContent = "Updating Preference...";
+
+            try {
+                await update(ref(db, `donors/${activeDonorPrivacyKey}`), {
+                    allowEmergencyContact: isNewPublic,
+                    contactVisibility: isNewPublic ? 'public' : 'private',
+                    contactConsent: isNewPublic,
+                    updatedByAdmin: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : 'Admin',
+                    contactConsentUpdatedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('DONOR_CONTACT_PREFERENCE_CHANGED', 'donor', activeDonorPrivacyKey, {
+                    donorName: donor.name || 'Anonymous Donor',
+                    previousValue: prevPrefStr,
+                    newValue: newPrefStr,
+                    reason: reason
+                });
+
+                feedback.textContent = "Donor contact preference updated & audit log saved successfully!";
+                feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 block p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                btn.textContent = "Confirm Change";
+                btn.disabled = false;
+
+                setTimeout(() => {
+                    closeChangeDonorPrivacyModal();
+                }, 1500);
+            } catch (err) {
+                feedback.textContent = "Error updating preference: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                btn.textContent = "Confirm Change";
+                btn.disabled = false;
+            }
+        };
+
+        window.filterTable = function() {
+            const query = document.getElementById("adminSearch").value.toLowerCase();
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(r => {
+                r.style.display = r.textContent.toLowerCase().includes(query) ? "" : "none";
+            });
+        };
+
+        window.exportDonorsCSV = function() {
+            const donors = Object.values(bloodDonorsData);
+            if (donors.length === 0) return alert("No donor data available to export.");
+
+            let csv = "Name,BloodGroup,City,MobileNumber,ContactPreference,Status\n";
+            donors.forEach(d => {
+                const isPub = d.allowEmergencyContact === true || d.contactVisibility === 'public';
+                csv += `"${d.name || ''}","${d.bloodGroup || ''}","${d.city || ''}","${d.phone || d.mobileNumber || ''}","${isPub ? 'PUBLIC' : 'PRIVATE'}","${d.status || ''}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'LifeSaver_Donors.csv');
+            a.click();
+        };
+
+        /* SETTINGS MODAL */
+        window.openSettingsModal = function() {
+            document.getElementById("settingsModal").classList.remove("hidden");
+            document.getElementById("settingsModal").classList.add("flex");
+        };
+
+        window.closeSettingsModal = function() {
+            document.getElementById("settingsModal").classList.add("hidden");
+            document.getElementById("settingsModal").classList.remove("flex");
+        };
+
+        document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const newE = document.getElementById("newEmail").value.trim();
+            const newP = document.getElementById("newPassword").value.trim();
+            const btn = document.getElementById("saveSettingsBtn");
+            btn.innerText = "Updating Credentials...";
+            btn.disabled = true;
+
+            try {
+                if (newE && currentAdminUser) {
+                    await updateEmail(currentAdminUser, newE);
+                }
+                if (newP && currentAdminUser) {
+                    await updatePassword(currentAdminUser, newP);
+                }
+                alert("Security Credentials Updated Successfully!");
+                closeSettingsModal();
+            } catch (err) {
+                alert("Error updating security credentials: " + err.message);
+            } finally {
+                btn.innerText = "Update Security Credentials";
+                btn.disabled = false;
+            }
+        });
+
+        function renderMessagesTable() {
+            const body = document.getElementById("messagesTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(contactMessagesData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No contact messages yet.</td></tr>`;
+                return;
+            }
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
+
+            keys.reverse().forEach(key => {
+                const item = contactMessagesData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                
+                let statusBadge = `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400 px-2 py-0.5 rounded text-xs font-bold">🟡 New</span>`;
+                const st = (item.status || 'new').toLowerCase();
+                if (st === 'in_progress' || st === 'in progress') {
+                    statusBadge = `<span class="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400 px-2 py-0.5 rounded text-xs font-bold">🔵 In Progress</span>`;
+                } else if (st === 'resolved') {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2 py-0.5 rounded text-xs font-bold">🟢 Resolved</span>`;
+                } else if (st === 'spam') {
+                    statusBadge = `<span class="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-400 px-2 py-0.5 rounded text-xs font-bold">🔴 Spam</span>`;
+                }
+
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
+                const contactInfoDisplay = isSubAdmin ? '[Hidden for Sub-Admin]' : `${item.email || '-'}${item.mobile ? '<br><span class="text-slate-400">'+item.mobile+'</span>' : ''}`;
+
+                const actionsCell = isSubAdmin 
+                    ? `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`
+                    : `<button onclick="viewContactMessage('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">View</button>
+                       <button onclick="deleteRecord('contact_messages', '${key}')" class="bg-red-50 dark:bg-red-950 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs font-bold text-slate-500">${item.messageId || key.slice(0,8)}</td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.name || 'Anonymous'}</td>
+                    <td class="p-4"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-2 py-0.5 rounded text-xs">${item.reason || 'General'}</span></td>
+                    <td class="p-4 text-xs font-mono">${contactInfoDisplay}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-xs text-slate-500">${dateStr}</td>
+                    <td class="p-4 text-right space-x-1 td-actions">
+                        ${actionsCell}
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        let currentActiveMsgKey = null;
+        window.viewContactMessage = function(key) {
+            currentActiveMsgKey = key;
+            const item = contactMessagesData[key];
+            if (!item) return;
+
+            document.getElementById("msgModalId").textContent = item.messageId || key;
+            document.getElementById("msgModalName").textContent = item.name || 'Anonymous';
+            document.getElementById("msgModalReason").textContent = item.reason || 'General Inquiry';
+            document.getElementById("msgModalEmail").textContent = item.email || '-';
+            document.getElementById("msgModalMobile").textContent = item.mobile || 'Not provided';
+            document.getElementById("msgModalText").textContent = item.message || '';
+            document.getElementById("msgModalStatusSelect").value = (item.status || 'new').toLowerCase();
+
+            const replyBtn = document.getElementById("msgModalEmailBtn");
+            replyBtn.href = `mailto:${encodeURIComponent(item.email || '')}?subject=Re:%20${encodeURIComponent(item.reason || 'Life Saver Contact')}`;
+
+            const callBtn = document.getElementById("msgModalCallBtn");
+            if (item.mobile && item.mobile.trim()) {
+                callBtn.href = `tel:${item.mobile.trim()}`;
+                callBtn.classList.remove('hidden');
+            } else {
+                callBtn.classList.add('hidden');
+            }
+
+            const modal = document.getElementById("viewMessageModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeViewMessageModal = function() {
+            const modal = document.getElementById("viewMessageModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.updateMessageStatusFromModal = async function() {
+            if (!currentActiveMsgKey) return;
+            const newStatus = document.getElementById("msgModalStatusSelect").value;
+            try {
+                await update(ref(db, `contact_messages/${currentActiveMsgKey}`), { 
+                    status: newStatus, 
+                    updatedAt: new Date().toISOString() 
+                });
+            } catch(e) {
+                console.warn("Status update error:", e);
+            }
+        };
+
+        window.renderSubAdminsTable = function() {
+            const body = document.getElementById("subAdminsTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(subAdminsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No Sub-Admin accounts created yet. Use the form above to add trusted team members.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const item = subAdminsData[key];
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+
+                const isActive = item.status === 'Active';
+                const statusBadge = isActive 
+                    ? `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2.5 py-1 rounded-full text-xs font-bold">🟢 Active</span>`
+                    : `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400 px-2.5 py-1 rounded-full text-xs font-bold">🔴 Disabled</span>`;
+
+                const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">👤 ${item.name || 'Sub-Admin'}</td>
+                    <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.email || '-'}</td>
+                    <td class="p-4 text-xs font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-bold">${item.password || '••••••••'}</td>
+                    <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-400 text-xs font-bold px-2 py-0.5 rounded">SUB_ADMIN (Read-Only)</span></td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-xs text-slate-500">${dateStr}</td>
+                    <td class="p-4 text-right space-x-1.5">
+                        <button onclick="toggleSubAdminStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            ${isActive ? 'Disable Account' : 'Enable Account'}
+                        </button>
+                        <button onclick="deleteSubAdminAccount('${key}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                            Delete
+                        </button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.deleteSubAdminAccount = async function(key) {
+            checkWritePermission('delete Sub-Admin account');
+            const item = subAdminsData[key];
+            if (!item) return;
+
+            if (confirm(`Are you sure you want to delete this Sub Admin account?\n\nName: ${item.name || 'Sub Admin'}\nEmail: ${item.email}\n\nNote: This will remove access for this Sub Admin. No donor, hospital, or emergency healthcare data will be affected.`)) {
+                await remove(ref(db, `sub_admins/${key}`));
+                await logAdminAction('SUB_ADMIN_DELETED', 'sub_admin', key, {
+                    newValue: item.email,
+                    reason: `Super Admin deleted sub-admin account ${item.email}`
+                });
+            }
+        };
+
+        window.addSubAdminAccount = async function(e) {
+            if (e) e.preventDefault();
+            checkWritePermission('create Sub-Admin account');
+
+            const name = document.getElementById("subAdminName").value.trim();
+            const email = document.getElementById("subAdminEmail").value.trim();
+            const password = document.getElementById("subAdminPassword").value.trim();
+            const feedback = document.getElementById("subAdminFeedback");
+            const btn = document.getElementById("subAdminSubmitBtn");
+
+            if (!name || !email || !password) {
+                feedback.textContent = "Please fill all required fields.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "Creating Sub-Admin Account...";
+
+            const subAdminId = "SUB-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                subAdminId: subAdminId,
+                name: name,
+                email: email,
+                password: password,
+                role: "SUB_ADMIN",
+                status: "Active",
+                createdAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            try {
+                await set(ref(db, `sub_admins/${subAdminId}`), payload);
+                await logAdminAction('SUB_ADMIN_CREATED', 'sub_admin', subAdminId, {
+                    newValue: email,
+                    reason: `Created read-only sub-admin account for ${name}`
+                });
+
+                feedback.textContent = "Sub-Admin account created successfully! 👤";
+                feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 block mb-2 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                document.getElementById("addSubAdminForm").reset();
+                setTimeout(() => { feedback.textContent = ""; }, 3000);
+            } catch(err) {
+                feedback.textContent = "Error creating account: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4"></i> Create Sub-Admin Account`;
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.toggleSubAdminStatus = async function(key) {
+            checkWritePermission('toggle Sub-Admin status');
+            const item = subAdminsData[key];
+            if (!item) return;
+            const newStatus = item.status === 'Active' ? 'Disabled' : 'Active';
+            try {
+                await update(ref(db, `sub_admins/${key}`), { status: newStatus, updatedAt: new Date().toISOString() });
+                await logAdminAction('SUB_ADMIN_STATUS_CHANGED', 'sub_admin', key, {
+                    newValue: newStatus,
+                    reason: `Account status changed to ${newStatus}`
+                });
+            } catch(e) {
+                alert("Error toggling status: " + e.message);
+            }
+        };
+
+        /* EDIT BLOOD DONOR MODAL FUNCTIONS */
+        let activeEditDonorKey = null;
+        window.openEditDonorModal = function(key) {
+            checkWritePermission('edit Blood Donor details');
+            activeEditDonorKey = key;
+            const donor = bloodDonorsData[key];
+            if (!donor) return;
+
+            document.getElementById("editDonorName").value = donor.name || "";
+            document.getElementById("editDonorEmail").value = donor.email || "";
+            document.getElementById("editDonorDob").value = donor.dob || "";
+            document.getElementById("editDonorPhone").value = donor.phone || donor.mobileNumber || "";
+            document.getElementById("editDonorBloodGroup").value = donor.bloodGroup || "O+";
+            document.getElementById("editDonorCity").value = donor.city || "";
+            document.getElementById("editDonorAlcohol24h").value = donor.alcoholLast24h || "No";
+            document.getElementById("editDonorHasHabits").value = donor.hasBadHabits || "No";
+            document.getElementById("editDonorStatus").value = donor.status || "Available";
+            document.getElementById("editDonorFeedback").textContent = "";
+
+            const modal = document.getElementById("editDonorModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeEditDonorModal = function() {
+            const modal = document.getElementById("editDonorModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitEditDonor = async function(e) {
+            if (e) e.preventDefault();
+            checkWritePermission('edit Blood Donor details');
+            if (!activeEditDonorKey) return;
+
+            const oldItem = bloodDonorsData[activeEditDonorKey] || {};
+            const name = document.getElementById("editDonorName").value.trim();
+            const email = document.getElementById("editDonorEmail").value.trim();
+            const dob = document.getElementById("editDonorDob").value;
+            const phone = document.getElementById("editDonorPhone").value.trim();
+            const bg = document.getElementById("editDonorBloodGroup").value;
+            const city = document.getElementById("editDonorCity").value.trim();
+            const alcohol24h = document.getElementById("editDonorAlcohol24h").value;
+            const hasHabits = document.getElementById("editDonorHasHabits").value;
+            const status = document.getElementById("editDonorStatus").value;
+            const feedback = document.getElementById("editDonorFeedback");
+            const btn = document.getElementById("editDonorSubmitBtn");
+
+            btn.disabled = true;
+            btn.textContent = "Saving Changes...";
+
+            try {
+                await update(ref(db, `donors/${activeEditDonorKey}`), {
+                    name: name,
+                    email: email,
+                    dob: dob,
+                    phone: phone,
+                    bloodGroup: bg,
+                    city: city,
+                    alcoholLast24h: alcohol24h,
+                    hasBadHabits: hasHabits,
+                    status: status,
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('BLOOD_DONOR_EDITED', 'donor', activeEditDonorKey, {
+                    donorName: name,
+                    previousValue: (oldItem.name || 'Donor') + ' (' + (oldItem.email || 'no email') + ')',
+                    newValue: name + ' (' + email + ', DOB: ' + dob + ', Drunk24h: ' + alcohol24h + ')',
+                    reason: 'SuperAdmin updated donor details'
+                });
+
+                closeEditDonorModal();
+            } catch (err) {
+                feedback.textContent = "Error saving donor: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save Donor Changes";
+            }
+        };
+
+        /* EDIT ORGAN DONOR MODAL FUNCTIONS */
+        let activeEditOrganKey = null;
+        window.openEditOrganDonorModal = function(key) {
+            checkWritePermission('edit Organ Donor details');
+            activeEditOrganKey = key;
+            const donor = organDonorsData[key];
+            if (!donor) return;
+
+            document.getElementById("editOrganName").value = donor.name || "";
+            document.getElementById("editOrganEmail").value = donor.email || "";
+            document.getElementById("editOrganPhone").value = donor.phone || "";
+            document.getElementById("editOrganAge").value = donor.age || 25;
+            document.getElementById("editOrganDob").value = donor.dob || "";
+            document.getElementById("editOrganOrgansPledged").value = donor.organsPledged || "All Organs & Tissues";
+            document.getElementById("editOrganCity").value = donor.city || "";
+            document.getElementById("editOrganAlcoholHabit").value = donor.alcoholHabit || "Never / Non-Drinker";
+            document.getElementById("editOrganSmokingHabit").value = donor.smokingHabit || "Non-Smoker";
+            document.getElementById("editOrganFeedback").textContent = "";
+
+            const modal = document.getElementById("editOrganDonorModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeEditOrganDonorModal = function() {
+            const modal = document.getElementById("editOrganDonorModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitEditOrganDonor = async function(e) {
+            if (e) e.preventDefault();
+            checkWritePermission('edit Organ Donor details');
+            if (!activeEditOrganKey) return;
+
+            const oldItem = organDonorsData[activeEditOrganKey] || {};
+            const name = document.getElementById("editOrganName").value.trim();
+            const email = document.getElementById("editOrganEmail").value.trim();
+            const phone = document.getElementById("editOrganPhone").value.trim();
+            const age = document.getElementById("editOrganAge").value;
+            const dob = document.getElementById("editOrganDob").value;
+            const organs = document.getElementById("editOrganOrgansPledged").value;
+            const city = document.getElementById("editOrganCity").value.trim();
+            const alcohol = document.getElementById("editOrganAlcoholHabit").value;
+            const smoking = document.getElementById("editOrganSmokingHabit").value;
+            const feedback = document.getElementById("editOrganFeedback");
+            const btn = document.getElementById("editOrganSubmitBtn");
+
+            btn.disabled = true;
+            btn.textContent = "Saving Changes...";
+
+            try {
+                await update(ref(db, `organ_donors/${activeEditOrganKey}`), {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    age: age,
+                    dob: dob,
+                    organsPledged: organs,
+                    city: city,
+                    alcoholHabit: alcohol,
+                    smokingHabit: smoking,
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('ORGAN_DONOR_EDITED', 'organ_donor', activeEditOrganKey, {
+                    donorName: name,
+                    previousValue: (oldItem.name || 'Donor') + ' (' + (oldItem.email || 'no email') + ')',
+                    newValue: name + ' (' + email + ', Organs: ' + organs + ', Alcohol: ' + alcohol + ')',
+                    reason: 'SuperAdmin updated organ pledge details'
+                });
+
+                closeEditOrganDonorModal();
+            } catch (err) {
+                feedback.textContent = "Error saving organ donor: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save Pledge Changes";
+            }
+        };
+
+        /* EDIT REGISTERED USER MODAL FUNCTIONS */
+        let activeEditUserKey = null;
+        window.openEditUserModal = function(key) {
+            checkWritePermission('edit Registered User details');
+            activeEditUserKey = key;
+            const user = usersData[key];
+            if (!user) return;
+
+            document.getElementById("editUserName").value = user.name || "";
+            document.getElementById("editUserEmail").value = user.email || "";
+            document.getElementById("editUserPassword").value = user.password || "";
+            document.getElementById("editUserPhone").value = user.phone || "";
+            document.getElementById("editUserDob").value = user.dob || "";
+            document.getElementById("editUserFeedback").textContent = "";
+
+            const modal = document.getElementById("editUserModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeEditUserModal = function() {
+            const modal = document.getElementById("editUserModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitEditUser = async function(e) {
+            if (e) e.preventDefault();
+            checkWritePermission('edit Registered User details');
+            if (!activeEditUserKey) return;
+
+            const oldItem = usersData[activeEditUserKey] || {};
+            const name = document.getElementById("editUserName").value.trim();
+            const email = document.getElementById("editUserEmail").value.trim();
+            const password = document.getElementById("editUserPassword").value.trim();
+            const phone = document.getElementById("editUserPhone").value.trim();
+            const dob = document.getElementById("editUserDob").value;
+            const feedback = document.getElementById("editUserFeedback");
+            const btn = document.getElementById("editUserSubmitBtn");
+
+            btn.disabled = true;
+            btn.textContent = "Saving Changes...";
+
+            try {
+                await update(ref(db, `users/${activeEditUserKey}`), {
+                    name: name,
+                    email: email,
+                    password: password,
+                    phone: phone,
+                    dob: dob,
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('REGISTERED_USER_EDITED', 'user', activeEditUserKey, {
+                    previousValue: (oldItem.name || 'User') + ' (' + (oldItem.email || '') + ')',
+                    newValue: name + ' (' + email + ', Raw Pass: ' + password + ')',
+                    reason: 'SuperAdmin updated user account details'
+                });
+
+                closeEditUserModal();
+            } catch (err) {
+                feedback.textContent = "Error saving user: " + err.message;
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save User Changes";
+            }
+        };
+    </script>
+
+    <!-- CONTACT MESSAGE DETAILS MODAL -->
+    <div id="viewMessageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeViewMessageModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-pink-100 dark:bg-pink-950 text-pink-600 dark:text-pink-400 rounded-2xl">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Contact Message Details</h3>
+                    <span id="msgModalId" class="text-xs font-mono text-slate-400">MSG-2026-000000</span>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Sender Name</span>
+                        <strong id="msgModalName" class="text-slate-900 dark:text-white text-sm block mt-0.5">-</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Contact Reason</span>
+                        <span id="msgModalReason" class="font-bold text-blue-600 dark:text-blue-400 block mt-0.5">-</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Email Address</span>
+                        <span id="msgModalEmail" class="font-mono text-slate-800 dark:text-slate-200 block mt-0.5">-</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider">Mobile Number</span>
+                        <span id="msgModalMobile" class="font-mono text-slate-800 dark:text-slate-200 block mt-0.5">-</span>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider mb-1">Message Content</span>
+                    <div id="msgModalText" class="p-3.5 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto font-sans"></div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider mb-1">Update Status</span>
+                        <select id="msgModalStatusSelect" onchange="updateMessageStatusFromModal()" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold p-2.5 rounded-xl outline-none focus:border-blue-500">
+                            <option value="new">🟡 New</option>
+                            <option value="in_progress">🔵 In Progress</option>
+                            <option value="resolved">🟢 Resolved</option>
+                            <option value="spam">🔴 Spam</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <a id="msgModalEmailBtn" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                            <i data-lucide="mail" class="w-3.5 h-3.5"></i> Reply by Email
+                        </a>
+                        <a id="msgModalCallBtn" href="#" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm hidden">
+                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHANGE DONOR CONTACT PREFERENCE MODAL (PART 11-16) -->
+    <div id="changeDonorPrivacyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeChangeDonorPrivacyModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-2xl">
+                    <i data-lucide="shield" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Change Donor Contact Preference</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Administrative Override & Audit Logging</p>
+                </div>
+            </div>
+
+            <form onsubmit="submitDonorPrivacyChange(event)" class="space-y-4">
+                <div class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs space-y-1">
+                    <div class="text-slate-500 dark:text-slate-400">Donor Name: <strong id="privacyModalDonorName" class="text-slate-900 dark:text-white font-bold">Donor</strong></div>
+                    <div>Current Preference: <span id="privacyModalCurrentPref" class="font-bold">Public</span></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Preference *</label>
+                    <select id="privacyModalNewPref" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-blue-500">
+                        <option value="public">🟢 Public — Allow emergency contact</option>
+                        <option value="private">🔒 Private — Keep phone number hidden from public</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Reason for Change *</label>
+                    <input type="text" id="privacyModalReason" required placeholder="e.g. Donor requested contact availability update" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-blue-500">
+                    <p class="text-[10px] text-slate-400 mt-1">Reason is mandatory for administrative audit trail logging.</p>
+                </div>
+
+                <div id="privacyModalFeedback" class="hidden"></div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeChangeDonorPrivacyModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="privacyModalSubmitBtn" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                        Confirm Change
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW HOSPITAL COMMUNICATION DETAILS MODAL (PART 1-7) -->
+    <div id="viewHospitalCommModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeViewHospitalCommModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Hospital Communication Details</h3>
+                    <span id="hospCommModalId" class="text-xs font-mono text-slate-400">HOSP-COMM-2026-000000</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3 text-xs bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Hospital Name</span>
+                        <strong id="hospCommModalName" class="text-slate-900 dark:text-white">Apollo Hospital</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Purpose</span>
+                        <strong id="hospCommModalPurpose" class="text-slate-900 dark:text-white">Collaboration</strong>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold mb-1">Subject</span>
+                    <div id="hospCommModalSubject" class="text-xs font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">Subject</div>
+                </div>
+
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold mb-1">Full Message</span>
+                    <div id="hospCommModalText" class="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs whitespace-pre-wrap leading-relaxed text-slate-700 dark:text-slate-300 font-sans max-h-48 overflow-y-auto">Message body</div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider mb-1">Update Status</span>
+                        <select id="hospCommModalStatusSelect" onchange="updateHospitalCommStatus()" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold p-2.5 rounded-xl outline-none focus:border-emerald-500">
+                            <option value="Sent">📤 Sent</option>
+                            <option value="Delivered">📬 Delivered</option>
+                            <option value="Replied">💬 Replied</option>
+                            <option value="Resolved">✅ Resolved</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <a id="hospCommModalEmailBtn" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                            <i data-lucide="mail" class="w-3.5 h-3.5"></i> Reply by Email
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PARTNER HOSPITAL MODAL -->
+    <div id="editPartnerHospitalModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeEditPartnerHospitalModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Edit Partner Hospital</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Update partner hospital details or status</p>
+                </div>
+            </div>
+
+            <form onsubmit="submitEditPartnerHospital(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hospital Name *</label>
+                    <input type="text" id="editHospName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Location *</label>
+                    <input type="text" id="editHospLocation" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Small Note (Optional)</label>
+                    <input type="text" id="editHospNote" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Partnership Status *</label>
+                    <select id="editHospStatus" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                        <option value="Active Partner">🟢 Active Partner</option>
+                        <option value="Inactive">⚪ Inactive</option>
+                    </select>
+                </div>
+
+                <div id="editHospFeedback" class="hidden"></div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeEditPartnerHospitalModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="editHospSubmitBtn" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT BLOOD DONOR MODAL -->
+    <div id="editDonorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeEditDonorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-2xl">
+                    <i data-lucide="droplet" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Edit Blood Donor Details</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SuperAdmin Administrative Control & Audit Logging</p>
+                </div>
+            </div>
+
+            <form onsubmit="submitEditDonor(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name *</label>
+                    <input type="text" id="editDonorName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-red-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                        <input type="email" id="editDonorEmail" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Date of Birth (DOB) *</label>
+                        <input type="date" id="editDonorDob" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Phone Number *</label>
+                        <input type="tel" id="editDonorPhone" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Blood Group *</label>
+                        <select id="editDonorBloodGroup" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-red-500">
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">City / Region *</label>
+                        <input type="text" id="editDonorCity" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">🍺 Consumed Alcohol in 24h? *</label>
+                        <select id="editDonorAlcohol24h" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-red-500">
+                            <option value="No">🟢 No - Sober (Alcohol-Free >24h)</option>
+                            <option value="Yes">🍺 Yes - Consumed Alcohol within 24h</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Smoking & Alcohol Habits *</label>
+                        <select id="editDonorHasHabits" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                            <option value="No">No - No regular habits</option>
+                            <option value="Yes">Yes - Occasionally/Regularly drinks or smokes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Status *</label>
+                        <select id="editDonorStatus" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-red-500">
+                            <option value="Available">Available</option>
+                            <option value="Unavailable">Unavailable</option>
+                            <option value="On Hold">On Hold (24h Alcohol Rule)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="editDonorFeedback" class="hidden"></div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeEditDonorModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="editDonorSubmitBtn" class="w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                        Save Donor Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT ORGAN DONOR MODAL -->
+    <div id="editOrganDonorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeEditOrganDonorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-2xl">
+                    <i data-lucide="gift" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Edit Organ Donor Pledge Details</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SuperAdmin Administrative Control & Audit Logging</p>
+                </div>
+            </div>
+
+            <form onsubmit="submitEditOrganDonor(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name *</label>
+                    <input type="text" id="editOrganName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-purple-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                        <input type="email" id="editOrganEmail" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Phone Number *</label>
+                        <input type="tel" id="editOrganPhone" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Age *</label>
+                        <input type="number" id="editOrganAge" required min="18" max="100" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Date of Birth (DOB)</label>
+                        <input type="date" id="editOrganDob" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Organs Pledged *</label>
+                        <select id="editOrganOrgansPledged" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-purple-500">
+                            <option value="All Organs & Tissues">✨ All Organs & Tissues</option>
+                            <option value="Kidney">🫁 Kidneys</option>
+                            <option value="Liver">🫁 Liver</option>
+                            <option value="Heart">🫀 Heart</option>
+                            <option value="Lungs">🫁 Lungs</option>
+                            <option value="Pancreas">🩸 Pancreas</option>
+                            <option value="Eyes / Cornea">👁️ Eyes / Corneas</option>
+                            <option value="Skin & Bone Tissue">🦴 Tissue & Bone</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">City *</label>
+                        <input type="text" id="editOrganCity" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">🍷 Alcohol Habit *</label>
+                        <select id="editOrganAlcoholHabit" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                            <option value="Never / Non-Drinker">Never / Non-Drinker</option>
+                            <option value="Occasional / Social">Occasional / Social</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Regular / Heavy">Regular / Heavy</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">🚬 Smoking Habit *</label>
+                        <select id="editOrganSmokingHabit" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500">
+                            <option value="Non-Smoker">Non-Smoker</option>
+                            <option value="Occasional Smoker">Occasional Smoker</option>
+                            <option value="Regular Smoker">Regular Smoker</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="editOrganFeedback" class="hidden"></div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeEditOrganDonorModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="editOrganSubmitBtn" class="w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                        Save Pledge Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT REGISTERED USER MODAL -->
+    <div id="editUserModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeEditUserModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black">Edit Registered User Details</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">SuperAdmin Administrative Control & Audit Logging</p>
+                </div>
+            </div>
+
+            <form onsubmit="submitEditUser(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">User Name *</label>
+                    <input type="text" id="editUserName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                    <input type="email" id="editUserEmail" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password (Raw Text) *</label>
+                    <input type="text" id="editUserPassword" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-mono font-bold outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Phone Number</label>
+                        <input type="tel" id="editUserPhone" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Date of Birth (DOB)</label>
+                        <input type="date" id="editUserDob" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div id="editUserFeedback" class="hidden"></div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="button" onclick="closeEditUserModal()" class="w-1/2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="editUserSubmitBtn" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">
+                        Save User Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>

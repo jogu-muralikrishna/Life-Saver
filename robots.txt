@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-login.html
+
+Sitemap: https://jogu-muralikrishna.github.io/Life-Saver/sitemap.xml

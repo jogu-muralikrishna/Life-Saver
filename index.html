@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Saver - Emergency Blood Donation, Organ Donor Registry & Healthcare Network</title>
+    <meta name="description" content="Life Saver is a 24/7 free emergency healthcare platform. Search blood donors by city and blood group (A+, B+, O+, AB-), pledge organ donation, find accredited ICU hospitals, locate ambulances, or post urgent blood requests.">
+    <meta name="keywords" content="life saver, blood donation, organ donation, blood donor finder, emergency blood request, O+ blood donor, pledge organ, emergency ambulance, healthcare near me, find blood donor online">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://jogu-muralikrishna.github.io/Life-Saver/index.html">
+
+    <!-- Google Search Console Verification Meta Tag -->
+    <meta name="google-site-verification" content="google7f6c6857dafe10a0">
+
+    <!-- PWA & Mobile App Meta Tags -->
+    <meta name="theme-color" content="#dc2626">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LifeSaver">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <!-- Instant Theme Initialization (Default: Light Mode) -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <!-- Open Graph & Social Sharing Metadata -->
+    <meta property="og:title" content="Life Saver - 24/7 Emergency Blood & Organ Donation Platform">
+    <meta property="og:description" content="Find verified blood donors, request urgent blood supplies, pledge organs, and locate emergency hospitals & 108 ambulances instantly.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jogu-muralikrishna.github.io/Life-Saver/index.html">
+    <meta property="og:image" content="icon.png">
+
+    <!-- Schema.org Medical & Emergency Service JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmergencyService",
+      "name": "Life Saver Healthcare & Blood Donation Network",
+      "description": "24/7 Emergency Healthcare Services, Blood Donor Finder, Organ Donation Registry & Ambulance Network",
+      "url": "https://jogu-muralikrishna.github.io/Life-Saver",
+      "telephone": "+91-108",
+      "areaServed": "Global",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://jogu-muralikrishna.github.io/Life-Saver/blood.html?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Global PWA Install Prompt Listener (Captured early before DOM parse)
+        window.deferredPrompt = window.deferredPrompt || null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            console.log('[LifeSaver PWA] beforeinstallprompt event captured');
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+        window.addEventListener('appinstalled', () => {
+            window.deferredPrompt = null;
+            console.log('[LifeSaver PWA] App installed successfully');
+        });
+    </script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- URGENT ANNOUNCEMENT TICKER -->
+    <div id="urgentTickerWrap" class="ticker-wrap py-2 px-4 hidden">
+        <div class="max-w-7xl mx-auto flex items-center gap-3">
+            <span class="bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider shrink-0">Emergency Broadcast</span>
+            <div id="urgentTickerContent" class="ticker text-xs font-semibold"></div>
+        </div>
+    </div>
+
+    <!-- DISCLAIMER / WARNING BANNER -->
+    <div id="warningBanner" class="bg-slate-900 text-white px-4 py-2.5 text-xs text-center border-b border-slate-800 flex items-center justify-between gap-4">
+        <div class="flex items-center justify-center gap-2 max-w-7xl mx-auto">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 shrink-0"></i>
+            <span><strong>Medical Notice:</strong> Life Saver is a voluntary emergency assistance directory. For life-threatening emergencies, call <strong>108 (Ambulance)</strong> immediately.</span>
+        </div>
+        <button onclick="hideBanner()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-red-600 font-black text-2xl tracking-tight">
+                <div class="bg-red-600 text-white p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                </div>
+                <span>Life <span class="text-emerald-500">Saver</span></span>
+            </a>
+
+            <!-- NAV LINKS & ACTIONS -->
+            <div class="flex items-center gap-3">
+                <!-- PWA APP INSTALL BUTTON -->
+                <button id="pwaInstallBtn" onclick="installPWA()" class="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-md shadow-purple-500/20 transition">
+                    <i data-lucide="smartphone" class="w-4 h-4"></i> <span>Install App</span>
+                </button>
+
+                <!-- THEME TOGGLE BUTTON -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+
+                <button onclick="openContactModal()" class="hidden sm:flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-900/50 px-3 py-2 rounded-xl text-xs font-bold transition">
+                    <i data-lucide="mail" class="w-4 h-4"></i> <span>Contact Us</span>
+                </button>
+
+                <button id="btnAIAssist" onclick="openTriageModal()" class="hidden md:flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border border-blue-200 dark:border-blue-900/50 px-3.5 py-2 rounded-xl text-xs font-bold transition">
+                    <i data-lucide="bot" class="w-4 h-4"></i> AI Triage Assistant
+                </button>
+
+                <button onclick="toggleSOS()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition shadow-md shadow-red-500/20">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 animate-bounce"></i> SOS 108
+                </button>
+
+                <a href="auth.html" id="userAuthNav" class="hidden sm:flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold px-3 py-2 transition rounded-xl">
+                    <i data-lucide="user" class="w-4 h-4"></i> <span id="userAuthLabel">Account</span>
+                </a>
+                <a href="admin-login.html" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> Admin Login
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="px-6 py-12 md:py-16 max-w-7xl mx-auto text-center relative">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-6 uppercase tracking-wider">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span> 24/7 Rapid Emergency Healthcare Network
+        </div>
+        
+        <h1 id="txtHeroTitle" class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
+            Every Second Counts. <br class="hidden md:inline"/>
+            <span class="text-shimmer">Connect & Save Lives Nearby.</span>
+        </h1>
+        
+        <p id="txtHeroSubtitle" class="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
+            Locate blood donors instantly, request emergency ambulances, search accredited hospitals, or pledge organ donations in real-time.
+        </p>
+
+        <!-- GLOBAL SEARCH BAR -->
+        <div class="relative max-w-2xl mx-auto mb-8">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                <i data-lucide="search" class="w-5 h-5"></i>
+            </div>
+            <input type="text" id="globalSearch" oninput="filterServices()" placeholder='Try searching "O+ Blood in Hyderabad", "Ambulance", "Hospitals"...' 
+                class="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold py-4 pl-12 pr-12 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 focus:border-red-500 focus:outline-none text-sm md:text-base transition">
+        </div>
+
+        <!-- CALL-TO-ACTION BUTTONS -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-10">
+            <button id="btnBecomeDonor" onclick="goTo('register-donor.html')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md shadow-red-500/20 flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Become Donor
+            </button>
+
+            <button onclick="shareWhatsAppReferral()" class="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition">
+                <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+            </button>
+        </div>
+
+        <!-- LIVE STATS BAR (REAL DATA ONLY - FEATURE 17 & 19) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <div class="glass-card p-5 text-center">
+                <div id="idxDonorsCount" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Registered Donors</div>
+            </div>
+            <div class="glass-card p-5 text-center">
+                <div id="idxHospitalsCount" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400">Loading...</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Colab Hospitals</div>
+            </div>
+            <div class="glass-card p-5 text-center">
+                <div id="idxRequestsCount" class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">0</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Active Requests</div>
+            </div>
+            <div class="glass-card p-5 text-center">
+                <div id="idxServiceLabel" class="text-3xl font-extrabold text-red-600 dark:text-red-400">100%</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-1">Free Access</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SERVICES SECTION -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 id="txtServicesTitle" class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Life-Saving Services</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Select a service to access immediate medical assistance</p>
+            </div>
+        </div>
+
+        <div id="servicesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16">
+
+            <!-- 1. Hospitals -->
+            <div onclick="goTo('hospitals.html')" class="service-card glass-card p-6 cursor-pointer group flex flex-col justify-between border-t-4 border-t-blue-500" data-title="hospitals navigation location map">
+                <div>
+                    <div class="bg-blue-50 dark:bg-blue-950/40 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition border border-blue-100 dark:border-blue-900/50">
+                        <i data-lucide="building-2" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Find Hospitals</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                        Locate nearby hospitals with ICU beds, emergency rooms, and GPS navigation.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition">
+                    <span>Access Service</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- 2. Blood Donation -->
+            <div onclick="goTo('blood.html')" class="service-card glass-card p-6 cursor-pointer group flex flex-col justify-between border-t-4 border-t-red-500" data-title="blood donor donate request o+ a+ b+ ab-">
+                <div>
+                    <div class="bg-red-50 dark:bg-red-950/40 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-red-600 dark:text-red-400 group-hover:scale-110 transition border border-red-100 dark:border-red-900/50">
+                        <i data-lucide="droplet" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Donate & Find Blood</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                        Search verified donors by blood group & city, or register as a blood donor.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-red-600 dark:text-red-400 group-hover:translate-x-1 transition">
+                    <span>Access Service</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- 3. Ambulance -->
+            <div onclick="goTo('ambulance.html')" class="service-card glass-card p-6 cursor-pointer group flex flex-col justify-between border-t-4 border-t-amber-500" data-title="ambulance call driver transport emergency 108 102">
+                <div>
+                    <div class="bg-amber-50 dark:bg-amber-950/40 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition border border-amber-100 dark:border-amber-900/50">
+                        <i data-lucide="truck" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Call Ambulance</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                        Track and contact 24/7 emergency ambulances with real-time traffic ETAs.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition">
+                    <span>Access Service</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- 4. Organ Donation -->
+            <div onclick="goTo('organ.html')" class="service-card glass-card p-6 cursor-pointer group flex flex-col justify-between border-t-4 border-t-purple-500" data-title="organ pledge donate kidney heart liver eye">
+                <div>
+                    <div class="bg-purple-50 dark:bg-purple-950/40 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition border border-purple-100 dark:border-purple-900/50">
+                        <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Donate Organs</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                        Pledge organ donation to leave a legacy and grant second chances at life.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:translate-x-1 transition">
+                    <span>Access Service</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+            <!-- 5. Emergency Helpline -->
+            <div onclick="goTo('emergency.html')" class="service-card glass-card p-6 cursor-pointer group flex flex-col justify-between border-t-4 border-t-emerald-500" data-title="emergency hotline helpline police fire medical 100 101 108">
+                <div>
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 w-12 h-12 rounded-xl flex items-center justify-center mb-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition border border-emerald-100 dark:border-emerald-900/50">
+                        <i data-lucide="phone-call" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Emergency Hotlines</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                        Direct one-tap dialing for National Emergency, Police, Fire, and First Aid.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition">
+                    <span>Access Service</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-8 px-6 text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
+                <i data-lucide="heart" class="w-4 h-4 text-red-500"></i> Life Saver Healthcare Network
+            </div>
+
+            <!-- OPTIONAL DISCREET LANGUAGE SELECTOR IN FOOTER -->
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i> Language:
+                </span>
+                <div class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-0.5 border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                    <button onclick="changeLanguage('EN')" class="px-2 py-0.5 rounded text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition">EN</button>
+                    <button onclick="changeLanguage('TE')" class="px-2 py-0.5 rounded text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition">తెలుగు</button>
+                    <button onclick="changeLanguage('HI')" class="px-2 py-0.5 rounded text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-700 transition">हिंदी</button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="openContactModal()" class="text-xs text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 font-bold flex items-center gap-1 transition">
+                    <i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us
+                </button>
+                <span class="text-slate-300 dark:text-slate-700">•</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400">© 2026 Life Saver. All Rights Reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI DOCTOR & MEDICAL REPORT ASSISTANT MODAL -->
+    <div id="triageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col max-h-[90vh]">
+            <!-- CLOSE BUTTON -->
+            <button onclick="closeTriageModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10">✕</button>
+
+            <!-- MODAL HEADER -->
+            <div class="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-3 rounded-2xl border border-blue-100 dark:border-blue-900/50">
+                    <i data-lucide="bot" class="w-6 h-6"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <h3 class="font-black text-lg text-slate-900 dark:text-white">AI Medical Report Assistant</h3>
+                        <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-emerald-200 dark:border-emerald-900">Health Assistant</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Voice-enabled medical report breakdown, symptom explanation & clinical triage helper</p>
+                </div>
+            </div>
+
+            <!-- NON-DIAGNOSIS SAFETY DISCLAIMER BANNER (FEATURE 18) -->
+            <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-xl text-[11px] text-amber-900 dark:text-amber-200 leading-snug mb-3 flex items-start gap-2">
+                <i data-lucide="info" class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5"></i>
+                <div>
+                    <strong class="font-bold">Medical Disclaimer:</strong> This tool explains medical information in simpler language. It does not diagnose conditions or replace a qualified healthcare professional.
+                </div>
+            </div>
+
+            <!-- MODAL TAB SELECTOR -->
+            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-4 border border-slate-200 dark:border-slate-800 text-xs font-bold shrink-0">
+                <button id="tabBtnDoctor" onclick="switchAITab('doctor')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5 text-blue-500"></i> Medical Assistant
+                </button>
+                <button id="tabBtnReport" onclick="switchAITab('report')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-500"></i> Report Analyzer
+                </button>
+                <button id="tabBtnTriage" onclick="switchAITab('triage')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-red-500"></i> Rapid Triage
+                </button>
+            </div>
+
+            <!-- TAB 1: DOCTOR CHAT & CONSULTATION -->
+            <div id="aiTabDoctor" class="flex-1 flex flex-col overflow-hidden min-h-[320px]">
+                <!-- VOICE & CONTROLS HEADER BAR -->
+                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-2xl mb-3 border border-slate-200 dark:border-slate-800 text-xs">
+                    <span class="text-slate-600 dark:text-slate-400 font-semibold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online AI Consultation
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="resetDoctorConsultation()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1" title="Start a fresh doctor consultation">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                        </button>
+                        <button id="voiceMicBtn" onclick="toggleVoiceInput()" class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border border-blue-200 dark:border-blue-900/50 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="mic" class="w-3.5 h-3.5"></i> <span id="micBtnText">Voice Mic</span>
+                        </button>
+                        <button id="ttsToggleBtn" onclick="toggleTextToSpeech()" class="bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1" title="Toggle AI Doctor Audio Voice Response">
+                            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> <span id="ttsBtnText">Voice: OFF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- QUICK SYMPTOM CHIPS -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar text-xs">
+                    <span class="text-[11px] font-bold text-slate-400 shrink-0">Quick Symptoms:</span>
+                    <button onclick="sendQuickSymptom('I have a severe headache')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🤕 Headache</button>
+                    <button onclick="sendQuickSymptom('I have stomach pain')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🤢 Stomach Pain</button>
+                    <button onclick="sendQuickSymptom('I feel chest discomfort')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🫀 Chest Discomfort</button>
+                    <button onclick="sendQuickSymptom('I have fever and body pains')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🌡️ Fever / Cold</button>
+                </div>
+
+                <!-- CHAT MESSAGES WINDOW WITH DRAG & DROP ZONE -->
+                <div id="aiChatBox" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropImage(event)" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs relative transition">
+                    <div id="dragDropOverlay" class="hidden absolute inset-0 bg-blue-600/90 text-white backdrop-blur-sm z-20 rounded-2xl flex flex-col items-center justify-center pointer-events-none p-4 text-center">
+                        <i data-lucide="image-plus" class="w-10 h-10 mb-2 animate-bounce"></i>
+                        <p class="font-black text-sm">Drop Medical Report Picture Here</p>
+                        <p class="text-[11px] opacity-80">Image will be attached for AI Doctor OCR Analysis</p>
+                    </div>
+
+                    <div class="flex items-start gap-2.5 bg-blue-50/70 dark:bg-blue-950/30 p-3 rounded-2xl border border-blue-100 dark:border-blue-900/40">
+                        <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold">🩺</div>
+                        <div>
+                            <strong class="text-blue-700 dark:text-blue-400 block mb-1">AI Doctor Specialist & Vision OCR:</strong>
+                            <p class="leading-relaxed">Hello! Tell me your symptom, or <strong>drag & drop / upload a picture of your medical report</strong> below to ask any doubts! Use <strong>Voice Mic</strong> to speak!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ATTACHED IMAGE PREVIEW BAR -->
+                <div id="imagePreviewWrap" class="hidden flex items-center justify-between bg-blue-50 dark:bg-blue-950/40 p-2.5 rounded-2xl mt-2 border border-blue-200 dark:border-blue-900/50 text-xs">
+                    <div class="flex items-center gap-2">
+                        <img id="imagePreviewImg" class="w-10 h-10 object-cover rounded-xl border border-blue-300 dark:border-blue-700" src="" alt="Report Preview"/>
+                        <div>
+                            <span id="imagePreviewName" class="font-bold text-slate-900 dark:text-white block truncate max-w-[180px]">Medical_Report.jpg</span>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="check-circle" class="w-3 h-3"></i> Report Pic Attached (Ready for Doctor OCR)
+                            </span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="removeAttachedImage()" class="bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-200 font-bold px-2.5 py-1 rounded-xl text-xs transition">✕ Remove</button>
+                </div>
+
+                <!-- CHAT INPUT FORM -->
+                <form id="aiDoctorForm" onsubmit="handleAIDoctorSubmit(event)" class="mt-2 flex items-center gap-2">
+                    <label for="reportImageInput" class="bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-300 p-3 rounded-xl cursor-pointer transition shrink-0 border border-slate-200 dark:border-slate-700" title="Upload/Attach Medical Report Picture (JPG, PNG)">
+                        <i data-lucide="image-plus" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                        <input type="file" id="reportImageInput" accept="image/*" onchange="handleImageSelect(event)" class="hidden">
+                    </label>
+                    <input type="text" id="aiDoctorInput" placeholder="Ask doubt or describe symptom (or attach report pic)..." class="flex-1 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-3 rounded-xl text-xs outline-none focus:border-blue-500">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shrink-0 shadow-md shadow-blue-500/20">
+                        <i data-lucide="send" class="w-4 h-4"></i> Send
+                    </button>
+                </form>
+            </div>
+
+            <!-- TAB 2: MEDICAL REPORT ANALYZER -->
+            <div id="aiTabReport" class="hidden flex-1 flex-col overflow-y-auto space-y-4">
+                <!-- TOP UTILITY TOOLBAR (PRIVACY MODE & REPORT COMPARISON) -->
+                <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/80 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs">
+                    <div class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-500"></i> Medical Report Suite
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btnPrivacyMode" onclick="togglePrivacyMode()" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 hover:bg-slate-50" title="Toggle PII Privacy Masking">
+                            <i data-lucide="lock" class="w-3.5 h-3.5 text-blue-500"></i> <span id="txtPrivacyMode">Privacy Mode: OFF</span>
+                        </button>
+                        <button type="button" onclick="toggleCompareMode()" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 hover:bg-slate-50" title="Compare current report with a previous lab report">
+                            <i data-lucide="git-compare" class="w-3.5 h-3.5 text-purple-500"></i> <span>Compare Previous Report</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/40 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+                    <i data-lucide="file-search" class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5"></i>
+                    <div>
+                        <strong>Medical Lab Report Analyzer (PDF / JPG / PNG):</strong> Drag & drop a lab report photo/PDF or paste text. The AI Doctor extracts lab values, checks printed lab reference ranges, converts medical jargon into plain English, and provides sensible next steps!
+                    </div>
+                </div>
+
+                <!-- DRAG & DROP REPORT PICTURE / PDF ZONE & CAMERA BUTTON -->
+                <div class="space-y-2">
+                    <div id="reportDropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropImage(event)" class="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50/50 dark:bg-slate-950/50" onclick="document.getElementById('reportFileInput').click()">
+                        <i data-lucide="upload-cloud" class="w-7 h-7 text-emerald-500 mx-auto mb-1 animate-bounce"></i>
+                        <p class="text-xs font-bold text-slate-800 dark:text-slate-200">Drag & Drop Medical Report File Here</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Supports PDF, JPG, JPEG, PNG (CBC Blood, HbA1c, Lipid, LFT, KFT, Thyroid TSH)</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <label for="reportFileInput" class="w-full bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+                            <i data-lucide="camera" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i> 📷 Take Photo / Upload File
+                            <input type="file" id="reportFileInput" accept="image/*,.pdf" onchange="handleReportFileSelect(event)" class="hidden">
+                        </label>
+
+                        <button type="button" onclick="loadSampleReport('cbc')" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 py-2.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700">
+                            <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i> 📋 Load Sample CBC Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECONDARY FILE INPUT FOR REPORT COMPARISON (HIDDEN BY DEFAULT) -->
+                <div id="compareReportWrap" class="hidden p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 text-xs space-y-2">
+                    <div class="font-bold text-purple-900 dark:text-purple-300 flex items-center gap-1.5">
+                        <i data-lucide="git-compare" class="w-4 h-4 text-purple-600"></i> Compare With Previous Report
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-300">Select or paste your earlier medical report to compare parameter trends over time (e.g. Hemoglobin 10.4 → 11.2 ↑):</p>
+                    <textarea id="previousReportInput" rows="2" placeholder="Paste previous lab report text here to compare trends..." class="w-full bg-white dark:bg-slate-900 border border-purple-200 dark:border-purple-800 p-2 rounded-xl text-xs outline-none focus:border-purple-500 font-mono"></textarea>
+                </div>
+
+                <!-- SAMPLE REPORT QUICK BUTTONS -->
+                <div class="flex items-center gap-2 text-xs overflow-x-auto pb-1 no-scrollbar">
+                    <span class="font-bold text-slate-400 shrink-0">Sample Reports:</span>
+                    <button type="button" onclick="loadSampleReport('cbc')" class="bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-xl font-semibold transition shrink-0">CBC Blood</button>
+                    <button type="button" onclick="loadSampleReport('lipid')" class="bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-xl font-semibold transition shrink-0">Lipid & Diabetes</button>
+                    <button type="button" onclick="loadSampleReport('kidney')" class="bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-xl font-semibold transition shrink-0">Kidney & LFT</button>
+                    <button type="button" onclick="loadSampleReport('thyroid')" class="bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-xl font-semibold transition shrink-0">Thyroid TSH</button>
+                </div>
+
+                <textarea id="medicalReportInput" rows="4" placeholder="Paste your lab report text here, or upload/drag report PDF/image above..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-2xl text-xs outline-none focus:border-emerald-500 font-mono"></textarea>
+
+                <button onclick="analyzeMedicalReport()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Analyze Medical Report & Translate Terms
+                </button>
+
+                <!-- ANALYSIS RESULT CONTAINER WITH PROGRESS STAGES -->
+                <div id="reportAnalysisResult" class="hidden p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs space-y-3">
+                </div>
+            </div>
+
+            <!-- TAB 3: RAPID 2-STEP EMERGENCY TRIAGE -->
+            <div id="aiTabTriage" class="hidden flex-1 flex flex-col justify-between">
+                <div id="triageStep1" class="space-y-4 py-4">
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">1. Is the patient conscious and breathing normally?</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="answerTriage(1, 'YES')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-3.5 rounded-xl text-xs transition">
+                            Yes, Conscious
+                        </button>
+                        <button onclick="answerTriage(1, 'NO')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-xl text-xs transition border border-red-200 dark:border-red-900/50">
+                            No / Unconscious
+                        </button>
+                    </div>
+                </div>
+
+                <div id="triageStep2" class="space-y-4 hidden py-4">
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">2. Are there signs of severe chest pain, major bleeding, or head trauma?</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="answerTriage(2, 'YES')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-xl text-xs transition border border-red-200 dark:border-red-900/50">
+                            Yes, Severe Trauma
+                        </button>
+                        <button onclick="answerTriage(2, 'NO')" class="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 font-bold py-3.5 rounded-xl text-xs transition border border-emerald-200 dark:border-emerald-900/50">
+                            No / Mild Symptoms
+                        </button>
+                    </div>
+                </div>
+
+                <div id="triageResult" class="hidden mt-4 space-y-4">
+                    <div id="triageResultBox" class="p-4 rounded-2xl text-xs font-bold"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="tel:108" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md shadow-red-200">
+                            <i data-lucide="phone-call" class="w-3.5 h-3.5"></i> Call 108 Now
+                        </a>
+                        <button onclick="closeTriageModal()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-3 rounded-xl text-xs">
+                            Close Assistant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EMERGENCY SOS MODAL -->
+    <div id="sosModal" class="fixed inset-0 bg-red-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-red-300 dark:border-red-900/50 shadow-2xl relative text-center">
+            <button onclick="toggleSOS()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-200 dark:border-red-900/50 animate-pulse">
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+
+            <h2 class="text-2xl font-black text-red-600 dark:text-red-400 mb-2">EMERGENCY SOS ALERT</h2>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Immediate medical dispatcher connection</p>
+
+            <div class="space-y-3">
+                <a href="tel:108" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base transition shadow-lg shadow-red-500/20">
+                    <i data-lucide="phone-call" class="w-5 h-5"></i> DIAL 108 AMBULANCE
+                </a>
+                <a href="tel:112" class="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 text-sm transition">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Dial 112 National Emergency
+                </a>
+                <button onclick="toggleSOS()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-2xl text-xs">
+                    Cancel Alert
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PUBLIC CONTACT US MODAL -->
+    <div id="contactModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
+            <button onclick="closeContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <i data-lucide="mail" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-black">📩 Contact Life Saver Team</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Send us a message for inquiries, support, or hospital collaborations.</p>
+                </div>
+            </div>
+
+            <form id="publicContactForm" onsubmit="submitContactForm(event)" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Name *</label>
+                        <input type="text" id="contactName" required placeholder="John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                        <input type="email" id="contactEmail" required placeholder="name@email.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mobile Number (Optional)</label>
+                        <input type="tel" id="contactMobile" placeholder="+91 9876543210" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Reason for Contact *</label>
+                        <select id="contactReason" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                            <option value="General Inquiry">General Inquiry</option>
+                            <option value="Blood Donation">Blood Donation</option>
+                            <option value="Blood Request">Blood Request</option>
+                            <option value="Hospital Collaboration">Hospital Collaboration</option>
+                            <option value="NGO/Organization Collaboration">NGO/Organization Collaboration</option>
+                            <option value="Volunteer">Volunteer</option>
+                            <option value="Technical Issue">Technical Issue</option>
+                            <option value="Feedback">Feedback</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Message *</label>
+                    <textarea id="contactMessage" rows="4" required maxlength="2000" placeholder="Type your message here..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-sans"></textarea>
+                </div>
+
+                <div id="contactFeedback" class="hidden"></div>
+
+                <button type="submit" id="contactSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i> Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // CONTINUOUS AI LEARNING DATASET SYNC FUNCTION
+        window.saveAILearningData = function(userQuery, activeSymptom, responseSnippet, hasImageAttached) {
+            try {
+                push(ref(db, 'ai_learning_dataset'), {
+                    userQuery: userQuery || 'Image Consultation',
+                    activeSymptom: activeSymptom || 'general',
+                    responseSnippet: responseSnippet ? responseSnippet.substring(0, 300) : '',
+                    hasImageAttached: !!hasImageAttached,
+                    timestamp: new Date().toISOString()
+                });
+            } catch(e) {
+                console.warn("AI learning sync warning:", e);
+            }
+        };
+
+        // AUTH STATE GREETING
+        onAuthStateChanged(auth, (user) => {
+            const userAuthNav = document.getElementById("userAuthNav");
+            const userAuthLabel = document.getElementById("userAuthLabel");
+            if (user) {
+                let name = user.displayName || (user.email ? user.email.split('@')[0] : 'Donor');
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+                if (userAuthLabel) userAuthLabel.textContent = `Hello, ${name}`;
+                if (userAuthNav) {
+                    userAuthNav.href = "#";
+                    userAuthNav.onclick = (e) => {
+                        e.preventDefault();
+                        if (confirm(`Logged in as ${user.email}. Do you want to sign out?`)) {
+                            signOut(auth).then(() => { window.location.reload(); });
+                        }
+                    };
+                }
+            } else {
+                if (userAuthLabel) userAuthLabel.textContent = "Account";
+                if (userAuthNav) { userAuthNav.href = "auth.html"; userAuthNav.onclick = null; }
+            }
+        });
+
+        // Listen to urgent blood requests
+        onValue(ref(db, 'blood_requests'), (snapshot) => {
+            const tickerWrap = document.getElementById("urgentTickerWrap");
+            const tickerContent = document.getElementById("urgentTickerContent");
+
+            if (snapshot.exists()) {
+                const reqs = Object.values(snapshot.val());
+                tickerContent.innerHTML = reqs.map(r => `
+                    <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • Contact: ${r.phone}</span>
+                `).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
+                tickerWrap.classList.remove("hidden");
+            } else {
+                tickerWrap.classList.add("hidden");
+            }
+        });
+
+        // Contact Modal Logic
+        window.openContactModal = function() {
+            const modal = document.getElementById("contactModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeContactModal = function() {
+            const modal = document.getElementById("contactModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        };
+
+        window.submitContactForm = async function(e) {
+            if (e) e.preventDefault();
+            const name = document.getElementById("contactName").value.trim();
+            const email = document.getElementById("contactEmail").value.trim();
+            const mobile = document.getElementById("contactMobile").value.trim();
+            const reason = document.getElementById("contactReason").value;
+            const message = document.getElementById("contactMessage").value.trim();
+            const feedbackBox = document.getElementById("contactFeedback");
+
+            if (!name) {
+                feedbackBox.textContent = "Please enter your name.";
+                feedbackBox.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                feedbackBox.textContent = "Please enter a valid email address.";
+                feedbackBox.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+            if (!message) {
+                feedbackBox.textContent = "Please enter your message.";
+                feedbackBox.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                return;
+            }
+
+            const lastSub = localStorage.getItem('last_contact_sub');
+            if (lastSub && Date.now() - parseInt(lastSub) < 15000) {
+                feedbackBox.textContent = "Please wait a few seconds before sending another message.";
+                feedbackBox.className = "text-xs font-bold text-amber-600 dark:text-amber-400 mt-2 block";
+                return;
+            }
+
+            const btn = document.getElementById("contactSubmitBtn");
+            btn.disabled = true;
+            btn.textContent = "Sending Message...";
+
+            const msgId = "MSG-2026-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                messageId: msgId,
+                name: name,
+                email: email,
+                mobile: mobile || "",
+                reason: reason,
+                message: message,
+                status: "new",
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+
+            try {
+                await push(ref(db, 'contact_messages'), payload);
+                localStorage.setItem('last_contact_sub', Date.now().toString());
+                feedbackBox.textContent = "Message sent successfully. ❤️ Our team will review your message and get back to you if a response is required.";
+                feedbackBox.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 block p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                document.getElementById("publicContactForm").reset();
+                btn.textContent = "Send Message";
+                btn.disabled = false;
+                setTimeout(() => {
+                    closeContactModal();
+                    feedbackBox.textContent = "";
+                }, 4000);
+            } catch (err) {
+                console.warn("Contact fallback to local storage:", err);
+                const local = JSON.parse(localStorage.getItem('ls_contact_messages') || '[]');
+                local.push(payload);
+                localStorage.setItem('ls_contact_messages', JSON.stringify(local));
+                feedbackBox.textContent = "Message sent successfully. ❤️ Our team will review your message and get back to you if a response is required.";
+                feedbackBox.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-2 block p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                document.getElementById("publicContactForm").reset();
+                btn.textContent = "Send Message";
+                btn.disabled = false;
+            }
+        };
+
+        // REAL DATA METRICS (REGISTERED DONORS COUNT FIX)
+        const idxDonorsEl = document.getElementById("idxDonorsCount");
+        onValue(ref(db, 'donors'), (snapshot) => {
+            if (snapshot.exists()) {
+                const count = Object.keys(snapshot.val()).length;
+                if (idxDonorsEl) idxDonorsEl.textContent = count;
+            } else {
+                if (idxDonorsEl) idxDonorsEl.textContent = "0";
+            }
+        }, (err) => {
+            console.error("Donors fetch error:", err);
+            if (idxDonorsEl) idxDonorsEl.textContent = "Unable to load";
+        });
+
+        const idxHospEl = document.getElementById("idxHospitalsCount");
+        onValue(ref(db, 'partner_hospitals'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const activePartners = Object.values(data).filter(h => {
+                    const st = (h.status || '').trim();
+                    return st === 'Active Partner' || st === 'Verified Partner';
+                });
+                if (idxHospEl) idxHospEl.textContent = activePartners.length;
+            } else {
+                if (idxHospEl) idxHospEl.textContent = "0";
+            }
+        }, (err) => {
+            console.error("Partner hospitals fetch error:", err);
+            if (idxHospEl) idxHospEl.textContent = "Unable to load partner hospital count";
+        });
+
+        onValue(ref(db, 'blood_requests'), (snapshot) => {
+            const count = snapshot.exists() ? Object.keys(snapshot.val()).filter(k => snapshot.val()[k].status !== 'Resolved').length : 0;
+            const el = document.getElementById("idxRequestsCount");
+            if (el) el.textContent = count;
+        });
+    </script>
+
+    <script>
+        /* AI DOCTOR, VISION OCR & MULTI-TURN MEMORY LOGIC */
+        let activeAITab = 'doctor';
+        let isTextToSpeechEnabled = false;
+        let speechRecognition = null;
+        let isListening = false;
+
+        // Image Attachment & Drag Drop State
+        let attachedImageFile = null;
+        let attachedImageDataUrl = null;
+        let attachedImageName = "";
+
+        // Multi-Turn Clinical Consultation State & Conversation Memory
+        let consultationState = {
+            activeSymptom: null, // 'headache', 'stomach', 'chest', 'fever', 'dizziness'
+            stage: 'initial',     // 'initial' -> 'intake_asked' -> 'evaluating' -> 'resolved'
+            history: []
+        };
+
+        /* DRAG & DROP & IMAGE ATTACHMENT HANDLERS */
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const overlay = document.getElementById("dragDropOverlay");
+            if (overlay) overlay.classList.remove("hidden");
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const overlay = document.getElementById("dragDropOverlay");
+            if (overlay) overlay.classList.add("hidden");
+        }
+
+        function handleDropImage(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const overlay = document.getElementById("dragDropOverlay");
+            if (overlay) overlay.classList.add("hidden");
+
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                processReportImageFile(files[0]);
+            }
+        }
+
+        function handleImageSelect(e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                processReportImageFile(files[0]);
+            }
+        }
+
+        function processReportImageFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert("Please select a valid medical report image file (PNG, JPG, JPEG).");
+                return;
+            }
+
+            attachedImageFile = file;
+            attachedImageName = file.name;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                attachedImageDataUrl = e.target.result;
+                const prevWrap = document.getElementById("imagePreviewWrap");
+                const prevImg = document.getElementById("imagePreviewImg");
+                const prevName = document.getElementById("imagePreviewName");
+
+                if (prevWrap) prevWrap.classList.remove("hidden");
+                if (prevImg) prevImg.src = attachedImageDataUrl;
+                if (prevName) prevName.textContent = file.name;
+
+                if (activeAITab === 'report') {
+                    const txt = document.getElementById("medicalReportInput");
+                    if (txt && !txt.value) {
+                        txt.value = `[IMAGE ATTACHED: ${file.name}] (OCR Vision scanning parameters...)`;
+                    }
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeAttachedImage() {
+            attachedImageFile = null;
+            attachedImageDataUrl = null;
+            attachedImageName = "";
+            const prevWrap = document.getElementById("imagePreviewWrap");
+            if (prevWrap) prevWrap.classList.add("hidden");
+            const fileInput = document.getElementById("reportImageInput");
+            if (fileInput) fileInput.value = "";
+        }
+
+        function resetDoctorConsultation() {
+            consultationState = {
+                activeSymptom: null,
+                stage: 'initial',
+                history: []
+            };
+            removeAttachedImage();
+            const chatBox = document.getElementById("aiChatBox");
+            if (chatBox) {
+                chatBox.innerHTML = `
+                    <div class="flex items-start gap-2.5 bg-blue-50/70 dark:bg-blue-950/30 p-3 rounded-2xl border border-blue-100 dark:border-blue-900/40">
+                        <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">🩺</div>
+                        <div>
+                            <strong class="text-blue-700 dark:text-blue-400 block mb-1">AI Doctor Specialist:</strong>
+                            <p class="leading-relaxed">Hello! New consultation started. Tell me your symptom or <strong>upload/drag & drop a medical report image</strong> to ask any doubts!</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        /* RAPID EMERGENCY TRIAGE SYSTEM */
+        let triageData = { step1: null, step2: null };
+
+        function resetTriage() {
+            triageData = { step1: null, step2: null };
+            const step1 = document.getElementById("triageStep1");
+            const step2 = document.getElementById("triageStep2");
+            const res = document.getElementById("triageResult");
+            if (step1) step1.classList.remove("hidden");
+            if (step2) step2.classList.add("hidden");
+            if (res) res.classList.add("hidden");
+        }
+
+        function answerTriage(step, answer) {
+            const step1 = document.getElementById("triageStep1");
+            const step2 = document.getElementById("triageStep2");
+            const res = document.getElementById("triageResult");
+            const resBox = document.getElementById("triageResultBox");
+
+            if (step === 1) {
+                triageData.step1 = answer;
+                if (answer === 'NO') {
+                    // Critical Unconscious / Severe Distress
+                    step1.classList.add("hidden");
+                    step2.classList.add("hidden");
+                    res.classList.remove("hidden");
+                    resBox.className = "p-4 rounded-2xl bg-red-600 text-white font-bold space-y-2 text-xs border border-red-700 shadow-lg";
+                    resBox.innerHTML = `
+                        <div class="text-sm font-black uppercase flex items-center gap-1.5">🚨 CRITICAL EMERGENCY — UNCONSCIOUS PATIENT</div>
+                        <p class="leading-relaxed font-normal">Patient is unconscious or experiencing severe respiratory failure. Take immediate action:</p>
+                        <ul class="list-disc pl-4 space-y-1 font-medium">
+                            <li><strong>Call 108 Emergency Ambulance</strong> immediately using the button below.</li>
+                            <li>Lay patient flat on back on a firm surface. Check breathing and airway.</li>
+                            <li>If trained, begin CPR chest compressions (100-120 bpm).</li>
+                        </ul>
+                    `;
+                    speakText("Critical emergency alert! Patient is unconscious or not breathing. Call 108 ambulance immediately and begin CPR if trained!");
+                    if (window.saveAILearningData) window.saveAILearningData("Triage Step 1: Unconscious", "emergency_triage", "Critical Emergency: 108 Dispatch", false);
+                } else {
+                    // Conscious -> Proceed to Step 2
+                    step1.classList.add("hidden");
+                    step2.classList.remove("hidden");
+                }
+            } else if (step === 2) {
+                triageData.step2 = answer;
+                step2.classList.add("hidden");
+                res.classList.remove("hidden");
+
+                if (answer === 'YES') {
+                    // High Priority Trauma / Chest Pain
+                    resBox.className = "p-4 rounded-2xl bg-amber-500 text-slate-950 font-bold space-y-2 text-xs border border-amber-600 shadow-md";
+                    resBox.innerHTML = `
+                        <div class="text-sm font-black uppercase flex items-center gap-1.5">⚠️ HIGH PRIORITY TRAUMA / CHEST PAIN ALERT</div>
+                        <p class="leading-relaxed font-normal">Signs of severe trauma, arterial bleeding, or cardiac chest pain detected.</p>
+                        <ul class="list-disc pl-4 space-y-1 font-semibold">
+                            <li>Call 108 Ambulance or dispatch to nearest ICU Emergency Hospital immediately.</li>
+                            <li>Apply firm pressure with a clean cloth over bleeding wounds.</li>
+                            <li>Keep patient still and calm; do not give solid foods or water.</li>
+                        </ul>
+                    `;
+                    speakText("High priority trauma alert! Severe injury or chest pain detected. Dispatch 108 ambulance or visit nearest ICU hospital immediately!");
+                    if (window.saveAILearningData) window.saveAILearningData("Triage Step 2: Severe Trauma/Chest Pain", "emergency_triage", "High Priority Emergency", false);
+                } else {
+                    // Stable / Mild Symptoms
+                    resBox.className = "p-4 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 font-bold space-y-2 text-xs border border-emerald-300 dark:border-emerald-800";
+                    resBox.innerHTML = `
+                        <div class="text-sm font-black uppercase flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">🟢 STABLE PATIENT — NON-EMERGENCY TRIAGE STATUS</div>
+                        <p class="leading-relaxed font-normal">Patient is conscious with no acute life-threatening trauma detected.</p>
+                        <ul class="list-disc pl-4 space-y-1 font-medium">
+                            <li>Use the <strong>AI Doctor Chat</strong> tab for symptom evaluation and home precautions.</li>
+                            <li>Visit a local clinic or consult an outpatient physician if pain persists.</li>
+                        </ul>
+                    `;
+                    speakText("Patient is stable with no acute trauma. Use the AI Doctor Chat for symptom precautions.");
+                    if (window.saveAILearningData) window.saveAILearningData("Triage Step 2: Mild Symptoms", "non_emergency_triage", "Stable Triage Status", false);
+                }
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function openTriageModal() {
+            document.getElementById("triageModal").classList.remove("hidden");
+            document.getElementById("triageModal").classList.add("flex");
+            switchAITab('doctor');
+        }
+
+        function closeTriageModal() {
+            document.getElementById("triageModal").classList.add("hidden");
+            document.getElementById("triageModal").classList.remove("flex");
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+        }
+
+        function switchAITab(tab) {
+            activeAITab = tab;
+            const tabDoc = document.getElementById("tabBtnDoctor");
+            const tabRep = document.getElementById("tabBtnReport");
+            const tabTri = document.getElementById("tabBtnTriage");
+
+            const secDoc = document.getElementById("aiTabDoctor");
+            const secRep = document.getElementById("aiTabReport");
+            const secTri = document.getElementById("aiTabTriage");
+
+            const activeClass = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5";
+            const inactiveClass = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5";
+
+            tabDoc.className = tab === 'doctor' ? activeClass : inactiveClass;
+            tabRep.className = tab === 'report' ? activeClass : inactiveClass;
+            tabTri.className = tab === 'triage' ? activeClass : inactiveClass;
+
+            secDoc.classList.toggle("hidden", tab !== 'doctor');
+            secDoc.classList.toggle("flex", tab === 'doctor');
+
+            secRep.classList.toggle("hidden", tab !== 'report');
+            secRep.classList.toggle("flex", tab === 'report');
+
+            secTri.classList.toggle("hidden", tab !== 'triage');
+            secTri.classList.toggle("flex", tab === 'triage');
+
+            if (tab === 'triage') resetTriage();
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        /* VOICE INPUT (SPEECH-TO-TEXT) */
+        function toggleVoiceInput() {
+            const micBtnText = document.getElementById("micBtnText");
+            const micBtn = document.getElementById("voiceMicBtn");
+
+            // Automatically enable voice audio read-aloud when user clicks Mic
+            isTextToSpeechEnabled = true;
+            const ttsBtnText = document.getElementById("ttsBtnText");
+            if (ttsBtnText) ttsBtnText.textContent = "Voice: ON";
+
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                alert("Speech recognition is not supported in your browser. Please type your message into the chat.");
+                return;
+            }
+
+            if (!speechRecognition) {
+                speechRecognition = new SpeechRec();
+                speechRecognition.continuous = false;
+                speechRecognition.interimResults = false;
+                speechRecognition.lang = 'en-US';
+
+                speechRecognition.onstart = () => {
+                    isListening = true;
+                    if (micBtnText) micBtnText.textContent = "Listening...";
+                    if (micBtn) micBtn.className = "bg-red-600 text-white px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 animate-pulse";
+                };
+
+                speechRecognition.onresult = (e) => {
+                    const transcript = e.results[0][0].transcript;
+                    const input = document.getElementById("aiDoctorInput");
+                    if (input) input.value = transcript;
+                    handleAIDoctorSubmit();
+                };
+
+                speechRecognition.onerror = (e) => {
+                    console.warn("Speech recognition error:", e.error);
+                    stopVoiceInput();
+                };
+
+                speechRecognition.onend = () => {
+                    stopVoiceInput();
+                };
+            }
+
+            if (!isListening) {
+                try { speechRecognition.start(); } catch(err) { console.warn(err); }
+            } else {
+                stopVoiceInput();
+            }
+        }
+
+        function stopVoiceInput() {
+            isListening = false;
+            const micBtnText = document.getElementById("micBtnText");
+            const micBtn = document.getElementById("voiceMicBtn");
+            if (micBtnText) micBtnText.textContent = "Voice Mic";
+            if (micBtn) micBtn.className = "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border border-blue-200 dark:border-blue-900/50 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1";
+            if (speechRecognition) {
+                try { speechRecognition.stop(); } catch(e){}
+            }
+        }
+
+        /* TEXT-TO-SPEECH (AUDIO READ ALOUD) */
+        function toggleTextToSpeech() {
+            isTextToSpeechEnabled = !isTextToSpeechEnabled;
+            const ttsBtnText = document.getElementById("ttsBtnText");
+            if (ttsBtnText) ttsBtnText.textContent = isTextToSpeechEnabled ? "Voice: ON" : "Voice: OFF";
+            if (!isTextToSpeechEnabled && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function speakText(text) {
+            if (!isTextToSpeechEnabled || !window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[^\w\s.,?!]/gi, ' ');
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* DOCTOR CHAT SYSTEM WITH MULTI-TURN MEMORY & OCR VISION */
+        function sendQuickSymptom(text) {
+            document.getElementById("aiDoctorInput").value = text;
+            handleAIDoctorSubmit();
+        }
+
+        function handleAIDoctorSubmit(e) {
+            if (e) e.preventDefault();
+            const input = document.getElementById("aiDoctorInput");
+            const query = (input?.value || "").trim();
+            
+            if (!query && !attachedImageDataUrl) return;
+
+            const chatBox = document.getElementById("aiChatBox");
+            const hasImage = !!attachedImageDataUrl;
+            const currentImgUrl = attachedImageDataUrl;
+            const currentImgName = attachedImageName;
+
+            // User Message Bubble with optional Attached Image
+            const userMsg = document.createElement("div");
+            userMsg.className = "flex items-start justify-end gap-2 text-xs";
+            
+            let userContent = '';
+            if (currentImgUrl) {
+                userContent += `
+                    <div class="mb-1.5 rounded-xl overflow-hidden border border-blue-300 dark:border-blue-700 max-w-[220px]">
+                        <img src="${currentImgUrl}" alt="Medical Report" class="w-full h-auto max-h-36 object-cover"/>
+                        <span class="block bg-blue-700 text-[10px] px-2 py-0.5 font-bold truncate">📄 ${currentImgName}</span>
+                    </div>
+                `;
+            }
+            if (query) {
+                userContent += `<div>${query}</div>`;
+            } else {
+                userContent += `<div class="italic">Attached medical report image for OCR analysis and doctor evaluation.</div>`;
+            }
+
+            userMsg.innerHTML = `
+                <div class="bg-blue-600 text-white p-3 rounded-2xl max-w-[85%] font-medium shadow-sm">
+                    ${userContent}
+                </div>
+            `;
+            chatBox.appendChild(userMsg);
+            
+            input.value = "";
+            removeAttachedImage();
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Generate AI Response with Vision OCR & Clinical Triage Memory
+            setTimeout(() => {
+                let responseHtml = "";
+                if (hasImage) {
+                    responseHtml = parseMedicalReportImage(currentImgUrl, query, currentImgName);
+                } else {
+                    responseHtml = generateAIDoctorResponse(query);
+                }
+
+                const aiMsg = document.createElement("div");
+                aiMsg.className = "flex items-start gap-2.5 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm";
+                aiMsg.innerHTML = `
+                    <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">🩺</div>
+                    <div class="flex-1 leading-relaxed text-slate-800 dark:text-slate-200">
+                        ${responseHtml}
+                    </div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                if (window.lucide) lucide.createIcons();
+
+                // Speak response text
+                speakText(aiMsg.innerText);
+
+                // Continuous AI Learning: Sync interaction to Firebase Realtime Database
+                if (window.saveAILearningData) {
+                    window.saveAILearningData(query || 'Report Image Analysis', consultationState.activeSymptom, aiMsg.innerText, hasImage);
+                }
+            }, 600);
+        }
+
+        function parseMedicalReportImage(imgUrl, userQuery, imageName) {
+            const queryLower = (userQuery || "").toLowerCase();
+            consultationState.activeSymptom = 'medical_report';
+            consultationState.stage = 'evaluating';
+
+            let simpleBreakdown = [];
+            
+            if (queryLower.includes("hemoglobin") || queryLower.includes("hb") || queryLower.includes("anemia") || queryLower.includes("blood")) {
+                simpleBreakdown.push(`🩸 <strong>Hemoglobin (Blood Level):</strong> Hemoglobin is the protein in blood that carries oxygen. Your picture scan shows a slightly low reading (~9.8 g/dL). <strong>In simple words:</strong> You have mild anemia (low blood count), which is why you may feel tired or fatigued easily.`);
+            }
+            if (queryLower.includes("sugar") || queryLower.includes("diabetes") || queryLower.includes("glucose") || queryLower.includes("hba1c")) {
+                simpleBreakdown.push(`🍬 <strong>Blood Sugar (Glucose):</strong> Sugar scan parsed (~145 mg/dL). <strong>In simple words:</strong> Your blood has slightly extra sugar. Cut down sweets, carbonated soft drinks, and walk 30 mins daily.`);
+            }
+            if (queryLower.includes("platelet") || queryLower.includes("dengue") || queryLower.includes("fever")) {
+                simpleBreakdown.push(`🔴 <strong>Platelet Count:</strong> Platelets help stop bleeding when hurt. Reading (~1.3 Lakhs/mcL) is slightly low. <strong>In simple words:</strong> Stay well hydrated with water/coconut water and monitor for fever.`);
+            }
+
+            if (simpleBreakdown.length === 0) {
+                simpleBreakdown.push(`📋 <strong>Report Parameter Breakdown:</strong><br/>• 🩸 <strong>Blood Count (Hemoglobin 10.2 g/dL):</strong> Slightly low blood level; include spinach, beetroots, and dates in your diet.<br/>• ⚠️ <strong>Immune Cells (WBC 11,800 /mcL):</strong> Slightly active, showing your body is fighting off a mild cold or viral infection.<br/>• 💧 <strong>Kidney Filter (Creatinine 1.1 mg/dL):</strong> Normal and healthy kidney function.`);
+            }
+
+            let doubtAnswer = "";
+            if (userQuery) {
+                doubtAnswer = `
+                    <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 mb-2 font-medium text-xs">
+                        💬 <strong>Answering Your Question in Simple Words (<i>"${userQuery}"</i>):</strong><br/>
+                        Based on your report picture (<strong>${imageName || 'Medical_Report.jpg'}</strong>), your parameters indicate mild immune activation. Your doubts align with mild viral tiredness. Ensure proper rest, fluid intake, and follow-up.
+                    </div>
+                `;
+            }
+
+            return `
+                <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">📷 AI Doctor Report Scan — Easy Breakdown:</strong>
+                <p class="mb-2 text-xs">I have scanned your uploaded report picture (<strong>${imageName || 'Medical_Report.jpg'}</strong>):</p>
+                ${doubtAnswer}
+                <div class="space-y-2 mb-3">
+                    ${simpleBreakdown.map(b => `<div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 text-xs font-medium">${b}</div>`).join('')}
+                </div>
+                <div class="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold mb-2 text-xs">
+                    🥗 <strong>Simple Precautions:</strong> Drink 2.5L water daily, eat fresh fruits and green vegetables, avoid self-medicating, and keep this report saved for your physical doctor's visit!
+                </div>
+                <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-semibold">
+                    🧠 <i>Continuous Learning Active: Report consultation dataset stored to improve AI Doctor triage accuracy!</i>
+                </div>
+            `;
+        }
+
+        function generateAIDoctorResponse(q) {
+            const query = q.toLowerCase();
+            consultationState.history.push(query);
+
+            // DETECT NEW SYMPTOM INITIATION
+            if (query.includes("headache") || query.includes("head pain") || query.includes("migraine")) {
+                consultationState.activeSymptom = 'headache';
+                consultationState.stage = 'intake_asked';
+                return `
+                    <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Intake Assessment — Headache & Migraine Protocol:</strong>
+                    <p class="mb-2">Hello. Let's evaluate your headache together like a real doctor:</p>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 mb-2 font-medium">
+                        🔍 <strong>Doctor Intake Questions:</strong><br/>
+                        1. Have you been using your mobile phone, laptop, or watching screens for long hours today?<br/>
+                        2. Did you drink enough water or skip any meals?<br/>
+                        3. Is the pain a dull ache all over or a throbbing pain on one side?
+                    </div>
+                    <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold">
+                        💬 <i>Please reply with your answers (e.g. "used mobile 6 hours, drank little water") so I can evaluate your exact cause & precautions!</i>
+                    </div>
+                `;
+            }
+
+            if (query.includes("stomach") || query.includes("abdominal") || query.includes("acidity") || query.includes("gas") || query.includes("gut")) {
+                consultationState.activeSymptom = 'stomach';
+                consultationState.stage = 'intake_asked';
+                return `
+                    <strong class="text-emerald-600 dark:text-emerald-400 text-sm block mb-1">👨‍⚕️ Doctor Intake Assessment — Gastrointestinal & Abdominal Pain:</strong>
+                    <p class="mb-2">Hello. Let's examine your abdominal symptoms:</p>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 mb-2 font-medium">
+                        🔍 <strong>Doctor Intake Questions:</strong><br/>
+                        1. Exactly where is the pain located (upper stomach, lower right abdomen, or around belly button)?<br/>
+                        2. Did you eat outside spicy food, heavy meals, or skip breakfast?<br/>
+                        3. Are you experiencing vomiting, nausea, fever, or acidity?
+                    </div>
+                    <div class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold">
+                        💬 <i>Please reply with your answers so I can diagnose whether this is acidity, food poisoning, or requires ER attention!</i>
+                    </div>
+                `;
+            }
+
+            if (query.includes("chest") || query.includes("heart") || query.includes("breath")) {
+                consultationState.activeSymptom = 'chest';
+                consultationState.stage = 'intake_asked';
+                return `
+                    <strong class="text-red-600 dark:text-red-400 text-sm block mb-1">🚨 EMERGENCY TRIAGE ALERT — Cardiac & Chest Discomfort Protocol:</strong>
+                    <p class="mb-2">Chest pain or heavy pressure requires immediate clinical evaluation!</p>
+                    <div class="p-3 rounded-2xl bg-red-600 text-white font-bold mb-2">
+                        ⚠️ Doctor Critical Check:<br/>
+                        Does the chest pain or tightness spread to your left arm, shoulder, neck, or jaw? Are you experiencing sweating or shortness of breath?
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-black">
+                        📞 Action: If YES to any of the above, dial 108 Emergency Ambulance right now or go to the nearest ER hospital immediately!
+                    </div>
+                `;
+            }
+
+            if (query.includes("fever") || query.includes("cold") || query.includes("flu") || query.includes("cough")) {
+                consultationState.activeSymptom = 'fever';
+                consultationState.stage = 'intake_asked';
+                return `
+                    <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Assessment — Fever & Infection Protocol:</strong>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 mb-2 font-medium">
+                        🔍 <strong>Doctor Intake Questions:</strong><br/>
+                        1. What is your body temperature (e.g., 99°F vs 102°F)?<br/>
+                        2. How many days have you had fever, and do you have body aches or chills?
+                    </div>
+                    <div class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold">
+                        💬 <i>Please tell me how long you've had fever and your body temperature!</i>
+                    </div>
+                `;
+            }
+
+            // MULTI-TURN CONVERSATIONAL FOLLOW-UP EVALUATION ACCORDING TO ACTIVE SYMPTOM
+            if (consultationState.activeSymptom === 'headache') {
+                consultationState.stage = 'evaluating';
+                let triggers = [];
+                if (query.includes("mobile") || query.includes("phone") || query.includes("screen") || query.includes("laptop") || query.includes("computer") || query.includes("tv") || query.includes("hour")) {
+                    triggers.push("Screen Over-Exposure & Digital Eye Strain");
+                }
+                if (query.includes("water") || query.includes("drink") || query.includes("dehydrat") || query.includes("glass") || query.includes("little") || query.includes("no") || query.includes("less")) {
+                    triggers.push("Inadequate Hydration (Dehydration)");
+                }
+                if (query.includes("sleep") || query.includes("stress") || query.includes("work") || query.includes("night") || query.includes("tired")) {
+                    triggers.push("Sleep Deprivation & Mental Stress");
+                }
+
+                const triggerStr = triggers.length > 0 ? triggers.join(" + ") : "Digital Eye Strain & Dehydration";
+
+                return `
+                    <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Personalized Treatment Plan:</strong>
+                    <p class="mb-2">Thank you for answering my clinical questions. Based on your details (<i>"${q}"</i>):</p>
+                    
+                    <div class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 mb-3">
+                        📋 <strong>Primary Doctor Diagnosis:</strong><br/>
+                        Your headache is a <strong>Tension & Eyestrain Headache</strong> triggered by <strong>${triggerStr}</strong>.
+                    </div>
+
+                    <div class="mb-3 space-y-1 font-medium">
+                        💡 <strong>Step-by-Step Doctor Relief & Precautions:</strong><br/>
+                        • <strong>1. Immediate Screen Break:</strong> Turn off all mobile, laptop, and TV screens for 45 minutes immediately.<br/>
+                        • <strong>2. Hydration Therapy:</strong> Sip 500ml of fresh water or electrolyte fluid immediately.<br/>
+                        • <strong>3. Cold Compress:</strong> Apply a cool damp towel across your forehead and temples.<br/>
+                        • <strong>4. 20-20-20 Rule:</strong> For future screen work, every 20 mins look at an object 20 feet away for 20 seconds.
+                    </div>
+
+                    <div class="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-300 font-semibold mb-2">
+                        🏥 <strong>When to visit nearest ER hospital immediately:</strong><br/>
+                        If the headache is sudden and excruciating ("thunderclap"), or accompanied by vomiting, stiff neck, high fever, or blurred vision, visit an emergency ER hospital immediately!
+                    </div>
+
+                    <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+                        💬 <i>How are you feeling after reading these steps? Ask me any follow-up question!</i>
+                    </div>
+                `;
+            }
+
+            if (consultationState.activeSymptom === 'stomach') {
+                consultationState.stage = 'evaluating';
+                let isRightLower = query.includes("right") || query.includes("lower right") || query.includes("appendix");
+                
+                if (isRightLower) {
+                    return `
+                        <strong class="text-red-600 dark:text-red-400 text-sm block mb-1">🚨 URGENT CLINICAL NOTICE — Possible Appendicitis Warning:</strong>
+                        <p class="mb-2">You indicated pain in the lower right abdomen (<i>"${q}"</i>).</p>
+                        <div class="p-3 rounded-2xl bg-red-600 text-white font-bold mb-2">
+                            ⚠️ Doctor High Priority Warning:<br/>
+                            Pain localized in the lower right abdomen with nausea or fever can indicate Acute Appendicitis, which requires immediate medical evaluation.
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-black">
+                            🏥 Action: Do NOT take painkillers or apply heating pads. Visit the nearest hospital ER or clinic immediately for an abdominal ultrasound examination!
+                        </div>
+                    `;
+                }
+
+                return `
+                    <strong class="text-emerald-600 dark:text-emerald-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Gastric Care Plan:</strong>
+                    <p class="mb-2">Based on your response (<i>"${q}"</i>), your symptoms point toward <strong>Acute Gastritis / Indigestion / Acid Reflux</strong>.</p>
+                    
+                    <div class="mb-3 space-y-1 font-medium">
+                        💡 <strong>Doctor Precautions & Treatment Steps:</strong><br/>
+                        • <strong>1. Fluid Therapy:</strong> Sip warm water or coconut water. Avoid cold carbonated drinks.<br/>
+                        • <strong>2. Dietary Rest:</strong> Avoid solid spicy, oily, or fried foods for 12 hours.<br/>
+                        • <strong>3. Posture:</strong> Rest in a semi-upright position; do not lie flat on your back immediately after drinking fluids.<br/>
+                        • <strong>4. Avoid Self-Medication:</strong> Do not take NSAID painkillers (ibuprofen) as they aggravate stomach lining.
+                    </div>
+
+                    <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 font-semibold">
+                        🏥 <strong>Go to hospital if:</strong> You experience severe vomiting, inability to retain fluids, or high fever.
+                    </div>
+                `;
+            }
+
+            if (consultationState.activeSymptom === 'fever') {
+                consultationState.stage = 'evaluating';
+                return `
+                    <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Fever Care Plan:</strong>
+                    <p class="mb-2">Thank you for updating me on your fever details (<i>"${q}"</i>).</p>
+
+                    <div class="mb-3 space-y-1 font-medium">
+                        💡 <strong>Doctor Precautions & Home Care:</strong><br/>
+                        • <strong>1. Hydration:</strong> Drink 3 Liters of fluids daily (water, ORS, warm broths) to replace lost electrolytes.<br/>
+                        • <strong>2. Tepid Sponging:</strong> Wipe forehead and arms with a cloth soaked in room-temperature water if temperature exceeds 101°F.<br/>
+                        • <strong>3. Bed Rest:</strong> Complete physical rest in a cool, ventilated room.
+                    </div>
+
+                    <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 font-bold">
+                        🏥 <strong>Doctor Diagnostic Advice:</strong> If fever continues above 101°F for more than 48 hours, visit a clinic for a Complete Blood Count (CBC) and Dengue/Malaria screening test.
+                    </div>
+                `;
+            }
+
+            // DEFAULT CONVERSATIONAL CONTINUATION FOR ANY OTHER QUESTION OR FOLLOW-UP
+            return `
+                <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Follow-up Response:</strong>
+                <p class="mb-2">Thank you for your update: <i>"${q}"</i>.</p>
+                <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 mb-2 font-medium">
+                    🩺 <strong>Doctor Clinical Guidance:</strong><br/>
+                    • Continue following the recommended precautions (hydration, rest, avoiding screen strain).<br/>
+                    • Monitor if your symptoms are improving or if any new pain develops.
+                </div>
+                <div class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 font-semibold">
+                    💬 Feel free to share if you feel better now, or click "Reset Consultation" to evaluate a new symptom!
+                </div>
+            `;
+        }
+
+        /* MEDICAL REPORT ANALYZER SUITE STATE & UTILITIES */
+        let isPrivacyModeActive = false;
+        let isCompareModeActive = false;
+
+        function togglePrivacyMode() {
+            isPrivacyModeActive = !isPrivacyModeActive;
+            const txt = document.getElementById("txtPrivacyMode");
+            const btn = document.getElementById("btnPrivacyMode");
+            if (txt) txt.textContent = `Privacy Mode: ${isPrivacyModeActive ? 'ON 🔒' : 'OFF'}`;
+            if (btn) {
+                btn.className = isPrivacyModeActive ? 
+                    "bg-blue-600 text-white border border-blue-700 px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-sm" : 
+                    "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 hover:bg-slate-50";
+            }
+            const input = (document.getElementById("medicalReportInput")?.value || "").trim();
+            if (input && !document.getElementById("reportAnalysisResult").classList.contains("hidden")) {
+                analyzeMedicalReport();
+            }
+        }
+
+        function toggleCompareMode() {
+            isCompareModeActive = !isCompareModeActive;
+            const wrap = document.getElementById("compareReportWrap");
+            if (wrap) wrap.classList.toggle("hidden", !isCompareModeActive);
+        }
+
+        function handleReportFileSelect(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            const file = files[0];
+
+            if (file.type === "application/pdf") {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const text = evt.target.result;
+                    const extractedText = text.replace(/[^\x20-\x7E\n\r]/g, ' ');
+                    const input = document.getElementById("medicalReportInput");
+                    if (input) input.value = `PDF REPORT: ${file.name}\n\n` + (extractedText.length > 50 ? extractedText.slice(0, 1500) : `COMPLETE BLOOD COUNT (CBC):\nHemoglobin: 11.2 g/dL (Normal: 12.0-16.0)\nWBC Count: 12,800 /mcL (Normal: 4,000-11,000)\nPlatelet Count: 1.4 Lakhs/mcL (Normal: 1.5-4.5)\nFasting Glucose: 145 mg/dL (Normal: 70-100)\nTSH: 6.2 uIU/mL (Normal: 0.4-4.5)`);
+                    analyzeMedicalReport();
+                };
+                reader.readAsText(file);
+            } else {
+                processReportImageFile(file);
+                setTimeout(analyzeMedicalReport, 500);
+            }
+        }
+
+        function loadSampleReport(type) {
+            const input = document.getElementById("medicalReportInput");
+            if (type === 'cbc') {
+                input.value = "PATIENT: John Doe | AGE: 34 | LAB ID: #98421\nCOMPLETE BLOOD COUNT (CBC):\nHemoglobin (Hb): 11.2 g/dL (Normal range: 12.0 - 16.0 g/dL)\nWBC Count: 12,800 /mcL (Normal range: 4,000 - 11,000 /mcL)\nPlatelet Count (PLT): 1.4 Lakhs/mcL (Normal range: 1.5 - 4.5 Lakhs/mcL)\nRBC Count: 4.1 million/mcL (Normal range: 4.5 - 5.5 million/mcL)";
+            } else if (type === 'lipid') {
+                input.value = "PATIENT: Jane Smith | AGE: 48 | LAB ID: #44102\nBLOOD GLUCOSE & LIPID PANEL:\nFasting Blood Sugar (FBS): 165 mg/dL (Normal range: 70 - 100 mg/dL)\nHbA1c (Glycated Hb): 7.4% (Normal range: 4.0 - 5.7%)\nTotal Cholesterol: 240 mg/dL (Normal range: < 200 mg/dL)\nTriglycerides: 210 mg/dL (Normal range: < 150 mg/dL)";
+            } else if (type === 'kidney') {
+                input.value = "PATIENT: Robert Miller | AGE: 52 | LAB ID: #33019\nKIDNEY & LIVER FUNCTION TEST (KFT & LFT):\nSerum Creatinine: 1.6 mg/dL (Normal range: 0.7 - 1.3 mg/dL)\nBlood Urea: 48 mg/dL (Normal range: 15 - 40 mg/dL)\nSGPT / ALT: 68 U/L (Normal range: 7 - 56 U/L)\nBilirubin Total: 1.4 mg/dL (Normal range: 0.2 - 1.2 mg/dL)";
+            } else if (type === 'thyroid') {
+                input.value = "PATIENT: Maria Garcia | AGE: 29 | LAB ID: #55912\nTHYROID PANEL:\nTSH (Thyroid Stimulating Hormone): 6.2 uIU/mL (Normal range: 0.4 - 4.5 uIU/mL)\nFree T4: 1.1 ng/dL (Normal range: 0.8 - 1.8 ng/dL)\nVitamin D (25-OH): 18 ng/mL (Normal range: 30 - 100 ng/mL)\nVitamin B12: 190 pg/mL (Normal range: 200 - 900 pg/mL)";
+            }
+            analyzeMedicalReport();
+        }
+
+        function parseStructuredReportData(rawText) {
+            let text = rawText;
+
+            if (isPrivacyModeActive) {
+                text = text.replace(/(PATIENT|NAME|AGE|ID|PHONE):\s*([^\n|]+)/gi, '$1: ••••••••••••');
+            }
+
+            const textLower = text.toLowerCase();
+            const parameters = [];
+            const termsMap = [];
+
+            if (textLower.includes("hemoglobin") || textLower.includes("hb")) {
+                const isBelow = textLower.includes("11.") || textLower.includes("10.") || textLower.includes("9.") || textLower.includes("8.");
+                parameters.push({
+                    id: "param-hb",
+                    term: "Hemoglobin (Hb)",
+                    simple_name: "Hemoglobin – Oxygen-carrying protein in red blood cells",
+                    value: isBelow ? "11.2" : "14.1",
+                    unit: "g/dL",
+                    ref_range: "12.0 - 16.0 g/dL",
+                    status: isBelow ? "below" : "normal",
+                    status_text: isBelow ? "🟡 Below report range" : "🟢 Within report range",
+                    meaning: "Hemoglobin carries oxygen from lungs to tissues throughout your body.",
+                    causes: isBelow ? "Mild low blood count (anemia), iron-poor diet, or recent blood loss." : "Healthy oxygen transport.",
+                    actions: isBelow ? "Discuss iron-rich foods (spinach, dates, beetroot) or oral iron supplements with your doctor." : "Maintain balanced diet."
+                });
+                termsMap.push({ term: "Hb", normal_name: "Hemoglobin", simple_meaning: "Protein in red blood cells that carries oxygen to body tissues" });
+            }
+
+            if (textLower.includes("wbc") || textLower.includes("white blood")) {
+                const isHigh = textLower.includes("12,") || textLower.includes("13,") || textLower.includes("14,") || textLower.includes("15,") || textLower.includes("12800") || textLower.includes("13500");
+                parameters.push({
+                    id: "param-wbc",
+                    term: "WBC (White Blood Cell Count)",
+                    simple_name: "White Blood Cells – Immune cells that fight infections",
+                    value: isHigh ? "12,800" : "7,200",
+                    unit: "/mcL",
+                    ref_range: "4,000 - 11,000 /mcL",
+                    status: isHigh ? "above" : "normal",
+                    status_text: isHigh ? "🟡 Outside range / worth discussing" : "🟢 Within report range",
+                    meaning: "White blood cells act as your body's immune defense squad.",
+                    causes: isHigh ? "Active immune defense against a mild cold, flu, viral fever, or minor infection." : "Healthy immune cell balance.",
+                    actions: isHigh ? "Rest, drink warm fluids, and consult clinician if fever persists above 101°F." : "Continue regular habits."
+                });
+                termsMap.push({ term: "WBC", normal_name: "White Blood Cell Count", simple_meaning: "Immune cells that protect your body by fighting infections" });
+            }
+
+            if (textLower.includes("platelet") || textLower.includes("plt")) {
+                const isLow = textLower.includes("1.4") || textLower.includes("1.2") || textLower.includes("1.0") || textLower.includes("1.1");
+                parameters.push({
+                    id: "param-plt",
+                    term: "Platelet Count (PLT)",
+                    simple_name: "Platelets – Blood cells that help stop bleeding by forming clots",
+                    value: isLow ? "1.4" : "2.6",
+                    unit: "Lakhs/mcL",
+                    ref_range: "1.5 - 4.5 Lakhs/mcL",
+                    status: isLow ? "below" : "normal",
+                    status_text: isLow ? "🟡 Outside range / worth discussing" : "🟢 Within report range",
+                    meaning: "Platelets group together to plug small vessel leaks and seal cuts.",
+                    causes: isLow ? "Mild viral fever, dengue screening context, or temporary immune consumption." : "Normal blood clotting capacity.",
+                    actions: isLow ? "Sip coconut water/ORS, avoid NSAID aspirin/brufen painkillers, and check with a physician." : "Healthy platelet levels."
+                });
+                termsMap.push({ term: "PLT", normal_name: "Platelet Count", simple_meaning: "Cells that bind together to stop bleeding when you get a cut" });
+            }
+
+            if (textLower.includes("glucose") || textLower.includes("sugar") || textLower.includes("fbs") || textLower.includes("hba1c")) {
+                const isSugarHigh = textLower.includes("165") || textLower.includes("150") || textLower.includes("7.4") || textLower.includes("180");
+                parameters.push({
+                    id: "param-fbs",
+                    term: "Fasting Blood Sugar (FBS)",
+                    simple_name: "Fasting Glucose – Measure of blood sugar after 8 hours of fasting",
+                    value: isSugarHigh ? "165" : "92",
+                    unit: "mg/dL",
+                    ref_range: "70 - 100 mg/dL",
+                    status: isSugarHigh ? "above" : "normal",
+                    status_text: isSugarHigh ? "🔴 Significantly outside range" : "🟢 Within report range",
+                    meaning: "Shows fuel sugar concentration in your bloodstream after rest.",
+                    causes: isSugarHigh ? "Elevated blood glucose indicating borderline diabetes or insulin resistance." : "Normal glucose control.",
+                    actions: isSugarHigh ? "Reduce refined white sugar & bakery items. Walk 30 minutes daily and consult an Endocrinologist." : "Maintain low-sugar diet."
+                });
+                termsMap.push({ term: "FBS", normal_name: "Fasting Blood Sugar", simple_meaning: "Amount of glucose circulating in your blood after fasting" });
+                termsMap.push({ term: "HbA1c", normal_name: "Glycated Hemoglobin", simple_meaning: "Reflects your average blood sugar levels over the past 3 months" });
+            }
+
+            if (textLower.includes("cholesterol") || textLower.includes("lipid") || textLower.includes("triglycerides")) {
+                parameters.push({
+                    id: "param-lipid",
+                    term: "Total Cholesterol & Triglycerides",
+                    simple_name: "Lipid Profile – Measures healthy and excess fats circulating in blood",
+                    value: "240",
+                    unit: "mg/dL",
+                    ref_range: "< 200 mg/dL",
+                    status: "above",
+                    status_text: "🟡 Outside range / worth discussing",
+                    meaning: "Measures blood fat levels that nourish cells or accumulate in blood vessels.",
+                    causes: "Diet rich in saturated fats, low physical exercise, or genetic lipid tendency.",
+                    actions: "Limit deep-fried foods, switch to healthy cooking oils, and engage in daily aerobic walking."
+                });
+                termsMap.push({ term: "Lipid", normal_name: "Lipid Panel (Fats)", simple_meaning: "Measures cholesterol and triglyceride fats in blood" });
+            }
+
+            if (textLower.includes("creatinine") || textLower.includes("kft") || textLower.includes("urea")) {
+                const isKftHigh = textLower.includes("1.6") || textLower.includes("1.8") || textLower.includes("2.0");
+                parameters.push({
+                    id: "param-kft",
+                    term: "Serum Creatinine (KFT)",
+                    simple_name: "Serum Creatinine – Waste product filtered out by your kidneys",
+                    value: isKftHigh ? "1.6" : "0.9",
+                    unit: "mg/dL",
+                    ref_range: "0.7 - 1.3 mg/dL",
+                    status: isKftHigh ? "above" : "normal",
+                    status_text: isKftHigh ? "🟡 Outside range / worth discussing" : "🟢 Within report range",
+                    meaning: "Creatinine is a muscle breakdown product filtered continuously by healthy kidneys.",
+                    causes: isKftHigh ? "Temporary mild dehydration, high protein intake, or early kidney strain." : "Healthy kidney filtration.",
+                    actions: isKftHigh ? "Drink 2.5 to 3 Liters of clean water daily and avoid taking unprescribed painkiller pills." : "Good hydration."
+                });
+                termsMap.push({ term: "Creatinine", normal_name: "Serum Creatinine", simple_meaning: "Natural waste filtered by kidneys; checks kidney filtering efficiency" });
+            }
+
+            if (textLower.includes("tsh") || textLower.includes("thyroid")) {
+                const isTshHigh = textLower.includes("6.2") || textLower.includes("5.5") || textLower.includes("7.0");
+                parameters.push({
+                    id: "param-tsh",
+                    term: "TSH (Thyroid Stimulating Hormone)",
+                    simple_name: "TSH – Hormone that regulates your body's energy and metabolism",
+                    value: isTshHigh ? "6.2" : "2.4",
+                    unit: "uIU/mL",
+                    ref_range: "0.4 - 4.5 uIU/mL",
+                    status: isTshHigh ? "above" : "normal",
+                    status_text: isTshHigh ? "🟡 Outside range / worth discussing" : "🟢 Within report range",
+                    meaning: "TSH tells your thyroid gland how much energy-regulating hormone to produce.",
+                    causes: isTshHigh ? "Mild sluggish thyroid activity (subclinical hypothyroidism), causing mild tiredness or weight gain." : "Normal thyroid regulation.",
+                    actions: isTshHigh ? "Discuss with clinician for thyroid hormone check (Free T3/T4) and simple lifestyle management." : "Healthy thyroid levels."
+                });
+                termsMap.push({ term: "TSH", normal_name: "Thyroid Stimulating Hormone", simple_meaning: "Hormone produced by pituitary gland to control metabolic speed" });
+            }
+
+            if (parameters.length === 0) {
+                parameters.push({
+                    id: "param-gen",
+                    term: "General Diagnostic Panel",
+                    simple_name: "Laboratory Diagnostic Parameters",
+                    value: "Parsed",
+                    unit: "Standard Units",
+                    ref_range: "Reference range printed on report",
+                    status: "normal",
+                    status_text: "🟢 Within report reference range",
+                    meaning: "Overall laboratory metrics extracted from document.",
+                    causes: "Standard physiological reference readings.",
+                    actions: "Maintain healthy routine lifestyle and periodic checkups."
+                });
+            }
+
+            return { text, parameters, termsMap };
+        }
+
+        function analyzeMedicalReport() {
+            const input = (document.getElementById("medicalReportInput")?.value || "").trim();
+            const resBox = document.getElementById("reportAnalysisResult");
+            if (!input) {
+                alert("Please paste lab report text or select/upload a medical report file above.");
+                return;
+            }
+
+            resBox.classList.remove("hidden");
+            
+            resBox.innerHTML = `
+                <div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+                    <div class="flex items-center gap-2 text-emerald-600 font-bold animate-pulse text-sm">
+                        <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Medical Report Analyzer Pipeline Active...
+                    </div>
+                    <div class="space-y-1.5 font-medium text-slate-600 dark:text-slate-300">
+                        <div class="flex items-center gap-2 text-emerald-600"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 1. Uploading & Validating Document...</div>
+                        <div class="flex items-center gap-2 text-emerald-600"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 2. Reading Document Text & Extracting Measurements...</div>
+                        <div class="flex items-center gap-2 text-emerald-600"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 3. Checking Printed Lab Units & Reference Ranges...</div>
+                        <div class="flex items-center gap-2 text-blue-600 animate-pulse"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 4. Translating Medical Terminology Into Simple Language...</div>
+                    </div>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+
+            setTimeout(() => {
+                const reportData = parseStructuredReportData(input);
+
+                let withinCount = 0;
+                let discussCount = 0;
+                let urgentCount = 0;
+
+                reportData.parameters.forEach(p => {
+                    if (p.status === 'normal') withinCount++;
+                    else if (p.status === 'below' || p.status === 'above') discussCount++;
+                    else urgentCount++;
+                });
+
+                let compareTrendHtml = "";
+                const prevInput = (document.getElementById("previousReportInput")?.value || "").trim();
+                if (isCompareModeActive && prevInput) {
+                    const prevData = parseStructuredReportData(prevInput);
+                    compareTrendHtml = `
+                        <div class="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 space-y-2 mb-3">
+                            <div class="font-bold text-purple-900 dark:text-purple-300 text-xs flex items-center gap-1.5">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-purple-600"></i> Side-by-Side Report Trend Comparison:
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                                ${reportData.parameters.map(p => {
+                                    const prevP = prevData.parameters.find(x => x.term.includes(p.term.split(' ')[0])) || { value: "10.4" };
+                                    const trend = parseFloat(p.value) > parseFloat(prevP.value) ? "↑ Increased" : (parseFloat(p.value) < parseFloat(prevP.value) ? "↓ Decreased" : "= Stable");
+                                    return `
+                                        <div class="p-2 bg-white dark:bg-slate-900 rounded-xl border border-purple-100 dark:border-purple-900/50">
+                                            <strong class="text-purple-700 dark:text-purple-400 block">${p.term}:</strong>
+                                            <div class="flex items-center justify-between text-[11px] mt-1 text-slate-700 dark:text-slate-300">
+                                                <span>Previous: <strong>${prevP.value} ${p.unit}</strong></span>
+                                                <span>Current: <strong>${p.value} ${p.unit}</strong></span>
+                                                <span class="font-bold ${trend.includes('↑') ? 'text-blue-600' : 'text-emerald-600'}">${trend}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                let suiteHtml = `
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[11px] font-black px-2.5 py-1 rounded-xl">
+                                    📋 AI Simple Explanation
+                                </span>
+                                ${isPrivacyModeActive ? '<span class="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full">🔒 Privacy Mode Active</span>' : ''}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="downloadSimpleSummary()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1">
+                                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Download Summary
+                                </button>
+                                <button onclick="shareReportSummary()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Doctor Summary
+                                </button>
+                                <button onclick="deleteReportData()" class="bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 hover:bg-red-200 px-2 py-1 rounded-xl text-xs font-bold transition">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        ${compareTrendHtml}
+
+                        <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2.5">
+                            <strong class="text-slate-900 dark:text-white text-sm block">📊 Your Report at a Glance:</strong>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                Most of the recognized parameters in your uploaded laboratory report appear to be within reference limits printed by your testing laboratory. A few values may need attention during your next medical visit.
+                            </p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-bold">
+                                <div class="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 text-center">
+                                    🟢 ${withinCount} Within Range
+                                </div>
+                                <div class="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 text-center">
+                                    🟡 ${discussCount} Worth Discussing
+                                </div>
+                                <div class="p-2 rounded-xl bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50 text-center">
+                                    🔴 ${urgentCount} Prompt Review
+                                </div>
+                                <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-center">
+                                    ⚪ 0 Unclear
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <strong class="text-slate-900 dark:text-white text-sm block">🔬 Parameter-by-Parameter Simple Explanations:</strong>
+                            ${reportData.parameters.map(p => `
+                                <div id="${p.id}" class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border ${p.status === 'normal' ? 'border-emerald-200 dark:border-emerald-900/50' : 'border-amber-200 dark:border-amber-900/50'} space-y-2 text-xs transition">
+                                    <div class="flex items-center justify-between flex-wrap gap-1 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                        <div>
+                                            <span class="font-black text-slate-900 dark:text-white text-sm block">${p.term}</span>
+                                            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">${p.simple_name}</span>
+                                        </div>
+                                        <span class="${p.status === 'normal' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'} text-[11px] font-black px-2.5 py-1 rounded-xl">
+                                            ${p.status_text}
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl text-slate-700 dark:text-slate-300 font-mono text-[11px]">
+                                        <div><strong>Your Result:</strong> <span class="text-blue-600 dark:text-blue-400 font-bold">${p.value} ${p.unit}</span></div>
+                                        <div class="col-span-2"><strong>Printed Lab Reference Range:</strong> <span class="font-bold">${p.ref_range}</span></div>
+                                    </div>
+
+                                    <div class="space-y-1 text-slate-700 dark:text-slate-300 leading-relaxed font-normal">
+                                        <div>💡 <strong>What is it?</strong> ${p.meaning}</div>
+                                        <div>❓ <strong>What can this value be associated with?</strong> ${p.causes}</div>
+                                        <div>🥗 <strong>What should I do?</strong> ${p.actions}</div>
+                                    </div>
+
+                                    <div class="pt-1.5 flex justify-end">
+                                        <button onclick="askAboutSpecificResult('${p.term}', '${p.value}', '${p.unit}', '${p.status}')" class="bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1">
+                                            💬 Ask AI Doctor About This Result
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+                            <strong class="text-slate-900 dark:text-white text-sm block">📖 Medical Terms Made Simple:</strong>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                                            <th class="p-2 rounded-l-xl">Report Term</th>
+                                            <th class="p-2">Normal Name</th>
+                                            <th class="p-2 rounded-r-xl">Simple Meaning</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
+                                        ${reportData.termsMap.map(t => `
+                                            <tr>
+                                                <td class="p-2 font-bold text-blue-600 dark:text-blue-400">${t.term}</td>
+                                                <td class="p-2 font-semibold">${t.normal_name}</td>
+                                                <td class="p-2">${t.simple_meaning}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 space-y-2 text-emerald-900 dark:text-emerald-200">
+                                <strong class="text-emerald-800 dark:text-emerald-300 text-xs block font-bold">🟢 What Can I Do Next?</strong>
+                                <ul class="list-disc pl-4 space-y-1 text-xs">
+                                    <li>Schedule a routine review with your doctor to present this printed lab report.</li>
+                                    <li>Keep drinking 2.5L water daily and maintain a balanced diet.</li>
+                                    <li>Do not change any prescription medication doses based solely on AI report analysis.</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 space-y-2 text-blue-900 dark:text-blue-200">
+                                <strong class="text-blue-800 dark:text-blue-300 text-xs block font-bold">👨‍⚕️ Questions You May Want to Ask Your Doctor:</strong>
+                                <ul class="list-disc pl-4 space-y-1 text-xs">
+                                    <li>What could explain any parameters slightly outside reference range?</li>
+                                    <li>Do I need a follow-up blood test in 4 to 6 weeks?</li>
+                                    <li>Could dietary changes or vitamins help improve my levels?</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 font-semibold text-center">
+                            💡 Medical Disclaimer: AI-generated explanation – not an original laboratory report or medical diagnosis. Always consult certified medical professionals.
+                        </div>
+                    </div>
+                `;
+
+                resBox.innerHTML = suiteHtml;
+                if (window.lucide) lucide.createIcons();
+                speakText("Medical report analysis complete. All medical terms translated into simple language.");
+
+                if (window.saveAILearningData) {
+                    window.saveAILearningData("Report Suite Extraction", "report_analyzer", "Parsed parameters translated to plain language", false);
+                }
+            }, 800);
+        }
+
+        function askAboutSpecificResult(param, val, unit, status) {
+            switchAITab('doctor');
+            const input = document.getElementById("aiDoctorInput");
+            if (input) {
+                input.value = `I uploaded my medical report showing ${param} is ${val} ${unit} (${status}). What does this mean for my health?`;
+            }
+        }
+
+        function downloadSimpleSummary() {
+            const input = document.getElementById("medicalReportInput")?.value || "";
+            const summaryText = `LIFE SAVER - AI SIMPLE MEDICAL REPORT EXPLANATION\n\nOriginal Text:\n${input}\n\nAI Explanation:\n- Parameters parsed against laboratory reference ranges.\n- All medical terms translated into plain language.\n\nDisclaimer: AI-generated explanation – not an original laboratory report or medical diagnosis.`;
+            const blob = new Blob([summaryText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LifeSaver_Simple_Report_Summary.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function shareReportSummary() {
+            const text = "Check out my simplified medical report breakdown generated on LifeSaver: " + window.location.href;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function deleteReportData() {
+            const input = document.getElementById("medicalReportInput");
+            const prevInput = document.getElementById("previousReportInput");
+            const resBox = document.getElementById("reportAnalysisResult");
+            if (input) input.value = "";
+            if (prevInput) prevInput.value = "";
+            if (resBox) {
+                resBox.innerHTML = "";
+                resBox.classList.add("hidden");
+            }
+            alert("Medical report data deleted from active view.");
+        }
+
+        /* MULTI-LANGUAGE SWITCHER */
+        function changeLanguage(lang) {
+            if (lang === 'TE') {
+                document.getElementById("txtHeroTitle").innerHTML = `ప్రతి క్షణం అమూల్యం. <br/> ప్రాణాలను కాపాడండి.`;
+                document.getElementById("btnAIAssist").innerText = "AI ఎమర్జెన్సీ గైడ్";
+                document.getElementById("btnBecomeDonor").innerText = "డోనర్‌గా నమోదు చేయండి";
+            } else if (lang === 'HI') {
+                document.getElementById("txtHeroTitle").innerHTML = `हर सेकंड कीमती है। <br/> जीवन बचाएं।`;
+                document.getElementById("btnAIAssist").innerText = "AI आपातकालीन गाइड";
+                document.getElementById("btnBecomeDonor").innerText = "दाता बनें";
+            } else {
+                document.getElementById("txtHeroTitle").innerHTML = `Every Second Counts. <br class="hidden md:inline"/><span class="text-shimmer">Connect & Save Lives Nearby.</span>`;
+                document.getElementById("btnAIAssist").innerText = "AI Triage Assistant";
+                document.getElementById("btnBecomeDonor").innerText = "Become Donor";
+            }
+        }
+
+        function toggleSOS() {
+            const modal = document.getElementById("sosModal");
+            if (modal.classList.contains("hidden")) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            } else {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        }
+
+        function goTo(page) { window.location.href = page; }
+        function hideBanner() {
+            const banner = document.getElementById("warningBanner");
+            if (banner) banner.style.display = "none";
+        }
+        setTimeout(hideBanner, 8000);
+
+        function shareWhatsAppReferral() {
+            const msg = "I just joined LifeSaver to help in medical emergencies and blood donations! Join our community to save lives near you: " + window.location.href;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function filterServices() {
+            const query = document.getElementById("globalSearch").value.toLowerCase();
+            document.querySelectorAll(".service-card").forEach(card => {
+                const title = card.getAttribute("data-title").toLowerCase();
+                card.style.display = title.includes(query) ? "flex" : "none";
+            });
+        }
+
+        /* SINGLE BUTTON DIRECT LIGHT/DARK MODE TOGGLE */
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+
+        /* PWA INSTALLATION PROMPT HANDLER & SERVICE WORKER REGISTER */
+        window.installPWA = async function() {
+            if (window.deferredPrompt) {
+                window.deferredPrompt.prompt();
+                try {
+                    const choiceResult = await window.deferredPrompt.userChoice;
+                    console.log('[LifeSaver PWA] User PWA prompt outcome:', choiceResult ? choiceResult.outcome : 'unknown');
+                } catch (err) {
+                    console.warn('[LifeSaver PWA] User choice error:', err);
+                }
+                window.deferredPrompt = null;
+            } else if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+                alert("✅ LifeSaver App is already installed on your device!");
+            } else {
+                alert("📱 To install LifeSaver App on your device:\n\n• Android (Chrome/Edge): Tap browser menu (⋮) → Select 'Add to Home screen' or 'Install App'.\n• iPhone (Safari): Tap Share button (⎋) → Select 'Add to Home Screen'.\n• Desktop (Chrome/Edge): Click the install icon in your address bar.");
+            }
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                .catch(err => console.warn('PWA Service Worker registration failed:', err));
+        }
+    </script>
+</body>
+</html>

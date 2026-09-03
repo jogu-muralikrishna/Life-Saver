@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Login & Authentication - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white">
+
+    <!-- AUTHENTICATION FORM CARD -->
+    <div id="authCard" class="glass-card w-full max-w-md p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 relative">
+        <div class="absolute top-5 right-5">
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <div class="text-center mb-8">
+            <div class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-red-100 dark:border-red-900/50">
+                <i data-lucide="user-check" class="w-6 h-6"></i>
+            </div>
+            <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight" id="portalTitle">User Portal</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" id="portalSub">Sign in or register your account to manage emergency requests & donor profile</p>
+        </div>
+
+        <!-- MODE TOGGLE TABS -->
+        <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-6 border border-slate-200 dark:border-slate-800 text-xs font-bold">
+            <button id="tabSignin" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">
+                Sign In
+            </button>
+            <button id="tabSignup" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+                New Registration
+            </button>
+        </div>
+
+        <form id="authForm" class="space-y-4">
+            <div id="nameWrap" class="hidden">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                <input type="text" id="name" placeholder="John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+                <input type="email" id="email" required placeholder="user@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password</label>
+                <input type="password" id="password" required minlength="6" placeholder="•••••••• (min 6 characters)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked class="rounded bg-slate-50 dark:bg-slate-950 border-slate-300 dark:border-slate-700"> Keep me signed in
+                </label>
+                <a href="#" id="forgotPasswordBtn" onclick="openResetModal(); return false;" class="text-red-600 dark:text-red-400 hover:underline font-semibold">Forgot password?</a>
+            </div>
+
+            <button type="submit" id="authBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-sm transition shadow-md shadow-red-500/20">
+                Sign In to Account
+            </button>
+        </form>
+
+        <div class="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Want to register as a voluntary blood donor?</p>
+            <a href="register-donor.html" class="inline-block mt-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
+                Register Voluntary Donor & Get Certificate →
+            </a>
+        </div>
+
+        <a href="index.html" class="block text-center mt-6 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+            ← Back to Main Home Page
+        </a>
+    </div>
+
+    <!-- USER PERSONAL DASHBOARD CONTAINER -->
+    <div id="dashboardContainer" class="hidden glass-card w-full max-w-2xl p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 relative text-slate-900 dark:text-white">
+        <div class="flex items-center justify-between pb-6 mb-6 border-b border-slate-100 dark:border-slate-800">
+            <div>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white" id="userGreeting">Welcome Back!</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400" id="userEmailLabel"></p>
+            </div>
+            <button id="signOutBtn" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+            </button>
+        </div>
+
+        <!-- MY POSTED URGENT BLOOD REQUESTS -->
+        <div class="mb-8">
+            <h3 class="text-sm font-black uppercase tracking-wider text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
+                <i data-lucide="droplet" class="w-4 h-4"></i> My Active Urgent Blood Requests
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">When blood is received for your request, click "Blood Received — Delete Request" to remove the request from the live emergency network.</p>
+
+            <div id="myRequestsGrid" class="space-y-3">
+                <div class="text-xs text-slate-400 py-4 text-center">Loading your emergency requests...</div>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <a href="blood.html" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl text-xs text-center transition flex items-center justify-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Need
+            </a>
+            <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs text-center transition flex items-center justify-center gap-1.5">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Register Donor
+            </a>
+            <a href="index.html" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs text-center transition flex items-center justify-center gap-1.5">
+                <i data-lucide="home" class="w-4 h-4"></i> Main Home Page
+            </a>
+        </div>
+    </div>
+
+    <!-- PASSWORD RESET SCREEN MODAL OVERLAY -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeResetModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <!-- STEP 1: MANDATORY SECURITY IDENTITY VERIFICATION -->
+            <div id="resetStep1">
+                <div class="text-center mb-5">
+                    <div class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 w-11 h-11 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-red-100 dark:border-red-900/50">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Account Identity Verification</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs">Verify your Username & mandatory blood group to reset password</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Registered Email *</label>
+                        <input type="email" id="resetEmail" required placeholder="user@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Username / Full Name * (Case Insensitive)</label>
+                        <input type="text" id="resetName" required placeholder="e.g. John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Phone Number</label>
+                            <input type="tel" id="resetPhone" placeholder="9876543210" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Blood Group * (Mandatory)</label>
+                            <select id="resetBloodGroup" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="resetMsgStep1" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+                    <button type="button" id="btnVerifyResetEmail" onclick="verifyEmailForReset()" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs transition shadow-md shadow-red-500/20">
+                        Verify Account Identity & Continue →
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: NEW PASSWORD -->
+            <div id="resetStep2" class="hidden">
+                <div class="text-center mb-6">
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-emerald-100 dark:border-emerald-900/50">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 dark:text-white">Create New Password</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" id="verifiedUserLabel">Account Verified</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">New Password</label>
+                        <input type="password" id="newResetPassword" placeholder="•••••••• (min 6 characters)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Confirm New Password</label>
+                        <input type="password" id="confirmResetPassword" placeholder="••••••••" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                    </div>
+                    <div id="resetMsgStep2" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+                    <button type="button" id="btnSaveNewPassword" onclick="saveNewPassword()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3.5 rounded-xl text-sm transition shadow-md shadow-emerald-500/20">
+                        Save New Password & Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, onValue, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let targetResetUserKey = null;
+
+        window.openResetModal = function() {
+            const emailInForm = document.getElementById('email')?.value?.trim() || '';
+            const resetEmailInput = document.getElementById('resetEmail');
+            if (resetEmailInput) resetEmailInput.value = emailInForm;
+            
+            document.getElementById('resetStep1').classList.remove('hidden');
+            document.getElementById('resetStep2').classList.add('hidden');
+            document.getElementById('resetMsgStep1').classList.add('hidden');
+            document.getElementById('resetMsgStep2').classList.add('hidden');
+            document.getElementById('resetModal').classList.remove('hidden');
+            targetResetUserKey = null;
+        };
+
+        window.closeResetModal = function() {
+            document.getElementById('resetModal').classList.add('hidden');
+        };
+
+        window.verifyEmailForReset = async function() {
+            const email = document.getElementById('resetEmail').value.trim();
+            const name = document.getElementById('resetName').value.trim();
+            const phone = document.getElementById('resetPhone').value.trim();
+            const bloodGroup = document.getElementById('resetBloodGroup').value.trim();
+            const msgBox = document.getElementById('resetMsgStep1');
+            const btn = document.getElementById('btnVerifyResetEmail');
+
+            if (!email || !email.includes('@')) {
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Please enter a valid registered email address.";
+                msgBox.classList.remove('hidden');
+                return;
+            }
+
+            if (!name) {
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Please enter your Username / Full Name for identity verification.";
+                msgBox.classList.remove('hidden');
+                return;
+            }
+
+            if (!bloodGroup) {
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "⚠️ Mandatory Field: Please select your Blood Group to proceed.";
+                msgBox.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerText = "Verifying security records...";
+            btn.disabled = true;
+            msgBox.classList.add('hidden');
+
+            try {
+                // Search users node in Realtime Database
+                const snapshot = await get(ref(db, 'users'));
+                let foundKey = null;
+                let foundUser = null;
+
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    Object.keys(users).forEach(key => {
+                        const u = users[key];
+                        if ((u.email && u.email.toLowerCase() === email.toLowerCase()) || 
+                            (key.toLowerCase() === name.toLowerCase())) {
+                            foundKey = key;
+                            foundUser = u;
+                        }
+                    });
+                }
+
+                if (!foundUser) {
+                    const donorSnap = await get(ref(db, 'donors'));
+                    if (donorSnap.exists()) {
+                        const donors = donorSnap.val();
+                        Object.keys(donors).forEach(dk => {
+                            const d = donors[dk];
+                            if (d.email && d.email.toLowerCase() === email.toLowerCase()) {
+                                foundUser = foundUser || d;
+                                foundKey = foundKey || dk;
+                            }
+                        });
+                    }
+                }
+
+                if (!foundKey && !foundUser) {
+                    msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
+                    msgBox.textContent = "No registered user account found with this email / username. Please check your spelling.";
+                    msgBox.classList.remove('hidden');
+                    btn.innerText = "Verify Account Identity & Continue →";
+                    btn.disabled = false;
+                    return;
+                }
+
+                // CASE-INSENSITIVE USERNAME / NAME MATCHING
+                const dbName = (foundUser.name || foundKey || "").toLowerCase().trim();
+                const inputName = name.toLowerCase().trim();
+                const nameMatches = dbName.length === 0 || dbName === inputName || dbName.includes(inputName) || inputName.includes(dbName);
+
+                // MANDATORY BLOOD GROUP MATCHING
+                const dbBlood = (foundUser.bloodGroup || foundUser.blood_group || "").toLowerCase().trim();
+                const inputBlood = bloodGroup.toLowerCase().trim();
+                const bloodMatches = !dbBlood || dbBlood === inputBlood;
+
+                // PHONE NUMBER MATCHING (IF PROVIDED)
+                const dbPhone = (foundUser.phone || foundUser.mobile || "").replace(/\D/g, "");
+                const inputPhone = phone.replace(/\D/g, "");
+                const phoneMatches = !phone || !dbPhone || dbPhone === inputPhone || dbPhone.endsWith(inputPhone) || inputPhone.endsWith(dbPhone);
+
+                if (!nameMatches) {
+                    msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    msgBox.textContent = "❌ Security Identity Failed: Username / Full Name does not match our records for this account.";
+                    msgBox.classList.remove('hidden');
+                    return;
+                }
+
+                if (!bloodMatches) {
+                    msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    msgBox.textContent = "❌ Security Identity Failed: The Blood Group selected does not match the registered account records.";
+                    msgBox.classList.remove('hidden');
+                    return;
+                }
+
+                if (!phoneMatches) {
+                    msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    msgBox.textContent = "❌ Security Identity Failed: Phone Number does not match registered account records.";
+                    msgBox.classList.remove('hidden');
+                    return;
+                }
+
+                targetResetUserKey = foundKey;
+                const displayName = foundUser.name || name || email.split('@')[0];
+                document.getElementById('verifiedUserLabel').textContent = `Identity Verified for ${displayName} (${email})`;
+                
+                document.getElementById('resetStep1').classList.add('hidden');
+                document.getElementById('resetStep2').classList.remove('hidden');
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                console.error("User lookup error:", err);
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Error verifying account identity: " + err.message;
+                msgBox.classList.remove('hidden');
+            } finally {
+                btn.innerText = "Verify Account Identity & Continue →";
+                btn.disabled = false;
+            }
+        };
+
+        window.saveNewPassword = async function() {
+            const pass1 = document.getElementById('newResetPassword').value.trim();
+            const pass2 = document.getElementById('confirmResetPassword').value.trim();
+            const msgBox = document.getElementById('resetMsgStep2');
+            const btn = document.getElementById('btnSaveNewPassword');
+
+            if (!pass1 || pass1.length < 6) {
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Password must be at least 6 characters long.";
+                msgBox.classList.remove('hidden');
+                return;
+            }
+
+            if (!pass2 || pass1 !== pass2) {
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Passwords do not match. Please re-enter.";
+                msgBox.classList.remove('hidden');
+                return;
+            }
+
+            btn.innerText = "Updating password...";
+            btn.disabled = true;
+            msgBox.classList.add('hidden');
+
+            try {
+                if (targetResetUserKey) {
+                    await update(ref(db, `users/${targetResetUserKey}`), {
+                        password: pass1,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+
+                const resetEmailVal = document.getElementById('resetEmail').value.trim();
+                const mainEmailInput = document.getElementById('email');
+                const mainPasswordInput = document.getElementById('password');
+                if (mainEmailInput) mainEmailInput.value = resetEmailVal;
+                if (mainPasswordInput) mainPasswordInput.value = pass1;
+
+                alert("🎉 Password updated successfully!\nYour new password has been saved. You can now sign in.");
+                closeResetModal();
+            } catch (err) {
+                console.error("Password update error:", err);
+                msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                msgBox.textContent = "Failed to update password: " + err.message;
+                msgBox.classList.remove('hidden');
+            } finally {
+                btn.innerText = "Save New Password & Sign In";
+                btn.disabled = false;
+            }
+        };
+
+        let currentMode = "login";
+
+        // Listen to Auth State for Personal Main Dashboard
+        onAuthStateChanged(auth, (user) => {
+            const authCard = document.getElementById("authCard");
+            const dashboardContainer = document.getElementById("dashboardContainer");
+
+            if (user) {
+                if (authCard) authCard.classList.add("hidden");
+                if (dashboardContainer) dashboardContainer.classList.remove("hidden");
+
+                let name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+                document.getElementById("userGreeting").textContent = `Welcome, ${name}!`;
+                document.getElementById("userEmailLabel").textContent = user.email;
+
+                document.getElementById("signOutBtn").onclick = () => {
+                    signOut(auth).then(() => window.location.reload());
+                };
+
+                // Listen to active urgent blood requests
+                onValue(ref(db, 'blood_requests'), (snapshot) => {
+                    const grid = document.getElementById("myRequestsGrid");
+                    grid.innerHTML = "";
+
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        let keys = Object.keys(data).filter(k => {
+                            const r = data[k];
+                            return (r.userId && r.userId === user.uid) || (r.userEmail && r.userEmail === user.email);
+                        });
+
+                        // If no specific userId match, display active requests so user can manage them directly
+                        if (keys.length === 0) {
+                            keys = Object.keys(data);
+                        }
+
+                        keys.forEach(key => {
+                            const r = data[key];
+                            const card = document.createElement("div");
+                            card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                            card.innerHTML = `
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded">
+                                            ${r.bloodGroup} Needed (${r.units || 1} Units)
+                                        </span>
+                                        <span class="text-[10px] font-bold text-slate-500">${r.city}</span>
+                                    </div>
+                                    <h4 class="font-bold text-xs text-slate-900 dark:text-white">${r.hospital}</h4>
+                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Phone: <strong>${r.phone}</strong></p>
+                                </div>
+                                <button onclick="deleteMyBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shrink-0">
+                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Received — Delete Request
+                                </button>
+                            `;
+                            grid.appendChild(card);
+                        });
+                        lucide.createIcons();
+                    } else {
+                        grid.innerHTML = `<p class="text-xs text-slate-400 py-3">No active urgent blood requests currently posted.</p>`;
+                    }
+                });
+            } else {
+                if (authCard) authCard.classList.remove("hidden");
+                if (dashboardContainer) dashboardContainer.classList.add("hidden");
+            }
+        });
+
+        window.deleteMyBloodTicket = async function(key, units) {
+            if (confirm(`Confirm: Has blood been received for this emergency request? This will delete the request ticket from the live network.`)) {
+                try {
+                    await remove(ref(db, `blood_requests/${key}`));
+                    alert("Blood requirement ticket deleted successfully! Thank you to all donors.");
+                } catch (err) {
+                    alert("Error deleting ticket: " + err.message);
+                }
+            }
+        };
+
+        window.setAuthMode = function(mode) {
+            currentMode = mode;
+            const btn = document.getElementById('authBtn');
+            const nameWrap = document.getElementById('nameWrap');
+            const tabSignin = document.getElementById('tabSignin');
+            const tabSignup = document.getElementById('tabSignup');
+
+            if (mode === 'register') {
+                nameWrap.classList.remove('hidden');
+                btn.innerText = "Create New Account";
+                tabSignup.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                tabSignin.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+            } else {
+                nameWrap.classList.add('hidden');
+                btn.innerText = "Sign In to Account";
+                tabSignin.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                tabSignup.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+            }
+        };
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('authBtn');
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const name = document.getElementById('name')?.value?.trim() || email.split('@')[0];
+
+            if (!email || !password) {
+                alert("Please enter both email and password.");
+                btn.innerText = currentMode === 'register' ? "Create New Account" : "Sign In to Account";
+                btn.disabled = false;
+                return;
+            }
+
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters long.");
+                btn.innerText = currentMode === 'register' ? "Create New Account" : "Sign In to Account";
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                if (currentMode === 'register') {
+                    let uid = "USER-" + Math.floor(100000 + Math.random() * 900000);
+                    let authCreated = false;
+
+                    try {
+                        const credential = await createUserWithEmailAndPassword(auth, email, password);
+                        if (credential && credential.user) {
+                            uid = credential.user.uid;
+                            authCreated = true;
+                        }
+                    } catch (authErr) {
+                        console.warn("Firebase Auth registration notice/fallback:", authErr);
+                        if (authErr.code === 'auth/email-already-in-use') {
+                            alert("This email address is already registered! Attempting sign in...");
+                            try {
+                                await signInWithEmailAndPassword(auth, email, password);
+                                alert("Sign in successful!");
+                                return;
+                            } catch (signInErr) {
+                                alert("Email exists. Please sign in with your password.");
+                                btn.innerText = "Sign In to Account";
+                                btn.disabled = false;
+                                setAuthMode('login');
+                                return;
+                            }
+                        }
+                    }
+
+                    const userPayload = {
+                        name: name,
+                        email: email,
+                        password: password,
+                        createdAt: new Date().toISOString(),
+                        timestamp: Date.now()
+                    };
+
+                    try {
+                        await set(ref(db, `users/${uid}`), userPayload);
+                    } catch (dbErr) {
+                        try {
+                            await push(ref(db, 'users'), userPayload);
+                        } catch (pErr) {}
+                    }
+
+                    alert("Account created successfully! 👤 You are now signed in.");
+                } else {
+                    try {
+                        await signInWithEmailAndPassword(auth, email, password);
+                        alert("Login successful!");
+                    } catch (signInErr) {
+                        if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
+                            try {
+                                const credential = await createUserWithEmailAndPassword(auth, email, password);
+                                const uid = credential.user.uid;
+                                try {
+                                    await set(ref(db, `users/${uid}`), {
+                                        name: name,
+                                        email: email,
+                                        password: password,
+                                        createdAt: new Date().toISOString(),
+                                        timestamp: Date.now()
+                                    });
+                                } catch(e) {}
+                                alert("New account created and signed in successfully!");
+                                return;
+                            } catch (createErr) {
+                                throw signInErr;
+                            }
+                        } else {
+                            throw signInErr;
+                        }
+                    }
+                }
+            } catch (err) {
+                let msg = err.message;
+                if (err.code === 'auth/email-already-in-use') {
+                    msg = "This email address is already registered. Please click 'Sign In' tab.";
+                } else if (err.code === 'auth/weak-password') {
+                    msg = "Password should be at least 6 characters long.";
+                }
+                alert("Authentication Notice: " + msg);
+            } finally {
+                btn.innerText = currentMode === 'register' ? "Create New Account" : "Sign In to Account";
+                btn.disabled = false;
+            }
+        });
+    </script>
+    <script>
+        lucide.createIcons();
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>

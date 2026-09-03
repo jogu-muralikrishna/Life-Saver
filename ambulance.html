@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Ambulance & Live Traffic Emergency Routing - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Leaflet CSS & JS for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map {
+            min-height: 450px !important;
+            height: 450px !important;
+            width: 100% !important;
+            border-radius: 1rem !important;
+            z-index: 10 !important;
+            position: relative !important;
+        }
+    </style>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-amber-600 font-extrabold text-xl tracking-tight">
+                <i data-lucide="truck" class="w-6 h-6"></i>
+                <span>Life <span class="text-emerald-600">Saver</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openReportHazardModal()" class="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> Report Traffic Jam
+                </button>
+                <a href="index.html" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                    <span class="bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 p-2 rounded-xl">🚑</span> Smart Emergency Ambulance Fleet
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Real-time traffic density detection, ETA optimization & Green Corridor clearance</p>
+            </div>
+
+            <!-- DIRECT HOTLINE -->
+            <a href="tel:108" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-3 shadow-md shadow-red-500/20 transition">
+                <i data-lucide="phone-call" class="w-5 h-5 animate-bounce"></i>
+                <span>DIRECT AMBULANCE: 108</span>
+            </a>
+        </div>
+
+        <!-- TRAFFIC DENSITY & MAP CONTROLS HEADER -->
+        <div class="glass-card p-4 rounded-2xl mb-4 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Live Traffic Density:</span>
+                <span class="traffic-smooth text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 🟢 Low (Smooth)
+                </span>
+                <span class="traffic-moderate text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> 🟡 Moderate
+                </span>
+                <span class="traffic-heavy text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔴 Heavy Gridlock
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="toggleTrafficBtn" onclick="toggleTrafficOverlay()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+                    <i data-lucide="layers" class="w-4 h-4"></i> Show Traffic Heatmap
+                </button>
+            </div>
+        </div>
+
+        <!-- MAP CONTAINER -->
+        <div class="glass-card p-3 rounded-2xl mb-8 border border-slate-200 dark:border-slate-800 shadow-md relative">
+            <div id="map" style="height: 450px; min-height: 450px; width: 100%;"></div>
+        </div>
+
+        <!-- AMBULANCES LIST HEADER -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="truck" class="text-amber-600 dark:text-amber-400"></i> Active Ambulances & Traffic-Aware ETAs
+            </h2>
+            <span id="ambCount" class="text-xs bg-slate-100 dark:bg-slate-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50 px-3 py-1 rounded-full font-bold">
+                4 Active Ambulances
+            </span>
+        </div>
+
+        <!-- AMBULANCES GRID -->
+        <div id="ambulanceList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Ambulance Cards -->
+        </div>
+    </main>
+
+    <!-- GREEN CORRIDOR MODAL -->
+    <div id="corridorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-8 border border-slate-200 dark:border-slate-800 relative shadow-2xl">
+            <button onclick="closeCorridorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                    <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-emerald-700 dark:text-emerald-400">VIRTUAL GREEN CORRIDOR</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Priority Traffic Signal Clearance Activated</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
+                        <span>CLEARANCE ROUTE STATUS</span>
+                        <span class="text-emerald-700 dark:text-emerald-400 font-bold">Traffic Control Notified</span>
+                    </div>
+                    <div id="corridorRoute" class="font-mono text-sm text-slate-900 dark:text-white font-bold">
+                        Bypass Highway 44 → Ring Road Service Lane
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">TRAFFIC DENSITY</div>
+                        <div class="text-sm font-bold text-amber-700 dark:text-amber-400">Moderate Redirection</div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-1">ESTIMATED ETA</div>
+                        <div id="corridorETA" class="text-sm font-black text-emerald-700 dark:text-emerald-400">6 Mins (Saved 12 mins)</div>
+                    </div>
+                </div>
+            </div>
+
+            <a id="corridorCallBtn" href="tel:108" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl text-center block shadow-md shadow-emerald-200 transition text-base">
+                Confirm Emergency Dispatch
+            </a>
+        </div>
+    </div>
+
+    <!-- REPORT TRAFFIC HAZARD MODAL -->
+    <div id="hazardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 relative shadow-2xl">
+            <button onclick="closeReportHazardModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+
+            <h2 class="text-xl font-black mb-1 text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                <i data-lucide="alert-triangle"></i> Report Traffic Bottleneck
+            </h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Notify ambulances about active jams, accidents, or waterlogging</p>
+
+            <form id="hazardForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Location / Road Name</label>
+                    <input type="text" id="hazardLoc" required placeholder="e.g. Outer Ring Road Exit 4" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hazard Type</label>
+                    <select id="hazardType" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-amber-500">
+                        <option value="Heavy Traffic Jam">Heavy Traffic Jam</option>
+                        <option value="Accident Bottleneck">Accident Bottleneck</option>
+                        <option value="Road Construction">Road Construction</option>
+                        <option value="Waterlogging">Waterlogging</option>
+                    </select>
+                </div>
+
+                <button type="submit" id="hazardSubmitBtn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-black py-3 rounded-xl text-sm transition shadow-sm">
+                    Broadcast Traffic Alert
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        © 2026 Life Saver Healthcare Network.
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let map = null;
+        let markersGroup = null;
+        let trafficOverlayGroup = null;
+        let isTrafficShown = false;
+
+        const ambulancesData = [
+            { id: 1, driver: "Ramesh Kumar", phone: "9876543210", type: "ICU Ventilator Ambulance", vehicle: "TS 09 AB 1008", lat: 17.4342, lng: 78.4116, status: "Available", trafficDensity: "Smooth", eta: "6 mins", route: "Bypass Highway 44" },
+            { id: 2, driver: "Suresh Reddy", phone: "9123456789", type: "Basic Life Support (BLS)", vehicle: "TS 07 CD 2004", lat: 17.4483, lng: 78.4878, status: "Available", trafficDensity: "Moderate", eta: "11 mins", route: "Service Road West" },
+            { id: 3, driver: "Mohd Imran", phone: "9988776655", type: "Advanced Life Support (ALS)", vehicle: "TS 10 EF 3001", lat: 17.3789, lng: 78.4844, status: "Available", trafficDensity: "Heavy Gridlock", eta: "18 mins (Green Corridor Available)", route: "Flyover Bypass Lane" },
+            { id: 4, driver: "Venkatesh Naidu", phone: "9440112233", type: "Cardiac Care Ambulance", vehicle: "TS 11 GH 4005", lat: 17.4201, lng: 78.3456, status: "Available", trafficDensity: "Smooth", eta: "8 mins", route: "Expressway 2" }
+        ];
+
+        function initMap(userLat = 17.3850, userLng = 78.4867) {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+
+            if (!map) {
+                map = L.map('map', {
+                    center: [userLat, userLng],
+                    zoom: 12,
+                    zoomControl: true
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    subdomains: 'abcd',
+                    attribution: '© OpenStreetMap © CARTO'
+                }).addTo(map);
+
+                markersGroup = L.layerGroup().addTo(map);
+                trafficOverlayGroup = L.layerGroup().addTo(map);
+            } else {
+                map.setView([userLat, userLng], 12);
+            }
+
+            markersGroup.clearLayers();
+
+            // User location marker
+            L.circleMarker([userLat, userLng], {
+                radius: 10,
+                fillColor: "#d97706",
+                color: "#ffffff",
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.9
+            }).addTo(markersGroup).bindPopup("<b>📍 Your Emergency Position</b>").openPopup();
+
+            [100, 300, 700].forEach(delay => {
+                setTimeout(() => { if (map) map.invalidateSize(); }, delay);
+            });
+        }
+
+        window.toggleTrafficOverlay = function() {
+            isTrafficShown = !isTrafficShown;
+            const btn = document.getElementById("toggleTrafficBtn");
+            trafficOverlayGroup.clearLayers();
+
+            if (isTrafficShown) {
+                btn.innerHTML = `<i data-lucide="layers" class="w-4 h-4"></i> Hide Traffic Heatmap`;
+                L.polyline([[17.4342, 78.4116], [17.3850, 78.4867]], { color: '#059669', weight: 6, opacity: 0.8 }).addTo(trafficOverlayGroup).bindTooltip("🟢 Smooth Traffic Corridor");
+                L.polyline([[17.4483, 78.4878], [17.3850, 78.4867]], { color: '#d97706', weight: 6, opacity: 0.8 }).addTo(trafficOverlayGroup).bindTooltip("🟡 Moderate Traffic");
+                L.polyline([[17.3789, 78.4844], [17.3850, 78.4867]], { color: '#dc2626', weight: 7, opacity: 0.8 }).addTo(trafficOverlayGroup).bindTooltip("🔴 Heavy Congestion - Green Corridor Activated");
+            } else {
+                btn.innerHTML = `<i data-lucide="layers" class="w-4 h-4"></i> Show Traffic Heatmap`;
+            }
+            lucide.createIcons();
+        };
+
+        function renderAmbulances(list) {
+            const container = document.getElementById("ambulanceList");
+            container.innerHTML = "";
+
+            list.forEach(amb => {
+                if (markersGroup) {
+                    const marker = L.marker([amb.lat, amb.lng]).addTo(markersGroup);
+                    marker.bindPopup(`
+                        <div class="p-2 text-slate-900">
+                            <strong class="text-amber-600">${amb.type}</strong><br/>
+                            <span class="text-xs text-gray-600">Driver: ${amb.driver}</span><br/>
+                            <span class="text-xs font-bold text-emerald-600">Traffic: ${amb.trafficDensity} (ETA ${amb.eta})</span>
+                        </div>
+                    `);
+                }
+
+                let densityClass = "traffic-smooth";
+                let densityDot = "🟢";
+                if (amb.trafficDensity === "Moderate") {
+                    densityClass = "traffic-moderate";
+                    densityDot = "🟡";
+                } else if (amb.trafficDensity.includes("Heavy")) {
+                    densityClass = "traffic-heavy";
+                    densityDot = "🔴";
+                }
+
+                const card = document.createElement("div");
+                card.className = "glass-card p-6 flex flex-col justify-between hover:border-amber-500 transition";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-xs font-bold px-3 py-1 rounded-full border border-amber-200 dark:border-amber-900/50">
+                                🚑 ${amb.type}
+                            </span>
+                            <span class="${densityClass} text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                                ${densityDot} ${amb.trafficDensity}
+                            </span>
+                        </div>
+
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-1">${amb.driver}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 font-mono">Reg: ${amb.vehicle}</p>
+
+                        <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl mb-4 border border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
+                                <span>TRAFFIC-ADJUSTED ETA</span>
+                                <span class="font-black text-emerald-600 dark:text-emerald-400 text-sm">${amb.eta}</span>
+                            </div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <i data-lucide="navigation" class="w-3 h-3 text-slate-400"></i> ${amb.route}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <a href="tel:${amb.phone}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm">
+                            <i data-lucide="phone-call" class="w-3.5 h-3.5"></i> Call Driver
+                        </a>
+                        <button onclick="triggerGreenCorridor('${amb.driver}', '${amb.route}', '${amb.eta}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-emerald-400"></i> Green Corridor
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+            if (map) map.invalidateSize();
+        }
+
+        window.triggerGreenCorridor = function(driver, route, eta) {
+            document.getElementById("corridorRoute").textContent = route;
+            document.getElementById("corridorETA").textContent = `${eta} (Prioritized Clearance)`;
+            document.getElementById("corridorModal").classList.remove("hidden");
+            document.getElementById("corridorModal").classList.add("flex");
+        };
+
+        window.closeCorridorModal = function() {
+            document.getElementById("corridorModal").classList.add("hidden");
+            document.getElementById("corridorModal").classList.remove("flex");
+        };
+
+        /* HAZARD MODAL */
+        window.openReportHazardModal = function() {
+            document.getElementById("hazardModal").classList.remove("hidden");
+            document.getElementById("hazardModal").classList.add("flex");
+        };
+
+        window.closeReportHazardModal = function() {
+            document.getElementById("hazardModal").classList.add("hidden");
+            document.getElementById("hazardModal").classList.remove("flex");
+        };
+
+        document.getElementById("hazardForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById("hazardSubmitBtn");
+            btn.innerText = "Broadcasting Alert...";
+            btn.disabled = true;
+
+            try {
+                const loc = document.getElementById("hazardLoc").value;
+                const type = document.getElementById("hazardType").value;
+                await push(ref(db, 'traffic_hazards'), {
+                    location: loc,
+                    type: type,
+                    timestamp: new Date().toISOString()
+                });
+                alert("Traffic Hazard Broadcasted! Ambulances in area have been notified.");
+                closeReportHazardModal();
+            } catch (err) {
+                alert("Error submitting report: " + err.message);
+            } finally {
+                btn.innerText = "Broadcast Traffic Alert";
+                btn.disabled = false;
+            }
+        });
+
+        // Initialize Map & Render Data Immediately
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap(17.3850, 78.4867);
+            renderAmbulances(ambulancesData);
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    initMap(pos.coords.latitude, pos.coords.longitude);
+                });
+            }
+        });
+    </script>
+    <script>
+        lucide.createIcons();
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>

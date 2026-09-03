@@ -1,0 +1,28 @@
+{
+  "name": "Life Saver - Emergency Blood & Organ Donation",
+  "short_name": "LifeSaver",
+  "id": "/",
+  "description": "Find emergency blood donors, pledge organ donations, locate hospitals, and request emergency healthcare near you.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
+  "categories": ["medical", "health", "lifestyle"],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

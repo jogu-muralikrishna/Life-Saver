@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organ Donation Pledge & Formalities - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-purple-600 font-extrabold text-xl tracking-tight">
+                <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+                <span>Life <span class="text-emerald-600">Saver</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <a href="index.html" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="max-w-5xl mx-auto px-6 py-10 flex-1">
+        <div class="glass-card p-8 md:p-12 text-center mb-10 border border-purple-200 dark:border-purple-900/50 bg-white dark:bg-slate-900">
+            <div class="bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-purple-100 dark:border-purple-900/50">
+                <i data-lucide="gift" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Pledge Organ Donation & Medical Screening</h1>
+            <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-xl mx-auto mb-8 leading-relaxed">
+                A single organ donor can save up to 8 lives. Complete our online medical pre-screening and family consent declaration to leave a lasting legacy.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="organ-donor.html" class="bg-purple-600 hover:bg-purple-700 text-white font-black px-6 py-3 rounded-xl text-sm transition shadow-md shadow-purple-500/20 flex items-center gap-2">
+                    <i data-lucide="clipboard-check" class="w-4 h-4"></i> Complete Medical Screening & Pledge
+                </a>
+            </div>
+        </div>
+
+        <!-- FORMALITIES & SPECIFICATIONS -->
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <i data-lucide="shield-check" class="text-purple-600 dark:text-purple-400"></i> Key Medical & Legal Specifications
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card p-6">
+                <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2 flex items-center gap-2">
+                    🍷 1. Lifestyle Habits Declaration
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Evaluates alcohol consumption and smoking habits to help transplant teams assess organ suitability.
+                </p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2 flex items-center gap-2">
+                    🩺 2. Chronic Illness Screening
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Pre-checks for diabetes, hypertension, cardiac history, and infectious disease history for fast matching.
+                </p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2 flex items-center gap-2">
+                    📜 3. Legal & Family Formalities
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Ensures family awareness and formal declaration consent as required by organ donation authorities.
+                </p>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Organs & Tissues You Can Pledge for Others</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+            <div class="glass-card p-5">
+                <div class="text-purple-700 dark:text-purple-400 font-black text-base mb-1.5 flex items-center gap-1.5">🫀 Heart & Lungs</div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Saves recipients with end-stage heart failure or severe pulmonary illness.</p>
+            </div>
+            <div class="glass-card p-5">
+                <div class="text-purple-700 dark:text-purple-400 font-black text-base mb-1.5 flex items-center gap-1.5">🫁 Kidneys & Liver</div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">1 donor can provide 2 kidneys and a liver graft, freeing recipients from dialysis.</p>
+            </div>
+            <div class="glass-card p-5">
+                <div class="text-purple-700 dark:text-purple-400 font-black text-base mb-1.5 flex items-center gap-1.5">🩸 Pancreas & Intestines</div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Helps severe diabetic patients and individuals with intestinal organ failure.</p>
+            </div>
+            <div class="glass-card p-5">
+                <div class="text-purple-700 dark:text-purple-400 font-black text-base mb-1.5 flex items-center gap-1.5">👁️ Corneas & Tissues</div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Restores eyesight to 2 blind persons, plus skin and bone tissue grafts for burn victims.</p>
+            </div>
+        </div>
+
+        <!-- FREQUENTLY ASKED MEDICAL & HABIT QUESTIONS -->
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <i data-lucide="help-circle" class="text-purple-600 dark:text-purple-400"></i> Body Requirements & Lifestyle Answers
+        </h2>
+        
+        <div class="space-y-4 mb-10">
+            <div class="glass-card p-6 border border-purple-100 dark:border-purple-900/40">
+                <h3 class="font-black text-sm text-purple-900 dark:text-purple-300 mb-1 flex items-center gap-2">
+                    ❓ Can people with smoking or drinking habits pledge organ donation?
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <strong>YES!</strong> Having smoking or drinking habits does <strong>NOT</strong> prevent you from registering as an organ donor. Medical transplant teams evaluate each organ individually at the time of donation. For instance, even if a smoker's lungs are unfit, their corneas, kidneys, or liver may still be completely healthy and save lives!
+                </p>
+            </div>
+
+            <div class="glass-card p-6 border border-purple-100 dark:border-purple-900/40">
+                <h3 class="font-black text-sm text-purple-900 dark:text-purple-300 mb-1 flex items-center gap-2">
+                    ❓ What body and medical conditions are required for organ donation?
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Donors should generally be 18 years or older (or have parental consent if younger). The primary requirement is that pledged organs must be free from active untreated HIV, systemic active cancer, or active sepsis at the time of transplant matching.
+                </p>
+            </div>
+
+            <div class="glass-card p-6 border border-purple-100 dark:border-purple-900/40">
+                <h3 class="font-black text-sm text-purple-900 dark:text-purple-300 mb-1 flex items-center gap-2">
+                    ❓ Why is family consent mandatory?
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Under organ donation regulations, immediate next-of-kin family members are consulted to honor the donor's wish. Discussing your pledge with your family ensures your legal pledge pass is executed smoothly.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        © 2026 Life Saver Healthcare Network.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Nearby Hospitals - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Leaflet CSS & JS for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map {
+            min-height: 450px !important;
+            height: 450px !important;
+            width: 100% !important;
+            border-radius: 1rem !important;
+            z-index: 10 !important;
+            position: relative !important;
+        }
+    </style>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-blue-600 font-extrabold text-xl tracking-tight">
+                <i data-lucide="building-2" class="w-6 h-6"></i>
+                <span>Life <span class="text-emerald-600">Saver</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <a href="index.html" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Find Nearby Hospitals</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Real-time hospital search with interactive map markers and directions</p>
+            </div>
+
+            <!-- SEARCH / REFRESH -->
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="text" id="citySearch" placeholder="Enter City (e.g. Hyderabad, Mumbai)..." 
+                    class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-xl text-sm outline-none focus:border-blue-500 w-full md:w-64">
+                <button onclick="searchHospitalsByCity()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition shrink-0 shadow-sm">
+                    <i data-lucide="search" class="w-4 h-4"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <!-- MAP CONTAINER -->
+        <div class="glass-card p-3 rounded-2xl mb-8 border border-slate-200 dark:border-slate-800 shadow-md">
+            <div id="map" style="height: 450px; min-height: 450px; width: 100%;"></div>
+        </div>
+
+        <!-- HOSPITALS LIST HEADER & SORT CONTROL -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <i data-lucide="list" class="text-emerald-600 dark:text-emerald-400"></i> Nearby Hospital Results
+            </h2>
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+                <label class="text-xs text-slate-500 dark:text-slate-400 font-bold shrink-0">Sort By:</label>
+                <select id="sortControl" onchange="sortAndRenderHospitals()" class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white px-3 py-1.5 rounded-xl text-xs outline-none focus:border-blue-500 font-semibold">
+                    <option value="km_asc">⚡ Distance: Nearest First (Ascending km)</option>
+                    <option value="km_desc">Distance: Farthest First</option>
+                    <option value="name">Name (A - Z)</option>
+                </select>
+                <span id="hospitalCount" class="text-xs bg-slate-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-3 py-1.5 rounded-full font-bold shrink-0">
+                    0 Found
+                </span>
+            </div>
+        </div>
+
+        <div id="hospitalsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-12 text-slate-400">
+                <i data-lucide="loader" class="w-8 h-8 animate-spin mx-auto mb-2 text-blue-600"></i>
+                <p>Detecting your location & loading nearby hospitals...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        © 2026 Life Saver Healthcare Network.
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        let map = null;
+        let markersGroup = null;
+        let currentUserLat = 17.3850;
+        let currentUserLng = 78.4867;
+        let fetchedHospitalsList = [];
+
+        // Haversine formula to compute exact distance in KM between two coordinates
+        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth radius in KM
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return Math.round(R * c * 10) / 10; // Rounded to 1 decimal place
+        }
+
+        // Comprehensive hospital directory fallback covering major, local, government, and emergency hospitals
+        const sampleHospitals = [
+            { name: "Apollo Emergency Hospital", lat: 17.4342, lng: 78.4116, phone: "040-23607777", address: "Jubilee Hills, Hyderabad", type: "Super Speciality" },
+            { name: "KIMS Emergency Care", lat: 17.4483, lng: 78.4878, phone: "040-44885000", address: "Minister Road, Secunderabad", type: "Multi-Speciality" },
+            { name: "Yashoda Speciality Hospital", lat: 17.3789, lng: 78.4844, phone: "040-45674567", address: "Malakpet, Hyderabad", type: "Trauma Center" },
+            { name: "Continental Super Speciality", lat: 17.4201, lng: 78.3456, phone: "040-67000000", address: "Gachibowli, Hyderabad", type: "Emergency ER" },
+            { name: "NIMS Government Super Speciality", lat: 17.4225, lng: 78.4550, phone: "040-23489000", address: "Punjagutta, Hyderabad", type: "Government Hospital" },
+            { name: "Gandhi General Hospital & ER", lat: 17.4248, lng: 78.5033, phone: "040-27505566", address: "Musheerabad, Secunderabad", type: "Govt Civil Hospital" },
+            { name: "Osmania General Hospital", lat: 17.3702, lng: 78.4770, phone: "040-24600121", address: "Afzal Gunj, Hyderabad", type: "Government Trauma" },
+            { name: "Care Hospitals Emergency Care", lat: 17.4128, lng: 78.4497, phone: "040-61656565", address: "Banjara Hills, Hyderabad", type: "24/7 ICU & ER" },
+            { name: "Sunshine Super Speciality Hospital", lat: 17.4401, lng: 78.4912, phone: "040-44550000", address: "Paradise Circle, Secunderabad", type: "Orthopedic & ER" },
+            { name: "MaxCure General Hospital", lat: 17.4450, lng: 78.3800, phone: "040-49404940", address: "Madhapur, Hyderabad", type: "Multi-Speciality" },
+            { name: "Ozone Hospitals & Emergency", lat: 17.3621, lng: 78.5490, phone: "040-24036000", address: "Kothapet, Hyderabad", type: "Emergency ER" },
+            { name: "Pranaam Multi Speciality Hospital", lat: 17.4920, lng: 78.3890, phone: "040-23041000", address: "Miyapur, Hyderabad", type: "Local Hospital" }
+        ];
+
+        function initMap(userLat = 17.3850, userLng = 78.4867) {
+            currentUserLat = userLat;
+            currentUserLng = userLng;
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+
+            if (!map) {
+                map = L.map('map', {
+                    center: [userLat, userLng],
+                    zoom: 12,
+                    zoomControl: true
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19,
+                    subdomains: 'abcd',
+                    attribution: '© OpenStreetMap © CARTO'
+                }).addTo(map);
+
+                markersGroup = L.layerGroup().addTo(map);
+            } else {
+                map.setView([userLat, userLng], 12);
+            }
+
+            markersGroup.clearLayers();
+
+            L.circleMarker([userLat, userLng], {
+                radius: 10,
+                fillColor: "#dc2626",
+                color: "#ffffff",
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.9
+            }).addTo(markersGroup).bindPopup("<b>📍 Your Current Location</b>").openPopup();
+
+            [100, 300, 700].forEach(delay => {
+                setTimeout(() => { if (map) map.invalidateSize(); }, delay);
+            });
+        }
+
+        async function fetchHospitals(lat, lng) {
+            try {
+                // Expanded Overpass API query for ALL hospitals, clinics, nursing homes, and doctors within 15km
+                const query = `[out:json];(node["amenity"~"hospital|clinic|doctors|nursing_home"](around:15000,${lat},${lng});way["amenity"~"hospital|clinic|doctors|nursing_home"](around:15000,${lat},${lng}););out center 40;`;
+                const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                let hospitals = [];
+                if (data.elements && data.elements.length > 0) {
+                    hospitals = data.elements.map(el => {
+                        const hLat = el.lat || (el.center ? el.center.lat : lat);
+                        const hLng = el.lon || (el.center ? el.center.lon : lng);
+                        const dist = calculateDistanceKm(lat, lng, hLat, hLng);
+                        return {
+                            name: el.tags.name || el.tags["name:en"] || "General Emergency Hospital & Clinic",
+                            lat: hLat,
+                            lng: hLng,
+                            phone: el.tags.phone || el.tags["contact:phone"] || "108",
+                            address: el.tags["addr:full"] || el.tags["addr:street"] || el.tags["addr:city"] || "Nearby Medical Healthcare Facility",
+                            distanceKm: dist,
+                            type: el.tags.amenity ? el.tags.amenity.toUpperCase() : "HOSPITAL"
+                        };
+                    });
+                }
+
+                if (hospitals.length < 5) {
+                    // Combine with sample hospitals
+                    const formattedSamples = sampleHospitals.map(sh => ({
+                        ...sh,
+                        distanceKm: calculateDistanceKm(lat, lng, sh.lat, sh.lng)
+                    }));
+                    hospitals = [...hospitals, ...formattedSamples];
+                }
+
+                fetchedHospitalsList = hospitals;
+                sortAndRenderHospitals();
+            } catch (err) {
+                console.log("Overpass API fallback", err);
+                fetchedHospitalsList = sampleHospitals.map(sh => ({
+                    ...sh,
+                    distanceKm: calculateDistanceKm(lat, lng, sh.lat, sh.lng)
+                }));
+                sortAndRenderHospitals();
+            }
+        }
+
+        window.sortAndRenderHospitals = function() {
+            const sortBy = document.getElementById("sortControl")?.value || "km_asc";
+            
+            let sorted = [...fetchedHospitalsList];
+            if (sortBy === "km_asc") {
+                sorted.sort((a, b) => a.distanceKm - b.distanceKm);
+            } else if (sortBy === "km_desc") {
+                sorted.sort((a, b) => b.distanceKm - a.distanceKm);
+            } else if (sortBy === "name") {
+                sorted.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            renderHospitals(sorted);
+        };
+
+        function renderHospitals(hospitals) {
+            const listEl = document.getElementById("hospitalsList");
+            const countEl = document.getElementById("hospitalCount");
+            listEl.innerHTML = "";
+            countEl.textContent = `${hospitals.length} Found`;
+
+            if (markersGroup) {
+                markersGroup.clearLayers();
+                // User Marker
+                L.circleMarker([currentUserLat, currentUserLng], {
+                    radius: 10,
+                    fillColor: "#dc2626",
+                    color: "#ffffff",
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(markersGroup).bindPopup("<b>📍 Your Current Location</b>");
+            }
+
+            hospitals.forEach((h, index) => {
+                const distStr = h.distanceKm !== undefined ? `${h.distanceKm} km away` : 'Nearby';
+                const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentUserLat},${currentUserLng}&destination=${h.lat},${h.lng}&travelmode=driving`;
+
+                // Add map marker
+                if (markersGroup) {
+                    const marker = L.marker([h.lat, h.lng]).addTo(markersGroup);
+                    marker.bindPopup(`
+                        <div class="p-2 text-slate-900">
+                            <strong class="text-red-600">${h.name}</strong><br/>
+                            <span class="text-xs text-slate-600">📍 ${distStr} • ${h.address}</span><br/>
+                            <a href="${googleMapsUrl}" target="_blank" class="text-blue-600 text-xs font-bold underline mt-1 inline-block">Google Maps Directions</a>
+                        </div>
+                    `);
+                }
+
+                // Create Card
+                const card = document.createElement("div");
+                card.className = "glass-card p-6 flex flex-col justify-between hover:border-blue-500 transition shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 text-xs font-bold px-3 py-1 rounded-full border border-blue-200 dark:border-blue-900/50 flex items-center gap-1">
+                                🏥 Hospital #${index + 1}
+                            </span>
+                            <span class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-extrabold text-xs px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900">
+                                📍 ${distStr}
+                            </span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-1">${h.name}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i> ${h.address}
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <a href="tel:${h.phone.replace(/[^0-9]/g, '') || '108'}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+                        </a>
+                        <a href="${googleMapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm">
+                            <i data-lucide="navigation" class="w-3.5 h-3.5"></i> Google Maps
+                        </a>
+                    </div>
+                `;
+                listEl.appendChild(card);
+            });
+            lucide.createIcons();
+            if (map) map.invalidateSize();
+        }
+
+        window.searchHospitalsByCity = async function() {
+            const city = document.getElementById("citySearch").value.trim();
+            if (!city) return;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lng = parseFloat(data[0].lon);
+                    initMap(lat, lng);
+                    fetchHospitals(lat, lng);
+                } else {
+                    alert("City not found. Please try another city name.");
+                }
+            } catch (err) {
+                alert("Search failed. Please check internet connection.");
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initMap(17.3850, 78.4867);
+            fetchHospitals(17.3850, 78.4867);
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    initMap(pos.coords.latitude, pos.coords.longitude);
+                    fetchHospitals(pos.coords.latitude, pos.coords.longitude);
+                });
+            }
+        });
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>

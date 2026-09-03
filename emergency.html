@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Health Knowledge Library - Life Saver</title>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-red-600 font-extrabold text-xl tracking-tight">
+                <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                <span>Life <span class="text-emerald-600">Saver</span></span>
+            </a>
+            <div class="flex items-center gap-3">
+                <div id="userAuthBadge" class="hidden items-center gap-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-900 text-xs font-bold">
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> <span id="userAuthEmail">Registered Member</span>
+                </div>
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+                <a href="admin-login.html" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-400"></i> Admin Login
+                </a>
+                <a href="index.html" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-5xl mx-auto px-6 py-10 flex-1 w-full space-y-10">
+
+        <!-- RENAMED VISIBLE SECTION HEADER -->
+        <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-4 uppercase tracking-wider">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span> National Emergency & Health Education Network
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">📚 Health Knowledge Library</h1>
+            <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
+                Public 24/7 Emergency Helplines, 30-Second Bystander Survival Protocols, and Verified Health Education Resources for Registered Life Saver Members.
+            </p>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- PRESERVED DATA SECTION 1: 30-SECOND SURVIVAL PROTOCOLS -->
+        <!-- ========================================================= -->
+        <div class="glass-card p-6 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                    <i data-lucide="activity" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-400">🚨 30-Second Bystander Survival Protocols</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Immediate public rescue steps to keep a patient alive until the 108 ambulance arrives</p>
+                </div>
+            </div>
+
+            <!-- PROTOCOL TABS -->
+            <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <button onclick="switchProtocol('cpr')" id="btnCpr" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    🫁 Adult CPR Protocol
+                </button>
+                <button onclick="switchProtocol('choking')" id="btnChoking" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    🗣️ Choking (Heimlich)
+                </button>
+                <button onclick="switchProtocol('bleeding')" id="btnBleeding" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    🩸 Bleeding Control
+                </button>
+                <button onclick="switchProtocol('burns')" id="btnBurns" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    🐍 Snakebite / Burns
+                </button>
+            </div>
+
+            <!-- PROTOCOL DISPLAY BOX -->
+            <div id="protocolBox" class="bg-slate-50 dark:bg-slate-950 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm space-y-4">
+                <!-- Dynamic Protocol Steps -->
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- PRESERVED DATA SECTION 2: LIVE GPS LOCATION BROADCAST     -->
+        <!-- ========================================================= -->
+        <div class="glass-card p-6 md:p-8 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl rounded-3xl">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                        <i data-lucide="map-pin"></i> Live GPS Location Broadcast
+                    </h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Detect your current position to send to first responders or emergency contacts</p>
+                </div>
+                <button onclick="detectGPS()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh Geolocation
+                </button>
+            </div>
+
+            <div id="gpsBox" class="bg-slate-900 dark:bg-slate-950 p-4 rounded-xl font-mono text-xs text-emerald-400 border border-slate-800 mb-4">
+                Fetching location coordinates...
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button onclick="shareWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition shadow-sm">
+                    <i data-lucide="share-2" class="w-4 h-4"></i> Share Coordinates on WhatsApp
+                </button>
+                <button onclick="copyGPS()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Location Link
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- PRESERVED DATA SECTION 3: IMMEDIATE HELPLINE DIRECTORY    -->
+        <!-- ========================================================= -->
+        <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                <i data-lucide="phone-call" class="text-blue-600 dark:text-blue-400"></i> Immediate Helpline Directory (Public 24/7 Access)
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="tel:108" class="glass-card p-6 flex items-center justify-between group hover:border-red-500 transition rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 p-4 rounded-2xl border border-red-100 dark:border-red-900/50">
+                            <i data-lucide="ambulance" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">National Ambulance</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Medical Emergency Response</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-red-600 dark:text-red-400 group-hover:scale-110 transition font-mono">108</div>
+                </a>
+
+                <a href="tel:100" class="glass-card p-6 flex items-center justify-between group hover:border-blue-500 transition rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/50">
+                            <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">Police Control Room</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Law Enforcement & Safety</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-blue-600 dark:text-blue-400 group-hover:scale-110 transition font-mono">100</div>
+                </a>
+
+                <a href="tel:101" class="glass-card p-6 flex items-center justify-between group hover:border-amber-500 transition rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 p-4 rounded-2xl border border-amber-100 dark:border-amber-900/50">
+                            <i data-lucide="flame" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">Fire Brigade</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Fire & Rescue Service</p>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-black text-amber-600 dark:text-amber-400 group-hover:scale-110 transition font-mono">101</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- HR DIVIDER -->
+        <hr class="border-slate-200 dark:border-slate-800 my-8">
+
+        <!-- ========================================================= -->
+        <!-- PUBLIC USER LOCKED TEASER CARD (Shown when user is guest) -->
+        <!-- ========================================================= -->
+        <div id="publicLockedNotice" class="glass-card p-8 md:p-10 rounded-3xl border-2 border-dashed border-amber-300 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20 text-center relative overflow-hidden">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <div class="inline-flex items-center justify-center p-4 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 rounded-3xl mb-2 border border-amber-300 dark:border-amber-800 shadow-sm">
+                    <i data-lucide="lock" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white">📚 Full Health Knowledge Library Access</h2>
+                <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+                    Useful health education, blood donation guidelines, women's health, common illness self-care, nutrition guides, heart health, child health, senior care, and first aid modules are available exclusively to registered Life Saver members.
+                </p>
+
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-left space-y-3 shadow-sm my-6">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                        <i data-lucide="shield-check" class="text-emerald-600"></i> 🔐 Register to Access 10+ Educational Categories
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Register with Life Saver to access our full health education library, verified medical resources, blood donor guides, nutrition facts, and wellness protocols curated from official health organizations (WHO, CDC, NHS, MOHFW).
+                    </p>
+                </div>
+
+                <div>
+                    <a href="auth.html" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black px-8 py-3.5 rounded-2xl text-sm transition shadow-lg hover:shadow-emerald-500/25">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i> Register Now / Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- REGISTERED USER FULL LIBRARY (Shown when authenticated)   -->
+        <!-- ========================================================= -->
+        <div id="registeredLibraryContainer" class="hidden space-y-8">
+            <div class="bg-gradient-to-r from-emerald-900/40 to-blue-900/40 p-6 md:p-8 rounded-3xl border border-emerald-500/30 text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-extrabold uppercase mb-2">
+                        <i data-lucide="award" class="w-3.5 h-3.5"></i> Authenticated Member Access
+                    </div>
+                    <h2 class="text-2xl font-black mb-1">Welcome to the Verified Health Library</h2>
+                    <p class="text-xs text-slate-300">Curated medical educational topics from WHO, CDC, NHS, MOHFW, and ICMR.</p>
+                </div>
+                <div class="w-full md:w-80 shrink-0">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3.5 text-slate-400"></i>
+                        <input type="text" id="librarySearch" oninput="filterLibrary()" placeholder="Search library (e.g. fever, iron, pregnancy)..." class="w-full bg-slate-900/90 border border-slate-700 text-white py-2.5 pl-9 pr-4 rounded-xl text-xs outline-none focus:border-emerald-400 font-bold placeholder-slate-400">
+                    </div>
+                </div>
+            </div>
+
+            <!-- CATEGORY FILTER BUTTONS -->
+            <div class="flex flex-wrap items-center gap-2 pb-2">
+                <button onclick="filterCategory('all')" id="catBtn-all" class="cat-filter-btn active bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition">
+                    ✨ All Topics
+                </button>
+                <button onclick="filterCategory('blood')" id="catBtn-blood" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🩸 Blood Donation
+                </button>
+                <button onclick="filterCategory('women')" id="catBtn-women" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    👩 Women's Health
+                </button>
+                <button onclick="filterCategory('illness')" id="catBtn-illness" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🤒 Common Illnesses
+                </button>
+                <button onclick="filterCategory('nutrition')" id="catBtn-nutrition" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🥗 Nutrition
+                </button>
+                <button onclick="filterCategory('heart')" id="catBtn-heart" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    ❤️ Heart Health
+                </button>
+                <button onclick="filterCategory('child')" id="catBtn-child" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🧒 Child Health
+                </button>
+                <button onclick="filterCategory('senior')" id="catBtn-senior" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    👴 Senior Health
+                </button>
+                <button onclick="filterCategory('mental')" id="catBtn-mental" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🧠 Mental Wellness
+                </button>
+                <button onclick="filterCategory('firstaid')" id="catBtn-firstaid" class="cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    🩹 First Aid
+                </button>
+            </div>
+
+            <!-- ARTICLES GRID -->
+            <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- 1. BLOOD DONOR ELIGIBILITY -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="blood" data-search="blood donation eligibility age weight donor who can donate">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-3 py-1 rounded-full text-xs border border-red-200 dark:border-red-900/50">🩸 Blood Donation</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Who Can Donate Blood? Eligibility & Guidelines</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Blood donation is a safe, life-saving act. Basic medical eligibility criteria ensure the health and safety of both the donor and the recipient.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices & Preparation:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Age between 18 and 65 years, body weight >= 45 kg.</li>
+                            <li>Normal hemoglobin level (at least 12.5 g/dL).</li>
+                            <li>Drink 500ml water and eat an iron-rich meal 2 hours before donation.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ When to Postpone Donation:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Postpone if consumed alcohol within the last 24 hours.</li>
+                            <li>Postpone if suffering from fever, active cold, or taking antibiotics.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Doctor:</div>
+                        <p>Contact healthcare staff if persistent dizziness, fainting, or swelling occurs at the puncture site after donating.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: Indian Red Cross Society & WHO</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 2. WOMEN'S HEALTH - PREGNANCY NUTRITION -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="women" data-search="pregnancy nutrition iron periods menstrual hygiene women health">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-pink-50 dark:bg-pink-950/40 text-pink-600 dark:text-pink-400 font-extrabold px-3 py-1 rounded-full text-xs border border-pink-200 dark:border-pink-900/50">👩 Women's Health</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Pregnancy Nutrition & Menstrual Iron Balance</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Essential nutritional guidance focusing on iron-rich foods, folic acid, menstrual hygiene, and hydration during pregnancy and period cycles.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Consume spinach, lentils, jaggery, and dates for natural dietary iron.</li>
+                            <li>Pair iron-rich foods with Vitamin C (lemons, oranges) to increase absorption.</li>
+                            <li>Maintain hydration with 8-10 glasses of clean water daily.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Avoid unpasteurized milk products or raw unwashed produce during pregnancy.</li>
+                            <li>Avoid unhygienic reusable cloths during period hygiene.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Doctor:</div>
+                        <p>Seek immediate medical care for severe morning sickness, inability to retain fluids, abnormal bleeding, or severe abdominal pain.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: ICMR & Ministry of Health and Family Welfare (MOHFW)</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 3. COMMON ILLNESSES - FEVER & COUGH -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="illness" data-search="fever cough cold sore throat dehydration illness self-care">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 font-extrabold px-3 py-1 rounded-full text-xs border border-amber-200 dark:border-amber-900/50">🤒 Common Illnesses</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Food & Hydration Self-Care During Fever & Cough</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Practical supportive home care, hydration routines, and warning signs for common seasonal fever, sore throat, and mild colds.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Drink ORS (Oral Rehydration Salts), warm broths, and clear fluids frequently.</li>
+                            <li>Eat light, easily digestible foods like warm oats, soups, and khichdi.</li>
+                            <li>Warm saline gargles 3 times daily for sore throat relief.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Do NOT self-prescribe or consume unprescribed antibiotics.</li>
+                            <li>Avoid heavy, greasy, or ice-cold foods during fever.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Doctor:</div>
+                        <p>Seek urgent medical care if fever exceeds 102°F (38.9°C), lasts over 3 days, or is accompanied by severe headache, stiff neck, or shortness of breath.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: WHO & AIIMS New Delhi</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 4. NUTRITION - BALANCED DIET -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="nutrition" data-search="nutrition balanced diet iron protein calcium vitamins food">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 font-extrabold px-3 py-1 rounded-full text-xs border border-emerald-200 dark:border-emerald-900/50">🥗 Nutrition</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Balanced Diet Basics & Essential Nutrient Groups</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Fundamentals of whole-food nutrition, dietary fiber, micronutrients, and daily meal planning for long-term health.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Fill half your plate with colorful vegetables and whole fruits.</li>
+                            <li>Include plant-based proteins (pulses, beans, paneer) or lean meats.</li>
+                            <li>Ensure adequate calcium intake through dairy, sesame, or fortified plant milks.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Minimize ultra-processed foods, deep-fried snacks, and sugar-sweetened beverages.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Doctor:</div>
+                        <p>Consult a registered dietitian or doctor if experiencing severe nutritional deficiencies, sudden unexplained weight loss, or chronic digestive issues.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: National Institute of Nutrition (NIN) & ICMR</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 5. HEART HEALTH -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="heart" data-search="heart health cardiac salt sodium blood pressure exercise smoking">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-3 py-1 rounded-full text-xs border border-red-200 dark:border-red-900/50">❤️ Heart Health</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Heart-Healthy Lifestyle & Dietary Sodium Control</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Evidence-based habits for maintaining optimal blood pressure, healthy arterial function, and reducing cardiovascular risks.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Engage in 30 minutes of brisk walking or aerobic exercise at least 5 days a week.</li>
+                            <li>Limit daily salt intake to under 1 teaspoon (<5 grams).</li>
+                            <li>Include heart-friendly fats like mustard oil, walnuts, and flaxseeds.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Avoid tobacco smoking and exposure to secondhand smoke.</li>
+                            <li>Avoid trans fats found in bakery shortenings and commercial fried snacks.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 Emergency Warning Signs (Call 108):</div>
+                        <p class="font-bold text-red-600 dark:text-red-400">Call 108 immediately for severe crushing chest pressure, pain radiating to left arm/jaw, or sudden shortness of breath.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: World Heart Federation & WHO</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 6. CHILD HEALTH -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="child" data-search="child health pediatric fever hydration vaccination kids baby">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-extrabold px-3 py-1 rounded-full text-xs border border-purple-200 dark:border-purple-900/50">🧒 Child Health</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Child Care, Hydration & Pediatric Fever Awareness</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Essential parent guidance on childhood hydration, routine vaccination schedules, and recognizing red-flag symptoms in young children.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Offer frequent sips of ORS, coconut water, or light soups during diarrhea or fever.</li>
+                            <li>Ensure timely immunization according to the National Immunization Schedule.</li>
+                            <li>Dress feverish children in light, breathable cotton clothing.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>NEVER administer aspirin to children or teenagers (risk of Reye's syndrome).</li>
+                            <li>Do NOT over-wrap a child suffering from high fever.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Pediatrician:</div>
+                        <p>Seek urgent medical care if an infant under 3 months has a fever >= 100.4°F (38°C), or if a child is unusually lethargic, unresponsive, or crying without tears.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: UNICEF & Indian Academy of Pediatrics (IAP)</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 7. SENIOR HEALTH -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="senior" data-search="senior health elderly bone calcium checkup fall prevention older">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 font-extrabold px-3 py-1 rounded-full text-xs border border-blue-200 dark:border-blue-900/50">👴 Senior Health</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Senior Nutrition, Bone Wellness & Fall Safety</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Practical recommendations for older adults regarding bone density, proper hydration, medication safety, and home fall prevention.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Maintain calcium and Vitamin D intake through milk, curd, sunlight exposure, or physician advice.</li>
+                            <li>Ensure well-lit hallways, non-slip bathroom mats, and clear walkways at home.</li>
+                            <li>Drink fluids regularly even if thirst sensation decreases with age.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Avoid sudden posture changes from lying to standing to prevent orthostatic dizziness.</li>
+                            <li>Never skip prescribed routine health checks or medication reviews.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Contact a Doctor:</div>
+                        <p>Seek medical evaluation immediately following any fall, sudden joint immobility, confusion, or difficulty speaking.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: National Institute on Aging & WHO</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 8. MENTAL WELLNESS -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="mental" data-search="mental wellness stress sleep anxiety mental health daily routine">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 font-extrabold px-3 py-1 rounded-full text-xs border border-indigo-200 dark:border-indigo-900/50">🧠 Mental Wellness</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Stress Relief, Sleep Hygiene & Daily Mental Health</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Evidence-based self-care strategies for managing daily stress, improving sleep quality, and fostering emotional resilience.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Maintain a consistent sleep routine aiming for 7-8 hours per night.</li>
+                            <li>Practice 10 minutes of deep abdominal breathing or mindfulness daily.</li>
+                            <li>Stay socially connected with family, friends, and supportive community networks.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Avoid screen usage (phones, TVs) at least 45 minutes before bedtime.</li>
+                            <li>Avoid excessive caffeine or unguided self-medication for anxiety.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Seek Professional Support:</div>
+                        <p>Contact a certified mental health professional if experiencing persistent sadness, severe anxiety, or feelings of overwhelm lasting over two weeks.</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: WHO Mental Health & NIMHANS</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+                <!-- 9. FIRST AID - MINOR INJURIES -->
+                <div class="article-card glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4" data-category="firstaid" data-search="first aid cuts burns nosebleed fainting choking heat stroke">
+                    <div class="flex items-center justify-between">
+                        <span class="bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 font-extrabold px-3 py-1 rounded-full text-xs border border-teal-200 dark:border-teal-900/50">🩹 First Aid</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Verified: Aug 2026</span>
+                    </div>
+                    <h3 class="text-lg font-black text-slate-900 dark:text-white">Household First Aid: Minor Cuts, Burns & Nosebleeds</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Step-by-step basic bystander first aid procedures for common non-emergency household injuries and thermal burns.
+                    </p>
+                    
+                    <div class="bg-emerald-50 dark:bg-emerald-950/30 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-emerald-800 dark:text-emerald-400">✅ Helpful Choices:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li><strong>Minor Cuts:</strong> Clean gently with mild soap and cool running water; apply sterile gauze pressure.</li>
+                            <li><strong>Minor Burns:</strong> Hold burned area under cool running tap water for 10-15 minutes.</li>
+                            <li><strong>Nosebleeds:</strong> Sit upright, lean slightly forward, and pinch soft part of nose for 10 minutes.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-amber-800 dark:text-amber-400">⚠️ What to Avoid:</div>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Do NOT apply ice, toothpaste, or butter to burns.</li>
+                            <li>Do NOT tilt head backward during a nosebleed (prevents swallowing blood).</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 dark:bg-red-950/30 p-3.5 rounded-2xl border border-red-200 dark:border-red-900/40 text-xs text-slate-700 dark:text-slate-300 space-y-1">
+                        <div class="font-extrabold text-red-800 dark:text-red-400">🩺 When to Seek Medical Attention:</div>
+                        <p>Seek medical care for deep open wounds, burns larger than 2 inches, severe persistent nosebleeds, or signs of wound infection (pus, spreading redness).</p>
+                    </div>
+
+                    <div class="text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span>📚 Source: Indian Red Cross Society & CDC</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 italic">⚠️ Disclaimer: This information is provided for general educational purposes and does not replace advice from a qualified healthcare professional.</div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
+        © 2026 Life Saver Healthcare Network.
+    </footer>
+
+    <!-- REALTIME FIREBASE AUTH & UI LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        /* AUTH SESSION LISTENER */
+        onAuthStateChanged(auth, (user) => {
+            const publicNotice = document.getElementById("publicLockedNotice");
+            const regLibrary = document.getElementById("registeredLibraryContainer");
+            const userBadge = document.getElementById("userAuthBadge");
+            const userEmail = document.getElementById("userAuthEmail");
+
+            if (user) {
+                // AUTHENTICATED REGISTERED USER
+                if (publicNotice) publicNotice.classList.add("hidden");
+                if (regLibrary) regLibrary.classList.remove("hidden");
+                if (userBadge) userBadge.classList.remove("hidden");
+                if (userBadge) userBadge.classList.add("flex");
+                if (userEmail) userEmail.textContent = user.email || "Registered Member";
+            } else {
+                // PUBLIC GUEST USER
+                if (publicNotice) publicNotice.classList.remove("hidden");
+                if (regLibrary) regLibrary.classList.add("hidden");
+                if (userBadge) userBadge.classList.add("hidden");
+            }
+        });
+    </script>
+
+    <!-- UTILITY SCRIPTS (PRESERVED PROTOCOLS & GEOLOCATION) -->
+    <script>
+        lucide.createIcons();
+        let lat = null, lng = null;
+
+        const protocols = {
+            cpr: `
+                <div class="text-emerald-700 dark:text-emerald-400 font-extrabold text-base mb-2">🫁 Adult CPR Protocol (Chest Compressions)</div>
+                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    <li>Place the heel of one hand in the center of the patient's chest. Interlock your other hand on top.</li>
+                    <li>Push hard and fast (100 to 120 compressions per minute) to the beat of "Stayin' Alive".</li>
+                    <li>Allow chest to recoil fully between compressions. Repeat until ambulance 108 arrives.</li>
+                </ol>
+            `,
+            choking: `
+                <div class="text-amber-700 dark:text-amber-400 font-extrabold text-base mb-2">🗣️ Choking Rescue (Heimlich Maneuver)</div>
+                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    <li>Stand behind the choking person and wrap your arms around their waist.</li>
+                    <li>Make a fist with one hand, place thumb side above navel, and grasp fist with other hand.</li>
+                    <li>Perform quick upward abdominal thrusts until the lodged object is dislodged.</li>
+                </ol>
+            `,
+            bleeding: `
+                <div class="text-red-700 dark:text-red-400 font-extrabold text-base mb-2">🩸 Bleeding Control & Pressure Protocol</div>
+                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    <li>Apply firm, continuous direct pressure to the wound using a clean cloth or sterile gauze.</li>
+                    <li>Elevate the injured limb above heart level if no bone fracture is suspected.</li>
+                    <li>Do not remove soaked cloths; place additional cloths directly on top and maintain pressure.</li>
+                </ol>
+            `,
+            burns: `
+                <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2">🐍 Snakebite & Severe Burn Protocol</div>
+                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                    <li><strong>Snakebite:</strong> Keep patient calm and limb immobilized below heart level. Do NOT cut wound or suck venom!</li>
+                    <li><strong>Burns:</strong> Cool the burn under cool running tap water for 10-15 minutes. Do NOT apply ice or toothpaste! Cover with clean cloth.</li>
+                </ol>
+            `
+        };
+
+        function switchProtocol(type) {
+            document.getElementById("protocolBox").innerHTML = protocols[type];
+
+            document.getElementById("btnCpr").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            document.getElementById("btnChoking").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            document.getElementById("btnBleeding").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            document.getElementById("btnBurns").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+
+            if (type === 'cpr') document.getElementById("btnCpr").className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (type === 'choking') document.getElementById("btnChoking").className = "bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (type === 'bleeding') document.getElementById("btnBleeding").className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (type === 'burns') document.getElementById("btnBurns").className = "bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+        }
+
+        switchProtocol('cpr');
+
+        function detectGPS() {
+            const gpsBox = document.getElementById("gpsBox");
+            gpsBox.textContent = "Detecting current coordinates...";
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    lat = pos.coords.latitude;
+                    lng = pos.coords.longitude;
+                    gpsBox.innerHTML = `Latitude: ${lat.toFixed(5)} | Longitude: ${lng.toFixed(5)} <br/> Link: https://www.google.com/maps?q=${lat},${lng}`;
+                }, () => {
+                    gpsBox.textContent = "Location access denied. Please allow GPS access.";
+                });
+            } else {
+                gpsBox.textContent = "Geolocation is not supported by your browser.";
+            }
+        }
+
+        function shareWhatsApp() {
+            let msg = "EMERGENCY ALERT: I need urgent help!";
+            if (lat && lng) {
+                msg += ` My current GPS location: https://www.google.com/maps?q=${lat},${lng}`;
+            }
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function copyGPS() {
+            if (lat && lng) {
+                const link = `https://www.google.com/maps?q=${lat},${lng}`;
+                navigator.clipboard.writeText(link);
+                alert("Location link copied to clipboard!");
+            } else {
+                alert("Please refresh geolocation first.");
+            }
+        }
+
+        detectGPS();
+
+        let activeCategory = 'all';
+        function filterCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+                btn.className = "cat-filter-btn bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition";
+            });
+            const activeBtn = document.getElementById(`catBtn-${cat}`);
+            if (activeBtn) activeBtn.className = "cat-filter-btn active bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition";
+
+            filterLibrary();
+        }
+
+        function filterLibrary() {
+            const query = (document.getElementById("librarySearch")?.value || "").toLowerCase().trim();
+            const cards = document.querySelectorAll(".article-card");
+
+            cards.forEach(card => {
+                const categoryMatch = activeCategory === 'all' || card.dataset.category === activeCategory;
+                const searchText = (card.dataset.search || "") + " " + card.innerText.toLowerCase();
+                const searchMatch = !query || searchText.includes(query);
+
+                if (categoryMatch && searchMatch) {
+                    card.classList.remove("hidden");
+                } else {
+                    card.classList.add("hidden");
+                }
+            });
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+    </script>
+</body>
+</html>
