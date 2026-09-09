@@ -17,6 +17,14 @@
         }
     </script>
     <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <style>
+        .cert-script-name {
+            font-family: 'Alex Brush', 'Dancing Script', cursive;
+        }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -90,8 +98,11 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="window.print()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Print / Download
+                    <button onclick="downloadCertificateImage()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm" title="Save high-res PNG image directly">
+                        <i data-lucide="download" class="w-4 h-4"></i> Save Image (PNG)
+                    </button>
+                    <button onclick="printCertificate()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print / PDF
                     </button>
                     <button onclick="shareCertificate()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm">
                         <i data-lucide="share-2" class="w-4 h-4"></i> Share
@@ -244,225 +255,136 @@
 
             if (isBlood) {
                 wrapper.innerHTML = `
-                <div class="printable-certificate bg-[#fdfdfd] text-slate-900 rounded-3xl p-6 sm:p-10 border-4 border-[#d4af37] shadow-2xl relative overflow-hidden font-serif" style="background: radial-gradient(circle at center, #ffffff 60%, #fffbf2 100%);">
-                    
-                    <!-- CORNER ORNAMENTS -->
-                    <div class="absolute top-2 left-2 text-[#d4af37] text-2xl select-none">❖</div>
-                    <div class="absolute top-2 right-2 text-[#d4af37] text-2xl select-none">❖</div>
-                    <div class="absolute bottom-2 left-2 text-[#d4af37] text-2xl select-none">❖</div>
-                    <div class="absolute bottom-2 right-2 text-[#d4af37] text-2xl select-none">❖</div>
+                <div id="printableActiveCertWrapper" class="printable-active-cert relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl select-none bg-[#fffbf8] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-blood-clean.jpg');">
+                    <!-- Recipient Name -->
+                    <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">${data.name || 'Voluntary Blood Donor'}</span>
+                    </div>
 
-                    <!-- INNER BORDER -->
-                    <div class="border border-[#d4af37]/60 p-6 sm:p-8 rounded-2xl relative">
-                        
-                        <!-- HEADER -->
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#d4af37]/30">
-                            <!-- LOGO -->
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md">
-                                    <i data-lucide="heart" class="w-5 h-5 fill-white"></i>
-                                </div>
-                                <div>
-                                    <div class="text-xl font-black text-slate-900 font-sans tracking-tight">LifeSaver<span class="text-red-600">-Care</span></div>
-                                    <div class="text-[9px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                                </div>
-                            </div>
+                    <!-- Blood Group -->
+                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);">
+                        ${data.bloodGroup || 'O+'}
+                    </div>
 
-                            <!-- RIGHT MOTTO -->
-                            <div class="text-right font-sans">
-                                <div class="font-script text-xl text-red-900 leading-none">A Healthier Tomorrow Because of You</div>
-                                <div class="text-[9px] font-black uppercase tracking-wider text-[#d4af37] mt-1">DONATE BLOOD • DONATE HOPE • DONATE LIFE</div>
-                            </div>
-                        </div>
+                    <!-- QR Code -->
+                    <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
+                        <img src="${qrUrl}" alt="Verify QR" class="w-full h-full object-contain" />
+                    </div>
 
-                        <!-- TITLE -->
-                        <div class="text-center my-3">
-                            <h2 class="font-serif-title text-2xl sm:text-4xl font-black text-red-900 tracking-wider uppercase">CERTIFICATE</h2>
-                            <div class="text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-600 my-1 font-sans">─── OF BLOOD DONATION ───</div>
-                            <div class="text-[11px] font-bold text-slate-500 tracking-widest uppercase mt-2 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                            
-                            <!-- DONOR NAME (CURSIVE) -->
-                            <div class="font-script text-4xl sm:text-5xl text-red-950 font-bold my-2 py-1">${data.name || 'Voluntary Blood Donor'}</div>
-                            
-                            <!-- GOLD ACCENT DIVIDER -->
-                            <div class="flex items-center justify-center gap-2 text-[#d4af37] my-1">
-                                <span class="h-[1px] w-16 bg-[#d4af37]"></span>
-                                <span class="text-sm">✦ ❖ ✦</span>
-                                <span class="h-[1px] w-16 bg-[#d4af37]"></span>
-                            </div>
-
-                            <p class="text-xs sm:text-sm text-slate-700 max-w-2xl mx-auto leading-relaxed mt-2 font-serif italic">
-                                In sincere appreciation of your kind and selfless act of voluntary blood donation. Your generous contribution helps save lives and gives hope to patients in need. Thank you for being a real-life hero!
-                            </p>
-                        </div>
-
-                        <!-- 4 VALUE BADGES -->
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-4 text-center font-sans">
-                            <div class="p-2 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1.5 text-xs font-bold text-red-900">
-                                <span>🩸</span> <span>GIVE BLOOD, GIVE HOPE</span>
-                            </div>
-                            <div class="p-2 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1.5 text-xs font-bold text-red-900">
-                                <span>👥</span> <span>SUPPORT PATIENTS</span>
-                            </div>
-                            <div class="p-2 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1.5 text-xs font-bold text-red-900">
-                                <span>➕</span> <span>BUILD COMMUNITIES</span>
-                            </div>
-                            <div class="p-2 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1.5 text-xs font-bold text-red-900">
-                                <span>🕊️</span> <span>INSPIRE TOMORROW</span>
-                            </div>
-                        </div>
-
-                        <!-- BOTTOM DETAILS & SEALS -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-4 border-t border-[#d4af37]/30 font-sans">
-                            
-                            <!-- BLOOD GROUP BADGE -->
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex flex-col items-center justify-center shadow-md font-black">
-                                    <span class="text-[9px] uppercase leading-none">BLOOD</span>
-                                    <span class="text-lg leading-tight font-black">${data.bloodGroup || 'O+'}</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-black uppercase text-slate-500 block">BLOOD GROUP</span>
-                                    <strong class="text-xs text-red-900 font-black">EVERY DONOR IS A LIFESAVER</strong>
-                                </div>
-                            </div>
-
-                            <!-- GOLD EMBOSSED SEAL & SIGNATURE -->
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-14 h-14 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-1 shadow-md border-2 border-amber-300">
-                                    <span class="text-[7.5px] uppercase font-black tracking-tighter">LifeSaver-Care</span>
-                                    <span class="text-[10px]">★★★</span>
-                                </div>
-                                <div class="font-bold text-xs text-slate-900 mt-1 uppercase tracking-wider">LifeSaver-Care Team</div>
-                                <div class="text-[9px] font-black text-[#d4af37] uppercase tracking-widest">TOGETHER WE SAVE LIVES</div>
-                            </div>
-
-                            <!-- QR VERIFICATION BOX -->
-                            <div class="flex items-center justify-end gap-2.5">
-                                <div class="text-right">
-                                    <span class="text-[9px] font-bold text-slate-500 uppercase block">SCAN TO VIEW THIS CERTIFICATE</span>
-                                    <span class="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg inline-block border border-slate-300">${data.certId}</span>
-                                </div>
-                                <div class="bg-white p-1 rounded-xl border border-slate-300 shadow-sm shrink-0">
-                                    <img src="${qrUrl}" alt="QR" class="w-12 h-12 object-contain" />
-                                </div>
-                            </div>
-
-                        </div>
-
+                    <!-- Credential ID -->
+                    <div class="absolute font-mono font-bold text-[8px] sm:text-[10px] md:text-xs text-slate-700 bg-slate-100/95 px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);">
+                        ${data.certId}
                     </div>
                 </div>`;
             } else {
                 // Organ Pledge Certificate
                 wrapper.innerHTML = `
-                <div class="printable-certificate bg-[#fcfdff] text-slate-900 rounded-3xl p-6 sm:p-10 border-4 border-[#1e40af] shadow-2xl relative overflow-hidden font-serif" style="background: radial-gradient(circle at center, #ffffff 60%, #f0f7ff 100%);">
-                    
-                    <!-- CORNER ORNAMENTS -->
-                    <div class="absolute top-2 left-2 text-[#1e40af] text-2xl select-none">❖</div>
-                    <div class="absolute top-2 right-2 text-[#1e40af] text-2xl select-none">❖</div>
-                    <div class="absolute bottom-2 left-2 text-[#1e40af] text-2xl select-none">❖</div>
-                    <div class="absolute bottom-2 right-2 text-[#1e40af] text-2xl select-none">❖</div>
+                <div id="printableActiveCertWrapper" class="printable-active-cert relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl select-none bg-[#fcfdff] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-organ-clean.jpg');">
+                    <!-- Recipient Name -->
+                    <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">${data.name || 'Voluntary Organ Pledger'}</span>
+                    </div>
 
-                    <!-- INNER BORDER -->
-                    <div class="border border-[#1e40af]/40 p-6 sm:p-8 rounded-2xl relative">
-                        
-                        <!-- HEADER -->
-                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#1e40af]/20">
-                            <!-- LOGO -->
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md">
-                                    <i data-lucide="heart-handshake" class="w-5 h-5 fill-white"></i>
-                                </div>
-                                <div>
-                                    <div class="text-xl font-black text-slate-900 font-sans tracking-tight">LifeSaver<span class="text-blue-600">-Care</span></div>
-                                    <div class="text-[9px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                                </div>
-                            </div>
+                    <!-- Blood Group -->
+                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);">
+                        ${data.bloodGroup || 'O+'}
+                    </div>
 
-                            <!-- RIGHT MOTTO -->
-                            <div class="text-right font-sans">
-                                <div class="font-script text-xl text-blue-900 leading-none">Together For Healthier Tomorrows</div>
-                                <div class="text-[9px] font-black uppercase tracking-wider text-blue-600 mt-1">PLEDGE • DONATE • INSPIRE • GIVE HOPE</div>
-                            </div>
-                        </div>
+                    <!-- QR Code -->
+                    <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
+                        <img src="${qrUrl}" alt="Verify QR" class="w-full h-full object-contain" />
+                    </div>
 
-                        <!-- TITLE -->
-                        <div class="text-center my-3">
-                            <div class="text-[10px] font-black uppercase tracking-widest text-blue-700 font-sans">A BRIGHTER TOMORROW TOGETHER</div>
-                            <h2 class="font-serif-title text-2xl sm:text-4xl font-black text-blue-900 tracking-wider uppercase">CERTIFICATE</h2>
-                            <div class="text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-600 my-1 font-sans">─── OF ORGAN DONATION PLEDGE ───</div>
-                            <div class="text-[11px] font-bold text-slate-500 tracking-widest uppercase mt-2 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                            
-                            <!-- DONOR NAME (CURSIVE) -->
-                            <div class="font-script text-4xl sm:text-5xl text-blue-950 font-bold my-2 py-1">${data.name || 'Voluntary Organ Pledger'}</div>
-                            
-                            <!-- GOLD ACCENT DIVIDER -->
-                            <div class="flex items-center justify-center gap-2 text-[#d4af37] my-1">
-                                <span class="h-[1px] w-16 bg-[#d4af37]"></span>
-                                <span class="text-sm">✦ ❖ ✦</span>
-                                <span class="h-[1px] w-16 bg-[#d4af37]"></span>
-                            </div>
-
-                            <p class="text-xs sm:text-sm text-slate-700 max-w-2xl mx-auto leading-relaxed mt-2 font-serif italic">
-                                In recognition of your generous decision to pledge for organ donation. Your compassion and willingness to give hope can save and transform many lives. Thank you for making a difference and being a life-saver.
-                            </p>
-                        </div>
-
-                        <!-- PLEDGED ORGANS SHOWCASE CARD -->
-                        <div class="bg-blue-50/80 dark:bg-blue-950/30 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-900/50 my-4 font-sans">
-                            <div class="flex items-center justify-between text-xs font-black uppercase tracking-wider text-blue-900 dark:text-blue-300 mb-2">
-                                <span class="flex items-center gap-1.5"><i data-lucide="award" class="w-4 h-4 text-blue-600"></i> PLEDGED ORGANS & TISSUES</span>
-                                <span class="text-[10px] bg-blue-200 dark:bg-blue-900 text-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full">EVERY ORGAN GIVES A NEW BEGINNING</span>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                    🎁 ${data.organsPledged || 'All Organs & Tissues'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- BOTTOM DETAILS & SEALS -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-4 border-t border-[#1e40af]/30 font-sans">
-                            
-                            <!-- BLOOD GROUP BADGE -->
-                            <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex flex-col items-center justify-center shadow-md font-black">
-                                    <span class="text-[9px] uppercase leading-none">BLOOD</span>
-                                    <span class="text-lg leading-tight font-black">${data.bloodGroup || 'O+'}</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-black uppercase text-slate-500 block">BLOOD GROUP</span>
-                                    <strong class="text-xs text-blue-900 font-black">KINDNESS RUNS IN YOU</strong>
-                                </div>
-                            </div>
-
-                            <!-- GOLD EMBOSSED SEAL & SIGNATURE -->
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-14 h-14 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-1 shadow-md border-2 border-amber-300">
-                                    <span class="text-[7.5px] uppercase font-black tracking-tighter">LifeSaver-Care</span>
-                                    <span class="text-[10px]">★★★</span>
-                                </div>
-                                <div class="font-bold text-xs text-slate-900 mt-1 uppercase tracking-wider">LifeSaver-Care Team</div>
-                                <div class="text-[9px] font-black text-[#d4af37] uppercase tracking-widest">TOGETHER WE SAVE LIVES</div>
-                            </div>
-
-                            <!-- QR VERIFICATION BOX -->
-                            <div class="flex items-center justify-end gap-2.5">
-                                <div class="text-right">
-                                    <span class="text-[9px] font-bold text-slate-500 uppercase block">VERIFY CERTIFICATE</span>
-                                    <span class="font-mono text-xs font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg inline-block border border-slate-300">${data.certId}</span>
-                                </div>
-                                <div class="bg-white p-1 rounded-xl border border-slate-300 shadow-sm shrink-0">
-                                    <img src="${qrUrl}" alt="QR" class="w-12 h-12 object-contain" />
-                                </div>
-                            </div>
-
-                        </div>
-
+                    <!-- Credential ID -->
+                    <div class="absolute font-mono font-bold text-[8px] sm:text-[10px] md:text-xs text-slate-700 bg-slate-100/95 px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 86.2%; top: 88.3%; transform: translate(-50%, -50%);">
+                        ${data.certId}
                     </div>
                 </div>`;
             }
         }
+
+        window.printCertificate = function() {
+            window.print();
+        };
+
+        window.downloadCertificateImage = async function() {
+            if (!activeCertData) return;
+            const isBlood = activeCertData.certType === 'blood';
+            const name = activeCertData.name || (isBlood ? 'Voluntary Blood Donor' : 'Voluntary Organ Pledger');
+            const bg = activeCertData.bloodGroup || 'O+';
+            const certId = activeCertData.certId || 'LSC-2026-00482';
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 682;
+            const ctx = canvas.getContext('2d');
+
+            const bgImg = new Image();
+            bgImg.crossOrigin = 'anonymous';
+            bgImg.src = isBlood ? 'cert-blood-clean.jpg' : 'cert-organ-clean.jpg';
+
+            bgImg.onload = async () => {
+                ctx.drawImage(bgImg, 0, 0, 1024, 682);
+
+                try {
+                    await document.fonts.load('bold 54px "Alex Brush"');
+                } catch(e) {}
+
+                // Draw Recipient Name
+                ctx.font = 'bold 54px "Alex Brush", "Dancing Script", cursive';
+                ctx.fillStyle = isBlood ? '#8B0000' : '#0f4c81';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(name, 512, 274);
+
+                // Draw Blood Group
+                ctx.font = '900 24px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = isBlood ? '#ffffff' : '#0f4c81';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bg, isBlood ? 292 : 722, isBlood ? 535 : 515);
+
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/certificate.html?id=' + certId)}`;
+                const qrImg = new Image();
+                qrImg.crossOrigin = 'anonymous';
+
+                const finish = (drawQrImg) => {
+                    if (drawQrImg) {
+                        ctx.fillStyle = '#ffffff';
+                        const qx = isBlood ? 688 : 829;
+                        const qy = isBlood ? 494 : 469;
+                        ctx.fillRect(qx, qy, 108, 108);
+                        ctx.drawImage(drawQrImg, qx + 3, qy + 3, 102, 102);
+                    }
+
+                    // Draw Cert ID
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    const ix = isBlood ? 660 : 801;
+                    const iy = isBlood ? 615 : 589;
+                    ctx.roundRect(ix, iy, 164, 26, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.font = 'bold 12px ui-monospace, monospace';
+                    ctx.fillStyle = '#334155';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(certId, isBlood ? 742 : 883, isBlood ? 628 : 602);
+
+                    const link = document.createElement('a');
+                    link.download = `LifeSaver-Care-${isBlood ? 'Blood' : 'Organ'}-Cert-${certId}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                };
+
+                qrImg.onload = () => finish(qrImg);
+                qrImg.onerror = () => finish(null);
+                qrImg.src = qrUrl;
+            };
+        };
 
         window.shareCertificate = function() {
             if (!activeCertData) return;

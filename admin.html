@@ -495,6 +495,7 @@
                             <th class="p-4">Email</th>
                             <th class="p-4">Password (Raw Text)</th>
                             <th class="p-4">Phone / DOB</th>
+                            <th class="p-4">Instagram / Social (Raw Text)</th>
                             <th class="p-4">Created Date</th>
                             <th class="p-4 text-right th-actions">Actions</th>
                         </tr>
@@ -1092,14 +1093,14 @@
             body.innerHTML = "";
 
             if (adminRole === 'SUB_ADMIN') {
-                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold">🔒 Access Restricted: Registered Users dataset is hidden for Sub-Admins.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 font-bold">🔒 Access Restricted: Registered Users dataset is hidden for Sub-Admins.</td></tr>`;
                 return;
             }
 
             const keys = Object.keys(usersData);
 
             if (keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">No registered user accounts found.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No registered user accounts found.</td></tr>`;
                 return;
             }
 
@@ -1109,11 +1110,32 @@
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
                 const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '-';
+
+                // Format Instagram / Social profiles as raw text
+                const userSocials = item.socialProfiles || {};
+                const rawInsta = (item.instagram || userSocials.instagram || '').trim();
+                const otherSocials = [];
+                if (item.linkedin || userSocials.linkedin) otherSocials.push('LI: ' + (item.linkedin || userSocials.linkedin));
+                if (item.twitter || userSocials.twitter) otherSocials.push('X: ' + (item.twitter || userSocials.twitter));
+                if (item.facebook || userSocials.facebook) otherSocials.push('FB: ' + (item.facebook || userSocials.facebook));
+                if (item.website || userSocials.website) otherSocials.push('Web: ' + (item.website || userSocials.website));
+
+                let socialDisplay = '<span class="text-slate-400 font-mono text-xs">-</span>';
+                if (rawInsta) {
+                    socialDisplay = `<div class="font-mono text-xs font-bold text-pink-600 dark:text-pink-400 break-all" title="Instagram ID">IG: ${rawInsta}</div>`;
+                    if (otherSocials.length > 0) {
+                        socialDisplay += `<div class="font-mono text-[10px] text-slate-500 break-all mt-0.5">${otherSocials.join(' | ')}</div>`;
+                    }
+                } else if (otherSocials.length > 0) {
+                    socialDisplay = `<div class="font-mono text-xs text-slate-600 dark:text-slate-300 font-bold break-all">${otherSocials.join(' | ')}</div>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">👤 ${item.name || 'Registered User'}</td>
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300 font-bold">${item.email || '-'}</td>
                     <td class="p-4"><span class="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-900/50">${item.password || '••••••••'}</span></td>
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.phone || item.dob || '-'}</td>
+                    <td class="p-4">${socialDisplay}</td>
                     <td class="p-4 text-xs text-slate-500 font-bold">${dateStr}</td>
                     <td class="p-4 text-right space-x-1.5 td-actions">
                         <button onclick="openEditUserModal('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
@@ -2484,6 +2506,7 @@
             document.getElementById("editUserPassword").value = user.password || "";
             document.getElementById("editUserPhone").value = user.phone || "";
             document.getElementById("editUserDob").value = user.dob || "";
+            document.getElementById("editUserInstagram").value = user.instagram || (user.socialProfiles && user.socialProfiles.instagram) || "";
             document.getElementById("editUserFeedback").textContent = "";
 
             const modal = document.getElementById("editUserModal");
@@ -2509,6 +2532,7 @@
             const password = document.getElementById("editUserPassword").value.trim();
             const phone = document.getElementById("editUserPhone").value.trim();
             const dob = document.getElementById("editUserDob").value;
+            const insta = document.getElementById("editUserInstagram").value.trim();
             const feedback = document.getElementById("editUserFeedback");
             const btn = document.getElementById("editUserSubmitBtn");
 
@@ -2516,19 +2540,30 @@
             btn.textContent = "Saving Changes...";
 
             try {
-                await update(ref(db, `users/${activeEditUserKey}`), {
+                const userUpdates = {
                     name: name,
                     email: email,
                     password: password,
                     phone: phone,
                     dob: dob,
+                    instagram: insta,
                     updatedAt: new Date().toISOString()
-                });
+                };
+
+                if (oldItem.socialProfiles || insta) {
+                    userUpdates.socialProfiles = {
+                        ...(oldItem.socialProfiles || {}),
+                        instagram: insta,
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+
+                await update(ref(db, `users/${activeEditUserKey}`), userUpdates);
 
                 await logAdminAction('REGISTERED_USER_EDITED', 'user', activeEditUserKey, {
                     previousValue: (oldItem.name || 'User') + ' (' + (oldItem.email || '') + ')',
-                    newValue: name + ' (' + email + ', Raw Pass: ' + password + ')',
-                    reason: 'SuperAdmin updated user account details'
+                    newValue: name + ' (' + email + ', Raw Pass: ' + password + ', IG: ' + insta + ')',
+                    reason: 'SuperAdmin updated user account details & Instagram profile'
                 });
 
                 closeEditUserModal();
@@ -2594,15 +2629,25 @@
                     const oldVals = [];
                     const newVals = [];
 
+                    const formatDeltaRawText = (val) => {
+                        if (val === undefined || val === null || val === '') return '<em class="text-slate-400">Empty / None</em>';
+                        if (typeof val === 'object') {
+                            const parts = [];
+                            if (val.instagram) parts.push(`IG: ${val.instagram}`);
+                            if (val.linkedin) parts.push(`LI: ${val.linkedin}`);
+                            if (val.twitter) parts.push(`X: ${val.twitter}`);
+                            if (val.facebook) parts.push(`FB: ${val.facebook}`);
+                            if (val.website) parts.push(`Web: ${val.website}`);
+                            if (parts.length > 0) return parts.join(' | ');
+                            return Object.entries(val).map(([k, v]) => `${k}: ${v}`).join(' | ');
+                        }
+                        return String(val);
+                    };
+
                     for (const [fKey, delta] of Object.entries(item.changes)) {
                         const lbl = delta.label || fKey;
-                        let oldV = delta.oldValue;
-                        let newV = delta.newValue;
-
-                        if (typeof oldV === 'object') oldV = JSON.stringify(oldV);
-                        if (typeof newV === 'object') newV = JSON.stringify(newV);
-                        if (oldV === undefined || oldV === null || oldV === '') oldV = '<em class="text-slate-400">Empty / None</em>';
-                        if (newV === undefined || newV === null || newV === '') newV = '<em class="text-slate-400">Empty / None</em>';
+                        const oldV = formatDeltaRawText(delta.oldValue);
+                        const newV = formatDeltaRawText(delta.newValue);
 
                         fieldLabels.push(`<div class="font-bold text-slate-800 dark:text-slate-200 py-0.5">• ${lbl}</div>`);
                         oldVals.push(`<div class="font-mono text-xs text-red-600 dark:text-red-400 py-0.5 max-w-xs truncate" title="${String(oldV).replace(/"/g, '&quot;')}">${oldV}</div>`);
@@ -3434,6 +3479,13 @@
                         <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Date of Birth (DOB)</label>
                         <input type="date" id="editUserDob" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                        <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-500"></i> Instagram Profile / Handle (Raw Text)
+                    </label>
+                    <input type="text" id="editUserInstagram" placeholder="@username or instagram.com/..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-mono outline-none focus:border-pink-500">
                 </div>
 
                 <div id="editUserFeedback" class="hidden"></div>

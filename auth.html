@@ -17,6 +17,14 @@
         }
     </script>
     <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Dancing+Script:wght@700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        .cert-script-name {
+            font-family: 'Alex Brush', 'Dancing Script', 'Great Vibes', cursive !important;
+        }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -512,90 +520,35 @@
                         </span>
                     </div>
 
-                    <!-- IN-PANEL CERTIFICATE CANVAS -->
-                    <div id="printableBloodCertPanel" class="printable-certificate bg-[#fdfdfd] text-slate-900 rounded-2xl p-4 sm:p-5 border-2 border-[#d4af37] shadow-inner relative overflow-hidden font-serif select-none" style="background: radial-gradient(circle at center, #ffffff 60%, #fffbf2 100%);">
-                        <!-- CORNER ORNAMENTS -->
-                        <div class="absolute top-1.5 left-1.5 text-[#d4af37] text-sm select-none">❖</div>
-                        <div class="absolute top-1.5 right-1.5 text-[#d4af37] text-sm select-none">❖</div>
-                        <div class="absolute bottom-1.5 left-1.5 text-[#d4af37] text-sm select-none">❖</div>
-                        <div class="absolute bottom-1.5 right-1.5 text-[#d4af37] text-sm select-none">❖</div>
+                    <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
+                    <div id="printableBloodCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fffbf8] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-blood-clean.jpg');">
+                        <!-- Dynamic Recipient Name -->
+                        <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                            <span id="dashPanelBloodCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                        </div>
 
-                        <div class="border border-[#d4af37]/50 p-3 sm:p-4 rounded-xl relative">
-                            <!-- HEADER -->
-                            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-[#d4af37]/30">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center shadow-sm shrink-0">
-                                        <i data-lucide="heart" class="w-3.5 h-3.5 fill-white"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs sm:text-sm font-black text-slate-900 font-sans tracking-tight leading-none">LifeSaver<span class="text-red-600">-Care</span></div>
-                                        <div class="text-[7px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                                    </div>
-                                </div>
-                                <div class="text-right font-sans">
-                                    <div class="font-script text-xs sm:text-sm text-red-900 leading-none">A Healthier Tomorrow Because of You</div>
-                                    <div class="text-[7px] font-black uppercase tracking-wider text-[#d4af37]">DONATE BLOOD • SAVE LIVES</div>
-                                </div>
-                            </div>
+                        <!-- Dynamic Blood Group -->
+                        <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
+                            O+
+                        </div>
 
-                            <!-- TITLE -->
-                            <div class="text-center my-1.5">
-                                <h2 class="font-serif-title text-base sm:text-lg font-black text-red-900 tracking-wider uppercase">CERTIFICATE OF BLOOD DONATION</h2>
-                                <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 tracking-widest uppercase mt-0.5 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                                
-                                <div id="dashPanelBloodCertName" class="font-script text-2xl sm:text-3xl text-red-950 font-bold my-1 py-0.5">Rahul Kumar</div>
-                                
-                                <div class="flex items-center justify-center gap-1.5 text-[#d4af37] my-0.5">
-                                    <span class="h-[1px] w-8 bg-[#d4af37]"></span>
-                                    <span class="text-[10px]">✦ ❖ ✦</span>
-                                    <span class="h-[1px] w-8 bg-[#d4af37]"></span>
-                                </div>
+                        <!-- Dynamic QR Code -->
+                        <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
+                            <img id="dashPanelBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                        </div>
 
-                                <p class="text-[10px] sm:text-[11px] text-slate-700 max-w-md mx-auto leading-relaxed mt-1 font-serif italic">
-                                    In sincere appreciation of your kind and selfless act of voluntary blood donation. Your generous contribution helps save lives and gives hope to patients in need.
-                                </p>
-                            </div>
-
-                            <!-- BOTTOM BADGES & QR -->
-                            <div class="grid grid-cols-3 gap-2 items-center pt-2.5 mt-2 border-t border-[#d4af37]/30 font-sans">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex flex-col items-center justify-center shadow-sm font-black shrink-0">
-                                        <span class="text-[6.5px] uppercase leading-none">BLOOD</span>
-                                        <span id="dashPanelBloodCertBg" class="text-xs leading-tight font-black">O+</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-[7.5px] font-black uppercase text-slate-500 block leading-tight">GROUP</span>
-                                        <strong class="text-[9px] text-red-900 font-black leading-tight">HERO</strong>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col items-center text-center">
-                                    <div class="w-9 h-9 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-0.5 shadow-sm border border-amber-300">
-                                        <span class="text-[5.5px] uppercase font-black tracking-tighter">LifeSaver</span>
-                                        <span class="text-[7px]">★★★</span>
-                                    </div>
-                                    <div class="font-bold text-[8px] text-slate-900 mt-0.5 uppercase">Team Seal</div>
-                                </div>
-
-                                <div class="flex items-center justify-end gap-1.5">
-                                    <div class="text-right">
-                                        <span class="text-[6.5px] font-bold text-slate-500 uppercase block">CREDENTIAL ID</span>
-                                        <span id="dashPanelBloodCertId" class="font-mono text-[8.5px] font-black text-slate-900 bg-slate-100 px-1 py-0.5 rounded border border-slate-300">LSC-BD-2026-00482</span>
-                                    </div>
-                                    <div class="bg-white p-0.5 rounded-lg border border-slate-300 shadow-sm shrink-0">
-                                        <img id="dashPanelBloodCertQR" src="" alt="QR" class="w-8 h-8 object-contain" />
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Dynamic Certificate ID -->
+                        <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashPanelBloodCertId">
+                            LSC-BD-2026-00482
                         </div>
                     </div>
 
                     <!-- ACTION BUTTONS -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 mt-3 border-t border-red-100 dark:border-slate-800">
-                        <button onclick="openDashboardBloodCertModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
+                        <button onclick="openDashboardBloodCertModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm" title="View certificate in Fullscreen Full Mode">
                             <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Fullscreen
                         </button>
-                        <button onclick="downloadDashboardBloodCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <button onclick="downloadDashboardBloodCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1" title="Print or save as PDF">
                             <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print/PDF
                         </button>
                         <button onclick="shareBloodCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
@@ -622,102 +575,35 @@
                         </span>
                     </div>
 
-                    <!-- IN-PANEL CERTIFICATE CANVAS -->
-                    <div id="printableOrganCertPanel" class="printable-certificate bg-[#fcfdff] text-slate-900 rounded-2xl p-4 sm:p-5 border-2 border-[#1e40af] shadow-inner relative overflow-hidden font-serif select-none" style="background: radial-gradient(circle at center, #ffffff 60%, #f0f7ff 100%);">
-                        <!-- CORNER ORNAMENTS -->
-                        <div class="absolute top-1.5 left-1.5 text-[#1e40af] text-sm select-none">❖</div>
-                        <div class="absolute top-1.5 right-1.5 text-[#1e40af] text-sm select-none">❖</div>
-                        <div class="absolute bottom-1.5 left-1.5 text-[#1e40af] text-sm select-none">❖</div>
-                        <div class="absolute bottom-1.5 right-1.5 text-[#1e40af] text-sm select-none">❖</div>
+                    <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
+                    <div id="printableOrganCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fcfdff] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-organ-clean.jpg');">
+                        <!-- Dynamic Recipient Name -->
+                        <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                            <span id="dashPanelOrganCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                        </div>
 
-                        <div class="border border-[#1e40af]/40 p-3 sm:p-4 rounded-xl relative">
-                            <!-- HEADER -->
-                            <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-[#1e40af]/20">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-sm shrink-0">
-                                        <i data-lucide="heart-handshake" class="w-3.5 h-3.5 fill-white"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-xs sm:text-sm font-black text-slate-900 font-sans tracking-tight leading-none">LifeSaver<span class="text-blue-600">-Care</span></div>
-                                        <div class="text-[7px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                                    </div>
-                                </div>
-                                <div class="text-right font-sans">
-                                    <div class="font-script text-xs sm:text-sm text-blue-900 leading-none">Together For Healthier Tomorrows</div>
-                                    <div class="text-[7px] font-black uppercase tracking-wider text-blue-600">PLEDGE • DONATE • INSPIRE</div>
-                                </div>
-                            </div>
+                        <!-- Dynamic Blood Group -->
+                        <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
+                            O+
+                        </div>
 
-                            <!-- TITLE -->
-                            <div class="text-center my-1.5">
-                                <h2 class="font-serif-title text-base sm:text-lg font-black text-blue-900 tracking-wider uppercase">CERTIFICATE OF ORGAN DONATION PLEDGE</h2>
-                                <div class="text-[8px] sm:text-[9px] font-bold text-slate-500 tracking-widest uppercase mt-0.5 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                                
-                                <div id="dashPanelOrganCertName" class="font-script text-2xl sm:text-3xl text-blue-950 font-bold my-1 py-0.5">Rahul Kumar</div>
-                                
-                                <div class="flex items-center justify-center gap-1.5 text-[#d4af37] my-0.5">
-                                    <span class="h-[1px] w-8 bg-[#d4af37]"></span>
-                                    <span class="text-[10px]">✦ ❖ ✦</span>
-                                    <span class="h-[1px] w-8 bg-[#d4af37]"></span>
-                                </div>
+                        <!-- Dynamic QR Code -->
+                        <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
+                            <img id="dashPanelOrganCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                        </div>
 
-                                <p class="text-[10px] sm:text-[11px] text-slate-700 max-w-md mx-auto leading-relaxed mt-1 font-serif italic">
-                                    In recognition of your generous decision to pledge for organ donation. Your compassion and willingness to give hope can save and transform many lives.
-                                </p>
-                            </div>
-
-                            <!-- PLEDGED ORGANS IN-PANEL LIST -->
-                            <div class="bg-blue-50/80 p-2 rounded-xl border border-blue-200 my-2 font-sans">
-                                <div class="flex items-center justify-between text-[9px] font-black uppercase tracking-wider text-blue-900 mb-1">
-                                    <span class="flex items-center gap-1"><i data-lucide="award" class="w-3 h-3 text-blue-600"></i> PLEDGED ORGANS & TISSUES</span>
-                                </div>
-                                <div id="dashPanelOrganCertOrgansList" class="flex flex-wrap items-center gap-1">
-                                    <span class="bg-white border border-blue-200 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-                                        🎁 All Organs & Tissues
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- BOTTOM BADGES & QR -->
-                            <div class="grid grid-cols-3 gap-2 items-center pt-2.5 mt-1 border-t border-[#1e40af]/30 font-sans">
-                                <div class="flex items-center gap-1.5">
-                                    <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex flex-col items-center justify-center shadow-sm font-black shrink-0">
-                                        <span class="text-[6.5px] uppercase leading-none">BLOOD</span>
-                                        <span id="dashPanelOrganCertBg" class="text-xs leading-tight font-black">O+</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-[7.5px] font-black uppercase text-slate-500 block leading-tight">GROUP</span>
-                                        <strong class="text-[9px] text-blue-900 font-black leading-tight">PLEDGER</strong>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col items-center text-center">
-                                    <div class="w-9 h-9 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-0.5 shadow-sm border border-amber-300">
-                                        <span class="text-[5.5px] uppercase font-black tracking-tighter">LifeSaver</span>
-                                        <span class="text-[7px]">★★★</span>
-                                    </div>
-                                    <div class="font-bold text-[8px] text-slate-900 mt-0.5 uppercase">Team Seal</div>
-                                </div>
-
-                                <div class="flex items-center justify-end gap-1.5">
-                                    <div class="text-right">
-                                        <span class="text-[6.5px] font-bold text-slate-500 uppercase block">CREDENTIAL ID</span>
-                                        <span id="dashPanelOrganCertId" class="font-mono text-[8.5px] font-black text-slate-900 bg-slate-100 px-1 py-0.5 rounded border border-slate-300">LSC-OD-2026-00482</span>
-                                    </div>
-                                    <div class="bg-white p-0.5 rounded-lg border border-slate-300 shadow-sm shrink-0">
-                                        <img id="dashPanelOrganCertQR" src="" alt="QR" class="w-8 h-8 object-contain" />
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Dynamic Certificate ID -->
+                        <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 86.2%; top: 88.3%; transform: translate(-50%, -50%);" id="dashPanelOrganCertId">
+                            LSC-OD-2026-00482
                         </div>
                     </div>
 
                     <!-- ACTION BUTTONS -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 mt-3 border-t border-blue-100 dark:border-slate-800">
-                        <button onclick="openDashboardOrganCertModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
+                        <button onclick="openDashboardOrganCertModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm" title="View certificate in Fullscreen Full Mode">
                             <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Fullscreen
                         </button>
-                        <button onclick="downloadDashboardOrganCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <button onclick="downloadDashboardOrganCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1" title="Print or save as PDF">
                             <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print/PDF
                         </button>
                         <button onclick="shareOrganCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
@@ -1187,120 +1073,33 @@
             </div>
         </div>
     </div>
-    <!-- BLOOD DONATION CERTIFICATE MODAL (EXACT HIGH-FIDELITY MATCH TO IMAGE 1) -->
-    <div id="dashBloodCertModal" onclick="if(event.target === this) closeDashboardBloodCertModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden overflow-y-auto">
-        <div class="glass-card w-full max-w-4xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
-            <button onclick="closeDashboardBloodCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition z-10">
-                <i data-lucide="x" class="w-6 h-6"></i>
+    <!-- BLOOD DONATION CERTIFICATE MODAL (EXACT HIGH-FIDELITY FULL MODE MATCH TO USER PICTURE) -->
+    <div id="dashBloodCertModal" onclick="if(event.target === this) closeDashboardBloodCertModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden overflow-y-auto">
+        <div class="glass-card w-full max-w-5xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
+            <button onclick="closeDashboardBloodCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl transition z-20 bg-slate-100 dark:bg-slate-800" title="Close Fullscreen">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
-            <!-- CERTIFICATE CANVAS RENDER -->
-            <div id="printableBloodCert" class="printable-certificate bg-[#fdfdfd] text-slate-900 rounded-3xl p-5 sm:p-8 border-4 border-[#d4af37] shadow-lg relative overflow-hidden font-serif select-none" style="background: radial-gradient(circle at center, #ffffff 60%, #fffbf2 100%);">
-                
-                <!-- CORNER ORNAMENTS -->
-                <div class="absolute top-2 left-2 text-[#d4af37] text-xl select-none">❖</div>
-                <div class="absolute top-2 right-2 text-[#d4af37] text-xl select-none">❖</div>
-                <div class="absolute bottom-2 left-2 text-[#d4af37] text-xl select-none">❖</div>
-                <div class="absolute bottom-2 right-2 text-[#d4af37] text-xl select-none">❖</div>
+            <!-- CERTIFICATE CANVAS RENDER (EXACT IMAGE WITH OVERLAYS) -->
+            <div id="printableBloodCert" class="relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl select-none bg-[#fffbf8] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-blood-clean.jpg');">
+                <!-- Recipient Name -->
+                <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                    <span id="dashBloodCertName" class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                </div>
 
-                <!-- INNER BORDER -->
-                <div class="border border-[#d4af37]/60 p-4 sm:p-6 rounded-2xl relative">
-                    
-                    <!-- HEADER -->
-                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#d4af37]/30">
-                        <!-- LOGO -->
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md shrink-0">
-                                <i data-lucide="heart" class="w-5 h-5 fill-white"></i>
-                            </div>
-                            <div>
-                                <div class="text-lg font-black text-slate-900 font-sans tracking-tight leading-none">LifeSaver<span class="text-red-600">-Care</span></div>
-                                <div class="text-[8px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                            </div>
-                        </div>
+                <!-- Blood Group -->
+                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashBloodCertBg">
+                    O+
+                </div>
 
-                        <!-- RIGHT MOTTO -->
-                        <div class="text-right font-sans">
-                            <div class="font-script text-lg text-red-900 leading-none">A Healthier Tomorrow Because of You</div>
-                            <div class="text-[8px] font-black uppercase tracking-wider text-[#d4af37] mt-0.5">DONATE BLOOD • DONATE HOPE • DONATE LIFE</div>
-                        </div>
-                    </div>
+                <!-- QR Code -->
+                <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
+                    <img id="dashBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                </div>
 
-                    <!-- TITLE & PRESENTATION -->
-                    <div class="text-center my-2">
-                        <h2 class="font-serif-title text-2xl sm:text-3xl font-black text-red-900 tracking-wider uppercase">CERTIFICATE</h2>
-                        <div class="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-slate-600 my-0.5 font-sans">─── OF BLOOD DONATION ───</div>
-                        <div class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mt-1 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                        
-                        <!-- DONOR NAME (CURSIVE) -->
-                        <div id="dashBloodCertName" class="font-script text-3xl sm:text-5xl text-red-950 font-bold my-1 py-0.5">Rahul Kumar</div>
-                        
-                        <!-- GOLD ACCENT DIVIDER -->
-                        <div class="flex items-center justify-center gap-2 text-[#d4af37] my-0.5">
-                            <span class="h-[1px] w-12 bg-[#d4af37]"></span>
-                            <span class="text-xs">✦ ❖ ✦</span>
-                            <span class="h-[1px] w-12 bg-[#d4af37]"></span>
-                        </div>
-
-                        <p class="text-[11px] sm:text-xs text-slate-700 max-w-xl mx-auto leading-relaxed mt-1 font-serif italic">
-                            In sincere appreciation of your kind and selfless act of voluntary blood donation. Your generous contribution helps save lives and gives hope to patients in need. Thank you for being a real-life hero!
-                        </p>
-                    </div>
-
-                    <!-- 4 VALUE BADGES -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 my-3 text-center font-sans">
-                        <div class="p-1.5 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1 text-[10px] font-bold text-red-900">
-                            <span>🩸</span> <span>GIVE BLOOD, GIVE HOPE</span>
-                        </div>
-                        <div class="p-1.5 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1 text-[10px] font-bold text-red-900">
-                            <span>👥</span> <span>SUPPORT PATIENTS</span>
-                        </div>
-                        <div class="p-1.5 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1 text-[10px] font-bold text-red-900">
-                            <span>➕</span> <span>BUILD HEALTHIER COMMUNITIES</span>
-                        </div>
-                        <div class="p-1.5 rounded-xl bg-red-50/70 border border-red-100 flex items-center justify-center gap-1 text-[10px] font-bold text-red-900">
-                            <span>🕊️</span> <span>INSPIRE A BRIGHTER TOMORROW</span>
-                        </div>
-                    </div>
-
-                    <!-- BOTTOM DETAILS & SEALS -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-3 border-t border-[#d4af37]/30 font-sans">
-                        
-                        <!-- BLOOD GROUP BADGE -->
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-10 h-10 rounded-2xl bg-red-600 text-white flex flex-col items-center justify-center shadow-md font-black shrink-0">
-                                <span class="text-[8px] uppercase leading-none">BLOOD</span>
-                                <span id="dashBloodCertBg" class="text-base leading-tight font-black">O+</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] font-black uppercase text-slate-500 block">BLOOD GROUP</span>
-                                <strong class="text-[11px] text-red-900 font-black">EVERY DONOR IS A LIFESAVER</strong>
-                            </div>
-                        </div>
-
-                        <!-- GOLD EMBOSSED SEAL & SIGNATURE -->
-                        <div class="flex flex-col items-center text-center">
-                            <div class="w-12 h-12 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-1 shadow-md border-2 border-amber-300">
-                                <span class="text-[7px] uppercase font-black tracking-tighter">LifeSaver-Care</span>
-                                <span class="text-[9px]">★★★</span>
-                            </div>
-                            <div class="font-bold text-[11px] text-slate-900 mt-1 uppercase tracking-wider">LifeSaver-Care Team</div>
-                            <div class="text-[8px] font-black text-[#d4af37] uppercase tracking-widest">TOGETHER WE SAVE LIVES</div>
-                        </div>
-
-                        <!-- QR VERIFICATION BOX -->
-                        <div class="flex items-center justify-end gap-2">
-                            <div class="text-right">
-                                <span class="text-[8px] font-bold text-slate-500 uppercase block">SCAN TO VIEW THIS CERTIFICATE</span>
-                                <span id="dashBloodCertId" class="font-mono text-[11px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg inline-block border border-slate-300">LSC-BD-2026-00482</span>
-                            </div>
-                            <div class="bg-white p-1 rounded-xl border border-slate-300 shadow-sm shrink-0">
-                                <img id="dashBloodCertQR" src="" alt="QR Verification" class="w-11 h-11 object-contain" />
-                            </div>
-                        </div>
-
-                    </div>
-
+                <!-- Credential ID -->
+                <div class="absolute font-mono font-bold text-[8px] sm:text-[10px] md:text-xs text-slate-700 bg-slate-100/95 px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashBloodCertId">
+                    LSC-BD-2026-00482
                 </div>
             </div>
 
@@ -1316,8 +1115,11 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="window.print()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Download / Print PDF
+                    <button onclick="downloadBloodCertImage()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-pink-500/20 transition" title="Save high-res PNG image directly">
+                        <i data-lucide="download" class="w-4 h-4"></i> Save Image (PNG)
+                    </button>
+                    <button onclick="downloadDashboardBloodCert()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition" title="Print or save as PDF">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Download PDF / Print
                     </button>
                     <button onclick="closeDashboardBloodCertModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition">
                         Close
@@ -1327,118 +1129,33 @@
         </div>
     </div>
 
-    <!-- ORGAN DONATION PLEDGE CERTIFICATE MODAL (EXACT HIGH-FIDELITY MATCH TO IMAGE 2) -->
-    <div id="dashOrganCertModal" onclick="if(event.target === this) closeDashboardOrganCertModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden overflow-y-auto">
-        <div class="glass-card w-full max-w-4xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
-            <button onclick="closeDashboardOrganCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition z-10">
-                <i data-lucide="x" class="w-6 h-6"></i>
+    <!-- ORGAN DONATION PLEDGE CERTIFICATE MODAL (EXACT HIGH-FIDELITY FULL MODE MATCH TO USER PICTURE) -->
+    <div id="dashOrganCertModal" onclick="if(event.target === this) closeDashboardOrganCertModal()" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden overflow-y-auto">
+        <div class="glass-card w-full max-w-5xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
+            <button onclick="closeDashboardOrganCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-xl transition z-20 bg-slate-100 dark:bg-slate-800" title="Close Fullscreen">
+                <i data-lucide="x" class="w-5 h-5"></i>
             </button>
 
-            <!-- CERTIFICATE CANVAS RENDER -->
-            <div id="printableOrganCert" class="printable-certificate bg-[#fcfdff] text-slate-900 rounded-3xl p-5 sm:p-8 border-4 border-[#1e40af] shadow-lg relative overflow-hidden font-serif select-none" style="background: radial-gradient(circle at center, #ffffff 60%, #f0f7ff 100%);">
-                
-                <!-- CORNER ORNAMENTS -->
-                <div class="absolute top-2 left-2 text-[#1e40af] text-xl select-none">❖</div>
-                <div class="absolute top-2 right-2 text-[#1e40af] text-xl select-none">❖</div>
-                <div class="absolute bottom-2 left-2 text-[#1e40af] text-xl select-none">❖</div>
-                <div class="absolute bottom-2 right-2 text-[#1e40af] text-xl select-none">❖</div>
+            <!-- CERTIFICATE CANVAS RENDER (EXACT IMAGE WITH OVERLAYS) -->
+            <div id="printableOrganCert" class="relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl select-none bg-[#fcfdff] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-organ-clean.jpg');">
+                <!-- Recipient Name -->
+                <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                    <span id="dashOrganCertName" class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                </div>
 
-                <!-- INNER BORDER -->
-                <div class="border border-[#1e40af]/40 p-4 sm:p-6 rounded-2xl relative">
-                    
-                    <!-- HEADER -->
-                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-[#1e40af]/20">
-                        <!-- LOGO -->
-                        <div class="flex items-center gap-2">
-                            <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
-                                <i data-lucide="heart-handshake" class="w-5 h-5 fill-white"></i>
-                            </div>
-                            <div>
-                                <div class="text-lg font-black text-slate-900 font-sans tracking-tight leading-none">LifeSaver<span class="text-blue-600">-Care</span></div>
-                                <div class="text-[8px] font-black uppercase tracking-widest text-slate-500 font-sans">PEOPLE • SUPPORT • SAVE LIVES</div>
-                            </div>
-                        </div>
+                <!-- Blood Group -->
+                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashOrganCertBg">
+                    O+
+                </div>
 
-                        <!-- RIGHT MOTTO -->
-                        <div class="text-right font-sans">
-                            <div class="font-script text-lg text-blue-900 leading-none">Together For Healthier Tomorrows</div>
-                            <div class="text-[8px] font-black uppercase tracking-wider text-blue-600 mt-0.5">PLEDGE • DONATE • INSPIRE • GIVE HOPE</div>
-                        </div>
-                    </div>
+                <!-- QR Code -->
+                <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
+                    <img id="dashOrganCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                </div>
 
-                    <!-- TITLE & PRESENTATION -->
-                    <div class="text-center my-2">
-                        <div class="text-[9px] font-black uppercase tracking-widest text-blue-700 font-sans">A BRIGHTER TOMORROW TOGETHER</div>
-                        <h2 class="font-serif-title text-2xl sm:text-3xl font-black text-blue-900 tracking-wider uppercase">CERTIFICATE</h2>
-                        <div class="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-slate-600 my-0.5 font-sans">─── OF ORGAN DONATION PLEDGE ───</div>
-                        <div class="text-[10px] font-bold text-slate-500 tracking-widest uppercase mt-1 font-sans">THIS CERTIFICATE IS PROUDLY PRESENTED TO</div>
-                        
-                        <!-- DONOR NAME (CURSIVE) -->
-                        <div id="dashOrganCertName" class="font-script text-3xl sm:text-5xl text-blue-950 font-bold my-1 py-0.5">Rahul Kumar</div>
-                        
-                        <!-- GOLD ACCENT DIVIDER -->
-                        <div class="flex items-center justify-center gap-2 text-[#d4af37] my-0.5">
-                            <span class="h-[1px] w-12 bg-[#d4af37]"></span>
-                            <span class="text-xs">✦ ❖ ✦</span>
-                            <span class="h-[1px] w-12 bg-[#d4af37]"></span>
-                        </div>
-
-                        <p class="text-[11px] sm:text-xs text-slate-700 max-w-xl mx-auto leading-relaxed mt-1 font-serif italic">
-                            In recognition of your generous decision to pledge for organ donation. Your compassion and willingness to give hope can save and transform many lives. Thank you for making a difference and being a life-saver.
-                        </p>
-                    </div>
-
-                    <!-- PLEDGED ORGANS SHOWCASE CARD -->
-                    <div class="bg-blue-50/80 p-3 rounded-2xl border border-blue-200 my-3 font-sans">
-                        <div class="flex items-center justify-between text-[11px] font-black uppercase tracking-wider text-blue-900 mb-1.5">
-                            <span class="flex items-center gap-1.5"><i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> PLEDGED ORGANS & TISSUES</span>
-                            <span class="text-[9px] bg-blue-200 text-blue-900 px-2 py-0.5 rounded-full">EVERY ORGAN GIVES A NEW BEGINNING</span>
-                        </div>
-                        <div id="dashOrganCertOrgansList" class="flex flex-wrap items-center gap-1.5">
-                            <span class="bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm">
-                                🎁 All Organs & Tissues
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- BOTTOM DETAILS & SEALS -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-3 border-t border-[#1e40af]/30 font-sans">
-                        
-                        <!-- BLOOD GROUP BADGE -->
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white flex flex-col items-center justify-center shadow-md font-black shrink-0">
-                                <span class="text-[8px] uppercase leading-none">BLOOD</span>
-                                <span id="dashOrganCertBg" class="text-base leading-tight font-black">O+</span>
-                            </div>
-                            <div>
-                                <span class="text-[9px] font-black uppercase text-slate-500 block">BLOOD GROUP</span>
-                                <strong class="text-[11px] text-blue-900 font-black">KINDNESS RUNS IN YOU</strong>
-                            </div>
-                        </div>
-
-                        <!-- GOLD EMBOSSED SEAL & SIGNATURE -->
-                        <div class="flex flex-col items-center text-center">
-                            <div class="w-12 h-12 rounded-full cert-gold-seal flex flex-col items-center justify-center text-slate-900 font-black p-1 shadow-md border-2 border-amber-300">
-                                <span class="text-[7px] uppercase font-black tracking-tighter">LifeSaver-Care</span>
-                                <span class="text-[9px]">★★★</span>
-                            </div>
-                            <div class="font-bold text-[11px] text-slate-900 mt-1 uppercase tracking-wider">LifeSaver-Care Team</div>
-                            <div class="text-[8px] font-black text-[#d4af37] uppercase tracking-widest">TOGETHER WE SAVE LIVES</div>
-                        </div>
-
-                        <!-- QR VERIFICATION BOX -->
-                        <div class="flex items-center justify-end gap-2">
-                            <div class="text-right">
-                                <span class="text-[8px] font-bold text-slate-500 uppercase block">VERIFY CERTIFICATE</span>
-                                <span id="dashOrganCertId" class="font-mono text-[11px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg inline-block border border-slate-300">LSC-OD-2026-00482</span>
-                            </div>
-                            <div class="bg-white p-1 rounded-xl border border-slate-300 shadow-sm shrink-0">
-                                <img id="dashOrganCertQR" src="" alt="QR Verification" class="w-11 h-11 object-contain" />
-                            </div>
-                        </div>
-
-                    </div>
-
+                <!-- Credential ID -->
+                <div class="absolute font-mono font-bold text-[8px] sm:text-[10px] md:text-xs text-slate-700 bg-slate-100/95 px-2 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 86.2%; top: 88.3%; transform: translate(-50%, -50%);" id="dashOrganCertId">
+                    LSC-OD-2026-00482
                 </div>
             </div>
 
@@ -1454,8 +1171,11 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition">
-                        <i data-lucide="printer" class="w-4 h-4"></i> Download / Print PDF
+                    <button onclick="downloadOrganCertImage()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-blue-500/20 transition" title="Save high-res PNG image directly">
+                        <i data-lucide="download" class="w-4 h-4"></i> Save Image (PNG)
+                    </button>
+                    <button onclick="downloadDashboardOrganCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center gap-1.5 transition" title="Print or save as PDF">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Download PDF / Print
                     </button>
                     <button onclick="closeDashboardOrganCertModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition">
                         Close
@@ -3081,6 +2801,10 @@
                 location: newCity,
                 phone: newPhone,
                 accountType: newType,
+                instagram: newIg,
+                linkedin: newLi,
+                facebook: newFb,
+                website: newWeb,
                 socialProfiles: updatedSocials,
                 pendingProfile: null,
                 updatedAt: new Date().toISOString()
@@ -3102,6 +2826,10 @@
                                     location: newCity,
                                     phone: newPhone,
                                     phoneVisibility: newType === 'private' ? 'private' : 'public',
+                                    instagram: newIg,
+                                    linkedin: newLi,
+                                    facebook: newFb,
+                                    website: newWeb,
                                     socialProfiles: updatedSocials
                                 });
                             } else if (item.type === 'organ') {
@@ -3110,6 +2838,10 @@
                                     bloodGroup: newBg,
                                     city: newCity,
                                     phone: newPhone,
+                                    instagram: newIg,
+                                    linkedin: newLi,
+                                    facebook: newFb,
+                                    website: newWeb,
                                     socialProfiles: updatedSocials
                                 });
                             }
@@ -3192,7 +2924,14 @@
             };
 
             try {
-                await update(ref(db, `users/${currentActiveUser.uid}`), { socialProfiles: socialPayload });
+                await update(ref(db, `users/${currentActiveUser.uid}`), { 
+                    socialProfiles: socialPayload,
+                    instagram: ig,
+                    linkedin: li,
+                    twitter: tw,
+                    facebook: fb,
+                    website: wb
+                });
                 renderProfileSocialLinks(socialPayload);
                 msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 mb-3";
                 msgBox.textContent = "✅ Social media profiles updated successfully!";
@@ -4255,11 +3994,99 @@
             }
         };
 
+        // Helper to cleanly clear printing classes
+        function clearPrintableCerts() {
+            document.querySelectorAll('.printable-active-cert').forEach(el => el.classList.remove('printable-active-cert'));
+        }
+
         window.downloadDashboardBloodCert = function() {
-            openDashboardBloodCertModal();
+            clearPrintableCerts();
+            const certEl = document.getElementById('printableBloodCert') || document.getElementById('printableBloodCertPanel');
+            if (certEl) certEl.classList.add('printable-active-cert');
             setTimeout(() => {
                 window.print();
+                setTimeout(() => {
+                    clearPrintableCerts();
+                }, 1500);
             }, 300);
+        };
+
+        window.downloadBloodCertImage = async function() {
+            const name = document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Voluntary Donor';
+            const bg = document.getElementById('dashBloodCertBg')?.textContent?.trim() || 'O+';
+            const certId = document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
+            const qrImg = document.getElementById('dashBloodCertQR');
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 682;
+            const ctx = canvas.getContext('2d');
+
+            const bgImg = new Image();
+            bgImg.crossOrigin = 'anonymous';
+            bgImg.src = 'cert-blood-clean.jpg';
+
+            bgImg.onload = async () => {
+                ctx.drawImage(bgImg, 0, 0, 1024, 682);
+
+                // Wait for script font to load or fallback
+                try {
+                    await document.fonts.load('bold 54px "Alex Brush"');
+                } catch(e) {}
+
+                // Draw Recipient Name
+                ctx.font = 'bold 54px "Alex Brush", "Dancing Script", cursive';
+                ctx.fillStyle = '#8B0000';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(name, 512, 274);
+
+                // Draw Blood Group in badge
+                ctx.font = '900 24px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bg, 292, 535);
+
+                // Draw QR Code
+                const drawQR = (qrSource) => {
+                    if (qrSource && qrSource.complete && qrSource.naturalWidth > 0) {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(688, 494, 108, 108);
+                        ctx.drawImage(qrSource, 691, 497, 102, 102);
+                    }
+                    // Draw Cert ID
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.roundRect(660, 615, 164, 26, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.font = 'bold 12px ui-monospace, monospace';
+                    ctx.fillStyle = '#334155';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(certId, 742, 628);
+
+                    // Trigger download
+                    const link = document.createElement('a');
+                    link.download = `LifeSaver-Care-Blood-Cert-${certId}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                };
+
+                if (qrImg && qrImg.src) {
+                    const tempQr = new Image();
+                    tempQr.crossOrigin = 'anonymous';
+                    tempQr.onload = () => drawQR(tempQr);
+                    tempQr.onerror = () => drawQR(null);
+                    tempQr.src = qrImg.src;
+                } else {
+                    drawQR(null);
+                }
+            };
         };
 
         window.shareBloodCertWhatsApp = function() {
@@ -4338,10 +4165,92 @@
         };
 
         window.downloadDashboardOrganCert = function() {
-            openDashboardOrganCertModal();
+            clearPrintableCerts();
+            const certEl = document.getElementById('printableOrganCert') || document.getElementById('printableOrganCertPanel');
+            if (certEl) certEl.classList.add('printable-active-cert');
             setTimeout(() => {
                 window.print();
+                setTimeout(() => {
+                    clearPrintableCerts();
+                }, 1500);
             }, 300);
+        };
+
+        window.downloadOrganCertImage = async function() {
+            const name = document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Voluntary Pledger';
+            const bg = document.getElementById('dashOrganCertBg')?.textContent?.trim() || 'O+';
+            const certId = document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
+            const qrImg = document.getElementById('dashOrganCertQR');
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 682;
+            const ctx = canvas.getContext('2d');
+
+            const bgImg = new Image();
+            bgImg.crossOrigin = 'anonymous';
+            bgImg.src = 'cert-organ-clean.jpg';
+
+            bgImg.onload = async () => {
+                ctx.drawImage(bgImg, 0, 0, 1024, 682);
+
+                try {
+                    await document.fonts.load('bold 54px "Alex Brush"');
+                } catch(e) {}
+
+                // Draw Recipient Name
+                ctx.font = 'bold 54px "Alex Brush", "Dancing Script", cursive';
+                ctx.fillStyle = '#0f4c81';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(name, 512, 274);
+
+                // Draw Blood Group
+                ctx.font = '900 24px system-ui, -apple-system, sans-serif';
+                ctx.fillStyle = '#0f4c81';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(bg, 722, 515);
+
+                // Draw QR Code
+                const drawQR = (qrSource) => {
+                    if (qrSource && qrSource.complete && qrSource.naturalWidth > 0) {
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(829, 469, 108, 108);
+                        ctx.drawImage(qrSource, 832, 472, 102, 102);
+                    }
+                    // Draw Cert ID
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.roundRect(801, 589, 164, 26, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.font = 'bold 12px ui-monospace, monospace';
+                    ctx.fillStyle = '#334155';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(certId, 883, 602);
+
+                    // Trigger download
+                    const link = document.createElement('a');
+                    link.download = `LifeSaver-Care-Organ-Pledge-Cert-${certId}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                };
+
+                if (qrImg && qrImg.src) {
+                    const tempQr = new Image();
+                    tempQr.crossOrigin = 'anonymous';
+                    tempQr.onload = () => drawQR(tempQr);
+                    tempQr.onerror = () => drawQR(null);
+                    tempQr.src = qrImg.src;
+                } else {
+                    drawQR(null);
+                }
+            };
         };
 
         window.shareOrganCertWhatsApp = function() {
