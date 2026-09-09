@@ -394,6 +394,67 @@
         </div>
     </div>
 
+    <!-- 🚨 FEATURE 4: EMERGENCY BLOOD MATCH & DONOR ALERT BROADCAST MODAL -->
+    <div id="bloodMatchModal"
+        class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-6 sm:p-7 border border-red-200 dark:border-red-900/60 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+            <!-- Close button -->
+            <button onclick="closeBloodMatchModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-lg">✕</button>
+
+            <!-- Header -->
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-red-500/20 font-black">
+                    🚨
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-lg font-black text-slate-900 dark:text-white">Emergency Blood Match & Alert Broadcast</h3>
+                        <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 uppercase">Live SOS</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Algorithmic compatibility matching and instant multichannel donor alert dispatch</p>
+                </div>
+            </div>
+
+            <!-- Ticket Details Banner -->
+            <div id="matchModalTicketInfo" class="p-4 rounded-2xl bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 mb-4">
+                <!-- Dynamically injected -->
+            </div>
+
+            <!-- Multichannel Broadcast Actions -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                <button id="btnBroadcastWhatsApp" onclick="broadcastTicketWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition">
+                    <i data-lucide="share-2" class="w-4 h-4"></i> 1-Click WhatsApp SOS Broadcast
+                </button>
+                <button id="btnBrowserNotify" onclick="triggerBrowserAlert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition">
+                    <i data-lucide="bell-ring" class="w-4 h-4 text-amber-400"></i> Dispatch Browser Web Alert
+                </button>
+            </div>
+
+            <!-- Compatible Donors Header -->
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="users" class="w-3.5 h-3.5 text-red-500"></i> Compatible Donors in Registry (<span id="matchedDonorsCount">0</span>)
+                </h4>
+                <span id="matchedCityNote" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"></span>
+            </div>
+
+            <!-- Matched Donors Scroll List -->
+            <div id="matchedDonorsList" class="overflow-y-auto space-y-2 pr-1 flex-1 min-h-[140px] max-h-[250px] border border-slate-100 dark:border-slate-800/80 rounded-2xl p-2 bg-slate-50/50 dark:bg-slate-950/40">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span class="text-[11px] text-slate-400 flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> LifeSaver-Care Protocol
+                </span>
+                <button onclick="closeBloodMatchModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2 px-4 rounded-xl text-xs transition">
+                    Close Hub
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -536,51 +597,257 @@
             }
         };
 
-        // Listen to active urgent requests
-        onValue(ref(db, 'blood_requests'), (snapshot) => {
+        // BLOOD COMPATIBILITY MATRIX
+        const BLOOD_COMPATIBILITY = {
+            'A+': ['A+', 'A-', 'O+', 'O-'],
+            'A-': ['A-', 'O-'],
+            'B+': ['B+', 'B-', 'O+', 'O-'],
+            'B-': ['B-', 'O-'],
+            'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], // Universal Recipient
+            'AB-': ['AB-', 'A-', 'B-', 'O-'],
+            'O+': ['O+', 'O-'],
+            'O-': ['O-'] // Universal Donor
+        };
+
+        window.activeUrgentBloodTickets = {};
+        window.currentActiveMatchTicket = null;
+
+        window.renderUrgentBloodTickets = function() {
             const reqGrid = document.getElementById("urgentReqsGrid");
+            if (!reqGrid) return;
             reqGrid.innerHTML = "";
 
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                Object.keys(data).forEach(key => {
-                    const r = data[key];
-                    const card = document.createElement("div");
-                    card.className = "glass-card p-5 border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
-                    card.innerHTML = `
-                        <div>
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="bg-red-600 text-white text-xs font-black px-2.5 py-0.5 rounded-lg">
+            const keys = Object.keys(window.activeUrgentBloodTickets || {});
+            if (keys.length === 0) {
+                reqGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-xs">No active emergency blood requirement tickets currently posted.</p>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                const r = window.activeUrgentBloodTickets[key];
+                const compatibleGroups = BLOOD_COMPATIBILITY[r.bloodGroup] || [r.bloodGroup];
+                const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
+
+                const card = document.createElement("div");
+                card.className = "glass-card p-5 border border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 flex flex-col justify-between gap-3 hover:border-red-400 transition";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-red-600 text-white text-xs font-black px-2.5 py-0.5 rounded-lg shadow-sm">
                                     ${r.bloodGroup} Needed (${r.units || 1} Units)
                                 </span>
                                 <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900">
                                     Active Need
                                 </span>
                             </div>
-                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">${r.hospital}</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">${r.city} • Contact: <strong>${r.phone}</strong></p>
+                            <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                                📍 ${r.city}
+                            </span>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <a href="tel:${r.phone}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
+                        <h4 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">${r.hospital}</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Emergency Contact: <strong class="font-mono text-slate-900 dark:text-white">${r.phone}</strong></p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-red-200/60 dark:border-red-900/40 justify-between">
+                        <button onclick="openBloodMatchModal('${key}')" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white text-xs font-black px-3.5 py-2 rounded-xl shadow-md shadow-red-500/20 transition flex items-center gap-2 group">
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                            </span>
+                            <i data-lucide="crosshair" class="w-3.5 h-3.5 transition group-hover:rotate-45"></i>
+                            <span>Match Donors & Broadcast</span>
+                            <span class="bg-white/20 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full font-bold">
+                                ${matchingDonors.length}
+                            </span>
+                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <a href="tel:${r.phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
                             </a>
-                            <button onclick="closeBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
-                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Received (Delete)
+                            <button onclick="closeBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Received
                             </button>
                         </div>
-                    `;
-                    reqGrid.appendChild(card);
-                });
-                lucide.createIcons();
-            } else {
-                reqGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-xs">No active emergency blood requirement tickets currently posted.</p>`;
+                    </div>
+                `;
+                reqGrid.appendChild(card);
+            });
+            if (window.lucide) lucide.createIcons();
+        };
+
+        // OPEN BLOOD MATCH & BROADCAST MODAL
+        window.openBloodMatchModal = function(ticketKey) {
+            const ticket = (window.activeUrgentBloodTickets || {})[ticketKey];
+            if (!ticket) {
+                alert("Requirement ticket not found or already closed.");
+                return;
             }
+            window.currentActiveMatchTicket = ticket;
+
+            const compatibleGroups = BLOOD_COMPATIBILITY[ticket.bloodGroup] || [ticket.bloodGroup];
+            const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
+
+            matchingDonors.sort((a, b) => {
+                const aCityMatch = (a.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim();
+                const bCityMatch = (b.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim();
+                if (aCityMatch && !bCityMatch) return -1;
+                if (!aCityMatch && bCityMatch) return 1;
+                return (a.name || '').localeCompare(b.name || '');
+            });
+
+            const sameCityDonors = matchingDonors.filter(d => (d.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim());
+
+            const infoEl = document.getElementById("matchModalTicketInfo");
+            if (infoEl) {
+                infoEl.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-red-600 text-white text-sm font-black px-3 py-1 rounded-xl shadow-sm">
+                                ${ticket.bloodGroup} Needed
+                            </span>
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200">
+                                ${ticket.units || 1} Unit(s)
+                            </span>
+                        </div>
+                        <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
+                            📍 ${ticket.city}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div><strong>🏥 Hospital:</strong> ${ticket.hospital}</div>
+                        <div><strong>📞 Attendant Phone:</strong> <a href="tel:${ticket.phone}" class="text-red-600 font-bold hover:underline">${ticket.phone}</a></div>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-red-200/60 dark:border-red-900/40 text-[11px] text-slate-600 dark:text-slate-400">
+                        🩸 Compatible Donor Groups for ${ticket.bloodGroup}: <strong class="text-red-600 dark:text-red-400">${compatibleGroups.join(', ')}</strong>
+                    </div>
+                `;
+            }
+
+            const countEl = document.getElementById("matchedDonorsCount");
+            if (countEl) countEl.textContent = matchingDonors.length;
+
+            const cityNoteEl = document.getElementById("matchedCityNote");
+            if (cityNoteEl) {
+                cityNoteEl.textContent = `${sameCityDonors.length} in ${ticket.city}`;
+            }
+
+            const listEl = document.getElementById("matchedDonorsList");
+            if (listEl) {
+                listEl.innerHTML = "";
+                if (matchingDonors.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="p-6 text-center text-slate-500">
+                            <p class="text-xs font-bold">No registered donors currently match ${compatibleGroups.join(', ')}.</p>
+                            <p class="text-[11px] mt-1 text-slate-400">Click 1-Click WhatsApp Broadcast above to dispatch this requirement to community groups.</p>
+                        </div>
+                    `;
+                } else {
+                    matchingDonors.forEach(donor => {
+                        const isSameCity = (donor.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim();
+                        const phone = donor.phone || '9999999999';
+                        const waMsg = `Emergency SOS: Patient urgently needs ${ticket.bloodGroup} blood (${ticket.units || 1} units) at ${ticket.hospital}, ${ticket.city}. Contact: ${ticket.phone}. Are you available to donate?`;
+
+                        const item = document.createElement("div");
+                        item.className = "p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3";
+                        item.innerHTML = `
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="bg-red-600 text-white text-xs font-black w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm">
+                                    ${donor.bloodGroup || 'O+'}
+                                </span>
+                                <div class="truncate">
+                                    <div class="flex items-center gap-1.5">
+                                        <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate">${donor.name || 'Anonymous Donor'}</h5>
+                                        ${isSameCity ? `<span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[9px] font-black px-1.5 py-0.2 rounded shrink-0">📍 Same City</span>` : `<span class="text-[9px] text-slate-400 shrink-0">(${donor.city || 'Statewide'})</span>`}
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 font-mono">${phone}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <a href="tel:${phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                                    <i data-lucide="phone" class="w-3 h-3"></i> Call
+                                </a>
+                                <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                                    <i data-lucide="message-square" class="w-3 h-3"></i> SOS
+                                </a>
+                            </div>
+                        `;
+                        listEl.appendChild(item);
+                    });
+                }
+            }
+
+            window.lockBodyScroll();
+            const modal = document.getElementById("bloodMatchModal");
+            if (modal) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeBloodMatchModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("bloodMatchModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        };
+
+        window.broadcastTicketWhatsApp = function() {
+            if (!window.currentActiveMatchTicket) return;
+            const t = window.currentActiveMatchTicket;
+            const comp = (BLOOD_COMPATIBILITY[t.bloodGroup] || [t.bloodGroup]).join(', ');
+            const msg = `🚨 *URGENT BLOOD ALERT - LIFESAVER-CARE* 🚨\n\n` +
+                `Patient urgently requires *${t.units || 1} Unit(s)* of *${t.bloodGroup} Blood*.\n\n` +
+                `🏥 *Hospital:* ${t.hospital}\n` +
+                `📍 *City:* ${t.city}\n` +
+                `📞 *Emergency Contact:* ${t.phone}\n\n` +
+                `🩸 *Acceptable Blood Groups:* ${comp}\n\n` +
+                `⚡ *If you or someone in your network can donate, please call immediately.*\n\n` +
+                `LifeSaver-Care Emergency Network:\n${window.location.origin}/blood.html`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        window.triggerBrowserAlert = function() {
+            if (!window.currentActiveMatchTicket) return;
+            const t = window.currentActiveMatchTicket;
+            if (!("Notification" in window)) {
+                alert("Browser notifications are not supported on this browser.");
+                return;
+            }
+            if (Notification.permission === "granted") {
+                new Notification(`🚨 Urgent Blood Needed: ${t.bloodGroup}`, {
+                    body: `${t.units || 1} unit(s) needed at ${t.hospital}, ${t.city}. Attendant: ${t.phone}`,
+                    icon: 'icon.png'
+                });
+                alert("🔔 Emergency Alert notification dispatched to your browser!");
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification(`🚨 Urgent Blood Needed: ${t.bloodGroup}`, {
+                            body: `${t.units || 1} unit(s) needed at ${t.hospital}, ${t.city}. Attendant: ${t.phone}`,
+                            icon: 'icon.png'
+                        });
+                    }
+                });
+            } else {
+                alert("Notifications are currently blocked in your browser settings. Please enable permissions to receive instant emergency alerts.");
+            }
+        };
+
+        // Listen to active urgent requests
+        onValue(ref(db, 'blood_requests'), (snapshot) => {
+            window.activeUrgentBloodTickets = snapshot.exists() ? snapshot.val() : {};
+            renderUrgentBloodTickets();
         });
 
         // Listen to voluntary donors
         onValue(ref(db, 'donors'), (snapshot) => {
             allDonors = snapshot.exists() ? Object.values(snapshot.val()) : [];
             renderDonors();
+            renderUrgentBloodTickets();
         });
 
         /* POST REQUIREMENT MODAL */

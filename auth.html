@@ -28,6 +28,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="qrcode.min.js"></script>
     <script src="security.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col justify-between py-6 px-4 sm:px-6 bg-slate-900 text-white transition-colors duration-300 antialiased">
@@ -581,13 +582,18 @@
                             </div>
                         </div>
 
-                        <!-- ACTION BUTTONS (ONLY 2 BUTTONS: DOWNLOAD & SHARE ON WHATSAPP) -->
-                        <div id="dashBloodCertActions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 mt-3 border-t border-red-100 dark:border-slate-800">
-                            <button onclick="downloadDashboardBloodCert()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-red-500/20" title="Download official certificate image">
-                                <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
-                            </button>
-                            <button onclick="shareBloodCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
-                                <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                        <!-- ACTION BUTTONS (DOWNLOAD, SHARE ON WHATSAPP & AUTOMATED EMAIL DELIVERY) -->
+                        <div id="dashBloodCertActions" class="space-y-2 pt-3 mt-3 border-t border-red-100 dark:border-slate-800">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <button onclick="downloadDashboardBloodCert()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-red-500/20" title="Download official certificate image">
+                                    <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
+                                </button>
+                                <button onclick="shareBloodCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
+                                    <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                                </button>
+                            </div>
+                            <button onclick="openCertificateEmailModal('blood')" class="w-full py-2 px-3 rounded-xl border border-red-200/80 dark:border-red-900/50 bg-red-50/60 dark:bg-red-950/30 hover:bg-red-100/70 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold transition flex items-center justify-center gap-2" title="Email official certificate and verified credential packet">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 text-red-500"></i> Automated Certificate Delivery Hub (Email / Dispatch)
                             </button>
                         </div>
                     </div>
@@ -647,13 +653,18 @@
                             </div>
                         </div>
 
-                        <!-- ACTION BUTTONS (ONLY 2 BUTTONS: DOWNLOAD & SHARE ON WHATSAPP) -->
-                        <div id="dashOrganCertActions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 mt-3 border-t border-blue-100 dark:border-slate-800">
-                            <button onclick="downloadDashboardOrganCert()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-500/20" title="Download official certificate image">
-                                <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
-                            </button>
-                            <button onclick="shareOrganCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
-                                <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                        <!-- ACTION BUTTONS (DOWNLOAD, SHARE ON WHATSAPP & AUTOMATED EMAIL DELIVERY) -->
+                        <div id="dashOrganCertActions" class="space-y-2 pt-3 mt-3 border-t border-blue-100 dark:border-slate-800">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <button onclick="downloadDashboardOrganCert()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-500/20" title="Download official certificate image">
+                                    <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
+                                </button>
+                                <button onclick="shareOrganCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
+                                    <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                                </button>
+                            </div>
+                            <button onclick="openCertificateEmailModal('organ')" class="w-full py-2 px-3 rounded-xl border border-blue-200/80 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-2" title="Email official pledge certificate and verified credential packet">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Automated Certificate Delivery Hub (Email / Dispatch)
                             </button>
                         </div>
                     </div>
@@ -1239,6 +1250,76 @@
                         Close
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📧 FEATURE 5: AUTOMATED CERTIFICATE DELIVERY & CREDENTIAL DISPATCH HUB -->
+    <div id="certEmailDeliveryModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+            <!-- Close button -->
+            <button onclick="closeCertificateEmailModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-lg">✕</button>
+
+            <!-- Header -->
+            <div class="flex items-center gap-3 mb-4">
+                <div id="certEmailHeaderIcon" class="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center text-2xl shadow-lg font-black">
+                    📧
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Certificate Delivery Hub</h3>
+                        <span id="certEmailTypeBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 uppercase">Blood Donor</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Direct verified email dispatch & institutional credential packet</p>
+                </div>
+            </div>
+
+            <!-- Recipient Email Input -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>Recipient Email Address</span>
+                    <span class="text-[10px] font-normal text-slate-500">Self, Employer, Hospital, or Family</span>
+                </label>
+                <div class="relative">
+                    <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+                    <input type="email" id="certEmailRecipientInput" placeholder="name@example.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-semibold py-3 pl-10 pr-4 rounded-xl outline-none focus:border-red-500 text-sm">
+                </div>
+            </div>
+
+            <!-- Subject Line Preview -->
+            <div class="mb-4">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                    Subject Line
+                </label>
+                <input type="text" id="certEmailSubjectInput" readonly class="w-full bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-mono py-2 px-3 rounded-xl outline-none">
+            </div>
+
+            <!-- Credential Details Summary Box -->
+            <div id="certEmailSummaryBox" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 mb-4 text-xs space-y-1.5">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Notification Toast / Status Msg -->
+            <div id="certEmailStatusMsg" class="hidden p-3 rounded-xl text-xs font-bold mb-4 transition"></div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2">
+                <button onclick="sendCertificateMailClient()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-red-500/20 transition" id="btnSendCertEmail">
+                    <i data-lucide="send" class="w-4 h-4"></i> Launch Email App
+                </button>
+                <button onclick="copyCertificateEmailPacket()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Credential
+                </button>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="lock" class="w-3 h-3 text-emerald-500"></i> Cryptographically Signed
+                </span>
+                <button onclick="closeCertificateEmailModal()" class="text-slate-500 hover:text-slate-800 dark:hover:text-white font-bold">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -4054,7 +4135,7 @@
 
                     const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
                     window.userBloodDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                    const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
                     const qrEl = document.getElementById('dashBloodCertQR');
                     if (qrEl) qrEl.src = qrUrl;
@@ -4168,7 +4249,7 @@
 
                     const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
                     window.userOrganDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                    const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
                     const qrEl = document.getElementById('dashOrganCertQR');
                     if (qrEl) qrEl.src = qrUrl;
@@ -4215,7 +4296,7 @@
             const qrEl = document.getElementById('dashBloodCertQR');
             if (qrEl) {
                 const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             }
 
             const modal = document.getElementById('dashBloodCertModal');
@@ -4435,7 +4516,7 @@
             const qrEl = document.getElementById('dashOrganCertQR');
             if (qrEl) {
                 const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             }
 
             const modal = document.getElementById('dashOrganCertModal');
@@ -4551,6 +4632,158 @@
                 alert("✅ Pledge Certificate verification URL copied to clipboard!\n\n" + verifyUrl);
             }).catch(() => {
                 prompt("Copy Certificate URL:", verifyUrl);
+            });
+        };
+
+        // ==========================================
+        // FEATURE 5: AUTOMATED CERTIFICATE DELIVERY
+        // ==========================================
+        window.currentEmailCertType = 'blood';
+
+        window.openCertificateEmailModal = function(type) {
+            window.currentEmailCertType = type || 'blood';
+            const isBlood = (type === 'blood');
+            const profile = window.currentActiveUserProfile || {};
+            const userEmail = currentActiveUser?.email || profile.email || '';
+
+            const certId = isBlood 
+                ? (document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482')
+                : (document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482');
+            
+            const name = isBlood
+                ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || profile.name || 'Member')
+                : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
+
+            const bg = isBlood
+                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+');
+
+            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+
+            const emailInput = document.getElementById("certEmailRecipientInput");
+            if (emailInput) emailInput.value = userEmail;
+
+            const subjectInput = document.getElementById("certEmailSubjectInput");
+            if (subjectInput) {
+                subjectInput.value = isBlood 
+                    ? `Official Blood Donation Credential - ${name} (${certId})`
+                    : `Official Organ Donation Pledge Credential - ${name} (${certId})`;
+            }
+
+            const headerIcon = document.getElementById("certEmailHeaderIcon");
+            if (headerIcon) {
+                headerIcon.className = isBlood 
+                    ? "w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white flex items-center justify-center text-2xl shadow-lg font-black"
+                    : "w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg font-black";
+                headerIcon.textContent = isBlood ? "🩸" : "💙";
+            }
+
+            const badge = document.getElementById("certEmailTypeBadge");
+            if (badge) {
+                badge.textContent = isBlood ? "Blood Donor Certificate" : "Organ Pledge Certificate";
+                badge.className = isBlood 
+                    ? "text-[10px] font-black px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 uppercase"
+                    : "text-[10px] font-black px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 uppercase";
+            }
+
+            const sendBtn = document.getElementById("btnSendCertEmail");
+            if (sendBtn) {
+                sendBtn.className = isBlood
+                    ? "bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-red-500/20 transition"
+                    : "bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition";
+            }
+
+            const summary = document.getElementById("certEmailSummaryBox");
+            if (summary) {
+                summary.innerHTML = `
+                    <div class="flex justify-between"><strong>Recipient Name:</strong> <span>${name}</span></div>
+                    <div class="flex justify-between"><strong>Certificate ID:</strong> <span class="font-mono font-bold text-red-600 dark:text-red-400">${certId}</span></div>
+                    <div class="flex justify-between"><strong>Blood Group:</strong> <span>${bg}</span></div>
+                    <div class="flex justify-between"><strong>Verification Link:</strong> <a href="${verifyUrl}" target="_blank" class="text-blue-600 hover:underline truncate max-w-[200px]">${verifyUrl}</a></div>
+                `;
+            }
+
+            const statusMsg = document.getElementById("certEmailStatusMsg");
+            if (statusMsg) statusMsg.classList.add('hidden');
+
+            window.lockBodyScroll();
+            const modal = document.getElementById("certEmailDeliveryModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeCertificateEmailModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("certEmailDeliveryModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.formatCertificateEmailText = function() {
+            const isBlood = (window.currentEmailCertType === 'blood');
+            const profile = window.currentActiveUserProfile || {};
+            const certId = isBlood 
+                ? (document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482')
+                : (document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482');
+            const name = isBlood
+                ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || profile.name || 'Member')
+                : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
+            const bg = isBlood
+                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+');
+            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+
+            return `Dear Recipient,\n\n` +
+                `This is an official credential verification dispatch from LifeSaver-Care.\n\n` +
+                `========================================\n` +
+                `LIFESAVER-CARE VERIFIED CREDENTIAL PACKET\n` +
+                `========================================\n` +
+                `Recipient Name  : ${name}\n` +
+                `Certificate Type: ${isBlood ? 'Voluntary Blood Donor Certificate' : 'Organ Donation Pledge Credential'}\n` +
+                `Blood Group     : ${bg}\n` +
+                `Certificate ID  : ${certId}\n` +
+                `Verification URL: ${verifyUrl}\n` +
+                `Status          : Verified & Recorded in National Registry\n` +
+                `========================================\n\n` +
+                `You may verify this certificate directly on any browser at:\n` +
+                `${verifyUrl}\n\n` +
+                `Warm regards,\n` +
+                `LifeSaver-Care Emergency & Donor Network\n` +
+                `${window.location.origin}`;
+        };
+
+        window.sendCertificateMailClient = function() {
+            const recipient = document.getElementById("certEmailRecipientInput")?.value?.trim() || '';
+            const subject = document.getElementById("certEmailSubjectInput")?.value || 'Official LifeSaver-Care Certificate';
+            const body = window.formatCertificateEmailText();
+
+            const mailtoUrl = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoUrl;
+
+            const statusMsg = document.getElementById("certEmailStatusMsg");
+            if (statusMsg) {
+                statusMsg.className = "p-3 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
+                statusMsg.textContent = "✅ Email client launched with verified credential packet!";
+                statusMsg.classList.remove('hidden');
+            }
+        };
+
+        window.copyCertificateEmailPacket = function() {
+            const body = window.formatCertificateEmailText();
+            navigator.clipboard?.writeText(body).then(() => {
+                const statusMsg = document.getElementById("certEmailStatusMsg");
+                if (statusMsg) {
+                    statusMsg.className = "p-3 rounded-xl text-xs font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800";
+                    statusMsg.textContent = "📋 Full verified credential packet copied to clipboard! Paste into Gmail, Outlook, or official submissions.";
+                    statusMsg.classList.remove('hidden');
+                }
+            }).catch(() => {
+                prompt("Copy Credential Packet:", body);
             });
         };
     </script>

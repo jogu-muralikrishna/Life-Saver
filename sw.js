@@ -16,7 +16,8 @@ const ASSETS_TO_CACHE = [
   './manifest.json',
   './icon.png',
   './cert-blood-clean.jpg',
-  './cert-organ-clean.jpg'
+  './cert-organ-clean.jpg',
+  './qrcode.min.js'
 ];
 
 // Install Event - Pre-cache core assets

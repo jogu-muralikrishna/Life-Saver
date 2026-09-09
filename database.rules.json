@@ -1,56 +1,69 @@
 {
   "rules": {
-    ".read": "true",
-    ".write": "true",
     "users": {
+      ".read": true,
       "$uid": {
-        ".read": "true",
-        ".write": "true"
+        ".write": "auth != null && (auth.uid === $uid || !data.exists())"
       }
     },
     "donors": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["bloodGroup", "city", "email", "phone", "donationCount", "timesDonated", "status"]
     },
     "organ_donors": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["city", "email", "phone", "organsPledged"]
     },
     "blood_requests": {
-      ".read": "true",
-      ".write": "true"
-    },
-    "profile_change_requests": {
-      ".read": "true",
-      ".write": "true"
-    },
-    "account_change_requests": {
-      ".read": "true",
-      ".write": "true"
-    },
-    "contact_requests": {
-      ".read": "true",
-      ".write": "true"
-    },
-    "messages": {
-      ".read": "true",
-      ".write": "true"
-    },
-    "admin_audit_logs": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": true,
+      ".indexOn": ["bloodGroup", "city", "status", "timestamp"]
     },
     "partner_hospitals": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["city", "status"]
+    },
+    "admin_audit_logs": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["timestamp", "action", "adminEmail"]
+    },
+    "sub_admins": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["email", "status"]
+    },
+    "hospital_communications": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["hospitalId", "status", "timestamp"]
+    },
+    "profile_change_requests": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "account_change_requests": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "contact_requests": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "messages": {
+      ".read": "auth != null",
+      ".write": true
     },
     "referrals": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": true
     },
     "referral_codes": {
-      ".read": "true",
-      ".write": "true"
+      ".read": true,
+      ".write": true
     }
   }
 }

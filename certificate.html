@@ -28,6 +28,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="qrcode.min.js"></script>
     <script src="security.js" defer></script>
 </head>
 <body class="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white antialiased">
@@ -251,7 +252,8 @@
         function renderCertificate(data) {
             const wrapper = document.getElementById("certificateDisplayWrapper");
             const isBlood = data.certType === 'blood';
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/certificate.html?id=' + data.certId)}`;
+            const verifyUrl = window.location.origin + '/certificate.html?id=' + data.certId;
+            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
 
             if (isBlood) {
                 wrapper.innerHTML = `
@@ -344,7 +346,8 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(bg, isBlood ? 292 : 722, isBlood ? 535 : 515);
 
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + '/certificate.html?id=' + certId)}`;
+                const verifyUrl = window.location.origin + '/certificate.html?id=' + certId;
+                const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                 const qrImg = new Image();
                 qrImg.crossOrigin = 'anonymous';
 

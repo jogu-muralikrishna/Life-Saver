@@ -20,6 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="qrcode.min.js"></script>
     <script src="security.js" defer></script>
 </head>
 <body class="min-h-screen pb-20 flex flex-col justify-between">
@@ -866,7 +867,8 @@
             if (document.getElementById("passDateDisplay")) document.getElementById("passDateDisplay").textContent = todayDate;
             if (document.getElementById("passDateFooter")) document.getElementById("passDateFooter").textContent = "Date: " + todayDate;
             
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + "/certificate.html?id=" + credentialID)}`;
+            const verifyUrl = window.location.origin + "/certificate.html?id=" + credentialID;
+            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             document.getElementById("passQR").src = qrUrl;
 
             document.getElementById("passModal").classList.remove("hidden");
@@ -885,7 +887,8 @@
             document.getElementById("passOrgans").textContent = "🎁 All Organs & Tissues";
             document.getElementById("passID").textContent = credentialID;
             
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(window.location.origin + "/certificate.html?id=" + credentialID)}`;
+            const verifyUrl = window.location.origin + "/certificate.html?id=" + credentialID;
+            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             document.getElementById("passQR").src = qrUrl;
 
             window.lockBodyScroll();
