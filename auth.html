@@ -49,6 +49,17 @@
             <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" id="portalSub">One individual account per member. Sign in or create your personal account to view your unique referral code, verified certificates, and donor profile</p>
         </div>
 
+        <!-- LEADERBOARD LOGIN REQUIRED BANNER -->
+        <div id="leaderboardLoginNotice" class="hidden mb-5 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-3 shadow-sm">
+            <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm font-black text-sm">
+                🏆
+            </div>
+            <div>
+                <span class="font-black block text-amber-800 dark:text-amber-300">Login Required to View Leaderboard</span>
+                <span class="text-[11px] opacity-90">Please sign in or create an account to view donor rankings and your personal badge.</span>
+            </div>
+        </div>
+
         <!-- REFERRAL DETECTED BANNER -->
         <div id="referralNotice" class="hidden mb-5 p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-700 dark:text-red-300 flex items-center gap-3">
             <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-sm">
@@ -1771,18 +1782,38 @@
             if (window.lucide) lucide.createIcons();
         }
 
+        function checkLeaderboardAutoOpen() {
+            const p = new URLSearchParams(window.location.search);
+            if (p.get('redirect') === 'leaderboard' || p.get('action') === 'leaderboard' || window.location.hash === '#leaderboard') {
+                setTimeout(() => {
+                    if (window.openLeaderboardModal) window.openLeaderboardModal();
+                }, 250);
+            }
+        }
+
+        function checkLeaderboardPromptBanner() {
+            const p = new URLSearchParams(window.location.search);
+            if (p.get('redirect') === 'leaderboard' || p.get('action') === 'leaderboard' || window.location.hash === '#leaderboard') {
+                const notice = document.getElementById('leaderboardLoginNotice');
+                if (notice) notice.classList.remove('hidden');
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 await initUserDashboard(user);
+                checkLeaderboardAutoOpen();
             } else {
                 const saved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
                 if (saved && saved.uid) {
                     await initUserDashboard(saved);
+                    checkLeaderboardAutoOpen();
                 } else {
                     const authCard = document.getElementById("authCard");
                     const dashboardContainer = document.getElementById("dashboardContainer");
                     if (authCard) authCard.classList.remove("hidden");
                     if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                    checkLeaderboardPromptBanner();
                 }
             }
             if (window.lucide) lucide.createIcons();

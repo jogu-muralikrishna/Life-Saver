@@ -138,10 +138,10 @@
                 </button>
 
                 <!-- TOOL 2: CONTACT (VISIBLE ON TABLET & DESKTOP) -->
-                <button onclick="openContactModal()" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
+                <a href="contact.html" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
                     <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
                     <span>Contact</span>
-                </button>
+                </a>
 
                 <!-- TOOL 3: INSTALL APP (VISIBLE ON DESKTOP) -->
                 <button id="pwaInstallBtn" onclick="installPWA()" class="hidden md:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
@@ -169,9 +169,9 @@
                             <button onclick="openTriageModal(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg text-left">
                                 <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant
                             </button>
-                            <button onclick="openContactModal(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg text-left">
+                            <a href="contact.html" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg text-left">
                                 <i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us
-                            </button>
+                            </a>
                             <button onclick="installPWA(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg text-left">
                                 <i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Install App
                             </button>
@@ -278,9 +278,9 @@
                 <button onclick="openTriageModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-900/50">
                     <i data-lucide="bot" class="w-4 h-4"></i> AI Triage Assistant
                 </button>
-                <button onclick="openContactModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-2.5 rounded-xl text-xs font-bold border border-emerald-200 dark:border-emerald-900/50">
+                <a href="contact.html" class="w-full flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-2.5 rounded-xl text-xs font-bold border border-emerald-200 dark:border-emerald-900/50">
                     <i data-lucide="mail" class="w-4 h-4"></i> Contact Us
-                </button>
+                </a>
                 <a href="auth.html" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
                     <i data-lucide="user" class="w-4 h-4"></i> Member Account
                 </a>
@@ -507,6 +507,48 @@
             <!-- LEADERBOARD RANK LIST -->
             <div id="leaderboardList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[50vh]">
                 <div class="text-xs text-slate-400 py-8 text-center">Loading leaderboard rankings...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🏆 LEADERBOARD LOGIN REQUIRED PROMPT MODAL -->
+    <div id="leaderboardAuthPromptModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-6 sm:p-7 border border-amber-300 dark:border-amber-700/60 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+            <button onclick="closeLeaderboardLoginPrompt()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition font-bold">✕</button>
+
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-3xl shadow-lg shadow-amber-500/20 mb-4 mx-auto font-black">
+                🏆
+            </div>
+
+            <h3 class="text-xl font-black text-center text-slate-900 dark:text-white tracking-tight mb-1">
+                Login Required for Leaderboard
+            </h3>
+            <p class="text-xs text-center text-slate-500 dark:text-slate-400 mb-5 max-w-xs mx-auto">
+                The Life Saver Community Donor Leaderboard and ranking badges are exclusively accessible to verified members.
+            </p>
+
+            <div class="space-y-2 mb-6 bg-amber-50/70 dark:bg-amber-950/30 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-900/50 text-xs">
+                <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <span class="text-amber-500 font-bold">🥇</span>
+                    <span>View top ranked voluntary blood & organ donors</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <span class="text-amber-500 font-bold">🎖️</span>
+                    <span>Track your donation count & unlock milestone badges</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                    <span class="text-amber-500 font-bold">🚀</span>
+                    <span>Compete on live community referrals and save lives</span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <a href="auth.html?redirect=leaderboard" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black py-3 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-amber-500/20 transition">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Sign In or Register to Access Leaderboard
+                </a>
+                <button onclick="closeLeaderboardLoginPrompt()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -865,8 +907,11 @@
             }
         };
 
+        let currentActiveAuthUser = null;
+
         // AUTH STATE GREETING (TOP BAR & THREE-DOT DROPDOWN)
         onAuthStateChanged(auth, async (user) => {
+            currentActiveAuthUser = user;
             const userGreetingTop = document.getElementById("userGreetingTop");
             const navSignOutBtn = document.getElementById("navSignOutBtn");
             const userAuthTopBar = document.getElementById("userAuthTopBar");
@@ -922,8 +967,23 @@
             }
         };
 
+        // Check if user is logged in
+        window.isUserLoggedIn = function() {
+            if (currentActiveAuthUser && currentActiveAuthUser.uid) return true;
+            try {
+                const localUser = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (localUser && localUser.uid) return true;
+            } catch(e) {}
+            return false;
+        };
+
         // Live Community Referral Leaderboard Data Loader
         window.openLeaderboardModal = function() {
+            if (!window.isUserLoggedIn()) {
+                window.openLeaderboardLoginPrompt();
+                return;
+            }
+
             const modal = document.getElementById('leaderboardModal');
             if (!modal) return;
             window.lockBodyScroll();
@@ -983,6 +1043,25 @@
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+            }
+        };
+
+        window.openLeaderboardLoginPrompt = function() {
+            window.lockBodyScroll();
+            const promptModal = document.getElementById('leaderboardAuthPromptModal');
+            if (promptModal) {
+                promptModal.classList.remove('hidden');
+                promptModal.classList.add('flex');
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeLeaderboardLoginPrompt = function() {
+            window.unlockBodyScroll();
+            const promptModal = document.getElementById('leaderboardAuthPromptModal');
+            if (promptModal) {
+                promptModal.classList.add('hidden');
+                promptModal.classList.remove('flex');
             }
         };
 
@@ -2453,10 +2532,9 @@
             const action = urlParams.get('action') || urlParams.get('modal');
 
             if (action === 'contact' || window.location.hash === '#contact' || window.location.hash === '#contactModal') {
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                setTimeout(() => {
-                    openContactModal();
-                }, 50);
+                window.location.href = 'contact.html';
+                return;
+            }
             } else if (action === 'triage' || window.location.hash === '#triage' || window.location.hash === '#triageModal') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 setTimeout(() => {
