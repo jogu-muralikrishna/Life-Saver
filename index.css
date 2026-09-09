@@ -91,42 +91,42 @@ body {
   }
 }
 
-/* Scroll-Based Staggered Reveal System */
+/* Scroll-Based Staggered Reveal System - Fail-Safe Always Visible */
 .reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(18px) scale(0.985);
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-on-scroll.is-revealed {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: none;
 }
 
-.stagger-1 { transition-delay: 50ms; }
-.stagger-2 { transition-delay: 100ms; }
-.stagger-3 { transition-delay: 150ms; }
-.stagger-4 { transition-delay: 200ms; }
-.stagger-5 { transition-delay: 250ms; }
+.stagger-1 { transition-delay: 40ms; }
+.stagger-2 { transition-delay: 80ms; }
+.stagger-3 { transition-delay: 120ms; }
+.stagger-4 { transition-delay: 160ms; }
+.stagger-5 { transition-delay: 200ms; }
 
 /* Interactive Card Micro-Animations */
 .service-card, .glass-card {
+  text-decoration: none;
+  color: inherit;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
 }
 
 .service-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.12), 0 0 25px rgba(239, 68, 68, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
 }
 
 html.dark .service-card:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 0 30px rgba(220, 38, 38, 0.25);
-  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.4), 0 8px 16px -6px rgba(0, 0, 0, 0.25);
 }
 
 .service-card:active, .glass-card:active {
-  transform: translateY(-2px) scale(0.995);
+  transform: translateY(-1px) scale(0.995);
 }
 
 /* Button Interactive Motion */
@@ -795,15 +795,14 @@ html.dark #heroMotionCanvas {
 
 /* 4. Scroll-Triggered Reveal Animations */
 .reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(18px) scale(0.985);
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-on-scroll.is-revealed {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: none;
 }
 
 /* Stagger Delays */

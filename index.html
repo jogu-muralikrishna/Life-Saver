@@ -75,7 +75,8 @@
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // Global PWA Install Prompt Listener (Captured early before DOM parse)
+        // Immediate Early Navigation & PWA Listeners
+        window.goTo = function(page) { window.location.href = page; };
         window.deferredPrompt = window.deferredPrompt || null;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -292,7 +293,7 @@
     </div>
 
     <!-- HERO SECTION WITH LIVING HEALTHCARE NETWORK MOTION BACKGROUND -->
-    <header id="heroSection" class="px-6 py-12 md:py-16 max-w-7xl mx-auto text-center relative overflow-hidden">
+    <header id="heroSection" class="px-4 pt-6 pb-6 md:pt-8 md:pb-8 max-w-7xl mx-auto text-center relative overflow-hidden">
         
         <!-- LIVING DIGITAL HEALTHCARE NETWORK CANVAS -->
         <canvas id="heroMotionCanvas"></canvas>
@@ -307,120 +308,119 @@
 
         <div class="relative z-10">
             <!-- 24/7 BADGE WITH LIVE INDICATOR -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-6 uppercase tracking-wider">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full neon-badge-red font-bold text-xs mb-3 uppercase tracking-wider">
                 <span class="live-pulse-dot"></span> 24/7 Rapid Emergency Healthcare Network
             </div>
             
-            <h1 id="txtHeroTitle" class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
-                Every Second Counts. <br class="hidden md:inline"/>
+            <h1 id="txtHeroTitle" class="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2 leading-tight">
+                Every Second Counts. <br class="hidden sm:inline"/>
                 <span class="text-shimmer">Connect & Save Lives Nearby.</span>
             </h1>
             
-            <p id="txtHeroSubtitle" class="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-6 font-normal leading-relaxed">
+            <p id="txtHeroSubtitle" class="text-slate-600 dark:text-slate-300 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-3 font-normal leading-relaxed">
                 Locate blood donors instantly, request emergency ambulances, search accredited hospitals, or pledge organ donations in real-time.
             </p>
 
             <!-- 🌟 PROMINENT INSPIRATIONAL QUOTATION -->
-            <div class="max-w-2xl mx-auto mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-50/90 via-amber-50/60 to-emerald-50/90 dark:from-red-950/40 dark:via-slate-900/80 dark:to-emerald-950/40 border border-red-200/80 dark:border-red-900/50 shadow-md shadow-red-500/5 text-center">
-                <div class="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-red-600 dark:text-red-400 mb-1.5">
+            <div class="max-w-2xl mx-auto mb-4 py-2.5 px-4 sm:py-3 sm:px-5 rounded-2xl bg-gradient-to-r from-red-50/90 via-amber-50/60 to-emerald-50/90 dark:from-red-950/40 dark:via-slate-900/80 dark:to-emerald-950/40 border border-red-200/80 dark:border-red-900/50 shadow-sm text-center">
+                <div class="flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-wider text-red-600 dark:text-red-400 mb-1">
                     <span>❤️</span> <span>Life-Saving Community Motto</span> <span>❤️</span>
                 </div>
-                <blockquote class="text-sm sm:text-base italic font-serif text-slate-800 dark:text-slate-100 font-extrabold leading-relaxed">
+                <blockquote class="text-xs sm:text-sm md:text-base italic font-serif text-slate-800 dark:text-slate-100 font-extrabold leading-snug">
                     “Every second counts. Your few minutes today can become someone’s hope tomorrow. A single drop can create a thousand smiles — Be a donor, be a hero.”
                 </blockquote>
-                <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-widest">
+                <div class="text-[10px] font-black text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">
                     — LifeSaver-Care Emergency Healthcare Network
                 </div>
             </div>
 
             <!-- GLOBAL SEARCH BAR -->
-            <div class="relative max-w-2xl mx-auto mb-8 reveal-on-scroll stagger-3">
+            <div class="relative max-w-2xl mx-auto mb-4">
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </div>
                 <input type="text" id="globalSearch" oninput="filterServices()" placeholder='Try searching "O+ Blood in Hyderabad", "Ambulance", "Hospitals"...' 
-                    class="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold py-4 pl-12 pr-12 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 focus:border-red-500 focus:outline-none text-sm md:text-base transition">
+                    class="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold py-3 pl-12 pr-12 rounded-2xl shadow-md border border-slate-200 dark:border-slate-800 focus:border-red-500 focus:outline-none text-sm md:text-base transition">
             </div>
 
             <!-- CALL-TO-ACTION BUTTONS -->
-            <div class="flex flex-wrap items-center justify-center gap-3 mb-10 reveal-on-scroll stagger-4">
-                <button id="btnBecomeDonor" onclick="goTo('register-donor.html')" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl text-sm transition shadow-md shadow-red-500/20 flex items-center gap-2 hover:scale-[1.02]">
+            <div class="flex flex-wrap items-center justify-center gap-3 mb-5">
+                <a href="register-donor.html" id="btnBecomeDonor" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition shadow-md shadow-red-500/20 flex items-center gap-2 hover:scale-[1.02]">
                     <i data-lucide="user-plus" class="w-4 h-4"></i> Become Donor
-                </button>
+                </a>
 
-                <button onclick="shareWhatsAppReferral()" class="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition hover:scale-[1.02]">
+                <button onclick="shareWhatsAppReferral()" class="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition hover:scale-[1.02]">
                     <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
                 </button>
             </div>
 
             <!-- LIVE STATS BAR WITH REAL-TIME PULSE HIGHLIGHTS -->
-            <!-- LIVE STATS BAR WITH REAL-TIME PULSE HIGHLIGHTS (FAST LOAD & ACCURATE LIVE BLOOD DONORS) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto reveal-on-scroll stagger-5">
-                <div onclick="goTo('find-donor.html')" class="glass-card p-5 text-center cursor-pointer hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view and find active blood donors">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
+                <a href="find-donor.html" class="glass-card p-4 sm:p-5 text-center cursor-pointer hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative block no-underline" title="Click to view and find active blood donors">
                     <div class="flex items-center justify-center gap-1.5 mb-1">
                         <span class="live-pulse-dot bg-emerald-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Live Donors</span>
                     </div>
-                    <div id="idxDonorsCount" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition duration-200">0</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Active Blood Donors</div>
-                    <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 group-hover:text-white transition">
-                        Find Blood Donors <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    <div id="idxDonorsCount" class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition duration-200">0</div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Active Blood Donors</div>
+                    <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 group-hover:text-white transition">
+                        Find Donors <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </span>
-                </div>
-                <div onclick="goTo('hospitals.html')" class="glass-card p-5 text-center cursor-pointer hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view all accredited partner hospitals">
+                </a>
+                <a href="hospitals.html" class="glass-card p-4 sm:p-5 text-center cursor-pointer hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative block no-underline" title="Click to view all accredited partner hospitals">
                     <div class="flex items-center justify-center gap-1.5 mb-1">
                         <span class="live-pulse-dot bg-blue-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Verified</span>
                     </div>
-                    <div id="idxHospitalsCount" class="text-3xl font-black text-blue-600 dark:text-blue-400 group-hover:scale-105 transition duration-200">0</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Colab Hospitals</div>
-                    <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 group-hover:bg-blue-600 group-hover:text-white transition">
-                        View Hospitals Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    <div id="idxHospitalsCount" class="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400 group-hover:scale-105 transition duration-200">0</div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Colab Hospitals</div>
+                    <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 group-hover:bg-blue-600 group-hover:text-white transition">
+                        View Hospitals <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </span>
-                </div>
-                <div onclick="goTo('blood.html')" class="glass-card p-5 text-center cursor-pointer hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view active emergency blood requests board">
+                </a>
+                <a href="blood.html" class="glass-card p-4 sm:p-5 text-center cursor-pointer hover:border-amber-500 hover:shadow-lg hover:shadow-amber-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative block no-underline" title="Click to view active emergency blood requests board">
                     <div class="flex items-center justify-center gap-1.5 mb-1">
                         <span class="live-pulse-dot bg-amber-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Urgent</span>
                     </div>
-                    <div id="idxRequestsCount" class="text-3xl font-black text-amber-600 dark:text-amber-400 group-hover:scale-105 transition duration-200">0</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Active Requests</div>
-                    <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white transition">
-                        View Needs Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    <div id="idxRequestsCount" class="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 group-hover:scale-105 transition duration-200">0</div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Active Requests</div>
+                    <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white transition">
+                        View Needs <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </span>
-                </div>
-                <div onclick="goTo('organ-donor.html')" class="glass-card p-5 text-center cursor-pointer hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view organ donation pledge registry">
+                </a>
+                <a href="organ-donor.html" class="glass-card p-4 sm:p-5 text-center cursor-pointer hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative block no-underline" title="Click to view organ donation pledge registry">
                     <div class="flex items-center justify-center gap-1.5 mb-1">
                         <span class="live-pulse-dot bg-purple-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">Pledges</span>
                     </div>
-                    <div id="idxOrganCount" class="text-3xl font-black text-purple-600 dark:text-purple-400 group-hover:scale-105 transition duration-200">0</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Organ Pledges</div>
-                    <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 group-hover:bg-purple-600 group-hover:text-white transition">
-                        View Registry Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                    <div id="idxOrganCount" class="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 group-hover:scale-105 transition duration-200">0</div>
+                    <div class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Organ Pledges</div>
+                    <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 group-hover:bg-purple-600 group-hover:text-white transition">
+                        View Registry <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </span>
-                </div>
+                </a>
             </div>
         </div>
     </header>
 
-    <!-- SERVICES SECTION (ENHANCED SPACIOUS CARDS WITH ATTRACTIVE MICRO-ANIMATIONS) -->
-    <main class="max-w-7xl mx-auto px-6 py-12">
-        <div class="text-center mb-12">
-            <h2 id="txtServicesTitle" class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Life-Saving Emergency Services</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-base mt-2 max-w-xl mx-auto">Select a specialized medical service below to access immediate emergency support and verified member directories</p>
+    <!-- SERVICES SECTION (BALANCED 6-CARD GRID WITH DIRECT NAVIGATION) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div class="text-center mb-6 sm:mb-8">
+            <h2 id="txtServicesTitle" class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Life-Saving Emergency Services</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1 max-w-xl mx-auto">Select a specialized medical service below to access immediate emergency support and verified member directories</p>
         </div>
 
-        <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16 max-w-6xl mx-auto">
+        <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mb-12 max-w-6xl mx-auto">
 
             <!-- 1. Hospitals -->
-            <div onclick="goTo('hospitals.html')" class="service-card glass-card p-8 cursor-pointer group flex flex-col justify-between border-t-4 border-t-blue-500 hover:border-blue-600" data-title="hospitals navigation location map">
+            <a href="hospitals.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-blue-500 hover:border-blue-600 rounded-2xl block no-underline transition" data-title="hospitals accredited emergency icu trauma beds navigation map doctor clinic">
                 <div>
-                    <div class="bg-blue-50 dark:bg-blue-950/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-blue-100 dark:border-blue-900/50 shadow-md shadow-blue-500/10">
-                        <i data-lucide="building-2" class="w-8 h-8"></i>
+                    <div class="bg-blue-50 dark:bg-blue-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-blue-100 dark:border-blue-900/50 shadow-md shadow-blue-500/10">
+                        <i data-lucide="building-2" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">Find Hospitals</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">Find Hospitals</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
                         Locate accredited nearby hospitals with real-time ICU bed availability, emergency trauma rooms, and live GPS map navigation.
                     </p>
                 </div>
@@ -428,17 +428,16 @@
                     <span>Explore Hospitals Directory</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
                 </div>
-            </div>
+            </a>
 
-            <!-- 2. Blood Donation -->
-            <div onclick="goTo('blood.html')" class="service-card glass-card p-8 cursor-pointer group flex flex-col justify-between border-t-4 border-t-red-500 hover:border-red-600" data-title="blood donor donate request o+ a+ b+ ab-">
+            <!-- 2. Blood Requests & Donors -->
+            <a href="blood.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-red-500 hover:border-red-600 rounded-2xl block no-underline transition" data-title="blood donor donate request o+ a+ b+ ab- plasma platelets urgent need blood bank">
                 <div>
-                    <div class="bg-red-50 dark:bg-red-950/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-red-600 dark:text-red-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-red-100 dark:border-red-900/50 shadow-md shadow-red-500/10">
-                        <i data-lucide="droplet" class="w-8 h-8"></i>
+                    <div class="bg-red-50 dark:bg-red-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-red-600 dark:text-red-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-red-100 dark:border-red-900/50 shadow-md shadow-red-500/10">
+                        <i data-lucide="droplet" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition">Donate & Find Blood</h3>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition">Blood Requests & Donors</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition">Blood Requests & Donors</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
                         Submit real-time blood needs, match with compatible donors in seconds, or register as a life-saving blood donor hero.
                     </p>
                 </div>
@@ -446,16 +445,16 @@
                     <span>Find Donors / Post Need</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
                 </div>
-            </div>
+            </a>
 
-            <!-- 3. Ambulance -->
-            <div onclick="goTo('ambulance.html')" class="service-card glass-card p-8 cursor-pointer group flex flex-col justify-between border-t-4 border-t-amber-500 hover:border-amber-600" data-title="ambulance 108 emergency vehicle icu transit rapid dispatch">
+            <!-- 3. Emergency Ambulance -->
+            <a href="ambulance.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-amber-500 hover:border-amber-600 rounded-2xl block no-underline transition" data-title="ambulance 108 emergency vehicle icu transit rapid dispatch trauma transit">
                 <div>
-                    <div class="bg-amber-50 dark:bg-amber-950/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-amber-600 dark:text-amber-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-amber-100 dark:border-amber-900/50 shadow-md shadow-amber-500/10">
-                        <i data-lucide="truck" class="w-8 h-8"></i>
+                    <div class="bg-amber-50 dark:bg-amber-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-amber-600 dark:text-amber-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-amber-100 dark:border-amber-900/50 shadow-md shadow-amber-500/10">
+                        <i data-lucide="truck" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Emergency Ambulance</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Emergency Ambulance</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
                         Instant 108 emergency dispatch access, ICU ambulances, and real-time transit status for life-critical situations.
                     </p>
                 </div>
@@ -463,16 +462,33 @@
                     <span>Call / Track Ambulance</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
                 </div>
-            </div>
+            </a>
 
-            <!-- 4. Organ Registry -->
-            <div onclick="goTo('organ-donor.html')" class="service-card glass-card p-8 cursor-pointer group flex flex-col justify-between border-t-4 border-t-purple-500 hover:border-purple-600" data-title="organ donation pledge registry cornea kidney liver heart transplant">
+            <!-- 4. Find Blood Donors Directory -->
+            <a href="find-donor.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-teal-500 hover:border-teal-600 rounded-2xl block no-underline transition" data-title="find donor voluntary blood donors contact call whatsapp search verified list">
                 <div>
-                    <div class="bg-purple-50 dark:bg-purple-950/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-purple-600 dark:text-purple-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-purple-100 dark:border-purple-900/50 shadow-md shadow-purple-500/10">
-                        <i data-lucide="heart-handshake" class="w-8 h-8"></i>
+                    <div class="bg-teal-50 dark:bg-teal-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-teal-600 dark:text-teal-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-teal-100 dark:border-teal-900/50 shadow-md shadow-teal-500/10">
+                        <i data-lucide="users" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">Organ Registry & Pledges</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition">Find Blood Donors</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                        Search verified voluntary donors by blood group and city with 1-click WhatsApp and direct phone contact.
+                    </p>
+                </div>
+                <div class="flex items-center justify-between text-xs font-black text-teal-600 dark:text-teal-400 bg-teal-50/70 dark:bg-teal-950/50 p-3 rounded-xl group-hover:bg-teal-600 group-hover:text-white transition">
+                    <span>Search Donors Directory</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
+                </div>
+            </a>
+
+            <!-- 5. Organ Registry & Pledges -->
+            <a href="organ-donor.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-purple-500 hover:border-purple-600 rounded-2xl block no-underline transition" data-title="organ donation pledge registry cornea kidney liver heart transplant pledge certificate">
+                <div>
+                    <div class="bg-purple-50 dark:bg-purple-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-purple-100 dark:border-purple-900/50 shadow-md shadow-purple-500/10">
+                        <i data-lucide="heart-handshake" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">Organ Registry & Pledges</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
                         Pledge organ donation, view registered organ champions, and generate your personalized digital donor pledge certificate.
                     </p>
                 </div>
@@ -480,16 +496,16 @@
                     <span>Pledge Organs & Registry</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
                 </div>
-            </div>
+            </a>
 
-            <!-- 5. Emergency Hotlines & First Aid -->
-            <div onclick="goTo('emergency.html')" class="service-card glass-card p-8 cursor-pointer group flex flex-col justify-between border-t-4 border-t-emerald-500 hover:border-emerald-600" data-title="emergency hotline helpline police fire medical 100 101 108 first aid">
+            <!-- 6. Emergency Hotlines & First Aid -->
+            <a href="emergency.html" class="service-card glass-card p-6 sm:p-7 cursor-pointer group flex flex-col justify-between border-t-4 border-t-emerald-500 hover:border-emerald-600 rounded-2xl block no-underline transition" data-title="emergency hotline helpline police fire medical 100 101 108 112 first aid cpr guide">
                 <div>
-                    <div class="bg-emerald-50 dark:bg-emerald-950/40 w-16 h-16 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-emerald-100 dark:border-emerald-900/50 shadow-md shadow-emerald-500/10">
-                        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+                    <div class="bg-emerald-50 dark:bg-emerald-950/40 w-14 h-14 rounded-2xl flex items-center justify-center mb-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 group-hover:-rotate-3 transition duration-300 border border-emerald-100 dark:border-emerald-900/50 shadow-md shadow-emerald-500/10">
+                        <i data-lucide="shield-alert" class="w-7 h-7"></i>
                     </div>
-                    <h3 class="font-extrabold text-slate-900 dark:text-white text-xl mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">Emergency Guide & Hotlines</h3>
-                    <p class="text-sm text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">Emergency Guide & Hotlines</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
                         One-tap direct dialing for National Emergency 112, Police 100, Fire 101, Ambulance 108, plus interactive step-by-step CPR & first aid guides.
                     </p>
                 </div>
@@ -497,7 +513,7 @@
                     <span>Open Emergency Guide</span>
                     <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1.5 transition"></i>
                 </div>
-            </div>
+            </a>
 
         </div>
     </main>
