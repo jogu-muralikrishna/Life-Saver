@@ -127,7 +127,7 @@
             </div>
         </div>
 
-        <!-- 2. MY PROFILE CARD (RICH PROFILE DETAILS) -->
+        <!-- 2. MY PROFILE CARD (RICH PROFILE DETAILS WITH DIRECT MANUAL EDITING) -->
         <div class="p-6 rounded-3xl bg-gradient-to-br from-slate-50 via-white to-red-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 border-2 border-red-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div class="flex items-center gap-4">
@@ -140,7 +140,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 id="profileFullName" class="text-xl font-black text-slate-900 dark:text-white">Member</h3>
+                            <input type="text" id="inlineProfileName" placeholder="Full Name" value="Member" class="text-lg sm:text-xl font-black text-slate-900 dark:text-white bg-transparent border-b border-dashed border-slate-300 dark:border-slate-700 hover:border-red-500 focus:border-red-500 outline-none transition py-0.5 px-1 rounded max-w-[200px] sm:max-w-xs" title="Click to edit name directly">
                             <span id="profileAccountTypeBadge" class="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                                 <i data-lucide="globe" class="w-3 h-3"></i> Public Account
                             </span>
@@ -151,8 +151,8 @@
 
                 <!-- PROFILE ACTION BUTTONS -->
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    <button onclick="openEditProfileModal()" id="btnEditProfile" class="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-red-500/20">
-                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit Profile
+                    <button onclick="saveDirectProfileDetails()" id="btnSaveDirectProfile" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20">
+                        <i data-lucide="save" class="w-3.5 h-3.5"></i> Save Details
                     </button>
                     <button onclick="openAccountTypeChangeModal()" class="flex-1 sm:flex-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2 px-3.5 rounded-xl text-xs border border-slate-200 dark:border-slate-700 transition flex items-center justify-center gap-1.5">
                         <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-500"></i> Account Privacy
@@ -160,30 +160,54 @@
                 </div>
             </div>
 
-            <!-- PROFILE DATA GRID -->
+            <!-- DIRECT EDIT FEEDBACK NOTIFICATION -->
+            <div id="directProfileFeedback" class="hidden text-xs p-3 rounded-xl font-semibold mb-4"></div>
+
+            <!-- PROFILE DATA GRID (DIRECT MANUAL EDITABLE INPUTS) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 pt-4 border-t border-slate-200/80 dark:border-slate-800">
                 <!-- Blood Group -->
-                <div class="bg-white/80 dark:bg-slate-950/80 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                    <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Blood Group</span>
-                    <div class="flex items-center gap-2">
-                        <span id="profileBloodGroup" class="text-sm font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 px-2.5 py-0.5 rounded-lg border border-red-100 dark:border-red-900">Not Set</span>
+                <div class="bg-white/90 dark:bg-slate-950/90 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Group
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400">Type / Pick</span>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="inlineProfileBloodGroup" list="inlineBgOptions" placeholder="e.g. O+, A+, B+" class="w-full bg-slate-50 dark:bg-slate-900 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-black text-sm p-2 rounded-xl outline-none uppercase focus:ring-2 focus:ring-red-500/20">
+                        <datalist id="inlineBgOptions">
+                            <option value="A+"></option>
+                            <option value="A-"></option>
+                            <option value="B+"></option>
+                            <option value="B-"></option>
+                            <option value="O+"></option>
+                            <option value="O-"></option>
+                            <option value="AB+"></option>
+                            <option value="AB-"></option>
+                        </datalist>
                     </div>
                 </div>
 
                 <!-- City / Location -->
-                <div class="bg-white/80 dark:bg-slate-950/80 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                    <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">City / Location</span>
-                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5" id="profileCity">
-                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> <span>Not Specified</span>
+                <div class="bg-white/90 dark:bg-slate-950/90 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-500"></i> City / Location
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400">Editable</span>
                     </div>
+                    <input type="text" id="inlineProfileCity" placeholder="Type your City / Location" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs p-2 rounded-xl outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20">
                 </div>
 
                 <!-- Phone -->
-                <div class="bg-white/80 dark:bg-slate-950/80 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800">
-                    <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Phone Number</span>
-                    <div class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5" id="profilePhone">
-                        <i data-lucide="phone" class="w-3.5 h-3.5 text-slate-400"></i> <span>Not Provided</span>
+                <div class="bg-white/90 dark:bg-slate-950/90 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <i data-lucide="phone" class="w-3.5 h-3.5 text-blue-500"></i> Phone Number
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-400">Editable</span>
                     </div>
+                    <input type="tel" id="inlineProfilePhone" placeholder="Type 10-digit Phone" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-xs p-2 rounded-xl outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                 </div>
 
                 <!-- Donor Status -->
@@ -575,7 +599,7 @@
 
 
     <!-- REFERRAL LEADERBOARD MODAL (FEATURE 8) -->
-    <div id="leaderboardModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="leaderboardModal" onclick="if(event.target === this) closeLeaderboardModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-lg p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative max-h-[90vh] flex flex-col animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeLeaderboardModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -608,7 +632,7 @@
     </div>
 
         <!-- REQUEST ACCOUNT TYPE CHANGE MODAL -->
-    <div id="accountTypeRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div id="accountTypeRequestModal" onclick="if(event.target === this) closeAccountTypeChangeModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeAccountTypeChangeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
@@ -956,6 +980,7 @@
                 </div>
             </div>
         </div>
+    </div>
     <!-- BLOOD DONATION CERTIFICATE MODAL (EXACT HIGH-FIDELITY MATCH TO IMAGE 1) -->
     <div id="dashBloodCertModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-6 hidden overflow-y-auto">
         <div class="glass-card w-full max-w-4xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
@@ -2209,6 +2234,19 @@
                 }
             }
 
+            // Fill Inline Editable Inputs
+            const inlineName = document.getElementById("inlineProfileName");
+            if (inlineName && document.activeElement !== inlineName) inlineName.value = profile.name || '';
+
+            const inlineBg = document.getElementById("inlineProfileBloodGroup");
+            if (inlineBg && document.activeElement !== inlineBg) inlineBg.value = (profile.bloodGroup && profile.bloodGroup !== 'Not Recorded' && profile.bloodGroup !== 'Not Set') ? profile.bloodGroup : '';
+
+            const inlineCity = document.getElementById("inlineProfileCity");
+            if (inlineCity && document.activeElement !== inlineCity) inlineCity.value = (profile.city && profile.city !== 'Not Specified') ? profile.city : '';
+
+            const inlinePhone = document.getElementById("inlineProfilePhone");
+            if (inlinePhone && document.activeElement !== inlinePhone) inlinePhone.value = (profile.phone && profile.phone !== 'Not Provided') ? profile.phone : '';
+
             // Donor and Organ Badges
             const donorStatusEl = document.getElementById("profileDonorStatus");
             if (donorStatusEl) {
@@ -2232,6 +2270,122 @@
             renderProfileSocialLinks(profile.socialProfiles || {});
             if (window.lucide) lucide.createIcons();
         }
+
+        // ==========================================
+        // DIRECT INLINE PROFILE EDITING & SAVE
+        // ==========================================
+        window.saveDirectProfileDetails = async function() {
+            if (!currentActiveUser) return;
+            const btn = document.getElementById("btnSaveDirectProfile");
+            const feedback = document.getElementById("directProfileFeedback");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Saving...';
+            }
+
+            const current = window.currentActiveUserProfile || {};
+            const curSocials = current.socialProfiles || {};
+
+            const newName = (document.getElementById("inlineProfileName")?.value || '').trim();
+            let newBg = (document.getElementById("inlineProfileBloodGroup")?.value || '').trim().toUpperCase();
+            const newCity = (document.getElementById("inlineProfileCity")?.value || '').trim();
+            const newPhone = (document.getElementById("inlineProfilePhone")?.value || '').trim();
+
+            if (!newName || newName.length < 2) {
+                if (feedback) {
+                    feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 mb-4";
+                    feedback.textContent = "Please enter a valid full name (at least 2 characters).";
+                    feedback.classList.remove('hidden');
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="save" class="w-3.5 h-3.5"></i> Save Details';
+                    if (window.lucide) lucide.createIcons();
+                }
+                return;
+            }
+
+            if (!newBg) {
+                newBg = "O+";
+            }
+
+            const userProfileUpdates = {
+                name: newName,
+                fullName: newName,
+                bloodGroup: newBg,
+                blood_group: newBg,
+                city: newCity,
+                location: newCity,
+                phone: newPhone,
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                await update(ref(db, `users/${currentActiveUser.uid}`), userProfileUpdates);
+
+                if (linkedDonorKeys && linkedDonorKeys.length > 0) {
+                    for (const item of linkedDonorKeys) {
+                        try {
+                            const k = typeof item === 'object' ? item.key : item;
+                            const type = typeof item === 'object' ? item.type : 'blood';
+                            if (type === 'blood') {
+                                await update(ref(db, `donors/${k}`), {
+                                    name: newName,
+                                    bloodGroup: newBg,
+                                    city: newCity,
+                                    location: newCity,
+                                    phone: newPhone
+                                });
+                            } else if (type === 'organ') {
+                                await update(ref(db, `organ_donors/${k}`), {
+                                    name: newName,
+                                    bloodGroup: newBg,
+                                    city: newCity,
+                                    phone: newPhone
+                                });
+                            }
+                        } catch (dErr) {
+                            console.warn("Donor record sync notice:", dErr);
+                        }
+                    }
+                }
+
+                window.currentActiveUserProfile = {
+                    ...current,
+                    name: newName,
+                    bloodGroup: newBg,
+                    city: newCity,
+                    phone: newPhone
+                };
+
+                renderCurrentProfileToUI(window.currentActiveUserProfile);
+
+                const greetingEl = document.getElementById("userGreeting");
+                if (greetingEl) greetingEl.textContent = `Welcome, ${newName}!`;
+
+                loadUserCertificates(currentActiveUser);
+
+                if (feedback) {
+                    feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 mb-4";
+                    feedback.textContent = "✅ Profile details saved successfully!";
+                    feedback.classList.remove('hidden');
+                    setTimeout(() => { feedback.classList.add('hidden'); }, 4000);
+                }
+            } catch (err) {
+                console.error("Direct save error:", err);
+                if (feedback) {
+                    feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900 mb-4";
+                    feedback.textContent = "Unable to save profile details: " + err.message;
+                    feedback.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="save" class="w-3.5 h-3.5"></i> Save Details';
+                    if (window.lucide) lucide.createIcons();
+                }
+            }
+        };
 
         function renderProfileSocialLinks(socials) {
             const container = document.getElementById("profileSocialLinksList");
@@ -3096,6 +3250,309 @@
             }
         };
 
+        // ==========================================
+        // USER CHANGE REQUESTS HISTORY (FEATURE 5)
+        // ==========================================
+        function listenToUserRequestsHistory(user) {
+            if (!user) return;
+            const listEl = document.getElementById("myRequestsHistoryList");
+            if (!listEl) return;
+
+            onValue(ref(db, 'change_requests'), (snapshot) => {
+                if (!snapshot.exists()) {
+                    listEl.innerHTML = `<div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No profile change requests submitted yet.</div>`;
+                    return;
+                }
+
+                const data = snapshot.val();
+                let myReqs = [];
+                Object.keys(data).forEach(k => {
+                    const r = data[k];
+                    if (r.userId === user.uid || (r.userEmail && r.userEmail === user.email)) {
+                        myReqs.push({ ...r, key: k });
+                    }
+                });
+
+                myReqs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                if (myReqs.length === 0) {
+                    listEl.innerHTML = `<div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No profile change requests submitted yet.</div>`;
+                    return;
+                }
+
+                listEl.innerHTML = "";
+                myReqs.forEach(req => {
+                    const dateStr = req.timestamp ? new Date(req.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+                    let statusBadge = `<span class="bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Pending Review</span>`;
+                    if (req.status === 'approved') {
+                        statusBadge = `<span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Approved & Updated</span>`;
+                    } else if (req.status === 'rejected') {
+                        statusBadge = `<span class="bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Declined</span>`;
+                    }
+
+                    const item = document.createElement("div");
+                    item.className = "p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5";
+                    item.innerHTML = `
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-black text-xs text-slate-900 dark:text-white">${escapeHtml(req.requestType || 'Profile Update')}</span>
+                                <span class="text-[10px] text-slate-400">${dateStr}</span>
+                            </div>
+                            <div class="text-xs text-slate-600 dark:text-slate-400">
+                                Requested: <strong class="text-slate-900 dark:text-white">${escapeHtml(req.targetValue || '')}</strong>
+                                ${req.reason ? ` — <span class="italic text-slate-500">"${escapeHtml(req.reason)}"</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            ${statusBadge}
+                        </div>
+                    `;
+                    listEl.appendChild(item);
+                });
+                if (window.lucide) lucide.createIcons();
+            });
+        }
+
+        // ==========================================
+        // REQUEST ACCOUNT TYPE CHANGE HANDLERS
+        // ==========================================
+        window.openAccountTypeChangeModal = function() {
+            window.lockBodyScroll();
+            const curType = window.currentActiveUserProfile?.accountType || 'public';
+            const curLabel = document.getElementById("reqCurrentAccountType");
+            if (curLabel) curLabel.value = curType === 'private' ? 'Private Account (Protected)' : 'Public Account (Directory Visible)';
+            
+            const targetSelect = document.getElementById("reqTargetAccountType");
+            if (targetSelect) targetSelect.value = curType === 'private' ? 'public' : 'private';
+
+            const fb = document.getElementById("accountTypeReqFeedback");
+            if (fb) fb.classList.add('hidden');
+
+            const modal = document.getElementById("accountTypeRequestModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeAccountTypeChangeModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("accountTypeRequestModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.submitAccountTypeChangeRequest = async function(e) {
+            if (e) e.preventDefault();
+            if (!currentActiveUser) return;
+
+            const btn = document.getElementById("btnSubmitAccountTypeReq");
+            const fb = document.getElementById("accountTypeReqFeedback");
+            const targetType = document.getElementById("reqTargetAccountType").value;
+            const reason = document.getElementById("reqAccountTypeReason").value.trim();
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Updating...";
+            }
+
+            const reqId = "REQ-PRIV-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                requestId: reqId,
+                userId: currentActiveUser.uid,
+                userName: window.currentActiveUserProfile?.name || currentActiveUser.displayName || 'Member',
+                userEmail: currentActiveUser.email,
+                requestType: 'Account Type Change',
+                currentValue: window.currentActiveUserProfile?.accountType || 'public',
+                targetValue: targetType,
+                reason: reason,
+                status: 'approved',
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await push(ref(db, 'change_requests'), payload);
+
+                await update(ref(db, `users/${currentActiveUser.uid}`), {
+                    accountType: targetType,
+                    updatedAt: new Date().toISOString()
+                });
+
+                if (linkedDonorKeys && linkedDonorKeys.length > 0) {
+                    for (const item of linkedDonorKeys) {
+                        try {
+                            const k = typeof item === 'object' ? item.key : item;
+                            await update(ref(db, `donors/${k}`), {
+                                phoneVisibility: targetType === 'private' ? 'private' : 'public'
+                            });
+                        } catch (dErr) {}
+                    }
+                }
+
+                if (window.currentActiveUserProfile) {
+                    window.currentActiveUserProfile.accountType = targetType;
+                    renderCurrentProfileToUI(window.currentActiveUserProfile);
+                }
+
+                if (fb) {
+                    fb.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                    fb.textContent = `✅ Account privacy updated to ${targetType === 'private' ? 'Private' : 'Public'} successfully!`;
+                    fb.classList.remove('hidden');
+                }
+
+                setTimeout(() => {
+                    closeAccountTypeChangeModal();
+                    if (fb) fb.classList.add('hidden');
+                    document.getElementById("accountTypeRequestForm")?.reset();
+                }, 1500);
+            } catch (err) {
+                console.error("Account type change request error:", err);
+                if (fb) {
+                    fb.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    fb.textContent = "Error submitting request: " + err.message;
+                    fb.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Submit Request';
+                    if (window.lucide) lucide.createIcons();
+                }
+            }
+        };
+
+        // ==========================================
+        // REQUEST PROFILE CHANGE MODAL HANDLERS
+        // ==========================================
+        window.openProfileChangeModal = function() {
+            window.lockBodyScroll();
+            const modal = document.getElementById("profileChangeRequestModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            onProfileFieldSelectChange();
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeProfileChangeModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("profileChangeRequestModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.onProfileFieldSelectChange = function() {
+            const field = document.getElementById("reqProfileField")?.value || 'Blood Group';
+            const curValInput = document.getElementById("reqCurrentFieldValue");
+            const wrapper = document.getElementById("reqNewValueWrapper");
+            const profile = window.currentActiveUserProfile || {};
+
+            if (field === 'Blood Group') {
+                if (curValInput) curValInput.value = profile.bloodGroup || 'Not Recorded';
+                if (wrapper) {
+                    wrapper.innerHTML = `
+                        <select id="reqNewFieldValue" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">
+                            <option value="A+">A+</option><option value="A-">A-</option>
+                            <option value="B+">B+</option><option value="B-">B-</option>
+                            <option value="O+">O+</option><option value="O-">O-</option>
+                            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                        </select>
+                    `;
+                }
+            } else if (field === 'Full Name') {
+                if (curValInput) curValInput.value = profile.name || '';
+                if (wrapper) wrapper.innerHTML = `<input type="text" id="reqNewFieldValue" required placeholder="Enter updated full name..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">`;
+            } else if (field === 'Phone Number') {
+                if (curValInput) curValInput.value = profile.phone || 'Not Provided';
+                if (wrapper) wrapper.innerHTML = `<input type="tel" id="reqNewFieldValue" required placeholder="Enter new 10-digit mobile..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">`;
+            } else if (field === 'City') {
+                if (curValInput) curValInput.value = profile.city || 'Not Specified';
+                if (wrapper) wrapper.innerHTML = `<input type="text" id="reqNewFieldValue" required placeholder="Enter new city / location..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">`;
+            } else {
+                if (curValInput) curValInput.value = profile.isBloodDonor ? 'Active Voluntary Donor' : 'Not Registered';
+                if (wrapper) {
+                    wrapper.innerHTML = `
+                        <select id="reqNewFieldValue" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-bold">
+                            <option value="Active Voluntary Donor">Active Voluntary Donor</option>
+                            <option value="Temporarily Unavailable">Temporarily Unavailable</option>
+                        </select>
+                    `;
+                }
+            }
+        };
+
+        window.submitProfileChangeRequest = async function(e) {
+            if (e) e.preventDefault();
+            if (!currentActiveUser) return;
+
+            const btn = document.getElementById("btnSubmitProfileReq");
+            const fb = document.getElementById("profileReqFeedback");
+            const field = document.getElementById("reqProfileField").value;
+            const newVal = document.getElementById("reqNewFieldValue").value.trim();
+            const reason = document.getElementById("reqProfileReason").value.trim();
+
+            if (!newVal) {
+                alert("Please enter the requested new value.");
+                return;
+            }
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Submitting...";
+            }
+
+            const reqId = "REQ-PROF-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                requestId: reqId,
+                userId: currentActiveUser.uid,
+                userName: window.currentActiveUserProfile?.name || currentActiveUser.displayName || 'Member',
+                userEmail: currentActiveUser.email,
+                requestType: `Profile Update (${field})`,
+                field: field,
+                currentValue: document.getElementById("reqCurrentFieldValue")?.value || '',
+                targetValue: newVal,
+                reason: reason,
+                status: 'pending',
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await push(ref(db, 'change_requests'), payload);
+                if (fb) {
+                    fb.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                    fb.textContent = "✅ Profile change request submitted to admin for verification!";
+                    fb.classList.remove('hidden');
+                }
+
+                setTimeout(() => {
+                    closeProfileChangeModal();
+                    if (fb) fb.classList.add('hidden');
+                    document.getElementById("profileChangeRequestForm")?.reset();
+                }, 1500);
+            } catch (err) {
+                console.error("Profile change request error:", err);
+                if (fb) {
+                    fb.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    fb.textContent = "Error submitting request: " + err.message;
+                    fb.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Submit Request';
+                    if (window.lucide) lucide.createIcons();
+                }
+            }
+        };
+
         // CERTIFICATE DASHBOARD LOGIC (SEPARATE BLOOD & ORGAN CARDS + VERIFICATION QR)
         window.userBloodDonorData = null;
         window.userOrganDonorData = null;
@@ -3107,7 +3564,13 @@
             const organActions = document.getElementById('dashOrganCertActions');
             const organUnpledged = document.getElementById('dashOrganCertUnpledged');
 
-            // 1. Load Blood Donation Certificate
+            const profile = window.currentActiveUserProfile || {};
+            const fallbackName = profile.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
+            const fallbackBg = (profile.bloodGroup && profile.bloodGroup !== 'Not Recorded' && profile.bloodGroup !== 'Not Set') ? profile.bloodGroup : 'O+';
+            const fallbackCertIdBD = `LSC-BD-2026-${(user.uid || '00482').slice(-5).toUpperCase()}`;
+            const fallbackCertIdOD = `LSC-OD-2026-${(user.uid || '00482').slice(-5).toUpperCase()}`;
+
+            // 1. Blood Donation Certificate
             try {
                 let bloodDonor = null;
                 const donorSnap = await get(ref(db, 'donors'));
@@ -3124,34 +3587,37 @@
                     }
                 }
 
-                if (bloodDonor) {
-                    window.userBloodDonorData = bloodDonor;
-                    const donorName = bloodDonor.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Valued Donor');
-                    const bloodGroup = bloodDonor.bloodGroup || 'O+';
-                    const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || `LSC-BD-2026-${(bloodDonor.key || '00482').slice(-5).padStart(5, '0')}`;
-                    window.userBloodDonorData.certId = certId;
+                const donorName = (bloodDonor && bloodDonor.name) || fallbackName;
+                const bloodGroup = (bloodDonor && bloodDonor.bloodGroup) || fallbackBg;
+                const certId = (bloodDonor && (bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID)) || fallbackCertIdBD;
 
-                    document.getElementById('dashBloodCertName').textContent = donorName;
-                    document.getElementById('dashBloodCertBg').textContent = bloodGroup;
-                    document.getElementById('dashBloodCertId').textContent = certId;
+                window.userBloodDonorData = {
+                    ...(bloodDonor || {}),
+                    name: donorName,
+                    bloodGroup: bloodGroup,
+                    certId: certId
+                };
 
-                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                    window.userBloodDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-                    document.getElementById('dashBloodCertQR').src = qrUrl;
+                const nameEl = document.getElementById('dashBloodCertName');
+                if (nameEl) nameEl.textContent = donorName;
+                const bgEl = document.getElementById('dashBloodCertBg');
+                if (bgEl) bgEl.textContent = bloodGroup;
+                const idEl = document.getElementById('dashBloodCertId');
+                if (idEl) idEl.textContent = certId;
 
-                    if (bloodActions) bloodActions.classList.remove('hidden');
-                    if (bloodUnreg) bloodUnreg.classList.add('hidden');
-                } else {
-                    window.userBloodDonorData = null;
-                    if (bloodActions) bloodActions.classList.add('hidden');
-                    if (bloodUnreg) bloodUnreg.classList.remove('hidden');
-                }
+                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                window.userBloodDonorData.verifyUrl = verifyUrl;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                const qrEl = document.getElementById('dashBloodCertQR');
+                if (qrEl) qrEl.src = qrUrl;
+
+                if (bloodActions) bloodActions.classList.remove('hidden');
+                if (bloodUnreg) bloodUnreg.classList.add('hidden');
             } catch (err) {
                 console.warn("Blood certificate load warning:", err);
             }
 
-            // 2. Load Organ Donation Pledge Certificate
+            // 2. Organ Donation Certificate
             try {
                 let organDonor = null;
                 const organSnap = await get(ref(db, 'organ_donors'));
@@ -3168,48 +3634,50 @@
                     }
                 }
 
-                if (organDonor) {
-                    window.userOrganDonorData = organDonor;
-                    const donorName = organDonor.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Pledged Hero');
-                    const bloodGroup = organDonor.bloodGroup || 'O+';
-                    const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || `LSC-OD-2026-${(organDonor.key || '00482').slice(-5).padStart(5, '0')}`;
-                    window.userOrganDonorData.certId = certId;
+                const donorName = (organDonor && organDonor.name) || fallbackName;
+                const bloodGroup = (organDonor && organDonor.bloodGroup) || fallbackBg;
+                const certId = (organDonor && (organDonor.credentialID || organDonor.certificateID || organDonor.donorID)) || fallbackCertIdOD;
 
-                    document.getElementById('dashOrganCertName').textContent = donorName;
-                    document.getElementById('dashOrganCertBg').textContent = bloodGroup;
-                    document.getElementById('dashOrganCertId').textContent = certId;
+                window.userOrganDonorData = {
+                    ...(organDonor || {}),
+                    name: donorName,
+                    bloodGroup: bloodGroup,
+                    certId: certId
+                };
 
-                    // Display actual pledged organs
-                    const organContainer = document.getElementById('dashOrganCertOrgansList');
-                    if (organContainer) {
-                        organContainer.innerHTML = '';
-                        let organs = organDonor.organs || organDonor.pledgedOrgans || ['All Organs & Tissues'];
-                        if (typeof organs === 'string') {
-                            organs = organs.split(',').map(s => s.trim()).filter(Boolean);
-                        }
-                        if (!Array.isArray(organs) || organs.length === 0) {
-                            organs = ['All Organs & Tissues'];
-                        }
-                        organs.forEach(org => {
-                            const badge = document.createElement('span');
-                            badge.className = 'bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm';
-                            badge.textContent = `✨ ${org}`;
-                            organContainer.appendChild(badge);
-                        });
+                const nameEl = document.getElementById('dashOrganCertName');
+                if (nameEl) nameEl.textContent = donorName;
+                const bgEl = document.getElementById('dashOrganCertBg');
+                if (bgEl) bgEl.textContent = bloodGroup;
+                const idEl = document.getElementById('dashOrganCertId');
+                if (idEl) idEl.textContent = certId;
+
+                const organContainer = document.getElementById('dashOrganCertOrgansList');
+                if (organContainer) {
+                    organContainer.innerHTML = '';
+                    let organs = (organDonor && (organDonor.organs || organDonor.pledgedOrgans)) || ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                    if (typeof organs === 'string') {
+                        organs = organs.split(',').map(s => s.trim()).filter(Boolean);
                     }
-
-                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                    window.userOrganDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-                    document.getElementById('dashOrganCertQR').src = qrUrl;
-
-                    if (organActions) organActions.classList.remove('hidden');
-                    if (organUnpledged) organUnpledged.classList.add('hidden');
-                } else {
-                    window.userOrganDonorData = null;
-                    if (organActions) organActions.classList.add('hidden');
-                    if (organUnpledged) organUnpledged.classList.remove('hidden');
+                    if (!Array.isArray(organs) || organs.length === 0) {
+                        organs = ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                    }
+                    organs.forEach(org => {
+                        const badge = document.createElement('span');
+                        badge.className = 'bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm';
+                        badge.textContent = `✨ ${org}`;
+                        organContainer.appendChild(badge);
+                    });
                 }
+
+                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                window.userOrganDonorData.verifyUrl = verifyUrl;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                const qrEl = document.getElementById('dashOrganCertQR');
+                if (qrEl) qrEl.src = qrUrl;
+
+                if (organActions) organActions.classList.remove('hidden');
+                if (organUnpledged) organUnpledged.classList.add('hidden');
             } catch (err) {
                 console.warn("Organ certificate load warning:", err);
             }
@@ -3219,6 +3687,25 @@
         // Blood Certificate Actions
         window.openDashboardBloodCertModal = function() {
             window.lockBodyScroll();
+            const profile = window.currentActiveUserProfile || {};
+            const donor = window.userBloodDonorData || {};
+            const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
+            const bg = (donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+');
+            const certId = donor.certId || `LSC-BD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
+
+            const nameEl = document.getElementById('dashBloodCertName');
+            if (nameEl) nameEl.textContent = name;
+            const bgEl = document.getElementById('dashBloodCertBg');
+            if (bgEl) bgEl.textContent = bg;
+            const idEl = document.getElementById('dashBloodCertId');
+            if (idEl) idEl.textContent = certId;
+
+            const qrEl = document.getElementById('dashBloodCertQR');
+            if (qrEl) {
+                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+            }
+
             const modal = document.getElementById('dashBloodCertModal');
             if (modal) {
                 modal.classList.remove('hidden');
@@ -3245,7 +3732,7 @@
 
         window.shareBloodCertWhatsApp = function() {
             const certId = window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const name = window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Rahul Kumar';
+            const name = window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
             const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
             const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
@@ -3264,6 +3751,43 @@
         // Organ Certificate Actions
         window.openDashboardOrganCertModal = function() {
             window.lockBodyScroll();
+            const profile = window.currentActiveUserProfile || {};
+            const donor = window.userOrganDonorData || {};
+            const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
+            const bg = (donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+');
+            const certId = donor.certId || `LSC-OD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
+
+            const nameEl = document.getElementById('dashOrganCertName');
+            if (nameEl) nameEl.textContent = name;
+            const bgEl = document.getElementById('dashOrganCertBg');
+            if (bgEl) bgEl.textContent = bg;
+            const idEl = document.getElementById('dashOrganCertId');
+            if (idEl) idEl.textContent = certId;
+
+            const organContainer = document.getElementById('dashOrganCertOrgansList');
+            if (organContainer) {
+                organContainer.innerHTML = '';
+                let organs = donor.organs || donor.pledgedOrgans || ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                if (typeof organs === 'string') {
+                    organs = organs.split(',').map(s => s.trim()).filter(Boolean);
+                }
+                if (!Array.isArray(organs) || organs.length === 0) {
+                    organs = ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                }
+                organs.forEach(org => {
+                    const badge = document.createElement('span');
+                    badge.className = 'bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm';
+                    badge.textContent = `✨ ${org}`;
+                    organContainer.appendChild(badge);
+                });
+            }
+
+            const qrEl = document.getElementById('dashOrganCertQR');
+            if (qrEl) {
+                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+            }
+
             const modal = document.getElementById('dashOrganCertModal');
             if (modal) {
                 modal.classList.remove('hidden');
@@ -3290,7 +3814,7 @@
 
         window.shareOrganCertWhatsApp = function() {
             const certId = window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const name = window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Rahul Kumar';
+            const name = window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Member';
             const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
             const text = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\nPledged by: *${name}*\nCertificate ID: *${certId}*\n\nVerify official pledge certificate online:\n${verifyUrl}\n\nGive someone a second chance at life! 🌟`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
