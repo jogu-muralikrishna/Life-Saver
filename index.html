@@ -2682,7 +2682,62 @@
             requestAnimationFrame(render);
         })();
 
+    <!-- OFFLINE EMERGENCY LIFELINE BAR (AUTO-SHOWS ON NETWORK LOSS) -->
+    <div id="offlineEmergencyBar" class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto bg-slate-950/95 text-white border-2 border-red-500 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl hidden transition-all duration-300">
+        <div class="flex items-center justify-between gap-3 mb-2.5">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <span class="text-xs font-black uppercase tracking-wider text-red-400">Offline Emergency Lifeline</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-mono">Zero Internet Active</span>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-tight mb-3">
+            Internet disconnected. You can still access emergency services with 1-tap direct dialing:
+        </p>
+        <div class="grid grid-cols-4 gap-2 text-center">
+            <a href="tel:108" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🚑</span>
+                <span>108</span>
+                <span class="text-[9px] font-normal opacity-80">Ambulance</span>
+            </a>
+            <a href="tel:112" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🚨</span>
+                <span>112</span>
+                <span class="text-[9px] font-normal opacity-80">National</span>
+            </a>
+            <a href="tel:1910" class="bg-rose-700 hover:bg-rose-800 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🩸</span>
+                <span>1910</span>
+                <span class="text-[9px] font-normal opacity-80">Blood Bank</span>
+            </a>
+            <a href="tel:104" class="bg-emerald-700 hover:bg-emerald-800 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🩺</span>
+                <span>104</span>
+                <span class="text-[9px] font-normal opacity-80">Medical</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
         /* PWA INSTALLATION PROMPT HANDLER & SERVICE WORKER REGISTER */
+        window.deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            window.deferredPrompt = null;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.classList.add('hidden');
+            console.log('[LifeSaver PWA] Successfully installed on device');
+        });
+
         window.installPWA = async function() {
             if (window.deferredPrompt) {
                 window.deferredPrompt.prompt();
@@ -2699,6 +2754,21 @@
                 alert("📱 To install LifeSaver App on your device:\n\n• Android (Chrome/Edge): Tap browser menu (⋮) → Select 'Add to Home screen' or 'Install App'.\n• iPhone (Safari): Tap Share button (⎋) → Select 'Add to Home Screen'.\n• Desktop (Chrome/Edge): Click the install icon in your address bar.");
             }
         };
+
+        /* OFFLINE DETECTION & RECOVERY */
+        function updateNetworkStatus() {
+            const bar = document.getElementById('offlineEmergencyBar');
+            if (bar) {
+                if (!navigator.onLine) {
+                    bar.classList.remove('hidden');
+                } else {
+                    bar.classList.add('hidden');
+                }
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        if (!navigator.onLine) updateNetworkStatus();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')

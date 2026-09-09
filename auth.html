@@ -539,9 +539,45 @@
                                 <img id="dashPanelBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
                             </div>
 
+                            <!-- Dynamic Milestone Ribbon Badge on In-Panel Preview -->
+                            <div id="dashPanelBloodMilestonePill" class="absolute pointer-events-none text-center flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full shadow-md border font-black text-[7px] sm:text-[9px] uppercase tracking-wider transition" style="top: 48.5%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, rgba(254, 243, 199, 0.95), rgba(253, 230, 138, 0.95)); color: #92400e; border-color: #f59e0b;">
+                                <span id="dashPanelBloodMilestonePillEmoji">🥉</span>
+                                <span id="dashPanelBloodMilestonePillText">Bronze Lifesaver • 1 Donation</span>
+                            </div>
+
                             <!-- Dynamic Certificate ID -->
                             <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashPanelBloodCertId">
                                 LSC-BD-2026-00482
+                            </div>
+                        </div>
+
+                        <!-- 🏅 VOLUNTARY DONOR MILESTONE BADGE & PROGRESSION CARD -->
+                        <div id="dashBloodMilestoneCard" class="mt-3 p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-red-500/5 to-purple-500/10 border border-amber-300/60 dark:border-amber-700/40 flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span id="dashMilestoneBadgeEmoji" class="text-2xl drop-shadow-sm">🥉</span>
+                                    <div>
+                                        <div class="flex items-center gap-1.5">
+                                            <span id="dashMilestoneTitle" class="text-xs font-black text-slate-900 dark:text-white">Bronze Lifesaver</span>
+                                            <span id="dashMilestoneTrophyPill" class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 uppercase">Tier 1</span>
+                                        </div>
+                                        <p id="dashMilestoneSubtitle" class="text-[10px] text-slate-500 dark:text-slate-400">Verified donations: <strong id="dashMilestoneCountText" class="text-red-600 dark:text-red-400">1 time</strong></p>
+                                    </div>
+                                </div>
+                                <span id="dashMilestoneLeaderboardRank" class="text-[10px] font-black font-mono text-red-600 dark:text-red-400 px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900">
+                                    🏆 Verified Donor
+                                </span>
+                            </div>
+                            <!-- Milestone Progress Bar -->
+                            <div class="pt-1">
+                                <div class="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                                    <span id="dashMilestoneProgressLabel">Next Level Progress</span>
+                                    <span id="dashMilestoneProgressPercent" class="font-mono text-red-600 dark:text-red-400">33%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                    <div id="dashMilestoneProgressBar" class="bg-gradient-to-r from-amber-500 to-red-600 h-full rounded-full transition-all duration-500" style="width: 33%;"></div>
+                                </div>
+                                <p id="dashMilestoneNextGoal" class="text-[10px] font-medium text-slate-500 dark:text-slate-400 text-right mt-1">2 more donations to unlock Silver Lifesaver 🥈</p>
                             </div>
                         </div>
 
@@ -3819,7 +3855,85 @@
                     btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Submit Request';
                     if (window.lucide) lucide.createIcons();
                 }
-               async function loadUserCertificates(user) {
+            }
+        };
+
+        window.getMilestoneTier = function(count) {
+            const n = parseInt(count, 10) || 0;
+            if (n >= 10) {
+                return {
+                    tier: 'DIAMOND',
+                    tierPill: 'Legend',
+                    title: 'Life Saver Legend',
+                    badge: '💎',
+                    ribbonColor: '#6366f1',
+                    pillBackground: 'linear-gradient(135deg, rgba(224, 231, 255, 0.95), rgba(199, 210, 254, 0.95))',
+                    pillTextColor: '#312e81',
+                    pillBorderColor: '#818cf8',
+                    nextTitle: 'Maximum Legend Tier Reached! 🌟',
+                    progress: 100,
+                    donations: n
+                };
+            } else if (n >= 5) {
+                return {
+                    tier: 'GOLD',
+                    tierPill: 'Tier 3 (Gold)',
+                    title: 'Gold Lifesaver',
+                    badge: '🥇',
+                    ribbonColor: '#d97706',
+                    pillBackground: 'linear-gradient(135deg, rgba(254, 240, 138, 0.95), rgba(253, 224, 71, 0.95))',
+                    pillTextColor: '#78350f',
+                    pillBorderColor: '#eab308',
+                    nextTitle: `${10 - n} more donations to unlock Diamond Legend 💎`,
+                    progress: Math.min(100, Math.round(((n - 5) / 5) * 100)),
+                    donations: n
+                };
+            } else if (n >= 3) {
+                return {
+                    tier: 'SILVER',
+                    tierPill: 'Tier 2 (Silver)',
+                    title: 'Silver Lifesaver',
+                    badge: '🥈',
+                    ribbonColor: '#64748b',
+                    pillBackground: 'linear-gradient(135deg, rgba(241, 245, 249, 0.95), rgba(226, 232, 240, 0.95))',
+                    pillTextColor: '#1e293b',
+                    pillBorderColor: '#94a3b8',
+                    nextTitle: `${5 - n} more donations to unlock Gold Lifesaver 🥇`,
+                    progress: Math.min(100, Math.round(((n - 3) / 2) * 100)),
+                    donations: n
+                };
+            } else if (n >= 1) {
+                return {
+                    tier: 'BRONZE',
+                    tierPill: 'Tier 1 (Bronze)',
+                    title: 'Bronze Lifesaver',
+                    badge: '🥉',
+                    ribbonColor: '#ea580c',
+                    pillBackground: 'linear-gradient(135deg, rgba(255, 237, 213, 0.95), rgba(254, 215, 170, 0.95))',
+                    pillTextColor: '#9a3412',
+                    pillBorderColor: '#f97316',
+                    nextTitle: `${3 - n} more donation to unlock Silver Lifesaver 🥈`,
+                    progress: Math.min(100, Math.round((n / 3) * 100)),
+                    donations: n
+                };
+            } else {
+                return {
+                    tier: 'REGISTERED',
+                    tierPill: 'Voluntary Donor',
+                    title: 'Registered Voluntary Donor',
+                    badge: '🌱',
+                    ribbonColor: '#059669',
+                    pillBackground: 'linear-gradient(135deg, rgba(236, 253, 245, 0.95), rgba(209, 250, 229, 0.95))',
+                    pillTextColor: '#065f46',
+                    pillBorderColor: '#10b981',
+                    nextTitle: '1 donation to unlock Bronze Lifesaver 🥉',
+                    progress: 0,
+                    donations: 0
+                };
+            }
+        };
+
+        async function loadUserCertificates(user) {
             if (!user) return;
             const bloodActive = document.getElementById('dashBloodCertActiveContent');
             const bloodUnreg = document.getElementById('dashBloodCertUnregistered');
@@ -3882,12 +3996,16 @@
                     const donorName = bloodDonor.name;
                     const bloodGroup = bloodDonor.bloodGroup;
                     const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
+                    const donationCount = parseInt(bloodDonor.donationCount !== undefined ? bloodDonor.donationCount : (bloodDonor.timesDonated || 0), 10);
+                    const tier = getMilestoneTier(donationCount);
 
                     window.userBloodDonorData = {
                         ...bloodDonor,
                         name: donorName,
                         bloodGroup: bloodGroup,
-                        certId: certId
+                        certId: certId,
+                        donationCount: donationCount,
+                        milestoneTier: tier
                     };
 
                     // Populate Modal Elements
@@ -3905,6 +4023,34 @@
                     if (pBgEl) pBgEl.textContent = bloodGroup;
                     const pIdEl = document.getElementById('dashPanelBloodCertId');
                     if (pIdEl) pIdEl.textContent = certId;
+
+                    // Populate Milestone Tier on Dashboard
+                    const emojiEl = document.getElementById('dashMilestoneBadgeEmoji');
+                    if (emojiEl) emojiEl.textContent = tier.badge;
+                    const titleEl = document.getElementById('dashMilestoneTitle');
+                    if (titleEl) titleEl.textContent = tier.title;
+                    const pillEl = document.getElementById('dashMilestoneTrophyPill');
+                    if (pillEl) pillEl.textContent = tier.tierPill;
+                    const countEl = document.getElementById('dashMilestoneCountText');
+                    if (countEl) countEl.textContent = `${donationCount} ${donationCount === 1 ? 'time' : 'times'}`;
+                    const pctEl = document.getElementById('dashMilestoneProgressPercent');
+                    if (pctEl) pctEl.textContent = `${tier.progress}%`;
+                    const barEl = document.getElementById('dashMilestoneProgressBar');
+                    if (barEl) barEl.style.width = `${tier.progress}%`;
+                    const goalEl = document.getElementById('dashMilestoneNextGoal');
+                    if (goalEl) goalEl.textContent = tier.nextTitle;
+
+                    // Populate In-Panel Preview Milestone Pill
+                    const pEmojiEl = document.getElementById('dashPanelBloodMilestonePillEmoji');
+                    if (pEmojiEl) pEmojiEl.textContent = tier.badge;
+                    const pTextEl = document.getElementById('dashPanelBloodMilestonePillText');
+                    if (pTextEl) pTextEl.textContent = `${tier.title} • ${donationCount} ${donationCount === 1 ? 'Donation' : 'Donations'}`;
+                    const pPillEl = document.getElementById('dashPanelBloodMilestonePill');
+                    if (pPillEl) {
+                        pPillEl.style.background = tier.pillBackground;
+                        pPillEl.style.color = tier.pillTextColor;
+                        pPillEl.style.borderColor = tier.pillBorderColor;
+                    }
 
                     const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
                     window.userBloodDonorData.verifyUrl = verifyUrl;
@@ -4127,6 +4273,64 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
+
+                // Draw Milestone Honor Badge Pill on Certificate Canvas
+                const donationCount = parseInt(window.userBloodDonorData?.donationCount !== undefined ? window.userBloodDonorData.donationCount : (window.userBloodDonorData?.timesDonated || 0), 10);
+                const tierInfo = window.getMilestoneTier ? window.getMilestoneTier(donationCount) : { badge: '🥉', title: 'Bronze Lifesaver', tier: 'BRONZE', ribbonColor: '#ea580c' };
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const badgeText = `${tierInfo.badge}  ${tierInfo.title.toUpperCase()} • ${donationCount} ${donationCount === 1 ? 'DONATION' : 'DONATIONS'}`;
+                ctx.font = 'bold 13px system-ui, -apple-system, sans-serif';
+                const textWidth = ctx.measureText(badgeText).width + 36;
+                const badgeHeight = 26;
+                const badgeX = 512 - (textWidth / 2);
+                const badgeY = 320;
+
+                // Gradient background based on tier
+                let grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + textWidth, badgeY + badgeHeight);
+                if (tierInfo.tier === 'DIAMOND') {
+                    grad.addColorStop(0, '#e0e7ff');
+                    grad.addColorStop(0.5, '#c7d2fe');
+                    grad.addColorStop(1, '#818cf8');
+                } else if (tierInfo.tier === 'GOLD') {
+                    grad.addColorStop(0, '#fef08a');
+                    grad.addColorStop(0.5, '#fde047');
+                    grad.addColorStop(1, '#ca8a04');
+                } else if (tierInfo.tier === 'SILVER') {
+                    grad.addColorStop(0, '#f8fafc');
+                    grad.addColorStop(0.5, '#e2e8f0');
+                    grad.addColorStop(1, '#94a3b8');
+                } else if (tierInfo.tier === 'BRONZE') {
+                    grad.addColorStop(0, '#ffedd5');
+                    grad.addColorStop(0.5, '#fed7aa');
+                    grad.addColorStop(1, '#ea580c');
+                } else {
+                    grad.addColorStop(0, '#ecfdf5');
+                    grad.addColorStop(0.5, '#d1fae5');
+                    grad.addColorStop(1, '#059669');
+                }
+
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(0,0,0,0.14)';
+                ctx.shadowBlur = 6;
+                ctx.shadowOffsetY = 2;
+                ctx.beginPath();
+                ctx.roundRect(badgeX, badgeY, textWidth, badgeHeight, 13);
+                ctx.fill();
+
+                // Border
+                ctx.shadowColor = 'transparent';
+                ctx.strokeStyle = tierInfo.ribbonColor || '#ea580c';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Text
+                ctx.fillStyle = (tierInfo.tier === 'BRONZE' || tierInfo.tier === 'GOLD') ? '#78350f' : (tierInfo.tier === 'DIAMOND' ? '#312e81' : (tierInfo.tier === 'SILVER' ? '#1e293b' : '#065f46'));
+                ctx.fillText(badgeText, 512, badgeY + (badgeHeight / 2));
+                ctx.restore();
 
                 // Draw Blood Group in badge
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
@@ -4402,6 +4606,66 @@
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             }
         });
+
+        /* OFFLINE DETECTION & RECOVERY */
+        function updateNetworkStatus() {
+            const bar = document.getElementById('offlineEmergencyBar');
+            if (bar) {
+                if (!navigator.onLine) {
+                    bar.classList.remove('hidden');
+                } else {
+                    bar.classList.add('hidden');
+                }
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        if (!navigator.onLine) updateNetworkStatus();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                .catch(err => console.warn('PWA Service Worker registration failed:', err));
+        }
     </script>
+
+    <!-- OFFLINE EMERGENCY LIFELINE BAR -->
+    <div id="offlineEmergencyBar" class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto bg-slate-950/95 text-white border-2 border-red-500 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl hidden transition-all duration-300">
+        <div class="flex items-center justify-between gap-3 mb-2.5">
+            <div class="flex items-center gap-2">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <span class="text-xs font-black uppercase tracking-wider text-red-400">Offline Emergency Lifeline</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-mono">Zero Internet Active</span>
+        </div>
+        <p class="text-[11px] text-slate-300 leading-tight mb-3">
+            Internet disconnected. You can still access emergency services with 1-tap direct dialing:
+        </p>
+        <div class="grid grid-cols-4 gap-2 text-center">
+            <a href="tel:108" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🚑</span>
+                <span>108</span>
+                <span class="text-[9px] font-normal opacity-80">Ambulance</span>
+            </a>
+            <a href="tel:112" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🚨</span>
+                <span>112</span>
+                <span class="text-[9px] font-normal opacity-80">National</span>
+            </a>
+            <a href="tel:1910" class="bg-rose-700 hover:bg-rose-800 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🩸</span>
+                <span>1910</span>
+                <span class="text-[9px] font-normal opacity-80">Blood Bank</span>
+            </a>
+            <a href="tel:104" class="bg-emerald-700 hover:bg-emerald-800 text-white p-2 rounded-xl text-xs font-black flex flex-col items-center justify-center gap-0.5 shadow transition">
+                <span class="text-base">🩺</span>
+                <span>104</span>
+                <span class="text-[9px] font-normal opacity-80">Medical</span>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

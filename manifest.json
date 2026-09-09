@@ -23,6 +23,28 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency Request",
+      "short_name": "Emergency",
+      "description": "Post urgent blood or organ emergency request",
+      "url": "./emergency.html",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Find Blood Donors",
+      "short_name": "Find Donors",
+      "description": "Search verified voluntary blood donors nearby",
+      "url": "./find-donor.html",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Member Dashboard",
+      "short_name": "Dashboard",
+      "description": "View donor certificates and stats",
+      "url": "./auth.html",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    }
   ]
 }
-
