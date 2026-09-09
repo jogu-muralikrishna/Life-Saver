@@ -1099,6 +1099,15 @@
             }
         };
 
+        function maskPhone(phone) {
+            if (!phone) return '+91 ••••• •••••';
+            const digits = String(phone).replace(/\D/g, '');
+            if (digits.length < 6) return '+91 ••••• •••••';
+            const firstTwo = digits.length >= 10 ? digits.slice(-10, -8) : digits.slice(0, 2);
+            const lastThree = digits.slice(-3);
+            return `+91 ${firstTwo}••• ••${lastThree}`;
+        }
+
         // Listen to urgent blood requests
         onValue(ref(db, 'blood_requests'), (snapshot) => {
             const tickerWrap = document.getElementById("urgentTickerWrap");
@@ -1107,7 +1116,7 @@
             if (snapshot.exists()) {
                 const reqs = Object.values(snapshot.val());
                 tickerContent.innerHTML = reqs.map(r => `
-                    <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • Contact: ${r.phone}</span>
+                    <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • <a href="blood.html" class="hover:underline font-mono text-white/90">Contact: ${maskPhone(r.phone)} 🛡️</a></span>
                 `).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
                 tickerWrap.classList.remove("hidden");
             } else {

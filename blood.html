@@ -459,6 +459,104 @@
         </div>
     </div>
 
+    <!-- 🛡️ LIFESAVER PRIVACY SHIELD: EMERGENCY CONTACT CONFIRMATION MODAL -->
+    <div id="privacyContactModal"
+        class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 sm:p-7 border border-emerald-200 dark:border-emerald-900/60 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+            <!-- Close button -->
+            <button onclick="closePrivacyContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-lg transition" title="Close">✕</button>
+
+            <!-- Header -->
+            <div class="flex items-center gap-3.5 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20 font-black shrink-0">
+                    🛡️
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">LifeSaver Privacy Shield</h3>
+                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 uppercase">Guarded Contact</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Emergency contact protection & respectful donor outreach</p>
+                </div>
+            </div>
+
+            <!-- Privacy Assurance Notice -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 mb-4 text-xs text-emerald-900 dark:text-emerald-200">
+                <div class="flex items-start gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">Voluntary Privacy Notice:</span> Voluntary donors and emergency patients are protected from automated scraping, spam, and non-emergency disturbance. Please confirm you are reaching out for a genuine medical need.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Contact Card -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span id="privacyContactRoleBadge" class="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900">
+                        Voluntary Blood Donor
+                    </span>
+                    <span id="privacyContactBloodGroup" class="bg-red-600 text-white font-black text-xs px-2.5 py-0.5 rounded-lg shadow-sm">
+                        O+
+                    </span>
+                </div>
+                <div>
+                    <h4 id="privacyContactName" class="font-bold text-slate-900 dark:text-white text-base">Donor Name</h4>
+                    <p id="privacyContactLocation" class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Location
+                    </p>
+                </div>
+
+                <!-- Masked / Revealed Phone Display -->
+                <div class="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Emergency Phone</span>
+                        <span id="privacyPhoneDisplay" class="font-mono text-sm font-black text-slate-800 dark:text-slate-100 tracking-wider">
+                            +91 ••••• •••••
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnCopyPhone" onclick="copyPrivacyPhoneNumber()" class="hidden text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 items-center gap-1">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span id="lblCopyPhone">Copy</span>
+                        </button>
+                        <button id="btnRevealPhone" onclick="toggleRevealPrivacyPhone()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i> <span id="lblRevealPhone">Reveal Full Number</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Confirmation Checkbox -->
+            <div class="mb-4">
+                <label class="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="chkEmergencyAcknowledge" checked class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                    <span>I confirm this is for a genuine urgent medical blood need and agree to contact respectfully.</span>
+                </label>
+            </div>
+
+            <!-- Pre-formatted Respectful WhatsApp Message Preview -->
+            <div class="mb-4">
+                <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Respectful WhatsApp Message Preview</span>
+                    <span class="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">Courteous & Verified</span>
+                </label>
+                <div id="privacyMsgPreview" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 italic font-mono leading-relaxed max-h-24 overflow-y-auto">
+                    <!-- Dynamically generated polite message -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button id="btnPrivacyDirectCall" onclick="handlePrivacyDirectCall()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm">
+                    <i data-lucide="phone" class="w-4 h-4"></i> Call Directly
+                </button>
+                <button id="btnPrivacySendWhatsApp" onclick="handlePrivacySendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> Send Respectful WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -523,6 +621,230 @@
             }
         };
 
+        // 🛡️ LIFESAVER PRIVACY SHIELD MODULE FOR DONORS & BLOOD REQUESTS
+        window.currentPrivacyContact = null;
+        window.isPhoneRevealed = false;
+        window.currentRenderedDonors = [];
+        window.currentMatchedDonors = [];
+
+        window.maskPhone = function(phone) {
+            if (!phone) return '+91 ••••• •••••';
+            const digits = String(phone).replace(/\D/g, '');
+            if (digits.length < 6) return '+91 ••••• •••••';
+            const firstTwo = digits.length >= 10 ? digits.slice(-10, -8) : digits.slice(0, 2);
+            const lastThree = digits.slice(-3);
+            return `+91 ${firstTwo}••• ••${lastThree}`;
+        };
+
+        window.openPrivacyContactModal = function(contact) {
+            if (!contact) return;
+            window.currentPrivacyContact = contact;
+            window.isPhoneRevealed = false;
+
+            const modal = document.getElementById("privacyContactModal");
+            if (!modal) return;
+
+            const isDonor = contact.type === 'donor';
+            const roleBadge = document.getElementById("privacyContactRoleBadge");
+            if (roleBadge) {
+                roleBadge.textContent = isDonor ? "Voluntary Blood Donor" : "Emergency Blood Requester";
+                roleBadge.className = isDonor 
+                    ? "text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900"
+                    : "text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900";
+            }
+
+            const bgEl = document.getElementById("privacyContactBloodGroup");
+            if (bgEl) bgEl.textContent = (contact.bloodGroup || 'Blood') + ' Needed';
+
+            const nameEl = document.getElementById("privacyContactName");
+            if (nameEl) nameEl.textContent = contact.name || (isDonor ? 'Voluntary Donor' : 'Patient Attendant');
+
+            const locEl = document.getElementById("privacyContactLocation");
+            if (locEl) {
+                const loc = contact.hospital ? `${contact.hospital}, ${contact.city}` : (contact.city || 'Emergency Registry');
+                locEl.innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${loc}`;
+            }
+
+            const phoneEl = document.getElementById("privacyPhoneDisplay");
+            if (phoneEl) {
+                phoneEl.textContent = window.maskPhone(contact.phone);
+            }
+
+            const lblReveal = document.getElementById("lblRevealPhone");
+            if (lblReveal) lblReveal.textContent = "Reveal Full Number";
+
+            const btnCopy = document.getElementById("btnCopyPhone");
+            if (btnCopy) {
+                btnCopy.classList.add("hidden");
+                btnCopy.classList.remove("inline-flex");
+            }
+
+            // Polite and respectful pre-formatted message
+            let respectfulMsg = "";
+            if (isDonor) {
+                const hospInfo = contact.hospital ? `at ${contact.hospital}, ${contact.requestCity || contact.city}` : `in ${contact.city}`;
+                respectfulMsg = `Hello ${contact.name || 'Donor'}, I am reaching out through the LifeSaver Voluntary Blood Network regarding an urgent medical requirement for ${contact.bloodGroup} blood ${hospInfo}. If you or someone you know might be available to donate, please let us know. Thank you so much for your voluntary support!`;
+            } else {
+                respectfulMsg = `Hello, I saw your urgent requirement on LifeSaver for ${contact.bloodGroup} blood at ${contact.hospital || 'the hospital'}, ${contact.city}. I am reaching out to see if you still need blood units and how we can assist.`;
+            }
+
+            const previewEl = document.getElementById("privacyMsgPreview");
+            if (previewEl) previewEl.textContent = `"${respectfulMsg}"`;
+
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk) chk.checked = true;
+
+            window.lockBodyScroll();
+            modal.scrollTop = 0;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closePrivacyContactModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("privacyContactModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+            window.currentPrivacyContact = null;
+            window.isPhoneRevealed = false;
+        };
+
+        window.toggleRevealPrivacyPhone = function() {
+            if (!window.currentPrivacyContact) return;
+            const phoneEl = document.getElementById("privacyPhoneDisplay");
+            const lblReveal = document.getElementById("lblRevealPhone");
+            const btnCopy = document.getElementById("btnCopyPhone");
+            if (!phoneEl) return;
+
+            window.isPhoneRevealed = !window.isPhoneRevealed;
+            if (window.isPhoneRevealed) {
+                const raw = window.currentPrivacyContact.phone || '';
+                const cleanDigits = raw.replace(/\D/g, '');
+                phoneEl.textContent = cleanDigits.length === 10 ? `+91 ${cleanDigits}` : (raw || '+91 ••••• •••••');
+                if (lblReveal) lblReveal.textContent = "Hide Number";
+                if (btnCopy) {
+                    btnCopy.classList.remove("hidden");
+                    btnCopy.classList.add("inline-flex");
+                }
+            } else {
+                phoneEl.textContent = window.maskPhone(window.currentPrivacyContact.phone);
+                if (lblReveal) lblReveal.textContent = "Reveal Full Number";
+                if (btnCopy) {
+                    btnCopy.classList.add("hidden");
+                    btnCopy.classList.remove("inline-flex");
+                }
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.copyPrivacyPhoneNumber = function() {
+            if (!window.currentPrivacyContact) return;
+            const raw = window.currentPrivacyContact.phone || '';
+            const cleanDigits = raw.replace(/\D/g, '');
+            const targetNumber = cleanDigits.length === 10 ? `+91${cleanDigits}` : raw;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(targetNumber).then(() => {
+                    const lbl = document.getElementById("lblCopyPhone");
+                    if (lbl) {
+                        lbl.textContent = "Copied!";
+                        setTimeout(() => { if (lbl) lbl.textContent = "Copy"; }, 2000);
+                    }
+                });
+            } else {
+                alert(`Phone number: ${targetNumber}`);
+            }
+        };
+
+        window.handlePrivacyDirectCall = function() {
+            if (!window.currentPrivacyContact) return;
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk && !chk.checked) {
+                alert("Please confirm this is for a genuine medical emergency before contacting.");
+                return;
+            }
+            const cleanPhone = (window.currentPrivacyContact.phone || '').replace(/\D/g, '');
+            if (!cleanPhone) {
+                alert("Phone number not available.");
+                return;
+            }
+            window.location.href = `tel:${cleanPhone}`;
+        };
+
+        window.handlePrivacySendWhatsApp = function() {
+            if (!window.currentPrivacyContact) return;
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk && !chk.checked) {
+                alert("Please confirm this is for a genuine medical emergency before contacting.");
+                return;
+            }
+            const contact = window.currentPrivacyContact;
+            const isDonor = contact.type === 'donor';
+            const cleanPhone = (contact.phone || '').replace(/\D/g, '');
+            if (!cleanPhone) {
+                alert("Phone number not available.");
+                return;
+            }
+
+            let respectfulMsg = "";
+            if (isDonor) {
+                const hospInfo = contact.hospital ? `at ${contact.hospital}, ${contact.requestCity || contact.city}` : `in ${contact.city}`;
+                respectfulMsg = `Hello ${contact.name || 'Donor'}, I am reaching out through the LifeSaver Voluntary Blood Network regarding an urgent medical requirement for ${contact.bloodGroup} blood ${hospInfo}. If you or someone you know might be available to donate, please let us know. Thank you so much for your voluntary support!`;
+            } else {
+                respectfulMsg = `Hello, I saw your urgent requirement on LifeSaver for ${contact.bloodGroup} blood at ${contact.hospital || 'the hospital'}, ${contact.city}. I am reaching out to see if you still need blood units and how we can assist.`;
+            }
+
+            const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+            window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}`, '_blank');
+        };
+
+        window.openPrivacyDonorByIndex = function(idx) {
+            const donor = window.currentRenderedDonors[idx];
+            if (donor) {
+                openPrivacyContactModal({
+                    type: 'donor',
+                    name: donor.name,
+                    bloodGroup: donor.bloodGroup,
+                    city: donor.city,
+                    phone: donor.phone
+                });
+            }
+        };
+
+        window.openPrivacyTicketByKey = function(key) {
+            const r = (window.activeUrgentBloodTickets || {})[key];
+            if (r) {
+                openPrivacyContactModal({
+                    type: 'request',
+                    name: `Patient Attendant (${r.hospital})`,
+                    bloodGroup: r.bloodGroup,
+                    hospital: r.hospital,
+                    city: r.city,
+                    phone: r.phone,
+                    units: r.units
+                });
+            }
+        };
+
+        window.openPrivacyMatchedDonor = function(idx) {
+            const donor = window.currentMatchedDonors[idx];
+            const t = window.currentActiveMatchTicket;
+            if (donor) {
+                openPrivacyContactModal({
+                    type: 'donor',
+                    name: donor.name,
+                    bloodGroup: donor.bloodGroup,
+                    city: donor.city,
+                    phone: donor.phone,
+                    hospital: t ? t.hospital : '',
+                    requestCity: t ? t.city : '',
+                    units: t ? t.units : 1
+                });
+            }
+        };
+
         let allDonors = [];
         let activeGroupFilter = "ALL";
 
@@ -543,6 +865,8 @@
                 return matchBg && matchCity;
             });
 
+            window.currentRenderedDonors = filtered;
+
             if (filtered.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full text-center py-12 glass-card">
@@ -554,8 +878,9 @@
                 return;
             }
 
-            filtered.forEach(donor => {
+            filtered.forEach((donor, idx) => {
                 const phone = donor.phone || '9999999999';
+                const masked = window.maskPhone(phone);
                 const card = document.createElement("div");
                 card.className = "glass-card p-6 flex flex-col justify-between hover:border-red-500 transition";
                 card.innerHTML = `
@@ -574,13 +899,23 @@
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <a href="tel:${phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                        </a>
-                        <a href="https://wa.me/91${phone}?text=Emergency:%20Need%20${donor.bloodGroup}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                        </a>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> ${masked}
+                            </span>
+                            <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-900">
+                                🛡️ Privacy Guarded
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="openPrivacyDonorByIndex(${idx})" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+                            </button>
+                            <button onclick="openPrivacyDonorByIndex(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
+                            </button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -603,21 +938,22 @@
 
         // BLOOD COMPATIBILITY MATRIX
         const BLOOD_COMPATIBILITY = {
-            'A+': ['A+', 'A-', 'O+', 'O-'],
-            'A-': ['A-', 'O-'],
-            'B+': ['B+', 'B-', 'O+', 'O-'],
-            'B-': ['B-', 'O-'],
-            'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'], // Universal Recipient
-            'AB-': ['AB-', 'A-', 'B-', 'O-'],
-            'O+': ['O+', 'O-'],
-            'O-': ['O-'] // Universal Donor
+            'O-': ['O-'],
+            'O+': ['O-', 'O+'],
+            'A-': ['O-', 'A-'],
+            'A+': ['O-', 'O+', 'A-', 'A+'],
+            'B-': ['O-', 'B-'],
+            'B+': ['O-', 'O+', 'B-', 'B+'],
+            'AB-': ['O-', 'A-', 'B-', 'AB-'],
+            'AB+': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
         };
 
         window.activeUrgentBloodTickets = {};
         window.currentActiveMatchTicket = null;
 
-        window.renderUrgentBloodTickets = function() {
-            const reqGrid = document.getElementById("urgentReqsGrid");
+        // RENDER ACTIVE BLOOD REQUIREMENTS
+        window.renderUrgentBloodTickets = function () {
+            const reqGrid = document.getElementById("urgentRequestsGrid");
             if (!reqGrid) return;
             reqGrid.innerHTML = "";
 
@@ -650,7 +986,11 @@
                             </span>
                         </div>
                         <h4 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">${r.hospital}</h4>
-                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Emergency Contact: <strong class="font-mono text-slate-900 dark:text-white">${r.phone}</strong></p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+                            Emergency Contact:
+                            <strong class="font-mono text-slate-900 dark:text-white">${window.maskPhone(r.phone)}</strong>
+                            <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-900">🛡️ Guarded</span>
+                        </p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-red-200/60 dark:border-red-900/40 justify-between">
@@ -666,9 +1006,9 @@
                             </span>
                         </button>
                         <div class="flex items-center gap-1.5">
-                            <a href="tel:${r.phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
-                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                            </a>
+                            <button onclick="openPrivacyTicketByKey('${key}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Attendant
+                            </button>
                             <button onclick="closeBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
                                 <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Received
                             </button>
@@ -700,6 +1040,7 @@
                 return (a.name || '').localeCompare(b.name || '');
             });
 
+            window.currentMatchedDonors = matchingDonors;
             const sameCityDonors = matchingDonors.filter(d => (d.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim());
 
             const infoEl = document.getElementById("matchModalTicketInfo");
@@ -720,7 +1061,7 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                         <div><strong>🏥 Hospital:</strong> ${ticket.hospital}</div>
-                        <div><strong>📞 Attendant Phone:</strong> <a href="tel:${ticket.phone}" class="text-red-600 font-bold hover:underline">${ticket.phone}</a></div>
+                        <div><strong>📞 Attendant Phone:</strong> <button onclick="openPrivacyTicketByKey('${ticketKey}')" class="text-red-600 font-mono font-bold hover:underline inline-flex items-center gap-1">${window.maskPhone(ticket.phone)} <span class="text-[10px] bg-red-100 dark:bg-red-950 px-1.5 py-0.2 rounded font-sans font-normal border border-red-200 dark:border-red-900">🛡️ Guarded • Contact</span></button></div>
                     </div>
                     <div class="mt-2 pt-2 border-t border-red-200/60 dark:border-red-900/40 text-[11px] text-slate-600 dark:text-slate-400">
                         🩸 Compatible Donor Groups for ${ticket.bloodGroup}: <strong class="text-red-600 dark:text-red-400">${compatibleGroups.join(', ')}</strong>
@@ -747,10 +1088,10 @@
                         </div>
                     `;
                 } else {
-                    matchingDonors.forEach(donor => {
+                    matchingDonors.forEach((donor, idx) => {
                         const isSameCity = (donor.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim();
                         const phone = donor.phone || '9999999999';
-                        const waMsg = `Emergency SOS: Patient urgently needs ${ticket.bloodGroup} blood (${ticket.units || 1} units) at ${ticket.hospital}, ${ticket.city}. Contact: ${ticket.phone}. Are you available to donate?`;
+                        const masked = window.maskPhone(phone);
 
                         const item = document.createElement("div");
                         item.className = "p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3";
@@ -764,16 +1105,18 @@
                                         <h5 class="text-xs font-bold text-slate-900 dark:text-white truncate">${donor.name || 'Anonymous Donor'}</h5>
                                         ${isSameCity ? `<span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[9px] font-black px-1.5 py-0.2 rounded shrink-0">📍 Same City</span>` : `<span class="text-[9px] text-slate-400 shrink-0">(${donor.city || 'Statewide'})</span>`}
                                     </div>
-                                    <p class="text-[10px] text-slate-500 font-mono">${phone}</p>
+                                    <p class="text-[10px] text-slate-500 font-mono flex items-center gap-1">
+                                        <i data-lucide="shield-check" class="w-3 h-3 text-emerald-500"></i> ${masked}
+                                    </p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
-                                <a href="tel:${phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
+                                <button onclick="openPrivacyMatchedDonor(${idx})" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
                                     <i data-lucide="phone" class="w-3 h-3"></i> Call
-                                </a>
-                                <a href="https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition">
-                                    <i data-lucide="message-square" class="w-3 h-3"></i> SOS
-                                </a>
+                                </button>
+                                <button onclick="openPrivacyMatchedDonor(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp
+                                </button>
                             </div>
                         `;
                         listEl.appendChild(item);

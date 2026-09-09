@@ -322,7 +322,180 @@
             window.currentUserAuth = user;
         });
 
-        function generateDonorContactHtml(donor) {
+        // 🛡️ LIFESAVER PRIVACY SHIELD MODULE FOR FIND DONOR
+        window.currentPrivacyContact = null;
+        window.isPhoneRevealed = false;
+        window.currentFindDonorsList = [];
+
+        window.maskPhone = function(phone) {
+            if (!phone) return '+91 ••••• •••••';
+            const digits = String(phone).replace(/\D/g, '');
+            if (digits.length < 6) return '+91 ••••• •••••';
+            const firstTwo = digits.length >= 10 ? digits.slice(-10, -8) : digits.slice(0, 2);
+            const lastThree = digits.slice(-3);
+            return `+91 ${firstTwo}••• ••${lastThree}`;
+        };
+
+        window.openPrivacyContactModal = function(contact) {
+            if (!contact) return;
+            window.currentPrivacyContact = contact;
+            window.isPhoneRevealed = false;
+
+            const modal = document.getElementById("privacyContactModal");
+            if (!modal) return;
+
+            const roleBadge = document.getElementById("privacyContactRoleBadge");
+            if (roleBadge) {
+                roleBadge.textContent = "Voluntary Blood Donor";
+                roleBadge.className = "text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+            }
+
+            const bgEl = document.getElementById("privacyContactBloodGroup");
+            if (bgEl) bgEl.textContent = (contact.bloodGroup || 'Blood') + ' Donor';
+
+            const nameEl = document.getElementById("privacyContactName");
+            if (nameEl) nameEl.textContent = contact.name || 'Voluntary Donor';
+
+            const locEl = document.getElementById("privacyContactLocation");
+            if (locEl) {
+                locEl.innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${contact.city || 'Emergency Registry'}`;
+            }
+
+            const phoneEl = document.getElementById("privacyPhoneDisplay");
+            if (phoneEl) {
+                phoneEl.textContent = window.maskPhone(contact.phone);
+            }
+
+            const lblReveal = document.getElementById("lblRevealPhone");
+            if (lblReveal) lblReveal.textContent = "Reveal Full Number";
+
+            const btnCopy = document.getElementById("btnCopyPhone");
+            if (btnCopy) {
+                btnCopy.classList.add("hidden");
+                btnCopy.classList.remove("inline-flex");
+            }
+
+            const respectfulMsg = `Hello ${contact.name || 'Donor'}, I am reaching out through the LifeSaver Voluntary Blood Network regarding an urgent medical requirement for ${contact.bloodGroup || 'blood'} blood in ${contact.city || 'your area'}. If you or someone you know might be available to donate, please let us know. Thank you for your noble voluntary service!`;
+
+            const previewEl = document.getElementById("privacyMsgPreview");
+            if (previewEl) previewEl.textContent = `"${respectfulMsg}"`;
+
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk) chk.checked = true;
+
+            window.lockBodyScroll();
+            modal.scrollTop = 0;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closePrivacyContactModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("privacyContactModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+            window.currentPrivacyContact = null;
+            window.isPhoneRevealed = false;
+        };
+
+        window.toggleRevealPrivacyPhone = function() {
+            if (!window.currentPrivacyContact) return;
+            const phoneEl = document.getElementById("privacyPhoneDisplay");
+            const lblReveal = document.getElementById("lblRevealPhone");
+            const btnCopy = document.getElementById("btnCopyPhone");
+            if (!phoneEl) return;
+
+            window.isPhoneRevealed = !window.isPhoneRevealed;
+            if (window.isPhoneRevealed) {
+                const raw = window.currentPrivacyContact.phone || '';
+                const cleanDigits = raw.replace(/\D/g, '');
+                phoneEl.textContent = cleanDigits.length === 10 ? `+91 ${cleanDigits}` : (raw || '+91 ••••• •••••');
+                if (lblReveal) lblReveal.textContent = "Hide Number";
+                if (btnCopy) {
+                    btnCopy.classList.remove("hidden");
+                    btnCopy.classList.add("inline-flex");
+                }
+            } else {
+                phoneEl.textContent = window.maskPhone(window.currentPrivacyContact.phone);
+                if (lblReveal) lblReveal.textContent = "Reveal Full Number";
+                if (btnCopy) {
+                    btnCopy.classList.add("hidden");
+                    btnCopy.classList.remove("inline-flex");
+                }
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.copyPrivacyPhoneNumber = function() {
+            if (!window.currentPrivacyContact) return;
+            const raw = window.currentPrivacyContact.phone || '';
+            const cleanDigits = raw.replace(/\D/g, '');
+            const targetNumber = cleanDigits.length === 10 ? `+91${cleanDigits}` : raw;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(targetNumber).then(() => {
+                    const lbl = document.getElementById("lblCopyPhone");
+                    if (lbl) {
+                        lbl.textContent = "Copied!";
+                        setTimeout(() => { if (lbl) lbl.textContent = "Copy"; }, 2000);
+                    }
+                });
+            } else {
+                alert(`Phone number: ${targetNumber}`);
+            }
+        };
+
+        window.handlePrivacyDirectCall = function() {
+            if (!window.currentPrivacyContact) return;
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk && !chk.checked) {
+                alert("Please confirm this is for a genuine medical emergency before contacting.");
+                return;
+            }
+            const cleanPhone = (window.currentPrivacyContact.phone || '').replace(/\D/g, '');
+            if (!cleanPhone) {
+                alert("Phone number not available.");
+                return;
+            }
+            window.location.href = `tel:${cleanPhone}`;
+        };
+
+        window.handlePrivacySendWhatsApp = function() {
+            if (!window.currentPrivacyContact) return;
+            const chk = document.getElementById("chkEmergencyAcknowledge");
+            if (chk && !chk.checked) {
+                alert("Please confirm this is for a genuine medical emergency before contacting.");
+                return;
+            }
+            const contact = window.currentPrivacyContact;
+            const cleanPhone = (contact.phone || '').replace(/\D/g, '');
+            if (!cleanPhone) {
+                alert("Phone number not available.");
+                return;
+            }
+
+            const respectfulMsg = `Hello ${contact.name || 'Donor'}, I am reaching out through the LifeSaver Voluntary Blood Network regarding an urgent medical requirement for ${contact.bloodGroup || 'blood'} blood in ${contact.city || 'your area'}. If you or someone you know might be available to donate, please let us know. Thank you for your noble voluntary service!`;
+
+            const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+            window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}`, '_blank');
+        };
+
+        window.openPrivacyFindDonorByIndex = function(idx) {
+            const donor = (window.currentFindDonorsList || [])[idx];
+            if (donor) {
+                openPrivacyContactModal({
+                    type: 'donor',
+                    name: donor.name,
+                    bloodGroup: donor.bloodGroup,
+                    city: donor.city,
+                    phone: donor.phone || (donor.publicContacts?.whatsapp?.number)
+                });
+            }
+        };
+
+        function generateDonorContactHtml(donor, idx) {
             const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || (!donor.phoneVisibility && !donor.accountType);
             const contacts = donor.publicContacts || {};
             const donorUid = donor.uid || donor.userId || donor.key || '';
@@ -330,15 +503,24 @@
 
             if (isPublic && donor.phone) {
                 const cleanPhone = donor.phone.replace(/\D/g, '');
+                const masked = window.maskPhone(cleanPhone);
                 return `
                     <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> ${masked}
+                            </span>
+                            <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-900">
+                                🛡️ Privacy Guarded
+                            </span>
+                        </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="tel:${cleanPhone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                            </a>
-                            <a href="https://wa.me/91${cleanPhone}?text=Emergency:%20Need%20${encodeURIComponent(donor.bloodGroup || 'blood')}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            </button>
+                            <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                            </a>
+                            </button>
                         </div>
                         <button onclick="openDirectMessageToDonor('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
@@ -350,16 +532,13 @@
             // Private Account / Private Phone cases:
             const actionButtons = [];
 
-            // WhatsApp with explicit public number
+            // WhatsApp with explicit public number routed through privacy modal
             if (contacts.whatsapp?.enabled && contacts.whatsapp?.number) {
-                const cleanWa = contacts.whatsapp.number.replace(/\D/g, '');
-                if (cleanWa) {
-                    actionButtons.push(`
-                        <a href="https://wa.me/91${cleanWa}?text=Emergency:%20Need%20${encodeURIComponent(donor.bloodGroup || 'blood')}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                        </a>
-                    `);
-                }
+                actionButtons.push(`
+                    <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
+                    </button>
+                `);
             }
 
             // Instagram
@@ -587,6 +766,8 @@
                 return matchBg && matchCity;
             });
 
+            window.currentFindDonorsList = filtered;
+
             if (filtered.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full text-center py-12 glass-card">
@@ -597,7 +778,7 @@
                 return;
             }
 
-            filtered.forEach(donor => {
+            filtered.forEach((donor, idx) => {
                 const card = document.createElement("div");
                 card.className = "glass-card p-6 flex flex-col justify-between hover:border-red-500 transition";
                 card.innerHTML = `
@@ -616,7 +797,7 @@
                         </p>
                     </div>
 
-                    ${generateDonorContactHtml(donor)}
+                    ${generateDonorContactHtml(donor, idx)}
                 `;
                 grid.appendChild(card);
             });
@@ -743,6 +924,105 @@
             }
         });
     </script>
+
+    <!-- 🛡️ LIFESAVER PRIVACY SHIELD: EMERGENCY CONTACT CONFIRMATION MODAL -->
+    <div id="privacyContactModal"
+        class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 sm:p-7 border border-emerald-200 dark:border-emerald-900/60 shadow-2xl relative my-auto max-h-[92vh] flex flex-col">
+            <!-- Close button -->
+            <button onclick="closePrivacyContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-lg transition" title="Close">✕</button>
+
+            <!-- Header -->
+            <div class="flex items-center gap-3.5 mb-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20 font-black shrink-0">
+                    🛡️
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">LifeSaver Privacy Shield</h3>
+                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 uppercase">Guarded Contact</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Emergency contact protection & respectful donor outreach</p>
+                </div>
+            </div>
+
+            <!-- Privacy Assurance Notice -->
+            <div class="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/50 mb-4 text-xs text-emerald-900 dark:text-emerald-200">
+                <div class="flex items-start gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
+                    <div>
+                        <span class="font-bold">Voluntary Privacy Notice:</span> Voluntary donors are protected from automated scraping, marketing calls, and non-emergency disturbance. Please confirm you are contacting strictly for a genuine medical need.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Contact Card -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 mb-4 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span id="privacyContactRoleBadge" class="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900">
+                        Voluntary Blood Donor
+                    </span>
+                    <span id="privacyContactBloodGroup" class="bg-red-600 text-white font-black text-xs px-2.5 py-0.5 rounded-lg shadow-sm">
+                        O+
+                    </span>
+                </div>
+                <div>
+                    <h4 id="privacyContactName" class="font-bold text-slate-900 dark:text-white text-base">Donor Name</h4>
+                    <p id="privacyContactLocation" class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Location
+                    </p>
+                </div>
+
+                <!-- Masked / Revealed Phone Display -->
+                <div class="pt-2 border-t border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block">Emergency Phone</span>
+                        <span id="privacyPhoneDisplay" class="font-mono text-sm font-black text-slate-800 dark:text-slate-100 tracking-wider">
+                            +91 ••••• •••••
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnCopyPhone" onclick="copyPrivacyPhoneNumber()" class="hidden text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 items-center gap-1">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> <span id="lblCopyPhone">Copy</span>
+                        </button>
+                        <button id="btnRevealPhone" onclick="toggleRevealPrivacyPhone()" class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i> <span id="lblRevealPhone">Reveal Full Number</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Confirmation Checkbox -->
+            <div class="mb-4">
+                <label class="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" id="chkEmergencyAcknowledge" checked class="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                    <span>I confirm this is for a genuine urgent medical blood need and agree to contact respectfully.</span>
+                </label>
+            </div>
+
+            <!-- Pre-formatted Respectful WhatsApp Message Preview -->
+            <div class="mb-4">
+                <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Respectful WhatsApp Message Preview</span>
+                    <span class="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">Courteous & Verified</span>
+                </label>
+                <div id="privacyMsgPreview" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 italic font-mono leading-relaxed max-h-24 overflow-y-auto">
+                    <!-- Dynamically generated polite message -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button id="btnPrivacyDirectCall" onclick="handlePrivacyDirectCall()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm">
+                    <i data-lucide="phone" class="w-4 h-4"></i> Call Directly
+                </button>
+                <button id="btnPrivacySendWhatsApp" onclick="handlePrivacySendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> Send Respectful WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- SEND CONTACT REQUEST MODAL (FOR PRIVATE DONORS) -->
     <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
