@@ -341,14 +341,15 @@
             </div>
 
             <!-- LIVE STATS BAR WITH REAL-TIME PULSE HIGHLIGHTS -->
+            <!-- LIVE STATS BAR WITH REAL-TIME PULSE HIGHLIGHTS (FAST LOAD & ACCURATE LIVE USERS) -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto reveal-on-scroll stagger-5">
-                <div onclick="goTo('find-donor.html')" class="glass-card p-5 text-center cursor-pointer hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view all registered blood donor members">
+                <div onclick="goTo('find-donor.html')" class="glass-card p-5 text-center cursor-pointer hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 transition group border border-slate-200/80 dark:border-slate-800 relative" title="Click to view all registered members and donors">
                     <div class="flex items-center justify-center gap-1.5 mb-1">
                         <span class="live-pulse-dot bg-emerald-500" title="Real-time live count"></span>
-                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Live Donors</span>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Live Members</span>
                     </div>
-                    <div id="idxDonorsCount" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition duration-200">1,280+</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Registered Donors</div>
+                    <div id="idxDonorsCount" class="text-3xl font-black text-emerald-600 dark:text-emerald-400 group-hover:scale-105 transition duration-200">0</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Current Users & Donors</div>
                     <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 group-hover:bg-emerald-600 group-hover:text-white transition">
                         View Donors Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
                     </span>
@@ -358,7 +359,7 @@
                         <span class="live-pulse-dot bg-blue-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">Verified</span>
                     </div>
-                    <div id="idxHospitalsCount" class="text-3xl font-black text-blue-600 dark:text-blue-400 group-hover:scale-105 transition duration-200">380+</div>
+                    <div id="idxHospitalsCount" class="text-3xl font-black text-blue-600 dark:text-blue-400 group-hover:scale-105 transition duration-200">0</div>
                     <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Colab Hospitals</div>
                     <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 group-hover:bg-blue-600 group-hover:text-white transition">
                         View Hospitals Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
@@ -369,7 +370,7 @@
                         <span class="live-pulse-dot bg-amber-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Urgent</span>
                     </div>
-                    <div id="idxRequestsCount" class="text-3xl font-black text-amber-600 dark:text-amber-400 group-hover:scale-105 transition duration-200">150+</div>
+                    <div id="idxRequestsCount" class="text-3xl font-black text-amber-600 dark:text-amber-400 group-hover:scale-105 transition duration-200">0</div>
                     <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Active Requests</div>
                     <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 group-hover:bg-amber-600 group-hover:text-white transition">
                         View Needs Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
@@ -380,7 +381,7 @@
                         <span class="live-pulse-dot bg-purple-500" title="Real-time live count"></span>
                         <span class="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">Pledges</span>
                     </div>
-                    <div id="idxOrganCount" class="text-3xl font-black text-purple-600 dark:text-purple-400 group-hover:scale-105 transition duration-200">420+</div>
+                    <div id="idxOrganCount" class="text-3xl font-black text-purple-600 dark:text-purple-400 group-hover:scale-105 transition duration-200">0</div>
                     <div class="text-xs text-slate-600 dark:text-slate-300 font-extrabold uppercase tracking-wider mt-1">Organ Pledges</div>
                     <span class="inline-flex items-center gap-1 mt-2.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 group-hover:bg-purple-600 group-hover:text-white transition">
                         View Registry Data <i data-lucide="arrow-right" class="w-3 h-3"></i>
@@ -1099,21 +1100,32 @@
             }
         };
 
-        // Animated Number Counter Helper
-        function animateCounterNumber(el, targetVal) {
+        // Fast, Low-to-High Animated Number Counter Helper
+        function animateCounterNumber(el, targetVal, customDuration = 350) {
             if (!el) return;
             const end = parseInt(targetVal, 10);
             if (isNaN(end)) {
                 el.textContent = targetVal;
                 return;
             }
-            const start = parseInt(el.textContent.replace(/\D/g, '') || '0', 10);
-            const duration = 750;
+            const rawStart = parseInt(el.textContent.replace(/\D/g, '') || '0', 10);
+            // GUARANTEE LOW-TO-HIGH: Always count upwards. If previous display was higher or invalid, start cleanly from 0
+            const start = (!isNaN(rawStart) && rawStart < end) ? rawStart : 0;
+            
+            if (start === end) {
+                el.textContent = end.toLocaleString();
+                return;
+            }
+
+            const duration = customDuration;
             const startTime = performance.now();
+
             function updateNumber(currentTime) {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                const current = Math.floor(progress * (end - start) + start);
+                // Snappy ease-out quad for super fast, lively counting
+                const easeOut = 1 - Math.pow(1 - progress, 2);
+                const current = Math.floor(easeOut * (end - start) + start);
                 el.textContent = current.toLocaleString();
                 if (progress < 1) {
                     requestAnimationFrame(updateNumber);
@@ -1124,54 +1136,115 @@
             requestAnimationFrame(updateNumber);
         }
 
-        // REAL DATA METRICS (ACCURATE LIVE DATABASE COUNTING)
-        const idxDonorsEl = document.getElementById("idxDonorsCount");
-        onValue(ref(db, 'donors'), (snapshot) => {
-            if (snapshot.exists()) {
-                const count = Object.keys(snapshot.val()).length;
-                animateCounterNumber(idxDonorsEl, count);
-            } else {
-                animateCounterNumber(idxDonorsEl, 0);
+        // Metrics Cache Management for Instant Zero-Lag Display
+        function getMetricsCache() {
+            try {
+                return JSON.parse(localStorage.getItem('ls_metrics_cache') || '{}');
+            } catch(e) {
+                return {};
             }
+        }
+
+        function updateMetricsCache(key, value) {
+            try {
+                const cache = getMetricsCache();
+                cache[key] = value;
+                localStorage.setItem('ls_metrics_cache', JSON.stringify(cache));
+            } catch(e) {}
+        }
+
+        // Counter Elements
+        const idxDonorsEl = document.getElementById("idxDonorsCount");
+        const idxHospEl = document.getElementById("idxHospitalsCount");
+        const idxReqEl = document.getElementById("idxRequestsCount");
+        const idxOrganEl = document.getElementById("idxOrganCount");
+
+        // Instantly hydrate counters from cache on load to eliminate network wait
+        const initialCache = getMetricsCache();
+        if (initialCache.users !== undefined && idxDonorsEl) {
+            idxDonorsEl.textContent = Number(initialCache.users).toLocaleString();
+        }
+        if (initialCache.hospitals !== undefined && idxHospEl) {
+            idxHospEl.textContent = Number(initialCache.hospitals).toLocaleString();
+        }
+        if (initialCache.requests !== undefined && idxReqEl) {
+            idxReqEl.textContent = Number(initialCache.requests).toLocaleString();
+        }
+        if (initialCache.organ !== undefined && idxOrganEl) {
+            idxOrganEl.textContent = Number(initialCache.organ).toLocaleString();
+        }
+
+        // ACCURATE CURRENT USERS & DONORS COUNT (Unified live member community tracking)
+        const registeredUsersSet = new Set();
+        const registeredDonorsSet = new Set();
+
+        function refreshLiveMemberCount() {
+            const combinedMemberSet = new Set([...registeredUsersSet, ...registeredDonorsSet]);
+            const totalMembers = combinedMemberSet.size;
+            animateCounterNumber(idxDonorsEl, totalMembers, 350);
+            updateMetricsCache('users', totalMembers);
+        }
+
+        // Listen to active registered users
+        onValue(ref(db, 'users'), (snapshot) => {
+            registeredUsersSet.clear();
+            if (snapshot.exists()) {
+                Object.keys(snapshot.val()).forEach(uid => registeredUsersSet.add(uid));
+            }
+            refreshLiveMemberCount();
         }, (err) => {
-            console.error("Donors fetch error:", err);
-            if (idxDonorsEl) idxDonorsEl.textContent = "0";
+            console.warn("Live users count notice:", err);
+            refreshLiveMemberCount();
         });
 
-        const idxHospEl = document.getElementById("idxHospitalsCount");
+        // Listen to registered donors
+        onValue(ref(db, 'donors'), (snapshot) => {
+            registeredDonorsSet.clear();
+            if (snapshot.exists()) {
+                Object.keys(snapshot.val()).forEach(id => registeredDonorsSet.add(id));
+            }
+            refreshLiveMemberCount();
+        }, (err) => {
+            console.warn("Live donors count notice:", err);
+            refreshLiveMemberCount();
+        });
+
+        // Listen to verified partner hospitals
         onValue(ref(db, 'partner_hospitals'), (snapshot) => {
+            let activeCount = 0;
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 const activePartners = Object.values(data).filter(h => {
                     const st = (h.status || '').trim();
                     return st === 'Active Partner' || st === 'Verified Partner';
                 });
-                animateCounterNumber(idxHospEl, activePartners.length);
-            } else {
-                animateCounterNumber(idxHospEl, 0);
+                activeCount = activePartners.length;
             }
+            animateCounterNumber(idxHospEl, activeCount, 350);
+            updateMetricsCache('hospitals', activeCount);
         }, (err) => {
-            console.error("Partner hospitals fetch error:", err);
-            if (idxHospEl) idxHospEl.textContent = "0";
+            console.warn("Partner hospitals notice:", err);
+            if (idxHospEl && (!idxHospEl.textContent || idxHospEl.textContent === '')) idxHospEl.textContent = "0";
         });
 
-        const idxReqEl = document.getElementById("idxRequestsCount");
+        // Listen to active blood requests
         onValue(ref(db, 'blood_requests'), (snapshot) => {
-            const count = snapshot.exists() ? Object.keys(snapshot.val()).filter(k => snapshot.val()[k].status !== 'Resolved').length : 0;
-            animateCounterNumber(idxReqEl, count);
+            const reqCount = snapshot.exists() ? Object.keys(snapshot.val()).filter(k => snapshot.val()[k].status !== 'Resolved').length : 0;
+            animateCounterNumber(idxReqEl, reqCount, 350);
+            updateMetricsCache('requests', reqCount);
+        }, (err) => {
+            console.warn("Blood requests notice:", err);
+            if (idxReqEl && (!idxReqEl.textContent || idxReqEl.textContent === '')) idxReqEl.textContent = "0";
         });
 
-        const idxOrganEl = document.getElementById("idxOrganCount");
+        // Listen to organ donation pledges
         onValue(ref(db, 'organ_donors'), (snapshot) => {
-            if (snapshot.exists()) {
-                const count = Object.keys(snapshot.val()).length;
-                animateCounterNumber(idxOrganEl, count);
-            } else {
-                animateCounterNumber(idxOrganEl, 0);
-            }
+            const organCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+            animateCounterNumber(idxOrganEl, organCount, 350);
+            updateMetricsCache('organ', organCount);
         }, (err) => {
-            console.error("Organ donors fetch error:", err);
-            if (idxOrganEl) idxOrganEl.textContent = "0";
+            console.warn("Organ pledges notice:", err);
+            if (idxOrganEl && (!idxOrganEl.textContent || idxOrganEl.textContent === '')) idxOrganEl.textContent = "0";
         });
     </script>
 
