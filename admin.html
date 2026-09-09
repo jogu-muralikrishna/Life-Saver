@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- 2. PROFILE & PRIVACY REQUESTS NOTIFICATION BUTTON -->
-                <button onclick="switchTab('profile_requests')" class="relative flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Profile Change Requests">
+                <button id="adminNavRequestsBtn" onclick="switchTab('profile_requests')" class="relative flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Profile Change Requests">
                     <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500"></i>
                     <span class="hidden md:inline">Requests</span>
                     <span id="adminNavNotifBadge" class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full hidden">0</span>
@@ -192,7 +192,7 @@
 
         <!-- STATS CARDS (FEATURE 17 REAL DATA METRICS) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <div class="glass-card p-5 border border-red-100 dark:border-red-900/50">
+            <div id="cardStatBloodDonors" class="glass-card p-5 border border-red-100 dark:border-red-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Blood Donors</span>
                     <i data-lucide="droplet" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
@@ -200,7 +200,7 @@
                 <div id="statBloodDonors" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div class="glass-card p-5 border border-emerald-100 dark:border-emerald-900/50">
+            <div id="cardStatHospitals" class="glass-card p-5 border border-emerald-100 dark:border-emerald-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Colab Hospitals</span>
                     <i data-lucide="building-2" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
@@ -208,7 +208,7 @@
                 <div id="statHospitals" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div class="glass-card p-5 border border-amber-100 dark:border-amber-900/50">
+            <div id="cardStatRequests" class="glass-card p-5 border border-amber-100 dark:border-amber-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Active Requests</span>
                     <i data-lucide="alert-circle" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
@@ -216,7 +216,7 @@
                 <div id="statRequests" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div class="glass-card p-5 border border-purple-100 dark:border-purple-900/50">
+            <div id="cardStatOrganDonors" class="glass-card p-5 border border-purple-100 dark:border-purple-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Organ Pledges</span>
                     <i data-lucide="gift" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
@@ -224,7 +224,7 @@
                 <div id="statOrganDonors" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div class="glass-card p-5 border border-blue-100 dark:border-blue-900/50">
+            <div id="cardStatLogs" class="glass-card p-5 border border-blue-100 dark:border-blue-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Audit Logs</span>
                     <i data-lucide="shield" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
@@ -232,7 +232,7 @@
                 <div id="statLogs" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div class="glass-card p-5 border border-pink-100 dark:border-pink-900/50">
+            <div id="cardStatMessages" class="glass-card p-5 border border-pink-100 dark:border-pink-900/50">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">New Messages</span>
                     <i data-lucide="mail" class="w-5 h-5 text-pink-600 dark:text-pink-400"></i>
@@ -399,18 +399,29 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Add a hospital that has collaborated with Life Saver.</p>
                     
                     <form id="addPartnerHospitalForm" onsubmit="addPartnerHospital(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hospital Name *</label>
-                                <input type="text" id="addHospName" required placeholder="e.g. St. Theresa's Hospital" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                                <input type="text" id="addHospName" required placeholder="e.g. Apollo Hospitals" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Location *</label>
-                                <input type="text" id="addHospLocation" required placeholder="e.g. Hyderabad, Telangana" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mobile / Phone Number *</label>
+                                <input type="tel" id="addHospMobile" required placeholder="e.g. +91 9876543210 / 040-23607777" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contact Phone / Email *</label>
-                                <input type="text" id="addHospNote" required placeholder="e.g. +91 9876543210 / info@hospital.org" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location *</label>
+                                <input type="text" id="addHospLocation" required placeholder="e.g. Jubilee Hills, Hyderabad" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Sub-branches (Comma-separated)</label>
+                                <input type="text" id="addHospSubBranches" placeholder="e.g. Secunderabad, Hyderguda, DRDO, Madhapur" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Services & Other Details</label>
+                                <input type="text" id="addHospDetails" placeholder="e.g. 24/7 ICU, Emergency Trauma Care, Blood Bank Hub" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-medium">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Partnership Status *</label>
@@ -436,7 +447,9 @@
                             <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                                 <th class="p-4">Hospital Name</th>
                                 <th class="p-4">Location</th>
-                                <th class="p-4">Contact</th>
+                                <th class="p-4">Mobile / Phone</th>
+                                <th class="p-4">Sub-branches</th>
+                                <th class="p-4">Details / Services</th>
                                 <th class="p-4">Partnership Status</th>
                                 <th class="p-4 text-right th-actions">Actions</th>
                             </tr>
@@ -725,36 +738,105 @@
             }
         };
 
+        const subAdminForbiddenTabs = [
+            'hospitals',
+            'messages',
+            'admin_activity',
+            'profile_requests',
+            'account_requests',
+            'audit',
+            'users',
+            'recycle_bin',
+            'sub_admins'
+        ];
+
         function applyRoleUIControls() {
             const badge = document.getElementById('adminRoleBadge');
             if (badge) badge.textContent = adminRole.replace(/_/g, ' ');
 
             const banner = document.getElementById("subAdminReadOnlyBanner");
-            const subAdminTabBtn = document.getElementById("tabSubAdminsBtn");
-            const usersTabBtn = document.getElementById("tabUsersBtn");
-            const adminActivityTabBtn = document.getElementById("tabAdminActivityBtn");
-            const recycleBinTabBtn = document.getElementById("tabRecycleBinBtn");
+
+            // 9 Restricted feature tab buttons for Sub-Admin
+            const subAdminForbiddenTabBtns = [
+                'tabHospitalsBtn',
+                'tabMessagesBtn',
+                'tabAdminActivityBtn',
+                'tabProfileRequestsBtn',
+                'tabAccountRequestsBtn',
+                'tabAuditBtn',
+                'tabUsersBtn',
+                'tabRecycleBinBtn',
+                'tabSubAdminsBtn'
+            ];
+
+            // Restricted table containers for Sub-Admin
+            const subAdminForbiddenContainers = [
+                'tableHospitalsContainer',
+                'tableMessagesContainer',
+                'tableAdminActivityContainer',
+                'tableProfileRequestsContainer',
+                'tableAccountRequestsContainer',
+                'tableAuditContainer',
+                'tableUsersContainer',
+                'tableRecycleBinContainer',
+                'tableSubAdminsContainer'
+            ];
+
+            // Restricted stat cards for Sub-Admin
+            const subAdminForbiddenStatCards = [
+                'cardStatHospitals',
+                'cardStatLogs',
+                'cardStatMessages'
+            ];
+
+            const navReqBtn = document.getElementById('adminNavRequestsBtn');
 
             if (adminRole === 'SUB_ADMIN') {
                 document.documentElement.classList.add('sub-admin-mode');
                 if (banner) banner.classList.remove("hidden");
 
-                // Hide creation forms for SUB_ADMIN
+                // Completely hide all 9 restricted feature tabs
+                subAdminForbiddenTabBtns.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add("hidden");
+                });
+
+                // Completely hide all 9 restricted feature containers
+                subAdminForbiddenContainers.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add("hidden");
+                });
+
+                // Completely hide restricted stat cards
+                subAdminForbiddenStatCards.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add("hidden");
+                });
+
+                // Hide topbar requests notification button for Sub-Admin
+                if (navReqBtn) navReqBtn.classList.add("hidden");
+
+                // Hide hospital add form if any
                 const addHospFormCard = document.getElementById("addPartnerHospitalForm")?.closest('.bg-slate-50');
                 if (addHospFormCard) addHospFormCard.classList.add("hidden");
 
-                // Hide restricted tabs for SUB_ADMIN
-                if (subAdminTabBtn) subAdminTabBtn.classList.add("hidden");
-                if (usersTabBtn) usersTabBtn.classList.add("hidden");
-                if (adminActivityTabBtn) adminActivityTabBtn.classList.add("hidden");
-                if (recycleBinTabBtn) recycleBinTabBtn.classList.add("hidden");
+                // Ensure Sub-Admin starts on an allowed tab (Blood Donors)
+                switchTab('blood');
             } else {
                 document.documentElement.classList.remove('sub-admin-mode');
                 if (banner) banner.classList.add("hidden");
-                if (subAdminTabBtn) subAdminTabBtn.classList.remove("hidden");
-                if (usersTabBtn) usersTabBtn.classList.remove("hidden");
-                if (adminActivityTabBtn) adminActivityTabBtn.classList.remove("hidden");
-                if (recycleBinTabBtn) recycleBinTabBtn.classList.remove("hidden");
+
+                subAdminForbiddenTabBtns.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove("hidden");
+                });
+
+                subAdminForbiddenStatCards.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove("hidden");
+                });
+
+                if (navReqBtn) navReqBtn.classList.remove("hidden");
             }
         }
 
@@ -1263,7 +1345,7 @@
             keys.forEach(k => {
                 const h = hospitalsData[k];
                 const st = (h.status || '').trim();
-                if (st === 'Active Partner' || st === 'Verified Partner') {
+                if (st === 'Active Partner' || st === 'Verified Partner' || st === 'Active') {
                     activeCount++;
                 }
             });
@@ -1272,7 +1354,7 @@
             if (statEl) statEl.textContent = activeCount;
 
             if (keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">0 Colab Hospitals. No colab hospitals added yet.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">0 Colab Hospitals. No colab hospitals added yet.</td></tr>`;
                 return;
             }
 
@@ -1286,10 +1368,26 @@
                     ? `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-max"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> 🟢 Active Partner</span>`
                     : `<span class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-max">⚪ Inactive</span>`;
 
+                const phoneDisplay = item.mobile || item.phone || item.contact || item.note || '-';
+
+                const subBranchesList = (item.subBranches || '')
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                const subBranchesHtml = subBranchesList.length > 0
+                    ? `<div class="flex flex-wrap gap-1">${subBranchesList.map(b => `<span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-900/50 px-2 py-0.5 rounded-full text-[11px] font-bold">🏢 ${b}</span>`).join('')}</div>`
+                    : `<span class="text-slate-400 text-xs italic">None</span>`;
+
+                const detailsHtml = item.details 
+                    ? `<div class="text-xs text-slate-700 dark:text-slate-300 max-w-xs line-clamp-2" title="${(item.details || '').replace(/"/g, '&quot;')}">${item.details}</div>`
+                    : `<span class="text-slate-400 text-xs italic">-</span>`;
+
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">🏥 ${item.name || 'Hospital Name'}</td>
                     <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-semibold">📍 ${item.location || item.city || '-'}</td>
-                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold">📞 ${item.note || item.phone || item.contact || '-'}</td>
+                    <td class="p-4 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold">📞 ${phoneDisplay}</td>
+                    <td class="p-4">${subBranchesHtml}</td>
+                    <td class="p-4">${detailsHtml}</td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-right space-x-1.5 td-actions">
                         <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">
@@ -1313,15 +1411,18 @@
             checkWritePermission('add Colab Hospital');
 
             const name = document.getElementById("addHospName").value.trim();
+            const mobile = document.getElementById("addHospMobile").value.trim();
             const location = document.getElementById("addHospLocation").value.trim();
-            const note = document.getElementById("addHospNote").value.trim();
+            const subBranches = document.getElementById("addHospSubBranches").value.trim();
+            const details = document.getElementById("addHospDetails").value.trim();
             const status = document.getElementById("addHospStatus").value;
             const feedback = document.getElementById("addHospFeedback");
             const btn = document.getElementById("addHospSubmitBtn");
 
-            if (!name || !location || !note) {
-                feedback.textContent = "Please provide Hospital Name, Location, and Contact details.";
+            if (!name || !location || !mobile) {
+                feedback.textContent = "Please provide Hospital Name, Mobile/Phone, and Primary Location.";
                 feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+                feedback.classList.remove("hidden");
                 return;
             }
 
@@ -1330,10 +1431,13 @@
 
             const payload = {
                 name: name,
+                mobile: mobile,
+                phone: mobile,
+                contact: mobile,
                 location: location,
-                note: note || "",
-                phone: note || "",
-                contact: note || "",
+                subBranches: subBranches || "",
+                details: details || "",
+                note: mobile || "",
                 status: status || "Active Partner",
                 createdAt: new Date().toISOString(),
                 timestamp: Date.now()
@@ -1343,11 +1447,16 @@
                 await push(ref(db, 'partner_hospitals'), payload);
                 feedback.textContent = "Colab hospital added successfully! ❤️";
                 feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 block mb-2 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50";
+                feedback.classList.remove("hidden");
                 document.getElementById("addPartnerHospitalForm").reset();
-                setTimeout(() => { feedback.textContent = ""; }, 3000);
+                setTimeout(() => { 
+                    feedback.textContent = ""; 
+                    feedback.classList.add("hidden");
+                }, 3000);
             } catch(err) {
                 feedback.textContent = "Error adding hospital: " + err.message;
                 feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 block mb-2";
+                feedback.classList.remove("hidden");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4"></i> Add Colab Hospital`;
@@ -1356,9 +1465,10 @@
         };
 
         window.togglePartnerHospitalStatus = async function(key) {
+            checkWritePermission('toggle Colab Hospital status');
             const hosp = hospitalsData[key];
             if (!hosp) return;
-            const isCurrentlyActive = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner');
+            const isCurrentlyActive = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner' || hosp.status === 'Active');
             const newStatus = isCurrentlyActive ? 'Inactive' : 'Active Partner';
             try {
                 await update(ref(db, `partner_hospitals/${key}`), {
@@ -1372,14 +1482,18 @@
 
         let activeEditHospKey = null;
         window.openEditPartnerHospitalModal = function(key) {
+            checkWritePermission('edit Colab Hospital');
             activeEditHospKey = key;
             const hosp = hospitalsData[key];
             if (!hosp) return;
             document.getElementById("editHospName").value = hosp.name || "";
+            document.getElementById("editHospMobile").value = hosp.mobile || hosp.phone || hosp.contact || hosp.note || "";
             document.getElementById("editHospLocation").value = hosp.location || hosp.city || "";
-            document.getElementById("editHospNote").value = hosp.note || hosp.phone || "";
-            document.getElementById("editHospStatus").value = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner') ? 'Active Partner' : 'Inactive';
+            document.getElementById("editHospSubBranches").value = hosp.subBranches || "";
+            document.getElementById("editHospDetails").value = hosp.details || "";
+            document.getElementById("editHospStatus").value = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner' || hosp.status === 'Active') ? 'Active Partner' : 'Inactive';
             document.getElementById("editHospFeedback").textContent = "";
+            document.getElementById("editHospFeedback").classList.add("hidden");
 
             const modal = document.getElementById("editPartnerHospitalModal");
             modal.classList.remove("hidden");
@@ -1394,13 +1508,23 @@
 
         window.submitEditPartnerHospital = async function(e) {
             if (e) e.preventDefault();
+            checkWritePermission('edit Colab Hospital');
             if (!activeEditHospKey) return;
             const name = document.getElementById("editHospName").value.trim();
+            const mobile = document.getElementById("editHospMobile").value.trim();
             const location = document.getElementById("editHospLocation").value.trim();
-            const note = document.getElementById("editHospNote").value.trim();
+            const subBranches = document.getElementById("editHospSubBranches").value.trim();
+            const details = document.getElementById("editHospDetails").value.trim();
             const status = document.getElementById("editHospStatus").value;
             const feedback = document.getElementById("editHospFeedback");
             const btn = document.getElementById("editHospSubmitBtn");
+
+            if (!name || !location || !mobile) {
+                feedback.textContent = "Hospital Name, Mobile, and Location are required.";
+                feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                feedback.classList.remove("hidden");
+                return;
+            }
 
             btn.disabled = true;
             btn.textContent = "Saving...";
@@ -1408,8 +1532,13 @@
             try {
                 await update(ref(db, `partner_hospitals/${activeEditHospKey}`), {
                     name: name,
+                    mobile: mobile,
+                    phone: mobile,
+                    contact: mobile,
                     location: location,
-                    note: note,
+                    subBranches: subBranches,
+                    details: details,
+                    note: mobile,
                     status: status,
                     updatedAt: new Date().toISOString()
                 });
@@ -1417,6 +1546,7 @@
             } catch(err) {
                 feedback.textContent = "Error saving: " + err.message;
                 feedback.className = "text-xs font-bold text-red-600 dark:text-red-400 mt-2 block";
+                feedback.classList.remove("hidden");
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Save Changes";
@@ -1632,8 +1762,8 @@
         };
 
         window.switchTab = function(tab) {
-            if (adminRole === 'SUB_ADMIN' && ['sub_admins', 'users', 'admin_activity', 'recycle_bin'].includes(tab)) {
-                alert(`🔒 Access Restricted: Sub-Admins are not permitted to access the ${tab.replace(/_/g, ' ')} section.`);
+            if (adminRole === 'SUB_ADMIN' && subAdminForbiddenTabs.includes(tab)) {
+                alert(`🔒 Access Restricted: Sub-Admins are not permitted to access this administrative section.`);
                 switchTab('blood');
                 return;
             }
@@ -3215,14 +3345,25 @@
                     <input type="text" id="editHospName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Location *</label>
-                    <input type="text" id="editHospLocation" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mobile / Phone Number *</label>
+                        <input type="tel" id="editHospMobile" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location *</label>
+                        <input type="text" id="editHospLocation" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Small Note (Optional)</label>
-                    <input type="text" id="editHospNote" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Sub-branches (Comma-separated)</label>
+                    <input type="text" id="editHospSubBranches" placeholder="e.g. Secunderabad, Hyderguda, DRDO, Madhapur" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-medium outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Services & Other Details</label>
+                    <textarea id="editHospDetails" rows="2" placeholder="e.g. 24/7 ICU, Emergency Trauma Care, Blood Bank Hub" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-medium outline-none focus:border-emerald-500"></textarea>
                 </div>
 
                 <div>

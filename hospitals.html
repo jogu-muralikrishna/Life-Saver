@@ -217,13 +217,38 @@
         </div>
 
         <!-- REAL-TIME FACILITY DIRECTORY NOTICE (REQUIREMENT 2) -->
-        <div class="mb-4 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-800 dark:text-blue-300 flex items-center gap-3">
+        <div class="mb-6 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-800 dark:text-blue-300 flex items-center gap-3">
             <i data-lucide="info" class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0"></i>
             <div>
                 <span class="font-black block">Verified Medical Facility Directory</span>
                 <span>Hospital names, addresses, and navigation links are sourced from live healthcare map data and Google Maps. Emergency resource availability is tracked separately via LifeSaver-Care network hospital records.</span>
             </div>
         </div>
+
+        <!-- 🤝 ACCREDITED PARTNER / COLAB HOSPITALS SHOWCASE -->
+        <section id="colabHospitalsSection" class="mb-10">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="p-1.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                            <i data-lucide="handshake" class="w-5 h-5"></i>
+                        </span>
+                        <span>LifeSaver Accredited Partner Hospitals</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Collaborating medical institutions with verified emergency wards, sub-branches & direct contact links</p>
+                </div>
+                <span id="colabHospitalsBadgeCount" class="text-xs bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-3 py-1.5 rounded-full font-bold shrink-0">
+                    🟢 Loading Colab Hospitals...
+                </span>
+            </div>
+
+            <div id="colabHospitalsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div class="col-span-full p-8 text-center text-slate-400 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-xs">
+                    <i data-lucide="loader" class="w-5 h-5 animate-spin mx-auto mb-2 text-emerald-600"></i>
+                    Fetching accredited partner hospitals...
+                </div>
+            </div>
+        </section>
 
         <!-- MAP CONTAINER -->
         <div class="glass-card p-3 rounded-2xl mb-8 border border-slate-200 dark:border-slate-800 shadow-md">
@@ -259,7 +284,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -274,6 +299,124 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // REAL-TIME COLLABORATED HOSPITALS SHOWCASE
+        const colabGrid = document.getElementById("colabHospitalsGrid");
+        const colabBadge = document.getElementById("colabHospitalsBadgeCount");
+
+        onValue(ref(db, 'partner_hospitals'), (snapshot) => {
+            if (!colabGrid) return;
+            colabGrid.innerHTML = "";
+
+            if (!snapshot.exists()) {
+                if (colabBadge) colabBadge.textContent = "0 Accredited Partners";
+                colabGrid.innerHTML = `
+                    <div class="col-span-full p-6 text-center text-slate-400 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-xs">
+                        No collaborated hospitals registered yet.
+                    </div>
+                `;
+                return;
+            }
+
+            const data = snapshot.val();
+            const keys = Object.keys(data);
+            const activeHospitals = [];
+
+            keys.forEach(k => {
+                const item = data[k];
+                const st = (item.status || 'Active Partner').trim();
+                if (st === 'Active Partner' || st === 'Verified Partner' || st === 'Active') {
+                    activeHospitals.push({ id: k, ...item });
+                }
+            });
+
+            if (colabBadge) {
+                colabBadge.textContent = `🟢 ${activeHospitals.length} Verified Partner${activeHospitals.length === 1 ? '' : 's'}`;
+            }
+
+            if (activeHospitals.length === 0) {
+                colabGrid.innerHTML = `
+                    <div class="col-span-full p-6 text-center text-slate-400 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-xs">
+                        No active partner hospitals currently available.
+                    </div>
+                `;
+                return;
+            }
+
+            activeHospitals.forEach(h => {
+                const phone = h.mobile || h.phone || h.contact || h.note || '';
+                const cleanPhone = phone.replace(/[^0-9+]/g, '');
+                const location = h.location || h.city || 'Location available on request';
+                const gmapsDir = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent((h.name || 'Hospital') + ' ' + location)}`;
+
+                // Process sub-branches
+                const subBranchesList = (h.subBranches || '')
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+
+                const subBranchesHtml = subBranchesList.length > 0
+                    ? `<div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Sub-branches & Network</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${subBranchesList.map(b => `<span class="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-900/60 px-2 py-0.5 rounded-lg text-xs font-semibold flex items-center gap-1">🏢 ${b}</span>`).join('')}
+                        </div>
+                       </div>`
+                    : '';
+
+                // Process Details / Services
+                const detailsHtml = h.details && h.details.trim()
+                    ? `<div class="mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/70 dark:border-slate-800/80 text-xs text-slate-600 dark:text-slate-300">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 block mb-0.5">Services & Specialities:</span>
+                        <span>${h.details}</span>
+                       </div>`
+                    : '';
+
+                const card = document.createElement("div");
+                card.className = "p-5 rounded-3xl bg-white dark:bg-slate-900 border border-emerald-200/80 dark:border-emerald-900/50 shadow-md shadow-emerald-500/5 hover:border-emerald-500 dark:hover:border-emerald-500 transition flex flex-col justify-between";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-2.5">
+                            <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-extrabold text-[11px] px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900 flex items-center gap-1 w-max">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 🟢 LifeSaver Partner
+                            </span>
+                            <span class="text-[11px] font-mono text-slate-400 font-semibold">24/7 Verified</span>
+                        </div>
+
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-1 flex items-start gap-1.5">
+                            <i data-lucide="building-2" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
+                            <span>${h.name || 'Partner Hospital'}</span>
+                        </h3>
+
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                            <span>${location}</span>
+                        </p>
+
+                        ${detailsHtml}
+                        ${subBranchesHtml}
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2">
+                        ${cleanPhone ? `
+                            <a href="tel:${cleanPhone}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Now
+                            </a>
+                        ` : `
+                            <button disabled class="bg-slate-100 dark:bg-slate-800 text-slate-400 text-xs font-bold py-2.5 px-3 rounded-xl cursor-not-allowed">
+                                No Phone
+                            </button>
+                        `}
+                        <a href="${gmapsDir}" target="_blank" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition border border-slate-200/80 dark:border-slate-700">
+                            <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-600"></i> Directions
+                        </a>
+                    </div>
+                `;
+                colabGrid.appendChild(card);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        });
 
         // AUTH STATE GREETING
         onAuthStateChanged(auth, async (user) => {
