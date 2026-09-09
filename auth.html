@@ -51,12 +51,40 @@
             </div>
         </div>
 
-        <!-- MODE TOGGLE TABS -->
+        <!-- MODE TOGGLE TABS (EARLY INTERACTION SAFE) -->
+        <script>
+            window.currentAuthMode = 'login';
+            window.setAuthMode = function(mode) {
+                window.currentAuthMode = mode;
+                const btn = document.getElementById('authBtn');
+                const nameWrap = document.getElementById('nameWrap');
+                const tabSignin = document.getElementById('tabSignin');
+                const tabSignup = document.getElementById('tabSignup');
+                const portalTitle = document.getElementById('portalTitle');
+                const portalSub = document.getElementById('portalSub');
+
+                if (mode === 'register') {
+                    if (nameWrap) nameWrap.classList.remove('hidden');
+                    if (btn) btn.innerText = "Create New Account";
+                    if (tabSignup) tabSignup.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                    if (tabSignin) tabSignin.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                    if (portalTitle) portalTitle.textContent = "New Registration";
+                    if (portalSub) portalSub.textContent = "Create your LifeSaver member account to manage requests & donor certificates";
+                } else {
+                    if (nameWrap) nameWrap.classList.add('hidden');
+                    if (btn) btn.innerText = "Sign In to Account";
+                    if (tabSignin) tabSignin.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                    if (tabSignup) tabSignup.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                    if (portalTitle) portalTitle.textContent = "User Portal";
+                    if (portalSub) portalSub.textContent = "Sign in or register your account to manage emergency requests, donor profile & referrals";
+                }
+            };
+        </script>
         <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-6 border border-slate-200 dark:border-slate-800 text-xs font-bold">
-            <button id="tabSignin" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">
+            <button type="button" id="tabSignin" onclick="window.setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">
                 Sign In
             </button>
-            <button id="tabSignup" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+            <button type="button" id="tabSignup" onclick="window.setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
                 New Registration
             </button>
         </div>
@@ -1459,6 +1487,39 @@
         let currentActiveUser = null;
         window.currentUserReferralCode = null;
         let targetResetUserKey = null;
+        let currentMode = window.currentAuthMode || "login";
+
+        window.setAuthMode = function(mode) {
+            currentMode = mode;
+            window.currentAuthMode = mode;
+            const btn = document.getElementById('authBtn');
+            const nameWrap = document.getElementById('nameWrap');
+            const tabSignin = document.getElementById('tabSignin');
+            const tabSignup = document.getElementById('tabSignup');
+            const portalTitle = document.getElementById('portalTitle');
+            const portalSub = document.getElementById('portalSub');
+
+            if (mode === 'register') {
+                if (nameWrap) nameWrap.classList.remove('hidden');
+                if (btn) btn.innerText = "Create New Account";
+                if (tabSignup) tabSignup.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                if (tabSignin) tabSignin.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                if (portalTitle) portalTitle.textContent = "New Registration";
+                if (portalSub) portalSub.textContent = "Create your LifeSaver member account to manage requests & donor certificates";
+            } else {
+                if (nameWrap) nameWrap.classList.add('hidden');
+                if (btn) btn.innerText = "Sign In to Account";
+                if (tabSignin) tabSignin.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
+                if (tabSignup) tabSignup.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+                if (portalTitle) portalTitle.textContent = "User Portal";
+                if (portalSub) portalSub.textContent = "Sign in or register your account to manage emergency requests, donor profile & referrals";
+            }
+        };
+
+        const tabSignin = document.getElementById('tabSignin');
+        const tabSignup = document.getElementById('tabSignup');
+        if (tabSignin) tabSignin.onclick = (e) => { e.preventDefault(); window.setAuthMode('login'); };
+        if (tabSignup) tabSignup.onclick = (e) => { e.preventDefault(); window.setAuthMode('register'); };
 
         window.lockBodyScroll = window.lockBodyScroll || function() {
             try { document.body.style.overflow = 'hidden'; } catch (e) {}
@@ -1714,132 +1775,150 @@
             }
         };
 
-        let currentMode = "login";
-
         // Listen to Auth State for Personal Main Dashboard & Referral Impact
-        onAuthStateChanged(auth, async (user) => {
+        async function initUserDashboard(user) {
+            if (!user) return;
             const authCard = document.getElementById("authCard");
             const dashboardContainer = document.getElementById("dashboardContainer");
             currentActiveUser = user;
 
-            if (user) {
-                if (authCard) authCard.classList.add("hidden");
-                if (dashboardContainer) dashboardContainer.classList.remove("hidden");
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                if (document.documentElement) document.documentElement.scrollTop = 0;
-                if (document.body) document.body.scrollTop = 0;
+            if (authCard) authCard.classList.add("hidden");
+            if (dashboardContainer) dashboardContainer.classList.remove("hidden");
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            if (document.documentElement) document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
 
-                let name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
-                name = name.charAt(0).toUpperCase() + name.slice(1);
-                document.getElementById("userGreeting").textContent = `Welcome, ${name}!`;
-                document.getElementById("userEmailLabel").textContent = user.email;
+            let name = user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
+            name = name.charAt(0).toUpperCase() + name.slice(1);
+            const userGreeting = document.getElementById("userGreeting");
+            if (userGreeting) userGreeting.textContent = `Welcome, ${name}!`;
+            const userEmailLabel = document.getElementById("userEmailLabel");
+            if (userEmailLabel) userEmailLabel.textContent = user.email || '';
 
-                document.getElementById("signOutBtn").onclick = () => {
-                    signOut(auth).then(() => window.location.reload());
+            const signOutBtn = document.getElementById("signOutBtn");
+            if (signOutBtn) {
+                signOutBtn.onclick = () => {
+                    localStorage.removeItem('ls_logged_user');
+                    signOut(auth).then(() => window.location.reload()).catch(() => window.location.reload());
                 };
+            }
 
-                // Ensure Referral Code Exists for User in Database
-                try {
-                    const userSnap = await get(ref(db, `users/${user.uid}`));
-                    let referralCode = null;
-                    if (userSnap.exists() && userSnap.val().referralCode) {
-                        referralCode = userSnap.val().referralCode;
-                    } else {
-                        referralCode = generateReferralCode(user.displayName || name);
-                        await update(ref(db, `users/${user.uid}`), {
-                            name: user.displayName || name,
-                            email: user.email,
-                            referralCode: referralCode,
-                            referralCount: userSnap.exists() ? (userSnap.val().referralCount || 0) : 0
-                        });
-                        await set(ref(db, `referral_codes/${referralCode}`), user.uid);
-                    }
-
-                    window.currentUserReferralCode = referralCode;
-                    const refCodeEl = document.getElementById('myRefCode');
-                    if (refCodeEl) refCodeEl.textContent = referralCode;
-
-                    // Ensure reverse lookup index is set
-                    try {
-                        await set(ref(db, `referral_codes/${referralCode}`), user.uid);
-                    } catch (e) {}
-
-                    // Real-Time Listener on User's Unique Referrals Map (Firebase-Safe)
-                    onValue(ref(db, `referrals/${user.uid}`), (refSnap) => {
-                        const count = refSnap.exists() ? Object.keys(refSnap.val()).length : 0;
-                        const refCountEl = document.getElementById('myRefCount');
-                        if (refCountEl) refCountEl.textContent = count;
-                        
-                        const myRankCountEl = document.getElementById('myRankCount');
-                        if (myRankCountEl) myRankCountEl.textContent = count;
-
-                        // Keep cached count in sync
-                        update(ref(db, `users/${user.uid}`), { referralCount: count }).catch(() => {});
+            // Ensure Referral Code Exists for User in Database
+            try {
+                const userSnap = await get(ref(db, `users/${user.uid}`));
+                let referralCode = null;
+                if (userSnap.exists() && userSnap.val().referralCode) {
+                    referralCode = userSnap.val().referralCode;
+                } else {
+                    referralCode = generateReferralCode(user.displayName || name);
+                    await update(ref(db, `users/${user.uid}`), {
+                        name: user.displayName || name,
+                        email: user.email || '',
+                        referralCode: referralCode,
+                        referralCount: userSnap.exists() ? (userSnap.val().referralCount || 0) : 0
                     });
-                } catch (refErr) {
-                    console.warn("Referral state initialization note:", refErr);
+                    await set(ref(db, `referral_codes/${referralCode}`), user.uid);
                 }
 
-                // Load Complete User Profile, Visibility & Social Links
-                loadUserProfileAndDashboard(user);
+                window.currentUserReferralCode = referralCode;
+                const refCodeEl = document.getElementById('myRefCode');
+                if (refCodeEl) refCodeEl.textContent = referralCode;
 
-                // Listen to User Change Requests History
-                listenToUserRequestsHistory(user);
+                // Ensure reverse lookup index is set
+                try {
+                    await set(ref(db, `referral_codes/${referralCode}`), user.uid);
+                } catch (e) {}
 
-                // Listen to In-Platform Contact Requests & Direct Messages Inbox
-                listenToUserInbox(user);
+                // Real-Time Listener on User's Unique Referrals Map (Firebase-Safe)
+                onValue(ref(db, `referrals/${user.uid}`), (refSnap) => {
+                    const count = refSnap.exists() ? Object.keys(refSnap.val()).length : 0;
+                    const refCountEl = document.getElementById('myRefCount');
+                    if (refCountEl) refCountEl.textContent = count;
+                    
+                    const myRankCountEl = document.getElementById('myRankCount');
+                    if (myRankCountEl) myRankCountEl.textContent = count;
 
-                // Load Donor Privacy Settings (PART 12 & 13)
-                loadUserDonorPrivacy(user);
-
-                // Load User Official Certificates (Blood & Organ)
-                loadUserCertificates(user);
-
-                // Listen to active urgent blood requests
-                onValue(ref(db, 'blood_requests'), (snapshot) => {
-                    const grid = document.getElementById("myRequestsGrid");
-                    grid.innerHTML = "";
-
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        let keys = Object.keys(data).filter(k => {
-                            const r = data[k];
-                            return (r.userId && r.userId === user.uid) || (r.userEmail && r.userEmail === user.email);
-                        });
-
-                        if (keys.length === 0) {
-                            keys = Object.keys(data);
-                        }
-
-                        keys.forEach(key => {
-                            const r = data[key];
-                            const card = document.createElement("div");
-                            card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
-                            card.innerHTML = `
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded">
-                                            ${r.bloodGroup} Needed (${r.units || 1} Units)
-                                        </span>
-                                        <span class="text-[10px] font-bold text-slate-500">${r.city}</span>
-                                    </div>
-                                    <h4 class="font-bold text-xs text-slate-900 dark:text-white">${r.hospital}</h4>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Phone: <strong>${r.phone}</strong></p>
-                                </div>
-                                <button onclick="deleteMyBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shrink-0">
-                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Received — Delete Request
-                                </button>
-                            `;
-                            grid.appendChild(card);
-                        });
-                        if (window.lucide) lucide.createIcons();
-                    } else {
-                        grid.innerHTML = `<p class="text-xs text-slate-400 py-3">No active urgent blood requests currently posted.</p>`;
-                    }
+                    // Keep cached count in sync
+                    update(ref(db, `users/${user.uid}`), { referralCount: count }).catch(() => {});
                 });
+            } catch (refErr) {
+                console.warn("Referral state initialization note:", refErr);
+            }
+
+            // Load Complete User Profile, Visibility & Social Links
+            loadUserProfileAndDashboard(user);
+
+            // Listen to User Change Requests History
+            listenToUserRequestsHistory(user);
+
+            // Listen to In-Platform Contact Requests & Direct Messages Inbox
+            listenToUserInbox(user);
+
+            // Load Donor Privacy Settings (PART 12 & 13)
+            loadUserDonorPrivacy(user);
+
+            // Load User Official Certificates (Blood & Organ)
+            loadUserCertificates(user);
+
+            // Listen to active urgent blood requests
+            onValue(ref(db, 'blood_requests'), (snapshot) => {
+                const grid = document.getElementById("myRequestsGrid");
+                if (!grid) return;
+                grid.innerHTML = "";
+
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    let keys = Object.keys(data).filter(k => {
+                        const r = data[k];
+                        return (r.userId && r.userId === user.uid) || (r.userEmail && r.userEmail === user.email);
+                    });
+
+                    if (keys.length === 0) {
+                        keys = Object.keys(data);
+                    }
+
+                    keys.forEach(key => {
+                        const r = data[key];
+                        const card = document.createElement("div");
+                        card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                        card.innerHTML = `
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded">
+                                        ${r.bloodGroup} Needed (${r.units || 1} Units)
+                                    </span>
+                                    <span class="text-[10px] font-bold text-slate-500">${r.city}</span>
+                                </div>
+                                <h4 class="font-bold text-xs text-slate-900 dark:text-white">${r.hospital}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Phone: <strong>${r.phone}</strong></p>
+                            </div>
+                            <button onclick="deleteMyBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shrink-0">
+                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Received — Delete Request
+                            </button>
+                        `;
+                        grid.appendChild(card);
+                    });
+                    if (window.lucide) lucide.createIcons();
+                } else {
+                    grid.innerHTML = `<p class="text-xs text-slate-400 py-3">No active urgent blood requests currently posted.</p>`;
+                }
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await initUserDashboard(user);
             } else {
-                if (authCard) authCard.classList.remove("hidden");
-                if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                const saved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (saved && saved.uid) {
+                    await initUserDashboard(saved);
+                } else {
+                    const authCard = document.getElementById("authCard");
+                    const dashboardContainer = document.getElementById("dashboardContainer");
+                    if (authCard) authCard.classList.remove("hidden");
+                    if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                }
             }
             if (window.lucide) lucide.createIcons();
         });
@@ -1995,198 +2074,342 @@
             }
         };
 
-        window.setAuthMode = function(mode) {
-            currentMode = mode;
-            const btn = document.getElementById('authBtn');
-            const nameWrap = document.getElementById('nameWrap');
-            const tabSignin = document.getElementById('tabSignin');
-            const tabSignup = document.getElementById('tabSignup');
+        // FORM SUBMIT HANDLER (DATABASE-BACKED AUTHENTICATION & ACCURATE VERIFICATION)
+        const authFormEl = document.getElementById('authForm');
+        if (authFormEl) {
+            authFormEl.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('authBtn');
+                const mode = window.currentAuthMode || currentMode || 'login';
+                const origText = mode === 'register' ? "Create New Account" : "Sign In to Account";
+                btn.innerText = "Processing...";
+                btn.disabled = true;
 
-            if (mode === 'register') {
-                nameWrap.classList.remove('hidden');
-                btn.innerText = "Create New Account";
-                tabSignup.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
-                tabSignin.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
-            } else {
-                nameWrap.classList.add('hidden');
-                btn.innerText = "Sign In to Account";
-                tabSignin.className = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition";
-                tabSignup.className = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
-            }
-        };
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value.trim();
+                const rawName = document.getElementById('name')?.value?.trim();
+                const name = rawName || email.split('@')[0];
 
-        // FORM SUBMIT HANDLER (ACCURATE FIREBASE-SAFE REFERRAL COUNTING)
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('authBtn');
-            btn.innerText = "Processing...";
-            btn.disabled = true;
+                if (!email || !password) {
+                    alert("Please enter both email and password.");
+                    btn.innerText = origText;
+                    btn.disabled = false;
+                    return;
+                }
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const name = document.getElementById('name')?.value?.trim() || email.split('@')[0];
+                if (password.length < 6) {
+                    alert("Password must be at least 6 characters long.");
+                    btn.innerText = origText;
+                    btn.disabled = false;
+                    return;
+                }
 
-            if (!email || !password) {
-                alert("Please enter both email and password.");
-                btn.innerText = currentMode === 'register' ? "Create New Account" : "Sign In to Account";
-                btn.disabled = false;
-                return;
-            }
+                try {
+                    if (mode === 'register') {
+                        // 1. CHECK DATABASE FIRST: Does user already exist in RTDB users?
+                        const usersSnap = await get(ref(db, 'users'));
+                        let existingKey = null;
+                        let existingUserData = null;
 
-            if (password.length < 6) {
-                alert("Password must be at least 6 characters long.");
-                btn.innerText = currentMode === 'register' ? "Create New Account" : "Sign In to Account";
-                btn.disabled = false;
-                return;
-            }
-
-            try {
-                if (currentMode === 'register') {
-                    let uid = null;
-                    let authCreated = false;
-
-                    try {
-                        const credential = await createUserWithEmailAndPassword(auth, email, password);
-                        if (credential && credential.user) {
-                            uid = credential.user.uid;
-                            authCreated = true;
-                        }
-                    } catch (authErr) {
-                        console.warn("Firebase Auth registration notice/fallback:", authErr);
-                        if (authErr.code === 'auth/email-already-in-use') {
-                            alert("This email address is already registered! Attempting sign in...");
-                            try {
-                                await signInWithEmailAndPassword(auth, email, password);
-                                alert("Sign in successful!");
-                                return;
-                            } catch (signInErr) {
-                                alert("Email exists. Please sign in with your password.");
-                                btn.innerText = "Sign In to Account";
-                                btn.disabled = false;
-                                setAuthMode('login');
-                                return;
-                            }
-                        } else {
-                            throw authErr;
-                        }
-                    }
-
-                    if (!uid) {
-                        uid = "USER-" + Math.floor(100000 + Math.random() * 900000);
-                    }
-
-                    // Generate unique referral code for the new user
-                    const myReferralCode = generateReferralCode(name);
-
-                    // Check if referred by someone
-                    const refCodeFromStorage = (sessionStorage.getItem('ls_ref_code') || '').trim().toUpperCase();
-                    let attributedReferrerUID = null;
-
-                    if (refCodeFromStorage) {
-                        try {
-                            // Look up referrer in referral_codes index
-                            const refCodeSnap = await get(ref(db, `referral_codes/${refCodeFromStorage}`));
-                            if (refCodeSnap.exists()) {
-                                attributedReferrerUID = refCodeSnap.val();
-                            } else {
-                                // Fallback: Search in users node
-                                const allUsersSnap = await get(ref(db, 'users'));
-                                if (allUsersSnap.exists()) {
-                                    const allU = allUsersSnap.val();
-                                    Object.keys(allU).forEach(k => {
-                                        if (allU[k].referralCode === refCodeFromStorage) {
-                                            attributedReferrerUID = k;
-                                        }
-                                    });
+                        if (usersSnap.exists()) {
+                            const allUsers = usersSnap.val();
+                            for (const k of Object.keys(allUsers)) {
+                                const u = allUsers[k];
+                                if (u.email && u.email.toLowerCase() === email.toLowerCase()) {
+                                    existingKey = k;
+                                    existingUserData = u;
+                                    break;
                                 }
                             }
-                        } catch (lookupErr) {
-                            console.warn("Referrer lookup warning:", lookupErr);
                         }
-                    }
 
-                    // Strict Rule 5: User cannot refer themselves
-                    if (attributedReferrerUID && attributedReferrerUID === uid) {
-                        attributedReferrerUID = null;
-                    }
-
-                    const userPayload = {
-                        name: name,
-                        email: email,
-                        password: password,
-                        referralCode: myReferralCode,
-                        referredBy: attributedReferrerUID ? refCodeFromStorage : null,
-                        referralCount: 0,
-                        createdAt: new Date().toISOString(),
-                        timestamp: Date.now()
-                    };
-
-                    // Save new user profile
-                    await set(ref(db, `users/${uid}`), userPayload);
-                    await set(ref(db, `referral_codes/${myReferralCode}`), uid);
-
-                    // If valid attribution, record unique referral in referrals/{referrerUID}/{newUID}
-                    if (attributedReferrerUID) {
-                        try {
-                            // Atomic unique UID recording (Rule 4, 6, 9, 10)
-                            await set(ref(db, `referrals/${attributedReferrerUID}/${uid}`), true);
-                            
-                            // Derive exact total count
-                            const referrerSnap = await get(ref(db, `referrals/${attributedReferrerUID}`));
-                            const currentCount = referrerSnap.exists() ? Object.keys(referrerSnap.val()).length : 1;
-                            await update(ref(db, `users/${attributedReferrerUID}`), {
-                                referralCount: currentCount
-                            });
-                            sessionStorage.removeItem('ls_ref_code');
-                        } catch (recErr) {
-                            console.warn("Referral tracking write notice:", recErr);
-                        }
-                    }
-
-                    alert("🎉 Account created successfully! 👤 You are now signed in.");
-                } else {
-                    try {
-                        await signInWithEmailAndPassword(auth, email, password);
-                        alert("Login successful!");
-                    } catch (signInErr) {
-                        if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
-                            try {
-                                const credential = await createUserWithEmailAndPassword(auth, email, password);
-                                const uid = credential.user.uid;
-                                const myReferralCode = generateReferralCode(name);
-                                await set(ref(db, `users/${uid}`), {
-                                    name: name,
-                                    email: email,
-                                    password: password,
-                                    referralCode: myReferralCode,
-                                    referralCount: 0,
-                                    createdAt: new Date().toISOString(),
-                                    timestamp: Date.now()
-                                });
-                                await set(ref(db, `referral_codes/${myReferralCode}`), uid);
-                                alert("New account created and signed in successfully!");
+                        if (existingKey) {
+                            if (existingUserData.password && existingUserData.password === password) {
+                                alert("An account with this email already exists and your password matches! Logging you in directly...");
+                                const sessionUser = {
+                                    uid: existingKey,
+                                    email: existingUserData.email || email,
+                                    displayName: existingUserData.name || name
+                                };
+                                localStorage.setItem('ls_logged_user', JSON.stringify(sessionUser));
+                                try { await signInWithEmailAndPassword(auth, email, password); } catch(e) {}
+                                await initUserDashboard(sessionUser);
                                 return;
-                            } catch (createErr) {
-                                throw signInErr;
+                            } else {
+                                alert("⚠️ An account with this email is already registered in the database. Please switch to 'Sign In' to enter your password, or use 'Forgot password?' to reset.");
+                                window.setAuthMode('login');
+                                return;
                             }
-                        } else {
-                            throw signInErr;
+                        }
+
+                        // 2. CHECK IF VOLUNTARY DONOR RECORD EXISTS TO SCRAPE PROFILE DATA
+                        let scrapedDonorData = null;
+                        try {
+                            const donorSnap = await get(ref(db, 'donors'));
+                            if (donorSnap.exists()) {
+                                const donors = donorSnap.val();
+                                for (const dk of Object.keys(donors)) {
+                                    const d = donors[dk];
+                                    if (d.email && d.email.toLowerCase() === email.toLowerCase()) {
+                                        scrapedDonorData = d;
+                                        break;
+                                    }
+                                }
+                            }
+                        } catch(donorErr) {
+                            console.warn("Donor scrape check note:", donorErr);
+                        }
+
+                        // 3. CREATE FIREBASE AUTH USER (IF SUPPORTED) OR DATABASE UID
+                        let uid = null;
+                        try {
+                            const cred = await createUserWithEmailAndPassword(auth, email, password);
+                            if (cred && cred.user) {
+                                uid = cred.user.uid;
+                            }
+                        } catch (authErr) {
+                            console.warn("Firebase Auth registration note:", authErr);
+                            if (authErr.code === 'auth/email-already-in-use') {
+                                try {
+                                    const signInCred = await signInWithEmailAndPassword(auth, email, password);
+                                    if (signInCred && signInCred.user) {
+                                        uid = signInCred.user.uid;
+                                    }
+                                } catch (signInErr) {}
+                            }
+                        }
+
+                        if (!uid) {
+                            uid = "USER-" + Math.floor(100000 + Math.random() * 900000);
+                        }
+
+                        // 4. GENERATE UNIQUE REFERRAL CODE & HANDLE ATTRIBUTION
+                        const myReferralCode = generateReferralCode(name);
+                        const refCodeFromStorage = (sessionStorage.getItem('ls_ref_code') || '').trim().toUpperCase();
+                        let attributedReferrerUID = null;
+
+                        if (refCodeFromStorage) {
+                            try {
+                                const refCodeSnap = await get(ref(db, `referral_codes/${refCodeFromStorage}`));
+                                if (refCodeSnap.exists()) {
+                                    attributedReferrerUID = refCodeSnap.val();
+                                }
+                            } catch (lookupErr) {
+                                console.warn("Referral lookup note:", lookupErr);
+                            }
+                        }
+
+                        if (attributedReferrerUID && attributedReferrerUID === uid) {
+                            attributedReferrerUID = null;
+                        }
+
+                        const userPayload = {
+                            name: name,
+                            fullName: name,
+                            email: email,
+                            password: password,
+                            phone: (scrapedDonorData && scrapedDonorData.phone) || '',
+                            bloodGroup: (scrapedDonorData && scrapedDonorData.bloodGroup) || '',
+                            blood_group: (scrapedDonorData && scrapedDonorData.bloodGroup) || '',
+                            city: (scrapedDonorData && scrapedDonorData.city) || '',
+                            location: (scrapedDonorData && scrapedDonorData.city) || '',
+                            referralCode: myReferralCode,
+                            referredBy: attributedReferrerUID ? refCodeFromStorage : null,
+                            referralCount: 0,
+                            isBloodDonor: !!scrapedDonorData,
+                            accountType: 'public',
+                            createdAt: new Date().toISOString(),
+                            timestamp: Date.now()
+                        };
+
+                        // Save user record to database
+                        await set(ref(db, `users/${uid}`), userPayload);
+                        await set(ref(db, `referral_codes/${myReferralCode}`), uid);
+
+                        if (attributedReferrerUID) {
+                            try {
+                                await set(ref(db, `referrals/${attributedReferrerUID}/${uid}`), true);
+                                const referrerSnap = await get(ref(db, `referrals/${attributedReferrerUID}`));
+                                const currentCount = referrerSnap.exists() ? Object.keys(referrerSnap.val()).length : 1;
+                                await update(ref(db, `users/${attributedReferrerUID}`), {
+                                    referralCount: currentCount
+                                });
+                                sessionStorage.removeItem('ls_ref_code');
+                            } catch (recErr) {}
+                        }
+
+                        const sessionUser = {
+                            uid: uid,
+                            email: email,
+                            displayName: name
+                        };
+                        localStorage.setItem('ls_logged_user', JSON.stringify(sessionUser));
+                        alert("🎉 Account created successfully! Welcome to LifeSaver-Care, " + name + "!");
+                        await initUserDashboard(sessionUser);
+                        return;
+
+                    } else {
+                        // =====================================
+                        // SIGN IN MODE: VERIFY DATABASE FIRST
+                        // =====================================
+                        const searchLower = email.toLowerCase();
+                        const cleanDigits = email.replace(/\D/g, '');
+
+                        // Fetch real-time users from database
+                        const usersSnap = await get(ref(db, 'users'));
+                        let matchedKey = null;
+                        let matchedUser = null;
+
+                        if (usersSnap.exists()) {
+                            const allUsers = usersSnap.val();
+                            for (const k of Object.keys(allUsers)) {
+                                const u = allUsers[k];
+                                const uEmail = (u.email || '').toLowerCase();
+                                const uName = (u.name || u.fullName || '').toLowerCase();
+                                const uPhone = (u.phone || '').replace(/\D/g, '');
+
+                                if (uEmail === searchLower || (uName && uName === searchLower) || (cleanDigits.length >= 10 && uPhone === cleanDigits)) {
+                                    matchedKey = k;
+                                    matchedUser = u;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 1. IF FOUND IN USERS DATABASE:
+                        if (matchedUser) {
+                            if (matchedUser.password && matchedUser.password !== password) {
+                                alert("⚠️ Incorrect password for this account. Please verify your password or click 'Forgot password?' below to reset.");
+                                btn.innerText = origText;
+                                btn.disabled = false;
+                                return;
+                            }
+
+                            const finalEmail = matchedUser.email || email;
+                            const finalName = matchedUser.name || matchedUser.fullName || name;
+
+                            if (!matchedUser.password) {
+                                try {
+                                    await update(ref(db, `users/${matchedKey}`), { password: password });
+                                } catch (e) {}
+                            }
+
+                            try {
+                                await signInWithEmailAndPassword(auth, finalEmail, password);
+                            } catch (authErr) {
+                                if (authErr.code === 'auth/user-not-found' || authErr.code === 'auth/invalid-credential') {
+                                    try {
+                                        await createUserWithEmailAndPassword(auth, finalEmail, password);
+                                    } catch(e) {}
+                                }
+                            }
+
+                            const sessionUser = {
+                                uid: matchedKey,
+                                email: finalEmail,
+                                displayName: finalName
+                            };
+                            localStorage.setItem('ls_logged_user', JSON.stringify(sessionUser));
+                            alert("🎉 Login successful! Welcome back, " + finalName + ".");
+                            await initUserDashboard(sessionUser);
+                            return;
+                        }
+
+                        // 2. CHECK IF REGISTERED IN DONORS DATABASE (Cross-database lookup)
+                        const donorSnap = await get(ref(db, 'donors'));
+                        let matchedDonor = null;
+                        let matchedDonorKey = null;
+
+                        if (donorSnap.exists()) {
+                            const allDonors = donorSnap.val();
+                            for (const dk of Object.keys(allDonors)) {
+                                const d = allDonors[dk];
+                                const dEmail = (d.email || '').toLowerCase();
+                                const dName = (d.name || '').toLowerCase();
+                                const dPhone = (d.phone || '').replace(/\D/g, '');
+
+                                if (dEmail === searchLower || (dName && dName === searchLower) || (cleanDigits.length >= 10 && dPhone === cleanDigits)) {
+                                    matchedDonor = d;
+                                    matchedDonorKey = dk;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (matchedDonor) {
+                            const newUid = matchedDonor.uid || matchedDonor.userId || ("USER-" + Math.floor(100000 + Math.random() * 900000));
+                            const donorName = matchedDonor.name || name;
+                            const donorEmail = matchedDonor.email || email;
+                            const donorRefCode = generateReferralCode(donorName);
+
+                            const newProfilePayload = {
+                                name: donorName,
+                                fullName: donorName,
+                                email: donorEmail,
+                                password: password,
+                                phone: matchedDonor.phone || '',
+                                bloodGroup: matchedDonor.bloodGroup || '',
+                                blood_group: matchedDonor.bloodGroup || '',
+                                city: matchedDonor.city || '',
+                                location: matchedDonor.city || '',
+                                referralCode: donorRefCode,
+                                referralCount: 0,
+                                isBloodDonor: true,
+                                accountType: matchedDonor.phoneVisibility === 'private' ? 'private' : 'public',
+                                createdAt: new Date().toISOString(),
+                                timestamp: Date.now()
+                            };
+
+                            await set(ref(db, `users/${newUid}`), newProfilePayload);
+                            await set(ref(db, `referral_codes/${donorRefCode}`), newUid);
+
+                            try {
+                                await createUserWithEmailAndPassword(auth, donorEmail, password);
+                            } catch (e) {
+                                try { await signInWithEmailAndPassword(auth, donorEmail, password); } catch(e2) {}
+                            }
+
+                            const sessionUser = {
+                                uid: newUid,
+                                email: donorEmail,
+                                displayName: donorName
+                            };
+                            localStorage.setItem('ls_logged_user', JSON.stringify(sessionUser));
+                            alert("🎉 Donor profile found in database! User account established. Welcome back, " + donorName + "!");
+                            await initUserDashboard(sessionUser);
+                            return;
+                        }
+
+                        // 3. FALLBACK TO FIREBASE AUTH (if created purely in Firebase Auth)
+                        try {
+                            const cred = await signInWithEmailAndPassword(auth, email, password);
+                            if (cred && cred.user) {
+                                const u = cred.user;
+                                const sessionUser = {
+                                    uid: u.uid,
+                                    email: u.email,
+                                    displayName: u.displayName || name
+                                };
+                                localStorage.setItem('ls_logged_user', JSON.stringify(sessionUser));
+                                alert("🎉 Login successful! Welcome back.");
+                                await initUserDashboard(sessionUser);
+                                return;
+                            }
+                        } catch (fbAuthErr) {
+                            alert("⚠️ No account found for '" + email + "' in the database.\n\nPlease check your email/username, or click 'New Registration' above to create a new account.");
+                            window.setAuthMode('register');
+                            return;
                         }
                     }
+                } catch (err) {
+                    console.error("Auth error:", err);
+                    alert("Authentication Notice: " + (err.message || err));
+                } finally {
+                    btn.innerText = origText;
+                    btn.disabled = false;
                 }
-            } catch (err) {
-                let msg = err.message;
-                if (err.code === 'auth/email-already-in-use') {
-                    msg = "This email address is already registered. Please click 'Sign In' tab.";
-                } else if (err.code === 'auth/weak-password') {
-                    msg = "Password should be at least 6 characters long.";
-                }
-                alert("Authentication Notice: " + msg);
-            } finally {
-                btn.innerText = origText;
-                btn.disabled = false;
-            }
-        });
+            });
+        }
 
         // ==========================================
         // USER PROFILE, PRIVACY & SOCIAL STATE

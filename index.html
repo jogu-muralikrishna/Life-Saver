@@ -1174,23 +1174,49 @@
             idxOrganEl.textContent = Number(initialCache.organ).toLocaleString();
         }
 
-        // ACCURATE CURRENT USERS & DONORS COUNT (Unified live member community tracking)
-        const registeredUsersSet = new Set();
-        const registeredDonorsSet = new Set();
+        // ACCURATE CURRENT USERS & DONORS COUNT (Deduplicated unique community member tracking)
+        let latestUsersMap = {};
+        let latestDonorsMap = {};
 
         function refreshLiveMemberCount() {
-            const combinedMemberSet = new Set([...registeredUsersSet, ...registeredDonorsSet]);
-            const totalMembers = combinedMemberSet.size;
+            const uniqueIndividuals = new Set();
+
+            // 1. Add all registered users by normalized email, phone, or UID
+            Object.keys(latestUsersMap).forEach(uid => {
+                const u = latestUsersMap[uid] || {};
+                const emailKey = (u.email || '').trim().toLowerCase();
+                const phoneKey = (u.phone || '').replace(/\D/g, '');
+                if (emailKey && emailKey.includes('@')) {
+                    uniqueIndividuals.add('e:' + emailKey);
+                } else if (phoneKey && phoneKey.length >= 10) {
+                    uniqueIndividuals.add('p:' + phoneKey);
+                } else {
+                    uniqueIndividuals.add('u:' + uid);
+                }
+            });
+
+            // 2. Add all voluntary donors (deduplicating those who also registered an account)
+            Object.keys(latestDonorsMap).forEach(did => {
+                const d = latestDonorsMap[did] || {};
+                const emailKey = (d.email || '').trim().toLowerCase();
+                const phoneKey = (d.phone || '').replace(/\D/g, '');
+                if (emailKey && emailKey.includes('@')) {
+                    uniqueIndividuals.add('e:' + emailKey);
+                } else if (phoneKey && phoneKey.length >= 10) {
+                    uniqueIndividuals.add('p:' + phoneKey);
+                } else {
+                    uniqueIndividuals.add('d:' + did);
+                }
+            });
+
+            const totalMembers = uniqueIndividuals.size;
             animateCounterNumber(idxDonorsEl, totalMembers, 350);
             updateMetricsCache('users', totalMembers);
         }
 
         // Listen to active registered users
         onValue(ref(db, 'users'), (snapshot) => {
-            registeredUsersSet.clear();
-            if (snapshot.exists()) {
-                Object.keys(snapshot.val()).forEach(uid => registeredUsersSet.add(uid));
-            }
+            latestUsersMap = snapshot.exists() ? (snapshot.val() || {}) : {};
             refreshLiveMemberCount();
         }, (err) => {
             console.warn("Live users count notice:", err);
@@ -1199,10 +1225,7 @@
 
         // Listen to registered donors
         onValue(ref(db, 'donors'), (snapshot) => {
-            registeredDonorsSet.clear();
-            if (snapshot.exists()) {
-                Object.keys(snapshot.val()).forEach(id => registeredDonorsSet.add(id));
-            }
+            latestDonorsMap = snapshot.exists() ? (snapshot.val() || {}) : {};
             refreshLiveMemberCount();
         }, (err) => {
             console.warn("Live donors count notice:", err);
