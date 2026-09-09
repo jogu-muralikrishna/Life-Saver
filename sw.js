@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifesaver-pwa-v3';
+const CACHE_NAME = 'lifesaver-pwa-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[LifeSaver PWA v3] Caching core app shell & offline assets');
+      console.log('[LifeSaver PWA v5] Caching core app shell & offline assets');
       return Promise.allSettled(
         ASSETS_TO_CACHE.map((url) => cache.add(url).catch(err => console.warn('[LifeSaver PWA] Cache add skipped:', url, err)))
       );
@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) return cachedResponse;
           // If HTML page request failed offline, fall back to index.html or emergency.html
           if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('./emergency.html') || caches.match('./index.html');
+            return caches.match('./index.html') || caches.match('./emergency.html');
           }
         });
       })

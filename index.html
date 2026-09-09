@@ -307,18 +307,31 @@
 
         <div class="relative z-10">
             <!-- 24/7 BADGE WITH LIVE INDICATOR -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-6 uppercase tracking-wider reveal-on-scroll">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-6 uppercase tracking-wider">
                 <span class="live-pulse-dot"></span> 24/7 Rapid Emergency Healthcare Network
             </div>
             
-            <h1 id="txtHeroTitle" class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight reveal-on-scroll stagger-1">
+            <h1 id="txtHeroTitle" class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-4 leading-tight">
                 Every Second Counts. <br class="hidden md:inline"/>
                 <span class="text-shimmer">Connect & Save Lives Nearby.</span>
             </h1>
             
-            <p id="txtHeroSubtitle" class="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-8 font-normal leading-relaxed reveal-on-scroll stagger-2">
+            <p id="txtHeroSubtitle" class="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-6 font-normal leading-relaxed">
                 Locate blood donors instantly, request emergency ambulances, search accredited hospitals, or pledge organ donations in real-time.
             </p>
+
+            <!-- 🌟 PROMINENT INSPIRATIONAL QUOTATION -->
+            <div class="max-w-2xl mx-auto mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-50/90 via-amber-50/60 to-emerald-50/90 dark:from-red-950/40 dark:via-slate-900/80 dark:to-emerald-950/40 border border-red-200/80 dark:border-red-900/50 shadow-md shadow-red-500/5 text-center">
+                <div class="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-red-600 dark:text-red-400 mb-1.5">
+                    <span>❤️</span> <span>Life-Saving Community Motto</span> <span>❤️</span>
+                </div>
+                <blockquote class="text-sm sm:text-base italic font-serif text-slate-800 dark:text-slate-100 font-extrabold leading-relaxed">
+                    “Every second counts. Your few minutes today can become someone’s hope tomorrow. A single drop can create a thousand smiles — Be a donor, be a hero.”
+                </blockquote>
+                <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-widest">
+                    — LifeSaver-Care Emergency Healthcare Network
+                </div>
+            </div>
 
             <!-- GLOBAL SEARCH BAR -->
             <div class="relative max-w-2xl mx-auto mb-8 reveal-on-scroll stagger-3">
@@ -2728,8 +2741,8 @@
 
                             c.x += c.vx;
                             c.y += c.vy;
-                            if (c.x < 0 || c.x > width) n.vx *= -1;
-                            if (c.y < 0 || c.y > height) n.vy *= -1;
+                            if (c.x < 0 || c.x > width) c.vx *= -1;
+                            if (c.y < 0 || c.y > height) c.vy *= -1;
 
                             const renderX = c.x;
                             const renderY = c.y + floatOffsetY;
@@ -2759,6 +2772,7 @@
             }
             requestAnimationFrame(render);
         })();
+    </script>
 
     <!-- OFFLINE EMERGENCY LIFELINE BAR (AUTO-SHOWS ON NETWORK LOSS) -->
     <div id="offlineEmergencyBar" class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto bg-slate-950/95 text-white border-2 border-red-500 rounded-2xl p-4 shadow-2xl z-50 backdrop-blur-xl hidden transition-all duration-300">
