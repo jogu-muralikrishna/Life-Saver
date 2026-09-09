@@ -203,23 +203,13 @@
                     class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs uppercase tracking-wider mb-4 border border-red-200 dark:border-red-900/50">
                     🩸 Save Up To 3 Lives With 1 Unit of Blood
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Blood Donor & Emergency
-                    Board</h1>
+                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Blood Donor & Emergency Board</h1>
                 <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-6">
-                    Connect directly with voluntary blood donors or post an emergency request for immediate donor
-                    response.
+                    Connect directly with voluntary blood donors or post an emergency request for immediate donor response.
                 </p>
 
-                <!-- ⏱️ INSPIRATIONAL QUOTATION -->
-                <div class="max-w-xl mx-auto mb-8 p-3.5 rounded-2xl bg-red-50/70 dark:bg-red-950/30 border border-red-200/70 dark:border-red-900/40 text-center shadow-sm">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-red-600 dark:text-red-400 block mb-0.5">⏱️ Every Second Counts</span>
-                    <p class="text-xs italic font-serif text-slate-700 dark:text-slate-200 font-bold leading-relaxed">
-                        “Your few minutes today can become someone’s hope tomorrow — A single drop can create a thousand smiles.”
-                    </p>
-                </div>
-
                 <!-- CITY SEARCH INPUT -->
-                <div class="relative max-w-xl mx-auto mb-6">
+                <div class="relative max-w-xl mx-auto mb-5">
                     <i data-lucide="map-pin" class="w-5 h-5 absolute left-4 top-3.5 text-slate-400"></i>
                     <input type="text" id="citySearchInput" oninput="renderDonors()"
                         placeholder="Type city manually (e.g. Hyderabad, Khammam, Nalgonda)..."
@@ -227,7 +217,7 @@
                 </div>
 
                 <!-- BLOOD GROUP SELECTOR PILLS -->
-                <div class="flex flex-wrap items-center justify-center gap-2">
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
                     <button onclick="filterBloodGroup('ALL')"
                         class="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-700 transition">ALL
                         GROUPS</button>
@@ -247,6 +237,12 @@
                         class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB+</button>
                     <button onclick="filterBloodGroup('AB-')"
                         class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB-</button>
+                </div>
+
+                <!-- ⏱️ SLEEK INSPIRATIONAL MOTTO -->
+                <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-red-50/80 dark:bg-red-950/40 border border-red-200/70 dark:border-red-900/40 text-xs text-red-700 dark:text-red-300 font-medium">
+                    <span class="font-bold">⏱️ Every Second Counts:</span>
+                    <span class="italic font-serif">“Your few minutes today can become someone’s hope tomorrow — A single drop can create a thousand smiles.”</span>
                 </div>
             </div>
         </div>
