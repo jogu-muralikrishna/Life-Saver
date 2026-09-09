@@ -361,6 +361,7 @@
                             <th class="p-4">🍺 Drunk (24h)</th>
                             <th class="p-4">Contact Preference</th>
                             <th class="p-4">Status</th>
+                            <th class="p-4">Times Donated</th>
                             <th class="p-4 text-right th-actions">Actions</th>
                         </tr>
                     </thead>
@@ -1070,7 +1071,7 @@
             const keys = Object.keys(bloodDonorsData);
 
             if (keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">No blood donor records found.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">No blood donor records found.</td></tr>`;
                 return;
             }
 
@@ -1091,7 +1092,7 @@
                 const preferenceDisplay = isSubAdmin ? '🔒 Restricted' : (isPublic ? '🟢 PUBLIC' : '🔒 PRIVATE');
 
                 const actionsCell = isSubAdmin 
-                    ? `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`
+                    ? `<button onclick="openEditDonorModal('${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm" title="Edit donor times donated">✏️ Edit (Donations)</button>`
                     : `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
                        <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⚙️ Preference</button>
                        <button onclick="deleteRecord('donors', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
@@ -1115,6 +1116,9 @@
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full ${item.status === 'Available' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}">
                             ${item.status || 'Available'}
                         </span>
+                    </td>
+                    <td class="p-4 font-mono font-black text-xs text-red-600 dark:text-red-400 whitespace-nowrap">
+                        🩸 ${item.donationCount || item.timesDonated || 0} times
                     </td>
                     <td class="p-4 text-right space-x-1 td-actions">
                         ${actionsCell}
@@ -2460,10 +2464,11 @@
         /* EDIT BLOOD DONOR MODAL FUNCTIONS */
         let activeEditDonorKey = null;
         window.openEditDonorModal = function(key) {
-            checkWritePermission('edit Blood Donor details');
             activeEditDonorKey = key;
             const donor = bloodDonorsData[key];
             if (!donor) return;
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
 
             document.getElementById("editDonorName").value = donor.name || "";
             document.getElementById("editDonorEmail").value = donor.email || "";
@@ -2474,6 +2479,31 @@
             document.getElementById("editDonorAlcohol24h").value = donor.alcoholLast24h || "No";
             document.getElementById("editDonorHasHabits").value = donor.hasBadHabits || "No";
             document.getElementById("editDonorStatus").value = donor.status || "Available";
+            document.getElementById("editDonorDonationCount").value = (donor.donationCount !== undefined) ? donor.donationCount : (donor.timesDonated || 0);
+
+            // Sub-Admin permissions: can edit donationCount and status; identity fields are read-only
+            const restrictedFields = ["editDonorName", "editDonorEmail", "editDonorDob", "editDonorPhone", "editDonorBloodGroup", "editDonorCity", "editDonorAlcohol24h", "editDonorHasHabits"];
+            restrictedFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = isSubAdmin;
+                    if (isSubAdmin) {
+                        el.classList.add("opacity-60", "cursor-not-allowed");
+                    } else {
+                        el.classList.remove("opacity-60", "cursor-not-allowed");
+                    }
+                }
+            });
+
+            const notice = document.getElementById("editDonorSubAdminNotice");
+            if (notice) {
+                if (isSubAdmin) {
+                    notice.classList.remove("hidden");
+                } else {
+                    notice.classList.add("hidden");
+                }
+            }
+
             document.getElementById("editDonorFeedback").textContent = "";
 
             const modal = document.getElementById("editDonorModal");
@@ -2490,18 +2520,11 @@
 
         window.submitEditDonor = async function(e) {
             if (e) e.preventDefault();
-            checkWritePermission('edit Blood Donor details');
             if (!activeEditDonorKey) return;
 
             const oldItem = bloodDonorsData[activeEditDonorKey] || {};
-            const name = document.getElementById("editDonorName").value.trim();
-            const email = document.getElementById("editDonorEmail").value.trim();
-            const dob = document.getElementById("editDonorDob").value;
-            const phone = document.getElementById("editDonorPhone").value.trim();
-            const bg = document.getElementById("editDonorBloodGroup").value;
-            const city = document.getElementById("editDonorCity").value.trim();
-            const alcohol24h = document.getElementById("editDonorAlcohol24h").value;
-            const hasHabits = document.getElementById("editDonorHasHabits").value;
+            const countVal = parseInt(document.getElementById("editDonorDonationCount").value, 10);
+            const donationCount = isNaN(countVal) || countVal < 0 ? 0 : countVal;
             const status = document.getElementById("editDonorStatus").value;
             const feedback = document.getElementById("editDonorFeedback");
             const btn = document.getElementById("editDonorSubmitBtn");
@@ -2510,25 +2533,54 @@
             btn.textContent = "Saving Changes...";
 
             try {
-                await update(ref(db, `donors/${activeEditDonorKey}`), {
-                    name: name,
-                    email: email,
-                    dob: dob,
-                    phone: phone,
-                    bloodGroup: bg,
-                    city: city,
-                    alcoholLast24h: alcohol24h,
-                    hasBadHabits: hasHabits,
-                    status: status,
-                    updatedAt: new Date().toISOString()
-                });
+                if (adminRole === 'SUB_ADMIN') {
+                    // Sub-Admin is explicitly permitted to edit donation count & availability status
+                    await update(ref(db, `donors/${activeEditDonorKey}`), {
+                        donationCount: donationCount,
+                        timesDonated: donationCount,
+                        status: status,
+                        updatedAt: new Date().toISOString()
+                    });
 
-                await logAdminAction('BLOOD_DONOR_EDITED', 'donor', activeEditDonorKey, {
-                    donorName: name,
-                    previousValue: (oldItem.name || 'Donor') + ' (' + (oldItem.email || 'no email') + ')',
-                    newValue: name + ' (' + email + ', DOB: ' + dob + ', Drunk24h: ' + alcohol24h + ')',
-                    reason: 'SuperAdmin updated donor details'
-                });
+                    await logAdminAction('BLOOD_DONOR_DONATIONS_EDITED', 'donor', activeEditDonorKey, {
+                        donorName: oldItem.name || 'Donor',
+                        previousValue: `${oldItem.donationCount || oldItem.timesDonated || 0} times (${oldItem.status || 'Available'})`,
+                        newValue: `${donationCount} times (${status})`,
+                        reason: 'SubAdmin updated times donated and status'
+                    });
+                } else {
+                    // Super Admin has full write access to all fields
+                    const name = document.getElementById("editDonorName").value.trim();
+                    const email = document.getElementById("editDonorEmail").value.trim();
+                    const dob = document.getElementById("editDonorDob").value;
+                    const phone = document.getElementById("editDonorPhone").value.trim();
+                    const bg = document.getElementById("editDonorBloodGroup").value;
+                    const city = document.getElementById("editDonorCity").value.trim();
+                    const alcohol24h = document.getElementById("editDonorAlcohol24h").value;
+                    const hasHabits = document.getElementById("editDonorHasHabits").value;
+
+                    await update(ref(db, `donors/${activeEditDonorKey}`), {
+                        name: name,
+                        email: email,
+                        dob: dob,
+                        phone: phone,
+                        bloodGroup: bg,
+                        city: city,
+                        alcoholLast24h: alcohol24h,
+                        hasBadHabits: hasHabits,
+                        status: status,
+                        donationCount: donationCount,
+                        timesDonated: donationCount,
+                        updatedAt: new Date().toISOString()
+                    });
+
+                    await logAdminAction('BLOOD_DONOR_EDITED', 'donor', activeEditDonorKey, {
+                        donorName: name,
+                        previousValue: `${oldItem.name || 'Donor'} (${oldItem.donationCount || 0} donations)`,
+                        newValue: `${name} (${donationCount} donations, Status: ${status})`,
+                        reason: 'SuperAdmin updated donor details'
+                    });
+                }
 
                 closeEditDonorModal();
             } catch (err) {
@@ -3403,6 +3455,10 @@
             </div>
 
             <form onsubmit="submitEditDonor(event)" class="space-y-4">
+                <div id="editDonorSubAdminNotice" class="hidden p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs font-semibold">
+                    👤 <strong>Sub-Admin Mode:</strong> You can edit the donor's <strong>Times Donated</strong> (leaderboard ranking) and <strong>Availability Status</strong>. Personal identity fields are restricted to Super Admin.
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name *</label>
                     <input type="text" id="editDonorName" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-red-500">
@@ -3451,6 +3507,20 @@
                             <option value="Yes">🍺 Yes - Consumed Alcohol within 24h</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- TIMES DONATED (LEADERBOARD METRIC) -->
+                <div class="p-3.5 rounded-2xl bg-red-50/60 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider">
+                            🏆 No. of Times Donated *
+                        </label>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300">Leaderboard Metric</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-2 leading-relaxed">
+                        Powers the voluntary donor leaderboard ranking. Both <strong>Super Admin</strong> and <strong>Sub-Admin</strong> can edit this manually.
+                    </p>
+                    <input type="number" id="editDonorDonationCount" min="0" step="1" required class="w-full bg-white dark:bg-slate-900 border border-red-300 dark:border-red-700 text-slate-900 dark:text-white p-3 rounded-xl text-sm font-black outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">

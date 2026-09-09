@@ -196,6 +196,27 @@
                 </div>
             </div>
 
+            <!-- AUTH STATUS PROMPT (FOR PERSONAL ACCOUNT SYNC & CERTIFICATES) -->
+            <div id="organAuthBanner" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-amber-100 dark:bg-amber-900/60 rounded-xl text-amber-600 dark:text-amber-300 shrink-0">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-bold">Not logged in yet?</p>
+                        <p class="text-[11px] text-amber-800 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                            Please <strong>log in or create your personal account</strong> first so your organ donation pledge, verified certificate, and donor card are linked directly to your dashboard!
+                        </p>
+                        <div class="mt-2.5 flex items-center gap-2">
+                            <a href="auth.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold text-[11px] shadow-sm transition">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i> Log In / Register
+                            </a>
+                            <span class="text-[11px] text-purple-700 dark:text-purple-400">or pledge below if you prefer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <form id="organForm" class="space-y-6 mt-6">
                 <!-- SECTION 1: PERSONAL INFORMATION -->
                 <div>
@@ -526,22 +547,26 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Track Auth state for dynamic greeting
+        // Track Auth state for dynamic greeting and sync banner
         onAuthStateChanged(auth, async (user) => {
             const greetingEl = document.getElementById("userGreetingTop");
             const authLink = document.getElementById("userAuthTopBar");
             const signOutBtn = document.getElementById("menuSignOutBtn");
+            const authBanner = document.getElementById("organAuthBanner");
 
             if (user) {
+                if (authBanner) authBanner.classList.add("hidden");
+
                 let displayName = user.displayName;
-                if (!displayName) {
-                    try {
-                        const snap = await get(ref(db, 'users/' + user.uid));
-                        if (snap.exists() && snap.val().name) {
-                            displayName = snap.val().name;
-                        }
-                    } catch(e) {}
-                }
+                let userSnapVal = null;
+                try {
+                    const snap = await get(ref(db, 'users/' + user.uid));
+                    if (snap.exists()) {
+                        userSnapVal = snap.val();
+                        if (userSnapVal.name) displayName = userSnapVal.name;
+                    }
+                } catch(e) {}
+
                 if (!displayName && user.email) {
                     displayName = user.email.split('@')[0];
                 }
@@ -552,7 +577,29 @@
                     authLink.title = `Signed in as ${finalName}`;
                 }
                 if (signOutBtn) signOutBtn.classList.remove('hidden');
+
+                // Prefill user profile details into form if empty
+                const emailInput = document.getElementById("email");
+                if (emailInput && !emailInput.value && user.email) {
+                    emailInput.value = user.email;
+                }
+                const nameInput = document.getElementById("name");
+                if (nameInput && !nameInput.value && displayName) {
+                    nameInput.value = displayName;
+                }
+                if (userSnapVal && userSnapVal.phone) {
+                    const phoneInput = document.getElementById("phone");
+                    if (phoneInput && !phoneInput.value) phoneInput.value = userSnapVal.phone;
+                }
+                if (userSnapVal && userSnapVal.city) {
+                    const cityInput = document.getElementById("city");
+                    if (cityInput && !cityInput.value) cityInput.value = userSnapVal.city;
+                }
             } else {
+                if (authBanner) {
+                    authBanner.classList.remove("hidden");
+                    if (window.lucide) lucide.createIcons();
+                }
                 if (greetingEl) greetingEl.textContent = 'Sign In';
                 if (authLink) {
                     authLink.href = 'auth.html';
@@ -729,7 +776,10 @@
             const email = document.getElementById('email').value.trim();
             const phone = document.getElementById('phone').value.trim();
 
+            const currentUser = auth.currentUser;
             const pledgeData = {
+                uid: currentUser ? currentUser.uid : null,
+                userEmail: currentUser ? currentUser.email : email,
                 name: name,
                 age: document.getElementById('age').value,
                 dob: document.getElementById('dob').value,
@@ -750,7 +800,7 @@
             };
 
             try {
-                // Deduplication check: update if already registered with same email/phone, else push
+                // Deduplication check: update if already registered with same email/phone/uid, else push
                 const organSnap = await get(ref(db, 'organ_donors'));
                 let existingKey = null;
                 if (organSnap.exists()) {
@@ -758,7 +808,8 @@
                     Object.keys(existingPledges).forEach(k => {
                         const p = existingPledges[k];
                         if ((email && p.email && p.email.toLowerCase() === email.toLowerCase()) || 
-                            (phone && p.phone && p.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''))) {
+                            (phone && p.phone && p.phone.replace(/\D/g, '') === phone.replace(/\D/g, '')) ||
+                            (currentUser && p.uid && p.uid === currentUser.uid)) {
                             existingKey = k;
                         }
                     });
@@ -769,6 +820,33 @@
                 } else {
                     await push(ref(db, 'organ_donors'), pledgeData);
                 }
+
+                // If user is logged in, link organDonor profile so certificates unlock immediately on dashboard
+                if (currentUser) {
+                    try {
+                        await update(ref(db, `users/${currentUser.uid}`), {
+                            organDonor: {
+                                name: name,
+                                organsPledged: organs,
+                                credentialID: credentialID,
+                                pledgeDate: pledgeData.pledgeDate,
+                                clearanceRating: rating,
+                                city: city,
+                                phone: phone
+                            }
+                        });
+                    } catch(userErr) {
+                        console.warn("User record sync notice:", userErr);
+                    }
+                }
+
+                // Cache to localStorage for instant offline dashboard access
+                localStorage.setItem('organDonorData', JSON.stringify({
+                    name: name,
+                    organsPledged: organs,
+                    credentialID: credentialID,
+                    pledgeDate: pledgeData.pledgeDate
+                }));
             } catch (err) {
                 console.warn("Firebase sync fallback activated:", err);
                 try {

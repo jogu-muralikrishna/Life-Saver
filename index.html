@@ -500,8 +500,8 @@
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mx-auto mb-2 border border-amber-200 dark:border-amber-900/50 shadow-md shadow-amber-500/10">
                     <i data-lucide="trophy" class="w-6 h-6"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">🏆 Life Saver Referral Leaderboard</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Honoring community champions expanding our emergency life-saving network</p>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">🏆 Life Saver Donor Leaderboard</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Honoring top voluntary blood donors based on verified number of times donated</p>
             </div>
 
             <!-- LEADERBOARD RANK LIST -->
@@ -512,10 +512,11 @@
     </div>
 
     <!-- AI DOCTOR & MEDICAL REPORT ASSISTANT MODAL -->
-    <div id="triageModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col max-h-[90vh]">
-            <!-- CLOSE BUTTON -->
-            <button onclick="closeTriageModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10">✕</button>
+    <div id="triageModal" onclick="if(event.target === this) closeTriageModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden overflow-y-auto p-3 sm:p-6">
+        <div class="min-h-full flex items-start sm:items-center justify-center py-6 sm:py-10">
+            <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col my-auto">
+                <!-- CLOSE BUTTON -->
+                <button onclick="closeTriageModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
 
             <!-- MODAL HEADER -->
             <div class="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -736,6 +737,7 @@
                     </div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
@@ -766,9 +768,10 @@
     </div>
 
     <!-- PUBLIC CONTACT US MODAL -->
-    <div id="contactModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative">
-            <button onclick="closeContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg">✕</button>
+    <div id="contactModal" onclick="if(event.target === this) closeContactModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden overflow-y-auto p-3 sm:p-6">
+        <div class="min-h-full flex items-start sm:items-center justify-center py-6 sm:py-10">
+            <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-6 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl relative my-auto">
+                <button onclick="closeContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg p-1 rounded-xl transition">✕</button>
 
             <div class="flex items-center gap-3 mb-4">
                 <div class="p-3 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl">
@@ -824,6 +827,7 @@
                     <i data-lucide="send" class="w-4 h-4"></i> Send Message
                 </button>
             </form>
+        </div>
         </div>
     </div>
 
@@ -931,41 +935,41 @@
             if (!listEl) return;
             listEl.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center animate-pulse">Loading live leaderboard rankings...</div>`;
 
-            onValue(ref(db, 'users'), (snap) => {
+            onValue(ref(db, 'donors'), (snap) => {
                 if (!snap.exists()) {
-                    listEl.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">No community referrals yet. Be the first to invite members!</div>`;
+                    listEl.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">No blood donor records yet. Register to rank on the leaderboard!</div>`;
                     return;
                 }
                 const data = snap.val();
-                const usersArray = Object.keys(data).map(uid => ({
-                    uid,
-                    name: data[uid].name || 'Community Member',
-                    referralCount: data[uid].referralCount || 0
-                })).filter(u => u.referralCount > 0);
+                const donorsArray = Object.keys(data).map(k => {
+                    const d = data[k];
+                    const times = parseInt(d.donationCount || d.timesDonated || 0, 10);
+                    return {
+                        name: d.name || 'Voluntary Donor',
+                        bloodGroup: d.bloodGroup || 'O+',
+                        city: d.city || '',
+                        timesDonated: times
+                    };
+                });
 
-                usersArray.sort((a, b) => b.referralCount - a.referralCount);
+                donorsArray.sort((a, b) => b.timesDonated - a.timesDonated);
 
-                if (usersArray.length === 0) {
-                    listEl.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">No community referrals recorded yet. Share your link to rank #1!</div>`;
-                    return;
-                }
-
-                const topUsers = usersArray.slice(0, 10);
-                listEl.innerHTML = topUsers.map((u, idx) => {
-                    const medals = ['🥇', '🥈', '🥉'];
+                const topDonors = donorsArray.slice(0, 15);
+                const medals = ['🥇', '🥈', '🥉'];
+                listEl.innerHTML = topDonors.map((d, idx) => {
                     const rankBadge = idx < 3 ? medals[idx] : `<span class="text-slate-400 font-black text-xs">#${idx + 1}</span>`;
-                    const maskName = u.name.length > 2 ? u.name.slice(0, 1) + '***' + u.name.slice(-1) : u.name;
+                    const maskName = d.name.length > 2 ? d.name.slice(0, 1) + '***' + d.name.slice(-1) : d.name;
                     return `
-                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 transition hover:border-amber-400">
+                        <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800 transition hover:border-red-400">
                             <div class="flex items-center gap-3">
                                 <span class="w-6 text-center text-sm font-bold shrink-0">${rankBadge}</span>
                                 <div>
                                     <div class="text-xs font-black text-slate-900 dark:text-white">${maskName}</div>
-                                    <div class="text-[10px] text-slate-400">Life Saver Advocate</div>
+                                    <div class="text-[10px] text-slate-400 font-semibold">🩸 Blood Group: <strong class="text-red-600 dark:text-red-400">${d.bloodGroup}</strong> ${d.city ? '• ' + d.city : ''}</div>
                                 </div>
                             </div>
-                            <div class="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200/60 dark:border-emerald-800/60">
-                                ${u.referralCount} ${u.referralCount === 1 ? 'Referral' : 'Referrals'}
+                            <div class="text-xs font-black text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 px-3 py-1 rounded-full border border-red-200/60 dark:border-red-800/60 font-mono">
+                                🩸 ${d.timesDonated} ${d.timesDonated === 1 ? 'time' : 'times'} donated
                             </div>
                         </div>
                     `;
@@ -1004,7 +1008,7 @@
             if (modal) {
                 window.lockBodyScroll();
                 modal.classList.remove("hidden");
-                modal.classList.add("flex");
+                modal.scrollTop = 0;
                 setTimeout(() => {
                     const nameInput = document.getElementById("contactName");
                     if (nameInput) {
@@ -1422,10 +1426,10 @@
             if (modal) {
                 window.lockBodyScroll();
                 modal.classList.remove("hidden");
-                modal.classList.add("flex");
+                modal.scrollTop = 0;
                 switchAITab('doctor');
                 setTimeout(() => {
-                    const queryInput = document.getElementById("aiQueryInput");
+                    const queryInput = document.getElementById("aiDoctorInput") || document.getElementById("aiQueryInput");
                     if (queryInput) {
                         queryInput.focus({ preventScroll: true });
                     }

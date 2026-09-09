@@ -194,6 +194,27 @@
                 <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Save lives & receive your Official Voluntary Donor Certificate</p>
             </div>
 
+            <!-- AUTH STATUS PROMPT (FOR PERSONAL ACCOUNT SYNC & CERTIFICATES) -->
+            <div id="donorAuthBanner" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-amber-100 dark:bg-amber-900/60 rounded-xl text-amber-600 dark:text-amber-300 shrink-0">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-bold">Not logged in yet?</p>
+                        <p class="text-[11px] text-amber-800 dark:text-amber-300/90 mt-0.5 leading-relaxed">
+                            Please <strong>log in or create your personal account</strong> first so your blood donor registration, official certificate, and leaderboard stats are linked directly to your dashboard!
+                        </p>
+                        <div class="mt-2.5 flex items-center gap-2">
+                            <a href="auth.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-[11px] shadow-sm transition">
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i> Log In / Register
+                            </a>
+                            <span class="text-[11px] text-amber-700 dark:text-amber-400">or register below if you prefer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <form id="donorForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
@@ -584,17 +605,21 @@
             const greetingEl = document.getElementById("userGreetingTop");
             const authLink = document.getElementById("userAuthTopBar");
             const signOutBtn = document.getElementById("menuSignOutBtn");
+            const authBanner = document.getElementById("donorAuthBanner");
 
             if (user) {
+                if (authBanner) authBanner.classList.add("hidden");
+
                 let displayName = user.displayName;
-                if (!displayName) {
-                    try {
-                        const snap = await get(ref(db, 'users/' + user.uid));
-                        if (snap.exists() && snap.val().name) {
-                            displayName = snap.val().name;
-                        }
-                    } catch(e) {}
-                }
+                let userSnapVal = null;
+                try {
+                    const snap = await get(ref(db, 'users/' + user.uid));
+                    if (snap.exists()) {
+                        userSnapVal = snap.val();
+                        if (userSnapVal.name) displayName = userSnapVal.name;
+                    }
+                } catch(e) {}
+
                 if (!displayName && user.email) {
                     displayName = user.email.split('@')[0];
                 }
@@ -605,7 +630,33 @@
                     authLink.title = `Signed in as ${finalName}`;
                 }
                 if (signOutBtn) signOutBtn.classList.remove('hidden');
+
+                // Prefill user profile details into donor form if empty
+                const emailInput = document.getElementById("email");
+                if (emailInput && !emailInput.value && user.email) {
+                    emailInput.value = user.email;
+                }
+                const nameInput = document.getElementById("name");
+                if (nameInput && !nameInput.value && displayName) {
+                    nameInput.value = displayName;
+                }
+                if (userSnapVal && userSnapVal.bloodGroup) {
+                    const bgSelect = document.getElementById("bloodGroup");
+                    if (bgSelect && !bgSelect.value) bgSelect.value = userSnapVal.bloodGroup;
+                }
+                if (userSnapVal && userSnapVal.phone) {
+                    const phoneInput = document.getElementById("phone");
+                    if (phoneInput && !phoneInput.value) phoneInput.value = userSnapVal.phone;
+                }
+                if (userSnapVal && userSnapVal.city) {
+                    const cityInput = document.getElementById("city");
+                    if (cityInput && !cityInput.value) cityInput.value = userSnapVal.city;
+                }
             } else {
+                if (authBanner) {
+                    authBanner.classList.remove("hidden");
+                    if (window.lucide) lucide.createIcons();
+                }
                 if (greetingEl) greetingEl.textContent = 'Sign In';
                 if (authLink) {
                     authLink.href = 'auth.html';
@@ -915,7 +966,10 @@
                 none: noneEnabled
             };
 
+            const currentUser = auth.currentUser;
             const donorData = {
+                uid: currentUser ? currentUser.uid : null,
+                userEmail: currentUser ? currentUser.email : email,
                 name: name,
                 bloodGroup: bg,
                 city: city,
@@ -942,7 +996,8 @@
                     Object.keys(existingDonors).forEach(k => {
                         const d = existingDonors[k];
                         if ((email && d.email && d.email.toLowerCase() === email.toLowerCase()) || 
-                            (phone && d.phone && d.phone.replace(/\D/g, '') === phone.replace(/\D/g, ''))) {
+                            (phone && d.phone && d.phone.replace(/\D/g, '') === phone.replace(/\D/g, '')) ||
+                            (currentUser && d.uid && d.uid === currentUser.uid)) {
                             existingKey = k;
                         }
                     });
@@ -953,6 +1008,33 @@
                 } else {
                     await push(ref(db, 'donors'), donorData);
                 }
+
+                // If user is logged in, link bloodDonor profile so certificates unlock immediately on dashboard
+                if (currentUser) {
+                    try {
+                        await update(ref(db, `users/${currentUser.uid}`), {
+                            bloodDonor: {
+                                name: name,
+                                bloodGroup: bg,
+                                city: city,
+                                phone: phone,
+                                credentialID: credentialID,
+                                registeredDate: donorData.registeredDate,
+                                status: "Available"
+                            }
+                        });
+                    } catch(userErr) {
+                        console.warn("User record sync notice:", userErr);
+                    }
+                }
+
+                // Cache to localStorage for instant offline dashboard access
+                localStorage.setItem('bloodDonorData', JSON.stringify({
+                    name: name,
+                    bloodGroup: bg,
+                    credentialID: credentialID,
+                    registeredDate: donorData.registeredDate
+                }));
             } catch (err) {
                 console.warn("Firebase sync fallback activated:", err);
                 try {

@@ -45,7 +45,7 @@
                 <i data-lucide="user-check" class="w-6 h-6"></i>
             </div>
             <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight" id="portalTitle">User Portal</h1>
-            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" id="portalSub">Sign in or register your account to manage emergency requests, donor profile & referrals</p>
+            <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" id="portalSub">One individual account per member. Sign in or create your personal account to view your unique referral code, verified certificates, and donor profile</p>
         </div>
 
         <!-- REFERRAL DETECTED BANNER -->
@@ -506,7 +506,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 <!-- 🩸 1. BLOOD DONATION CERTIFICATE (IN-PANEL RENDER) -->
-                <div class="glass-card p-4 sm:p-5 rounded-3xl border-2 border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between">
+                <div class="glass-card p-4 sm:p-5 rounded-3xl border-2 border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between min-h-[380px]">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
                             <span class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center text-sm font-black shadow-sm">🩸</span>
@@ -515,53 +515,64 @@
                                 <span class="text-[10px] font-bold text-slate-500">Official LifeSaver-Care Credential</span>
                             </div>
                         </div>
-                        <span class="bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-red-200 dark:border-red-900">
+                        <span id="dashBloodCertStatusBadge" class="bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-red-200 dark:border-red-900">
                             Active & Verified
                         </span>
                     </div>
 
-                    <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
-                    <div id="printableBloodCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fffbf8] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-blood-clean.jpg');">
-                        <!-- Dynamic Recipient Name -->
-                        <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
-                            <span id="dashPanelBloodCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                    <!-- ACTIVE REGISTERED STATE (DISPLAYS CERTIFICATE & 2 ACTION BUTTONS) -->
+                    <div id="dashBloodCertActiveContent" class="flex flex-col justify-between flex-1">
+                        <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
+                        <div id="printableBloodCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fffbf8] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-blood-clean.jpg');">
+                            <!-- Dynamic Recipient Name -->
+                            <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                                <span id="dashPanelBloodCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                            </div>
+
+                            <!-- Dynamic Blood Group -->
+                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
+                                O+
+                            </div>
+
+                            <!-- Dynamic QR Code -->
+                            <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
+                                <img id="dashPanelBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                            </div>
+
+                            <!-- Dynamic Certificate ID -->
+                            <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashPanelBloodCertId">
+                                LSC-BD-2026-00482
+                            </div>
                         </div>
 
-                        <!-- Dynamic Blood Group -->
-                        <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
-                            O+
-                        </div>
-
-                        <!-- Dynamic QR Code -->
-                        <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
-                            <img id="dashPanelBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
-                        </div>
-
-                        <!-- Dynamic Certificate ID -->
-                        <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashPanelBloodCertId">
-                            LSC-BD-2026-00482
+                        <!-- ACTION BUTTONS (ONLY 2 BUTTONS: DOWNLOAD & SHARE ON WHATSAPP) -->
+                        <div id="dashBloodCertActions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 mt-3 border-t border-red-100 dark:border-slate-800">
+                            <button onclick="downloadDashboardBloodCert()" class="bg-red-600 hover:bg-red-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-red-500/20" title="Download official certificate image">
+                                <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
+                            </button>
+                            <button onclick="shareBloodCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
+                                <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                            </button>
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 mt-3 border-t border-red-100 dark:border-slate-800">
-                        <button onclick="openDashboardBloodCertModal()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm" title="View certificate in Fullscreen Full Mode">
-                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Fullscreen
-                        </button>
-                        <button onclick="downloadDashboardBloodCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1" title="Print or save as PDF">
-                            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print/PDF
-                        </button>
-                        <button onclick="shareBloodCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
-                            <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp
-                        </button>
-                        <button onclick="copyBloodCertUrl()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Link
-                        </button>
+                    <!-- UNREGISTERED STATE (PROMPTS TO REGISTER) -->
+                    <div id="dashBloodCertUnregistered" class="hidden p-6 rounded-2xl bg-red-50/50 dark:bg-red-950/20 border border-red-200/80 dark:border-red-900/50 text-center my-auto">
+                        <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                            🩸
+                        </div>
+                        <h5 class="text-sm font-black text-slate-900 dark:text-white mb-1">Not Registered as Blood Donor</h5>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 max-w-xs mx-auto leading-relaxed">
+                            Register as a voluntary blood donor with your name and blood group to receive and display your verified official LifeSaver-Care certificate here.
+                        </p>
+                        <a href="register-donor.html" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition shadow-md shadow-red-500/20">
+                            <i data-lucide="droplet" class="w-4 h-4"></i> Register as Blood Donor
+                        </a>
                     </div>
                 </div>
 
                 <!-- 💙 2. ORGAN DONATION PLEDGE CERTIFICATE (IN-PANEL RENDER) -->
-                <div class="glass-card p-4 sm:p-5 rounded-3xl border-2 border-blue-200 dark:border-blue-900/60 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between">
+                <div class="glass-card p-4 sm:p-5 rounded-3xl border-2 border-blue-200 dark:border-blue-900/60 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between min-h-[380px]">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-2">
                             <span class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-black shadow-sm">💙</span>
@@ -570,48 +581,59 @@
                                 <span class="text-[10px] font-bold text-slate-500">Official LifeSaver-Care Credential</span>
                             </div>
                         </div>
-                        <span class="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-blue-200 dark:border-blue-900">
+                        <span id="dashOrganCertStatusBadge" class="bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-blue-200 dark:border-blue-900">
                             Pledged & Verified
                         </span>
                     </div>
 
-                    <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
-                    <div id="printableOrganCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fcfdff] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-organ-clean.jpg');">
-                        <!-- Dynamic Recipient Name -->
-                        <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
-                            <span id="dashPanelOrganCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                    <!-- ACTIVE REGISTERED STATE (DISPLAYS CERTIFICATE & 2 ACTION BUTTONS) -->
+                    <div id="dashOrganCertActiveContent" class="flex flex-col justify-between flex-1">
+                        <!-- IN-PANEL CERTIFICATE CANVAS (EXACT PICTURE WITH DYNAMIC OVERLAYS) -->
+                        <div id="printableOrganCertPanel" class="relative w-full aspect-[1024/682] rounded-2xl overflow-hidden shadow-lg select-none border border-slate-200 dark:border-slate-800 bg-[#fcfdff] bg-contain bg-no-repeat bg-center" style="background-image: url('cert-organ-clean.jpg');">
+                            <!-- Dynamic Recipient Name -->
+                            <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
+                                <span id="dashPanelOrganCertName" class="cert-script-name text-2xl sm:text-3xl md:text-4xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">Rahul Kumar</span>
+                            </div>
+
+                            <!-- Dynamic Blood Group -->
+                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
+                                O+
+                            </div>
+
+                            <!-- Dynamic QR Code -->
+                            <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
+                                <img id="dashPanelOrganCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
+                            </div>
+
+                            <!-- Dynamic Certificate ID -->
+                            <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 86.2%; top: 88.3%; transform: translate(-50%, -50%);" id="dashPanelOrganCertId">
+                                LSC-OD-2026-00482
+                            </div>
                         </div>
 
-                        <!-- Dynamic Blood Group -->
-                        <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
-                            O+
-                        </div>
-
-                        <!-- Dynamic QR Code -->
-                        <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
-                            <img id="dashPanelOrganCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
-                        </div>
-
-                        <!-- Dynamic Certificate ID -->
-                        <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 86.2%; top: 88.3%; transform: translate(-50%, -50%);" id="dashPanelOrganCertId">
-                            LSC-OD-2026-00482
+                        <!-- ACTION BUTTONS (ONLY 2 BUTTONS: DOWNLOAD & SHARE ON WHATSAPP) -->
+                        <div id="dashOrganCertActions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-3 mt-3 border-t border-blue-100 dark:border-slate-800">
+                            <button onclick="downloadDashboardOrganCert()" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-500/20" title="Download official certificate image">
+                                <i data-lucide="download" class="w-4 h-4"></i> Download Certificate
+                            </button>
+                            <button onclick="shareOrganCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20" title="Share certificate on WhatsApp">
+                                <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
+                            </button>
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 mt-3 border-t border-blue-100 dark:border-slate-800">
-                        <button onclick="openDashboardOrganCertModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm" title="View certificate in Fullscreen Full Mode">
-                            <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i> Fullscreen
-                        </button>
-                        <button onclick="downloadDashboardOrganCert()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1" title="Print or save as PDF">
-                            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print/PDF
-                        </button>
-                        <button onclick="shareOrganCertWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 shadow-sm">
-                            <i data-lucide="share-2" class="w-3.5 h-3.5"></i> WhatsApp
-                        </button>
-                        <button onclick="copyOrganCertUrl()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2 px-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1 border border-slate-200 dark:border-slate-700">
-                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy Link
-                        </button>
+                    <!-- UNREGISTERED STATE (PROMPTS TO PLEDGE) -->
+                    <div id="dashOrganCertUnpledged" class="hidden p-6 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/80 dark:border-blue-900/50 text-center my-auto">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                            💙
+                        </div>
+                        <h5 class="text-sm font-black text-slate-900 dark:text-white mb-1">Not Pledged for Organ Donation</h5>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 mb-4 max-w-xs mx-auto leading-relaxed">
+                            Pledging your organs takes only 2 minutes and can save up to 8 lives. Complete your pledge to receive your official government-aligned certificate here.
+                        </p>
+                        <a href="organ-donor.html" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition shadow-md shadow-blue-500/20">
+                            <i data-lucide="heart-handshake" class="w-4 h-4"></i> Pledge Organ Donation
+                        </a>
                     </div>
                 </div>
 
@@ -701,8 +723,8 @@
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-500 flex items-center justify-center mx-auto mb-2 border border-amber-200 dark:border-amber-900/50 shadow-md shadow-amber-500/10">
                     <i data-lucide="trophy" class="w-6 h-6"></i>
                 </div>
-                <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">🏆 Life Saver Referral Leaderboard</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Honoring voluntary members who help expand our emergency life-saving network</p>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">🏆 Life Saver Donor Leaderboard</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Honoring top voluntary blood donors based on verified number of times donated</p>
             </div>
 
             <!-- LOGGED-IN USER RANK POSITION BANNER -->
@@ -712,7 +734,7 @@
                     <span id="myRankBadge" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900">Rank #--</span>
                 </div>
                 <div class="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Your Referrals: <strong id="myRankCount" class="text-emerald-600 dark:text-emerald-400 font-black">0</strong>
+                    Your Donations: <strong id="myRankCount" class="text-red-600 dark:text-red-400 font-black">0 times</strong>
                 </div>
             </div>
 
@@ -1523,14 +1545,20 @@
                 };
             }
 
+            // Instant display of individual user's unique referral code so it never stalls on "Generating..."
+            const cachedRef = localStorage.getItem(`ls_ref_${user.uid}`);
+            const quickCode = cachedRef || ('LS-' + (user.displayName || name).replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 5) + '-' + user.uid.slice(-4).toUpperCase());
+            const refCodeEl = document.getElementById('myRefCode');
+            if (refCodeEl) refCodeEl.textContent = quickCode;
+            window.currentUserReferralCode = quickCode;
+
             // Ensure Referral Code Exists for User in Database
             try {
                 const userSnap = await get(ref(db, `users/${user.uid}`));
-                let referralCode = null;
+                let referralCode = quickCode;
                 if (userSnap.exists() && userSnap.val().referralCode) {
                     referralCode = userSnap.val().referralCode;
                 } else {
-                    referralCode = generateReferralCode(user.displayName || name);
                     await update(ref(db, `users/${user.uid}`), {
                         name: user.displayName || name,
                         email: user.email || '',
@@ -1540,8 +1568,8 @@
                     await set(ref(db, `referral_codes/${referralCode}`), user.uid);
                 }
 
+                localStorage.setItem(`ls_ref_${user.uid}`, referralCode);
                 window.currentUserReferralCode = referralCode;
-                const refCodeEl = document.getElementById('myRefCode');
                 if (refCodeEl) refCodeEl.textContent = referralCode;
 
                 // Ensure reverse lookup index is set
@@ -1699,46 +1727,52 @@
             const listEl = document.getElementById("leaderboardList");
             listEl.innerHTML = `<div class="text-xs text-slate-400 py-6 text-center">Loading rankings...</div>`;
 
-            onValue(ref(db, 'users'), (snapshot) => {
+            onValue(ref(db, 'donors'), (snapshot) => {
                 if (!snapshot.exists()) {
-                    listEl.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No referral data recorded yet. Be the first to refer a friend!</p>`;
+                    listEl.innerHTML = `<p class="text-xs text-slate-400 py-6 text-center">No blood donor records recorded yet. Register as a donor to join the leaderboard!</p>`;
                     return;
                 }
 
-                const users = snapshot.val();
-                let rankedUsers = [];
+                const donors = snapshot.val();
+                let rankedDonors = [];
 
-                Object.keys(users).forEach(uid => {
-                    const u = users[uid];
-                    const refCount = parseInt(u.referralCount || 0, 10);
-                    rankedUsers.push({
+                Object.keys(donors).forEach(k => {
+                    const d = donors[k];
+                    const times = parseInt(d.donationCount || d.timesDonated || 0, 10);
+                    const uid = d.uid || d.userId || '';
+                    const email = d.email || '';
+                    rankedDonors.push({
+                        key: k,
                         uid: uid,
-                        name: maskPublicName(u.name, u.email),
-                        referralCount: refCount,
-                        referralCode: u.referralCode || 'LS-MEMBER'
+                        email: email,
+                        name: maskPublicName(d.name, email),
+                        bloodGroup: d.bloodGroup || 'O+',
+                        timesDonated: times,
+                        city: d.city || ''
                     });
                 });
 
-                // Sort descending by referral count
-                rankedUsers.sort((a, b) => b.referralCount - a.referralCount);
+                // Sort descending by number of times donated
+                rankedDonors.sort((a, b) => b.timesDonated - a.timesDonated);
 
                 // Highlight Current User Rank
                 if (currentActiveUser) {
-                    const myIndex = rankedUsers.findIndex(u => u.uid === currentActiveUser.uid);
+                    const myIndex = rankedDonors.findIndex(u => (u.uid && u.uid === currentActiveUser.uid) || (u.email && currentActiveUser.email && u.email.toLowerCase() === currentActiveUser.email.toLowerCase()));
                     const myRankBadge = document.getElementById("myRankBadge");
                     const myRankCount = document.getElementById("myRankCount");
                     if (myIndex !== -1) {
                         if (myRankBadge) myRankBadge.textContent = `Rank #${myIndex + 1}`;
-                        if (myRankCount) myRankCount.textContent = rankedUsers[myIndex].referralCount;
+                        if (myRankCount) myRankCount.textContent = `${rankedDonors[myIndex].timesDonated} times`;
                     } else {
                         if (myRankBadge) myRankBadge.textContent = `Rank #--`;
+                        if (myRankCount) myRankCount.textContent = `0 times`;
                     }
                 }
 
                 listEl.innerHTML = "";
 
-                // Render Top Ranked Users
-                rankedUsers.slice(0, 25).forEach((item, index) => {
+                // Render Top Ranked Donors
+                rankedDonors.slice(0, 25).forEach((item, index) => {
                     const rankNum = index + 1;
                     let cardClass = "bg-slate-50 dark:bg-slate-950 border-slate-200/80 dark:border-slate-800";
                     let rankBadge = `<span class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs flex items-center justify-center">${rankNum}</span>`;
@@ -1754,7 +1788,7 @@
                         rankBadge = `<span class="text-base" title="3rd Place Bronze Medal">🥉</span>`;
                     }
 
-                    const isMe = currentActiveUser && (item.uid === currentActiveUser.uid);
+                    const isMe = currentActiveUser && ((item.uid && item.uid === currentActiveUser.uid) || (item.email && currentActiveUser.email && item.email.toLowerCase() === currentActiveUser.email.toLowerCase()));
                     if (isMe) {
                         cardClass += " ring-2 ring-red-500 shadow-md";
                     }
@@ -1766,12 +1800,12 @@
                             <div class="shrink-0 flex items-center justify-center w-7">${rankBadge}</div>
                             <div>
                                 <span class="font-bold text-xs text-slate-900 dark:text-white block">${item.name} ${isMe ? '<span class="text-[10px] font-black text-red-500 bg-red-100 dark:bg-red-950/60 px-1.5 py-0.5 rounded ml-1">YOU</span>' : ''}</span>
-                                <span class="text-[10px] text-slate-400 font-mono tracking-wider">${item.referralCode}</span>
+                                <span class="text-[10px] text-slate-400 font-semibold">🩸 Blood Group: <strong class="text-red-600 dark:text-red-400">${item.bloodGroup}</strong> ${item.city ? '• ' + item.city : ''}</span>
                             </div>
                         </div>
                         <div class="text-right shrink-0">
-                            <span class="text-xs font-black text-emerald-600 dark:text-emerald-400">${item.referralCount}</span>
-                            <span class="text-[10px] text-slate-400 block">${item.referralCount === 1 ? 'referral' : 'referrals'}</span>
+                            <span class="text-xs font-black text-red-600 dark:text-red-400 font-mono">🩸 ${item.timesDonated}</span>
+                            <span class="text-[10px] text-slate-400 block">${item.timesDonated === 1 ? 'time donated' : 'times donated'}</span>
                         </div>
                     `;
                     listEl.appendChild(row);
@@ -3785,81 +3819,118 @@
                     btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Submit Request';
                     if (window.lucide) lucide.createIcons();
                 }
-            }
-        };
-
-        // CERTIFICATE DASHBOARD LOGIC (SEPARATE BLOOD & ORGAN CARDS + VERIFICATION QR)
-        window.userBloodDonorData = null;
-        window.userOrganDonorData = null;
-
-        async function loadUserCertificates(user) {
+               async function loadUserCertificates(user) {
             if (!user) return;
-            const bloodActions = document.getElementById('dashBloodCertActions');
+            const bloodActive = document.getElementById('dashBloodCertActiveContent');
             const bloodUnreg = document.getElementById('dashBloodCertUnregistered');
-            const organActions = document.getElementById('dashOrganCertActions');
-            const organUnpledged = document.getElementById('dashOrganCertUnpledged');
+            const bloodBadge = document.getElementById('dashBloodCertStatusBadge');
 
-            const profile = window.currentActiveUserProfile || {};
-            const fallbackName = profile.name || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
-            const fallbackBg = (profile.bloodGroup && profile.bloodGroup !== 'Not Recorded' && profile.bloodGroup !== 'Not Set') ? profile.bloodGroup : 'O+';
+            const organActive = document.getElementById('dashOrganCertActiveContent');
+            const organUnpledged = document.getElementById('dashOrganCertUnpledged');
+            const organBadge = document.getElementById('dashOrganCertStatusBadge');
+
             const fallbackCertIdBD = `LSC-BD-2026-${(user.uid || '00482').slice(-5).toUpperCase()}`;
             const fallbackCertIdOD = `LSC-OD-2026-${(user.uid || '00482').slice(-5).toUpperCase()}`;
+
+            let userProfile = null;
+            try {
+                const uSnap = await get(ref(db, 'users/' + user.uid));
+                if (uSnap.exists()) userProfile = uSnap.val();
+            } catch (e) {
+                console.warn("User node lookup notice:", e);
+            }
 
             // 1. Blood Donation Certificate
             try {
                 let bloodDonor = null;
-                const donorSnap = await get(ref(db, 'donors'));
-                if (donorSnap.exists()) {
-                    const donors = donorSnap.val();
-                    for (const k of Object.keys(donors)) {
-                        const d = donors[k];
-                        if ((d.email && d.email.toLowerCase() === user.email.toLowerCase()) || 
-                            (d.uid && d.uid === user.uid) || 
-                            (d.userId && d.userId === user.uid)) {
-                            bloodDonor = { ...d, key: k };
-                            break;
+
+                // Priority 1: Check user's own profile record
+                if (userProfile && userProfile.bloodDonor && userProfile.bloodDonor.name && userProfile.bloodDonor.bloodGroup) {
+                    bloodDonor = userProfile.bloodDonor;
+                }
+
+                // Priority 2: Query donors table in Firebase
+                if (!bloodDonor) {
+                    const donorSnap = await get(ref(db, 'donors'));
+                    if (donorSnap.exists()) {
+                        const donors = donorSnap.val();
+                        for (const k of Object.keys(donors)) {
+                            const d = donors[k];
+                            if ((d.email && user.email && d.email.toLowerCase() === user.email.toLowerCase()) || 
+                                (d.uid && d.uid === user.uid) || 
+                                (d.userId && d.userId === user.uid) ||
+                                (userProfile && userProfile.phone && d.phone && d.phone.replace(/\D/g, '') === userProfile.phone.replace(/\D/g, ''))) {
+                                bloodDonor = { ...d, key: k };
+                                break;
+                            }
                         }
                     }
                 }
 
-                const donorName = (bloodDonor && bloodDonor.name) || fallbackName;
-                const bloodGroup = (bloodDonor && bloodDonor.bloodGroup) || fallbackBg;
-                const certId = (bloodDonor && (bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID)) || fallbackCertIdBD;
+                // Priority 3: Local cached registration
+                if (!bloodDonor) {
+                    const localBD = localStorage.getItem('bloodDonorData');
+                    if (localBD) {
+                        try {
+                            const parsed = JSON.parse(localBD);
+                            if (parsed && parsed.name && parsed.bloodGroup) bloodDonor = parsed;
+                        } catch(e) {}
+                    }
+                }
 
-                window.userBloodDonorData = {
-                    ...(bloodDonor || {}),
-                    name: donorName,
-                    bloodGroup: bloodGroup,
-                    certId: certId
-                };
+                if (bloodDonor && bloodDonor.name && bloodDonor.bloodGroup) {
+                    const donorName = bloodDonor.name;
+                    const bloodGroup = bloodDonor.bloodGroup;
+                    const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
 
-                // Populate Modal Elements
-                const nameEl = document.getElementById('dashBloodCertName');
-                if (nameEl) nameEl.textContent = donorName;
-                const bgEl = document.getElementById('dashBloodCertBg');
-                if (bgEl) bgEl.textContent = bloodGroup;
-                const idEl = document.getElementById('dashBloodCertId');
-                if (idEl) idEl.textContent = certId;
+                    window.userBloodDonorData = {
+                        ...bloodDonor,
+                        name: donorName,
+                        bloodGroup: bloodGroup,
+                        certId: certId
+                    };
 
-                // Populate In-Panel Elements
-                const pNameEl = document.getElementById('dashPanelBloodCertName');
-                if (pNameEl) pNameEl.textContent = donorName;
-                const pBgEl = document.getElementById('dashPanelBloodCertBg');
-                if (pBgEl) pBgEl.textContent = bloodGroup;
-                const pIdEl = document.getElementById('dashPanelBloodCertId');
-                if (pIdEl) pIdEl.textContent = certId;
+                    // Populate Modal Elements
+                    const nameEl = document.getElementById('dashBloodCertName');
+                    if (nameEl) nameEl.textContent = donorName;
+                    const bgEl = document.getElementById('dashBloodCertBg');
+                    if (bgEl) bgEl.textContent = bloodGroup;
+                    const idEl = document.getElementById('dashBloodCertId');
+                    if (idEl) idEl.textContent = certId;
 
-                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                window.userBloodDonorData.verifyUrl = verifyUrl;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-                
-                const qrEl = document.getElementById('dashBloodCertQR');
-                if (qrEl) qrEl.src = qrUrl;
-                const pQrEl = document.getElementById('dashPanelBloodCertQR');
-                if (pQrEl) pQrEl.src = qrUrl;
+                    // Populate In-Panel Elements
+                    const pNameEl = document.getElementById('dashPanelBloodCertName');
+                    if (pNameEl) pNameEl.textContent = donorName;
+                    const pBgEl = document.getElementById('dashPanelBloodCertBg');
+                    if (pBgEl) pBgEl.textContent = bloodGroup;
+                    const pIdEl = document.getElementById('dashPanelBloodCertId');
+                    if (pIdEl) pIdEl.textContent = certId;
 
-                if (bloodActions) bloodActions.classList.remove('hidden');
-                if (bloodUnreg) bloodUnreg.classList.add('hidden');
+                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                    window.userBloodDonorData.verifyUrl = verifyUrl;
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                    
+                    const qrEl = document.getElementById('dashBloodCertQR');
+                    if (qrEl) qrEl.src = qrUrl;
+                    const pQrEl = document.getElementById('dashPanelBloodCertQR');
+                    if (pQrEl) pQrEl.src = qrUrl;
+
+                    if (bloodActive) bloodActive.classList.remove('hidden');
+                    if (bloodUnreg) bloodUnreg.classList.add('hidden');
+                    if (bloodBadge) {
+                        bloodBadge.textContent = "Active & Verified";
+                        bloodBadge.className = "bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-red-200 dark:border-red-900";
+                    }
+                } else {
+                    // Non-registered blood donor: hide certificate, display unregistered prompt
+                    window.userBloodDonorData = null;
+                    if (bloodActive) bloodActive.classList.add('hidden');
+                    if (bloodUnreg) bloodUnreg.classList.remove('hidden');
+                    if (bloodBadge) {
+                        bloodBadge.textContent = "Not Registered";
+                        bloodBadge.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border border-slate-200 dark:border-slate-700";
+                    }
+                }
             } catch (err) {
                 console.warn("Blood certificate load warning:", err);
             }
@@ -3867,88 +3938,113 @@
             // 2. Organ Donation Certificate
             try {
                 let organDonor = null;
-                const organSnap = await get(ref(db, 'organ_donors'));
-                if (organSnap.exists()) {
-                    const donors = organSnap.val();
-                    for (const k of Object.keys(donors)) {
-                        const d = donors[k];
-                        if ((d.email && d.email.toLowerCase() === user.email.toLowerCase()) || 
-                            (d.uid && d.uid === user.uid) || 
-                            (d.userId && d.userId === user.uid)) {
-                            organDonor = { ...d, key: k };
-                            break;
+
+                // Priority 1: Check user's own profile record
+                if (userProfile && userProfile.organDonor && userProfile.organDonor.name) {
+                    organDonor = userProfile.organDonor;
+                }
+
+                // Priority 2: Query organ_donors table in Firebase
+                if (!organDonor) {
+                    const organSnap = await get(ref(db, 'organ_donors'));
+                    if (organSnap.exists()) {
+                        const donors = organSnap.val();
+                        for (const k of Object.keys(donors)) {
+                            const d = donors[k];
+                            if ((d.email && user.email && d.email.toLowerCase() === user.email.toLowerCase()) || 
+                                (d.uid && d.uid === user.uid) || 
+                                (d.userId && d.userId === user.uid) ||
+                                (userProfile && userProfile.phone && d.phone && d.phone.replace(/\D/g, '') === userProfile.phone.replace(/\D/g, ''))) {
+                                organDonor = { ...d, key: k };
+                                break;
+                            }
                         }
                     }
                 }
 
-                const donorName = (organDonor && organDonor.name) || fallbackName;
-                const bloodGroup = (organDonor && organDonor.bloodGroup) || fallbackBg;
-                const certId = (organDonor && (organDonor.credentialID || organDonor.certificateID || organDonor.donorID)) || fallbackCertIdOD;
-
-                window.userOrganDonorData = {
-                    ...(organDonor || {}),
-                    name: donorName,
-                    bloodGroup: bloodGroup,
-                    certId: certId
-                };
-
-                // Populate Modal Elements
-                const nameEl = document.getElementById('dashOrganCertName');
-                if (nameEl) nameEl.textContent = donorName;
-                const bgEl = document.getElementById('dashOrganCertBg');
-                if (bgEl) bgEl.textContent = bloodGroup;
-                const idEl = document.getElementById('dashOrganCertId');
-                if (idEl) idEl.textContent = certId;
-
-                // Populate In-Panel Elements
-                const pNameEl = document.getElementById('dashPanelOrganCertName');
-                if (pNameEl) pNameEl.textContent = donorName;
-                const pBgEl = document.getElementById('dashPanelOrganCertBg');
-                if (pBgEl) pBgEl.textContent = bloodGroup;
-                const pIdEl = document.getElementById('dashPanelOrganCertId');
-                if (pIdEl) pIdEl.textContent = certId;
-
-                let organs = (organDonor && (organDonor.organs || organDonor.pledgedOrgans)) || ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
-                if (typeof organs === 'string') {
-                    organs = organs.split(',').map(s => s.trim()).filter(Boolean);
-                }
-                if (!Array.isArray(organs) || organs.length === 0) {
-                    organs = ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                // Priority 3: Local cached registration
+                if (!organDonor) {
+                    const localOD = localStorage.getItem('organDonorData');
+                    if (localOD) {
+                        try {
+                            const parsed = JSON.parse(localOD);
+                            if (parsed && parsed.name) organDonor = parsed;
+                        } catch(e) {}
+                    }
                 }
 
-                const organContainer = document.getElementById('dashOrganCertOrgansList');
-                if (organContainer) {
-                    organContainer.innerHTML = '';
-                    organs.forEach(org => {
-                        const badge = document.createElement('span');
-                        badge.className = 'bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm';
-                        badge.textContent = `✨ ${org}`;
-                        organContainer.appendChild(badge);
-                    });
+                if (organDonor && organDonor.name) {
+                    const donorName = organDonor.name;
+                    const bloodGroup = organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || (userProfile && userProfile.bloodGroup) || 'O+';
+                    const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || fallbackCertIdOD;
+
+                    window.userOrganDonorData = {
+                        ...organDonor,
+                        name: donorName,
+                        bloodGroup: bloodGroup,
+                        certId: certId
+                    };
+
+                    // Populate Modal Elements
+                    const nameEl = document.getElementById('dashOrganCertName');
+                    if (nameEl) nameEl.textContent = donorName;
+                    const bgEl = document.getElementById('dashOrganCertBg');
+                    if (bgEl) bgEl.textContent = bloodGroup;
+                    const idEl = document.getElementById('dashOrganCertId');
+                    if (idEl) idEl.textContent = certId;
+
+                    // Populate In-Panel Elements
+                    const pNameEl = document.getElementById('dashPanelOrganCertName');
+                    if (pNameEl) pNameEl.textContent = donorName;
+                    const pBgEl = document.getElementById('dashPanelOrganCertBg');
+                    if (pBgEl) pBgEl.textContent = bloodGroup;
+                    const pIdEl = document.getElementById('dashPanelOrganCertId');
+                    if (pIdEl) pIdEl.textContent = certId;
+
+                    let organs = organDonor.organs || organDonor.pledgedOrgans || ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                    if (typeof organs === 'string') {
+                        organs = organs.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                    if (!Array.isArray(organs) || organs.length === 0) {
+                        organs = ['All Vital Organs & Tissues (Kidneys, Liver, Heart, Corneas)'];
+                    }
+
+                    const organContainer = document.getElementById('dashOrganCertOrgansList');
+                    if (organContainer) {
+                        organContainer.innerHTML = '';
+                        organs.forEach(org => {
+                            const badge = document.createElement('span');
+                            badge.className = 'bg-white border border-blue-200 text-blue-900 text-[11px] font-bold px-2.5 py-0.5 rounded-lg shadow-sm';
+                            badge.textContent = `✨ ${org}`;
+                            organContainer.appendChild(badge);
+                        });
+                    }
+
+                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                    window.userOrganDonorData.verifyUrl = verifyUrl;
+                    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                    
+                    const qrEl = document.getElementById('dashOrganCertQR');
+                    if (qrEl) qrEl.src = qrUrl;
+                    const pQrEl = document.getElementById('dashPanelOrganCertQR');
+                    if (pQrEl) pQrEl.src = qrUrl;
+
+                    if (organActive) organActive.classList.remove('hidden');
+                    if (organUnpledged) organUnpledged.classList.add('hidden');
+                    if (organBadge) {
+                        organBadge.textContent = "Pledged & Verified";
+                        organBadge.className = "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-blue-200 dark:border-blue-900";
+                    }
+                } else {
+                    // Non-pledged organ donor: hide certificate, display unpledged prompt
+                    window.userOrganDonorData = null;
+                    if (organActive) organActive.classList.add('hidden');
+                    if (organUnpledged) organUnpledged.classList.remove('hidden');
+                    if (organBadge) {
+                        organBadge.textContent = "Not Pledged";
+                        organBadge.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase border border-slate-200 dark:border-slate-700";
+                    }
                 }
-
-                const pOrganContainer = document.getElementById('dashPanelOrganCertOrgansList');
-                if (pOrganContainer) {
-                    pOrganContainer.innerHTML = '';
-                    organs.forEach(org => {
-                        const badge = document.createElement('span');
-                        badge.className = 'bg-white border border-blue-200 text-blue-900 text-[10px] font-bold px-2 py-0.5 rounded shadow-sm';
-                        badge.textContent = `🎁 ${org}`;
-                        pOrganContainer.appendChild(badge);
-                    });
-                }
-
-                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-                window.userOrganDonorData.verifyUrl = verifyUrl;
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-                
-                const qrEl = document.getElementById('dashOrganCertQR');
-                if (qrEl) qrEl.src = qrUrl;
-                const pQrEl = document.getElementById('dashPanelOrganCertQR');
-                if (pQrEl) pQrEl.src = qrUrl;
-
-                if (organActions) organActions.classList.remove('hidden');
-                if (organUnpledged) organUnpledged.classList.add('hidden');
             } catch (err) {
                 console.warn("Organ certificate load warning:", err);
             }
@@ -3958,10 +4054,9 @@
         // Blood Certificate Actions
         window.openDashboardBloodCertModal = function() {
             window.lockBodyScroll();
-            const profile = window.currentActiveUserProfile || {};
             const donor = window.userBloodDonorData || {};
-            const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
-            const bg = (donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+');
+            const name = donor.name || 'Member';
+            const bg = donor.bloodGroup || 'O+';
             const certId = donor.certId || `LSC-BD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashBloodCertName');
@@ -4000,22 +4095,14 @@
         }
 
         window.downloadDashboardBloodCert = function() {
-            clearPrintableCerts();
-            const certEl = document.getElementById('printableBloodCert') || document.getElementById('printableBloodCertPanel');
-            if (certEl) certEl.classList.add('printable-active-cert');
-            setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                    clearPrintableCerts();
-                }, 1500);
-            }, 300);
+            downloadBloodCertImage();
         };
 
         window.downloadBloodCertImage = async function() {
-            const name = document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Voluntary Donor';
-            const bg = document.getElementById('dashBloodCertBg')?.textContent?.trim() || 'O+';
-            const certId = document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const qrImg = document.getElementById('dashBloodCertQR');
+            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || document.getElementById('dashBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || 'Voluntary Donor';
+            const bg = document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+';
+            const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || document.getElementById('dashBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482';
+            const qrImg = document.getElementById('dashPanelBloodCertQR') || document.getElementById('dashBloodCertQR');
 
             const canvas = document.createElement('canvas');
             canvas.width = 1024;
@@ -4090,8 +4177,8 @@
         };
 
         window.shareBloodCertWhatsApp = function() {
-            const certId = window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const name = window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
+            const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
+            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
             const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
             const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
@@ -4165,22 +4252,14 @@
         };
 
         window.downloadDashboardOrganCert = function() {
-            clearPrintableCerts();
-            const certEl = document.getElementById('printableOrganCert') || document.getElementById('printableOrganCertPanel');
-            if (certEl) certEl.classList.add('printable-active-cert');
-            setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                    clearPrintableCerts();
-                }, 1500);
-            }, 300);
+            downloadOrganCertImage();
         };
 
         window.downloadOrganCertImage = async function() {
-            const name = document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Voluntary Pledger';
-            const bg = document.getElementById('dashOrganCertBg')?.textContent?.trim() || 'O+';
-            const certId = document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const qrImg = document.getElementById('dashOrganCertQR');
+            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || document.getElementById('dashOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || 'Voluntary Pledger';
+            const bg = document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+';
+            const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || document.getElementById('dashOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482';
+            const qrImg = document.getElementById('dashPanelOrganCertQR') || document.getElementById('dashOrganCertQR');
 
             const canvas = document.createElement('canvas');
             canvas.width = 1024;
@@ -4254,8 +4333,8 @@
         };
 
         window.shareOrganCertWhatsApp = function() {
-            const certId = window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const name = window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Member';
+            const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
+            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Member';
             const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
             const text = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\nPledged by: *${name}*\nCertificate ID: *${certId}*\n\nVerify official pledge certificate online:\n${verifyUrl}\n\nGive someone a second chance at life! 🌟`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
