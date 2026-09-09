@@ -1,0 +1,56 @@
+{
+  "rules": {
+    ".read": "true",
+    ".write": "true",
+    "users": {
+      "$uid": {
+        ".read": "true",
+        ".write": "true"
+      }
+    },
+    "donors": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "organ_donors": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "blood_requests": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "profile_change_requests": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "account_change_requests": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "contact_requests": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "messages": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "admin_audit_logs": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "partner_hospitals": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "referrals": {
+      ".read": "true",
+      ".write": "true"
+    },
+    "referral_codes": {
+      ".read": "true",
+      ".write": "true"
+    }
+  }
+}

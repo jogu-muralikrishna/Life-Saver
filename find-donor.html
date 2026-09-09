@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Blood Donors - Life Saver</title>
     <script>
-        if (localStorage.getItem('theme') === 'dark') {
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -22,25 +27,162 @@
 <body class="min-h-screen pb-20 flex flex-col justify-between">
 
     <!-- NAVBAR -->
-    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 text-red-600 font-extrabold text-xl tracking-tight">
-                <i data-lucide="search" class="w-6 h-6"></i>
-                <span>Life <span class="text-emerald-600">Saver</span></span>
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            
+            <!-- BRAND LOGO -->
+            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="droplet" class="w-5 h-5"></i>
+                </div>
+                <span>Life <span class="text-emerald-500">Saver</span></span>
             </a>
-            <div class="flex items-center gap-3">
-                <button id="themeToggleBtn" onclick="toggleTheme()"
-                    class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                    title="Toggle Light/Dark Theme">
+
+            <!-- GREETING / DYNAMIC USER NAME -->
+            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                <span id="userGreetingTop" class="truncate">Account</span>
+            </a>
+
+            <!-- 3 DIRECTLY VISIBLE QUICK TOOLS + CONTROLS -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                
+                <!-- TOOL 1: AI TRIAGE (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=triage" class="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-blue-200/80 dark:border-blue-900/50 transition shadow-sm shrink-0" title="AI Medical Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>AI Triage</span>
+                </a>
+
+                <!-- TOOL 2: CONTACT (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=contact" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Contact</span>
+                </a>
+
+                <!-- TOOL 3: INSTALL APP (VISIBLE ON DESKTOP) -->
+                <button onclick="window.location.href=\'index.html?action=install\'" class="hidden md:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Install App</span>
+                </button>
+
+                <!-- THEME TOGGLE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Toggle Light/Dark Theme">
                     <i data-lucide="moon" class="w-4 h-4"></i>
                 </button>
-                <a href="blood.html"
-                    class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Blood Hub
-                </a>
+
+                <!-- THREE-DOT MENU -->
+                <div class="relative nav-dropdown">
+                    <button id="navThreeDotsBtn" onclick="toggleNavToolsMenu(event)" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 flex items-center justify-center font-black" title="Menu & More Options">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- DROPDOWN PANEL -->
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+                        <!-- MOBILE QUICK TOOLS -->
+                        <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
+                            <a href="index.html?action=triage" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg"><i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant</a>
+                            <a href="contact.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us</a>
+                            <a href="register-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Register as Donor
+                            </a>
+                        </div>
+
+                        <!-- 🏆 REFERRAL LEADERBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-2 text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-lg transition mb-1 border border-amber-200/60 dark:border-amber-900/40">
+                            <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                            <span>🏆 Referral Leaderboard</span>
+                        </a>
+
+                        <!-- DASHBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                            <span>Dashboard & Referral</span>
+                        </a>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- SERVICES -->
+                        <div class="space-y-0.5">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 py-0.5">Services</div>
+                            <a href="register-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i> <span>Register Donor</span>
+                            </a>
+                            <a href="blood.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> <span>Blood Requests</span>
+                            </a>
+                            <a href="hospitals.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Hospitals</span>
+                            </a>
+                            <a href="ambulance.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="truck" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> <span>Ambulance</span>
+                            </a>
+                            <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500 shrink-0"></i> <span>Organ Registry</span>
+                            </a>
+                            <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Emergency Guide</span>
+                            </a>
+                        </div>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- ADMIN PORTAL -->
+                        <a href="admin-login.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Admin Portal</span>
+                        </a>
+                        <button id="navSignOutBtn" onclick="handleUserSignOut()" class="w-full hidden items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition text-left mt-0.5">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i> <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </nav>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
+        <div class="mobile-nav-content" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 text-red-600 font-extrabold text-lg">
+                    <i data-lucide="search" class="w-5 h-5"></i> Find Blood Donor
+                </div>
+                <button onclick="toggleMobileNav(event)" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</div>
+            <div class="space-y-1 mb-6">
+                <a href="index.html" class="nav-item-link w-full">
+                    <i data-lucide="home" class="w-4 h-4"></i> Home
+                </a>
+                <a href="hospitals.html" class="nav-item-link w-full">
+                    <i data-lucide="building-2" class="w-4 h-4"></i> Hospitals
+                </a>
+                <a href="blood.html" class="nav-item-link active w-full">
+                    <i data-lucide="droplet" class="w-4 h-4"></i> Blood Donation Hub
+                </a>
+                <a href="ambulance.html" class="nav-item-link w-full">
+                    <i data-lucide="truck" class="w-4 h-4"></i> Ambulance Service
+                </a>
+                <a href="organ.html" class="nav-item-link w-full">
+                    <i data-lucide="heart-handshake" class="w-4 h-4"></i> Organ Donation
+                </a>
+                <a href="emergency.html" class="nav-item-link w-full">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Emergency First Aid Guide
+                </a>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Account & Portal</div>
+            <div class="space-y-2">
+                <a href="auth.html" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="user" class="w-4 h-4"></i> Member Account
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- CONTENT -->
     <main class="max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
@@ -97,15 +239,10 @@
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer
-        class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        © 2026 Life Saver Healthcare Network.
-    </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, get, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -118,12 +255,315 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // AUTH STATE GREETING
+        onAuthStateChanged(auth, async (user) => {
+            const greetingEl = document.getElementById("userGreetingTop");
+            const navSignOutBtn = document.getElementById("navSignOutBtn");
+            const userAuthTopBar = document.getElementById("userAuthTopBar");
+
+            if (user) {
+                let name = user.displayName;
+                if (!name) {
+                    try {
+                        const snap = await get(ref(db, `users/${user.uid}`));
+                        if (snap.exists() && snap.val().name) {
+                            name = snap.val().name;
+                        }
+                    } catch(e) {}
+                }
+                if (!name && user.email) {
+                    name = user.email.split('@')[0];
+                }
+                name = (name || 'Member').trim();
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+
+                if (greetingEl) greetingEl.textContent = `Hello, ${name} 👋`;
+                if (userAuthTopBar) userAuthTopBar.title = `Signed in as ${user.email}`;
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.remove('hidden');
+                    navSignOutBtn.classList.add('flex');
+                }
+            } else {
+                if (greetingEl) greetingEl.textContent = "Account";
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.add('hidden');
+                    navSignOutBtn.classList.remove('flex');
+                }
+            }
+        });
+
+        window.handleUserSignOut = function() {
+            if (confirm("Are you sure you want to sign out from Life Saver?")) {
+                signOut(auth).then(() => {
+                    window.location.reload();
+                });
+            }
+        };
 
         let donorsList = [];
 
         window.applyFilters = function () {
             renderResults();
+        };
+
+        window.currentUserAuth = null;
+        onAuthStateChanged(auth, user => {
+            window.currentUserAuth = user;
+        });
+
+        function generateDonorContactHtml(donor) {
+            const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || (!donor.phoneVisibility && !donor.accountType);
+            const contacts = donor.publicContacts || {};
+            const donorUid = donor.uid || donor.userId || donor.key || '';
+            const donorName = donor.name || 'Voluntary Donor';
+
+            if (isPublic && donor.phone) {
+                const cleanPhone = donor.phone.replace(/\D/g, '');
+                return `
+                    <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="tel:${cleanPhone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
+                            </a>
+                            <a href="https://wa.me/91${cleanPhone}?text=Emergency:%20Need%20${encodeURIComponent(donor.bloodGroup || 'blood')}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
+                            </a>
+                        </div>
+                        <button onclick="openDirectMessageToDonor('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Private Account / Private Phone cases:
+            const actionButtons = [];
+
+            // WhatsApp with explicit public number
+            if (contacts.whatsapp?.enabled && contacts.whatsapp?.number) {
+                const cleanWa = contacts.whatsapp.number.replace(/\D/g, '');
+                if (cleanWa) {
+                    actionButtons.push(`
+                        <a href="https://wa.me/91${cleanWa}?text=Emergency:%20Need%20${encodeURIComponent(donor.bloodGroup || 'blood')}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
+                        </a>
+                    `);
+                }
+            }
+
+            // Instagram
+            if (contacts.instagram?.enabled && contacts.instagram?.username) {
+                const cleanIg = contacts.instagram.username.replace('@', '').trim();
+                if (cleanIg) {
+                    actionButtons.push(`
+                        <a href="https://instagram.com/${encodeURIComponent(cleanIg)}" target="_blank" class="bg-gradient-to-r from-pink-600 to-purple-600 hover:opacity-90 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="instagram" class="w-3.5 h-3.5"></i> Instagram
+                        </a>
+                    `);
+                }
+            }
+
+            // Email
+            if (contacts.email?.enabled && contacts.email?.address) {
+                const cleanEmail = contacts.email.address.trim();
+                if (cleanEmail && !cleanEmail.toLowerCase().startsWith('javascript:') && !cleanEmail.toLowerCase().startsWith('data:')) {
+                    actionButtons.push(`
+                        <a href="mailto:${encodeURIComponent(cleanEmail)}?subject=LifeSaver%20Emergency%20Blood%20Inquiry" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <i data-lucide="mail" class="w-3.5 h-3.5"></i> Email
+                        </a>
+                    `);
+                }
+            }
+
+            // Always provide the In-Platform Contact Request button for Private Accounts
+            const requestButtonHtml = `
+                <button onclick="openRequestToContactModal('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> 🔒 Send Contact Request
+                </button>
+            `;
+
+            if (actionButtons.length > 0) {
+                return `
+                    <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="grid grid-cols-2 gap-2">
+                            ${actionButtons.join('')}
+                        </div>
+                        ${requestButtonHtml}
+                    </div>
+                `;
+            }
+
+            // Purely Private account (no custom channels enabled)
+            return `
+                <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div class="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 text-xs font-bold flex items-center justify-center gap-1.5">
+                        <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-500"></i> Private Account
+                    </div>
+                    ${requestButtonHtml}
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Send Contact Request Logic
+        window.openRequestToContactModal = function(donorUid, donorName) {
+            window.lockBodyScroll();
+            document.getElementById("targetDonorUid").value = donorUid || '';
+            document.getElementById("targetDonorName").textContent = donorName || 'Voluntary Donor';
+            
+            if (window.currentUserAuth) {
+                document.getElementById("reqSenderName").value = window.currentUserAuth.displayName || '';
+                document.getElementById("reqSenderEmail").value = window.currentUserAuth.email || '';
+            }
+            
+            const modal = document.getElementById("sendContactRequestModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeRequestToContactModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("sendContactRequestModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.submitContactRequest = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnSubmitContactReq");
+            const feedback = document.getElementById("contactReqFeedback");
+            btn.disabled = true;
+            btn.innerText = "Sending Request...";
+
+            const receiverUid = document.getElementById("targetDonorUid").value;
+            const receiverName = document.getElementById("targetDonorName").textContent;
+            const senderName = document.getElementById("reqSenderName").value.trim();
+            const senderEmail = document.getElementById("reqSenderEmail").value.trim();
+            const message = document.getElementById("reqSenderMessage").value.trim();
+            const senderUid = window.currentUserAuth ? window.currentUserAuth.uid : 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+
+            const requestId = "REQ-CON-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                requestId: requestId,
+                senderUid: senderUid,
+                senderName: senderName,
+                senderEmail: senderEmail,
+                receiverUid: receiverUid,
+                receiverName: receiverName,
+                message: message,
+                status: 'pending',
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await push(ref(db, 'contact_requests'), payload);
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                feedback.textContent = "✅ Contact request sent securely! The member will review and accept it from their dashboard.";
+                feedback.classList.remove('hidden');
+                setTimeout(() => {
+                    closeRequestToContactModal();
+                    feedback.classList.add('hidden');
+                    document.getElementById("contactRequestForm").reset();
+                }, 2500);
+            } catch (err) {
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                feedback.textContent = "Error sending contact request: " + err.message;
+                feedback.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Send Contact Request';
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        // Direct Message to Donor Modal
+        window.openDirectMessageToDonor = function(donorUid, donorName) {
+            window.lockBodyScroll();
+            document.getElementById("directMsgReceiverUid").value = donorUid || '';
+            document.getElementById("directMsgDonorName").textContent = donorName || 'Voluntary Donor';
+            if (window.currentUserAuth) {
+                document.getElementById("directMsgSenderName").value = window.currentUserAuth.displayName || '';
+                document.getElementById("directMsgSenderEmail").value = window.currentUserAuth.email || '';
+            }
+            const modal = document.getElementById("directMessageDonorModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closeDirectMessageDonorModal = function() {
+            window.unlockBodyScroll();
+            const modal = document.getElementById("directMessageDonorModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.submitDirectMessageToDonor = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnSubmitDirectMsg");
+            const feedback = document.getElementById("directMsgFeedback");
+            btn.disabled = true;
+            btn.innerText = "Sending Message...";
+
+            const receiverUid = document.getElementById("directMsgReceiverUid").value;
+            const receiverName = document.getElementById("directMsgDonorName").textContent;
+            const senderName = document.getElementById("directMsgSenderName").value.trim();
+            const senderEmail = document.getElementById("directMsgSenderEmail").value.trim();
+            const subject = document.getElementById("directMsgSubject").value.trim();
+            const message = document.getElementById("directMsgBody").value.trim();
+            const senderUid = window.currentUserAuth ? window.currentUserAuth.uid : 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+
+            const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                messageId: messageId,
+                senderUid: senderUid,
+                senderName: senderName,
+                senderEmail: senderEmail,
+                receiverUid: receiverUid,
+                receiverName: receiverName,
+                subject: subject,
+                message: message,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString(),
+                read: false
+            };
+
+            try {
+                await push(ref(db, 'messages'), payload);
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                feedback.textContent = "✅ Message delivered! The member will see it in their dashboard inbox.";
+                feedback.classList.remove('hidden');
+                setTimeout(() => {
+                    closeDirectMessageDonorModal();
+                    feedback.classList.add('hidden');
+                    document.getElementById("directMessageDonorForm").reset();
+                }, 2000);
+            } catch (err) {
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                feedback.textContent = "Error sending message: " + err.message;
+                feedback.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Send Message';
+                if (window.lucide) lucide.createIcons();
+            }
         };
 
         function renderResults() {
@@ -150,7 +590,6 @@
             }
 
             filtered.forEach(donor => {
-                const phone = donor.phone || '9999999999';
                 const card = document.createElement("div");
                 card.className = "glass-card p-6 flex flex-col justify-between hover:border-red-500 transition";
                 card.innerHTML = `
@@ -169,14 +608,7 @@
                         </p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <a href="tel:${phone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                        </a>
-                        <a href="https://wa.me/91${phone}?text=Emergency:%20Need%20${donor.bloodGroup}%20blood%20urgently." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                        </a>
-                    </div>
+                    ${generateDonorContactHtml(donor)}
                 `;
                 grid.appendChild(card);
             });
@@ -204,6 +636,7 @@
                     document.getElementById('vBg').textContent = donor.bloodGroup || 'O+';
                     document.getElementById('vCity').textContent = donor.city || 'Verified Location';
                     document.getElementById('vDate').textContent = donor.registeredDate || new Date().toISOString().split('T')[0];
+                    window.lockBodyScroll();
                     document.getElementById('verifyCertModal').classList.remove('hidden');
                     document.getElementById('verifyCertModal').classList.add('flex');
                     if (window.lucide) lucide.createIcons();
@@ -212,6 +645,7 @@
         });
 
         window.closeVerifyModal = function() {
+            window.unlockBodyScroll();
             document.getElementById('verifyCertModal').classList.add('hidden');
             document.getElementById('verifyCertModal').classList.remove('flex');
         };
@@ -283,7 +717,133 @@
             }
         }
         updateThemeIcon();
+                // STRICT PAGE TOP INITIALIZATION
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }
+        });
+        window.addEventListener('load', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }
+        });
     </script>
+    <!-- SEND CONTACT REQUEST MODAL (FOR PRIVATE DONORS) -->
+    <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
+            <button onclick="closeRequestToContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto mb-2 border border-purple-100 dark:border-purple-900/50">
+                    <i data-lucide="shield" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white">Request to Contact Donor</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">This member has a private profile. Send a contact request to connect.</p>
+            </div>
+
+            <form id="contactRequestForm" onsubmit="submitContactRequest(event)" class="space-y-4">
+                <input type="hidden" id="targetDonorUid">
+                <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Donor:</span>
+                    <span id="targetDonorName" class="text-xs font-black text-purple-600 dark:text-purple-400">Donor Name</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Name *</label>
+                        <input type="text" id="reqSenderName" required placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Email *</label>
+                        <input type="email" id="reqSenderEmail" required placeholder="your@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Message / Request Reason *</label>
+                    <textarea id="reqSenderMessage" rows="3" required placeholder="Explain why you need to contact this donor (e.g. urgent blood requirement for family member at Hospital X)..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-medium"></textarea>
+                </div>
+
+                <div id="contactReqFeedback" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeRequestToContactModal()" class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btnSubmitContactReq" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i> Send Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DIRECT MESSAGE MODAL (FOR PUBLIC MEMBERS) -->
+    <div id="directMessageDonorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
+            <button onclick="closeDirectMessageDonorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-2 border border-blue-100 dark:border-blue-900/50">
+                    <i data-lucide="mail" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white">Send In-Platform Message</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Direct message via LifeSaver-Care member inbox</p>
+            </div>
+
+            <form id="directMessageDonorForm" onsubmit="submitDirectMessageToDonor(event)" class="space-y-4">
+                <input type="hidden" id="directMsgReceiverUid">
+                <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">To:</span>
+                    <span id="directMsgDonorName" class="text-xs font-black text-blue-600 dark:text-blue-400">Donor Name</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Name *</label>
+                        <input type="text" id="directMsgSenderName" required placeholder="Your full name" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-blue-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Email *</label>
+                        <input type="email" id="directMsgSenderEmail" required placeholder="your@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-blue-500 font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Subject *</label>
+                    <input type="text" id="directMsgSubject" required placeholder="e.g. Urgent Blood Inquiry / Availability" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-blue-500 font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Message *</label>
+                    <textarea id="directMsgBody" rows="3" required placeholder="Type your message..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-blue-500 font-medium"></textarea>
+                </div>
+
+                <div id="directMsgFeedback" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeDirectMessageDonorModal()" class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="btnSubmitDirectMsg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i> Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 
 </html>

@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blood Donation & Urgent Requirement Board - Life Saver</title>
     <script>
-        if (localStorage.getItem('theme') === 'dark') {
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -22,37 +27,171 @@
 <body class="min-h-screen pb-20 flex flex-col justify-between">
 
     <!-- NAVBAR -->
-    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 text-red-600 font-extrabold text-xl tracking-tight">
-                <i data-lucide="droplet" class="w-6 h-6"></i>
-                <span>Life <span class="text-emerald-600">Saver</span></span>
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            
+            <!-- BRAND LOGO -->
+            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="droplet" class="w-5 h-5"></i>
+                </div>
+                <span>Life <span class="text-emerald-500">Saver</span></span>
             </a>
-            <div class="flex items-center gap-3">
-                <button id="themeToggleBtn" onclick="toggleTheme()"
-                    class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
-                    title="Toggle Light/Dark Theme">
+
+            <!-- GREETING / DYNAMIC USER NAME -->
+            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                <span id="userGreetingTop" class="truncate">Account</span>
+            </a>
+
+            <!-- 3 DIRECTLY VISIBLE QUICK TOOLS + CONTROLS -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                
+                <!-- TOOL 1: AI TRIAGE (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=triage" class="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-blue-200/80 dark:border-blue-900/50 transition shadow-sm shrink-0" title="AI Medical Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>AI Triage</span>
+                </a>
+
+                <!-- TOOL 2: CONTACT (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=contact" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Contact</span>
+                </a>
+
+                <!-- TOOL 3: INSTALL APP (VISIBLE ON DESKTOP) -->
+                <button onclick="window.location.href=\'index.html?action=install\'" class="hidden md:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Install App</span>
+                </button>
+
+                <!-- THEME TOGGLE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Toggle Light/Dark Theme">
                     <i data-lucide="moon" class="w-4 h-4"></i>
                 </button>
-                <button onclick="openPostRequirementModal()"
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-red-500/20">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Blood Need
-                </button>
-                <a href="register-donor.html"
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i> Register as Donor
-                </a>
-                <a href="auth.html" id="userAuthNav"
-                    class="hidden sm:flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-bold px-3 py-2 transition rounded-xl">
-                    <i data-lucide="user" class="w-4 h-4"></i> <span id="userAuthLabel">Account</span>
-                </a>
-                <a href="index.html"
-                    class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center gap-1.5 px-3 py-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Home
-                </a>
+
+                <!-- THREE-DOT MENU -->
+                <div class="relative nav-dropdown">
+                    <button id="navThreeDotsBtn" onclick="toggleNavToolsMenu(event)" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 flex items-center justify-center font-black" title="Menu & More Options">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- DROPDOWN PANEL -->
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+                        <!-- MOBILE QUICK TOOLS -->
+                        <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
+                            <a href="index.html?action=triage" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg"><i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant</a>
+                            <a href="contact.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us</a>
+                            <button onclick="openPostRequirementModal(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-left">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need
+                            </button>
+                        </div>
+
+                        <!-- 🏆 REFERRAL LEADERBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-2 text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-lg transition mb-1 border border-amber-200/60 dark:border-amber-900/40">
+                            <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                            <span>🏆 Referral Leaderboard</span>
+                        </a>
+
+                        <!-- DASHBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                            <span>Dashboard & Referral</span>
+                        </a>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- SERVICES -->
+                        <div class="space-y-0.5">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 py-0.5">Services</div>
+                            <a href="find-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i> <span>Find Donor</span>
+                            </a>
+                            <button onclick="openPostRequirementModal(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-left">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> <span>Post Blood Need</span>
+                            </button>
+                            <a href="register-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="user-plus" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Register Donor</span>
+                            </a>
+                            <a href="hospitals.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Hospitals</span>
+                            </a>
+                            <a href="ambulance.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="truck" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> <span>Ambulance</span>
+                            </a>
+                            <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500 shrink-0"></i> <span>Organ Registry</span>
+                            </a>
+                            <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Emergency Guide</span>
+                            </a>
+                        </div>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- ADMIN PORTAL -->
+                        <a href="admin-login.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Admin Portal</span>
+                        </a>
+                        <button id="navSignOutBtn" onclick="handleUserSignOut()" class="w-full hidden items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition text-left mt-0.5">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i> <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </nav>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
+        <div class="mobile-nav-content" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 text-red-600 font-extrabold text-lg">
+                    <i data-lucide="droplet" class="w-5 h-5"></i> Blood Services
+                </div>
+                <button onclick="toggleMobileNav(event)" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</div>
+            <div class="space-y-1 mb-6">
+                <a href="index.html" class="nav-item-link w-full">
+                    <i data-lucide="home" class="w-4 h-4"></i> Home
+                </a>
+                <a href="hospitals.html" class="nav-item-link w-full">
+                    <i data-lucide="building-2" class="w-4 h-4"></i> Hospitals
+                </a>
+                <a href="blood.html" class="nav-item-link active w-full">
+                    <i data-lucide="droplet" class="w-4 h-4"></i> Blood Donation
+                </a>
+                <a href="ambulance.html" class="nav-item-link w-full">
+                    <i data-lucide="truck" class="w-4 h-4"></i> Ambulance Service
+                </a>
+                <a href="organ.html" class="nav-item-link w-full">
+                    <i data-lucide="heart-handshake" class="w-4 h-4"></i> Organ Donation
+                </a>
+                <a href="emergency.html" class="nav-item-link w-full">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Emergency First Aid Guide
+                </a>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Blood Actions</div>
+            <div class="space-y-2">
+                <button onclick="openPostRequirementModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-red-600 text-white p-2.5 rounded-xl text-xs font-bold shadow-md shadow-red-500/20">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Blood Need
+                </button>
+                <a href="register-donor.html" class="w-full flex items-center gap-2 bg-emerald-600 text-white p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Register as Donor
+                </a>
+                <a href="auth.html" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="user" class="w-4 h-4"></i> Member Account
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-6 py-8 flex-1">
@@ -255,16 +394,10 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer
-        class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        © 2026 Life Saver Healthcare Network.
-    </footer>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -281,27 +414,49 @@
         const db = getDatabase(app);
 
         // AUTH STATE GREETING
-        onAuthStateChanged(auth, (user) => {
-            const userAuthNav = document.getElementById("userAuthNav");
-            const userAuthLabel = document.getElementById("userAuthLabel");
+        onAuthStateChanged(auth, async (user) => {
+            const greetingEl = document.getElementById("userGreetingTop");
+            const navSignOutBtn = document.getElementById("navSignOutBtn");
+            const userAuthTopBar = document.getElementById("userAuthTopBar");
+
             if (user) {
-                let name = user.displayName || (user.email ? user.email.split('@')[0] : 'Donor');
-                name = name.charAt(0).toUpperCase() + name.slice(1);
-                if (userAuthLabel) userAuthLabel.textContent = `Hello, ${name}`;
-                if (userAuthNav) {
-                    userAuthNav.href = "#";
-                    userAuthNav.onclick = (e) => {
-                        e.preventDefault();
-                        if (confirm(`Logged in as ${user.email}. Do you want to sign out?`)) {
-                            signOut(auth).then(() => { window.location.reload(); });
+                let name = user.displayName;
+                if (!name) {
+                    try {
+                        const snap = await get(ref(db, `users/${user.uid}`));
+                        if (snap.exists() && snap.val().name) {
+                            name = snap.val().name;
                         }
-                    };
+                    } catch(e) {}
+                }
+                if (!name && user.email) {
+                    name = user.email.split('@')[0];
+                }
+                name = (name || 'Member').trim();
+                name = name.charAt(0).toUpperCase() + name.slice(1);
+
+                if (greetingEl) greetingEl.textContent = `Hello, ${name} 👋`;
+                if (userAuthTopBar) userAuthTopBar.title = `Signed in as ${user.email}`;
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.remove('hidden');
+                    navSignOutBtn.classList.add('flex');
                 }
             } else {
-                if (userAuthLabel) userAuthLabel.textContent = "Account";
-                if (userAuthNav) { userAuthNav.href = "auth.html"; userAuthNav.onclick = null; }
+                if (greetingEl) greetingEl.textContent = "Account";
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.add('hidden');
+                    navSignOutBtn.classList.remove('flex');
+                }
             }
         });
+
+        window.handleUserSignOut = function() {
+            if (confirm("Are you sure you want to sign out from Life Saver?")) {
+                signOut(auth).then(() => {
+                    window.location.reload();
+                });
+            }
+        };
 
         let allDonors = [];
         let activeGroupFilter = "ALL";
@@ -430,14 +585,31 @@
 
         /* POST REQUIREMENT MODAL */
         window.openPostRequirementModal = function () {
-            document.getElementById("reqModal").classList.remove("hidden");
-            document.getElementById("reqModal").classList.add("flex");
+            const modal = document.getElementById("reqModal");
+            if (modal) {
+                window.lockBodyScroll();
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+                setTimeout(() => {
+                    const firstField = document.getElementById("reqBg") || document.getElementById("reqHospital");
+                    if (firstField) {
+                        firstField.focus({ preventScroll: true });
+                    }
+                }, 100);
+            }
+            if (window.lucide) lucide.createIcons();
         };
+        window.openReqModal = window.openPostRequirementModal;
 
         window.closePostRequirementModal = function () {
-            document.getElementById("reqModal").classList.add("hidden");
-            document.getElementById("reqModal").classList.remove("flex");
+            window.unlockBodyScroll();
+            const modal = document.getElementById("reqModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
         };
+        window.closeReqModal = window.closePostRequirementModal;
 
         document.getElementById("reqForm").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -490,6 +662,30 @@
             }
         }
         updateThemeIcon();
+                        // STRICT PAGE TOP INITIALIZATION WITH BLOOD ACTION
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'request' || window.location.hash === '#request' || window.location.hash === '#reqModal') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                setTimeout(() => {
+                    openPostRequirementModal();
+                }, 50);
+            } else {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }
+        });
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.get('action') && (!window.location.hash || window.location.hash === '#')) {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }
+        });
     </script>
 </body>
 

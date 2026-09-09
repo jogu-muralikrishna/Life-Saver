@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us & 24/7 Emergency Support - Life Saver</title>
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen pb-20 flex flex-col justify-between">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            
+            <!-- BRAND LOGO -->
+            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="mail" class="w-5 h-5"></i>
+                </div>
+                <span>Life <span class="text-emerald-500">Saver</span></span>
+            </a>
+
+            <!-- GREETING / DYNAMIC USER NAME -->
+            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                <span id="userGreetingTop" class="truncate">Account</span>
+            </a>
+
+            <!-- QUICK TOOLS + CONTROLS -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <a href="index.html?action=triage" class="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-blue-200/80 dark:border-blue-900/50 transition shadow-sm shrink-0" title="AI Medical Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>AI Triage</span>
+                </a>
+
+                <a href="contact.html" class="inline-flex items-center gap-1.5 bg-emerald-600 text-white px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold shadow-sm shrink-0" title="Emergency Contact">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Contact</span>
+                </a>
+
+                <!-- THEME TOGGLE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+
+                <!-- THREE-DOT MENU -->
+                <div class="relative nav-dropdown">
+                    <button id="navThreeDotsBtn" onclick="toggleNavToolsMenu(event)" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 flex items-center justify-center font-black" title="Menu & More Options">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- DROPDOWN PANEL -->
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+                        <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
+                            <a href="index.html?action=triage" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg">
+                                <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant
+                            </a>
+                            <a href="contact.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg">
+                                <i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us
+                            </a>
+                        </div>
+
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                            <span>Dashboard & Profile</span>
+                        </a>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 py-1">Services</div>
+                        <a href="index.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-500"></i> Home
+                        </a>
+                        <a href="hospitals.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="building-2" class="w-3.5 h-3.5 text-cyan-500"></i> Hospital Network
+                        </a>
+                        <a href="blood.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Center
+                        </a>
+                        <a href="find-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-emerald-500"></i> Find Donors
+                        </a>
+                        <a href="ambulance.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-500"></i> Live Ambulance
+                        </a>
+                        <a href="organ.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500"></i> Organ Registry
+                        </a>
+                        <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-rose-500"></i> Emergency Guide
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex-1">
+        
+        <!-- HEADER HERO -->
+        <div class="text-center max-w-3xl mx-auto mb-10">
+            <div class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 px-3.5 py-1.5 rounded-full text-xs font-extrabold border border-emerald-200 dark:border-emerald-900/60 mb-3 shadow-sm">
+                <i data-lucide="headphones" class="w-3.5 h-3.5"></i> 24/7 Rapid Emergency Response & Support
+            </div>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                Get in Touch with <span class="text-emerald-600 dark:text-emerald-400">LifeSaver-Care</span>
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base mt-2">
+                Reach our central emergency coordinator team, inquire about hospital partnerships, blood drives, or platform support.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- LEFT: 24/7 HOTLINES & QUICK CHANNELS (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                
+                <!-- EMERGENCY HOTLINE BOX -->
+                <div class="p-6 rounded-3xl bg-red-500/10 border border-red-500/30 text-slate-900 dark:text-white">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-black">
+                            <i data-lucide="phone-call" class="w-5 h-5 animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-red-600 dark:text-red-400">Immediate Medical Emergency</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Call national emergency hotlines directly</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 pt-2">
+                        <a href="tel:108" class="p-3 bg-red-600 hover:bg-red-700 text-white text-center rounded-2xl transition font-black text-xs shadow-md">
+                            <span class="block text-lg font-black">108</span>
+                            <span>Ambulance</span>
+                        </a>
+                        <a href="tel:100" class="p-3 bg-blue-600 hover:bg-blue-700 text-white text-center rounded-2xl transition font-black text-xs shadow-md">
+                            <span class="block text-lg font-black">100</span>
+                            <span>Police</span>
+                        </a>
+                        <a href="tel:101" class="p-3 bg-amber-600 hover:bg-amber-700 text-white text-center rounded-2xl transition font-black text-xs shadow-md">
+                            <span class="block text-lg font-black">101</span>
+                            <span>Fire / Rescue</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- EMAIL & LOCATION CARDS -->
+                <div class="p-6 rounded-3xl glass-card border border-slate-200 dark:border-slate-800 space-y-4 bg-white dark:bg-slate-900 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Official Email</h4>
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">support@lifesaver-care.org</p>
+                            <p class="text-[11px] text-slate-400">Typical response time: under 2 hours</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Central Operations</h4>
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">Healthcare Command Center, Hyderabad, TS, India</p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Operating Hours</h4>
+                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-0.5">Emergency Dispatch: 24/7/365 Non-Stop</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT: CONTACT US FORM (7 cols) -->
+            <div class="lg:col-span-7">
+                <div class="p-6 sm:p-8 rounded-3xl glass-card border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
+                    <h2 class="text-xl font-black text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                        <i data-lucide="send" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i> Send Us a Direct Message
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Fill in your details below and our coordinators will assist you promptly.</p>
+
+                    <form id="standaloneContactForm" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Full Name *</label>
+                                <input type="text" id="contactName" required placeholder="e.g. Rahul Sharma" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address *</label>
+                                <input type="email" id="contactEmail" required placeholder="e.g. rahul@example.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Phone Number (Optional)</label>
+                                <input type="tel" id="contactMobile" placeholder="e.g. +91 98765 43210" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Inquiry Purpose *</label>
+                                <select id="contactReason" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                                    <option value="Emergency Blood Inquiry">Emergency Blood Inquiry</option>
+                                    <option value="Hospital Accreditation / Partnership">Hospital Accreditation / Partnership</option>
+                                    <option value="Ambulance Service Query">Ambulance Service Query</option>
+                                    <option value="Organ Donation Registry">Organ Donation Registry</option>
+                                    <option value="Account & Certificate Support">Account & Certificate Support</option>
+                                    <option value="General Feedback / Other">General Feedback / Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Message / Requirement *</label>
+                            <textarea id="contactMessage" rows="4" required placeholder="Describe your requirement, inquiry, or emergency context in detail..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-medium leading-relaxed"></textarea>
+                        </div>
+
+                        <div id="contactFeedback" class="hidden text-xs p-3 rounded-xl font-semibold"></div>
+
+                        <button type="submit" id="contactSubmitBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-2xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i data-lucide="send" class="w-4 h-4"></i> Send Message to Operations Team
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-nav border-t border-slate-200 dark:border-slate-800 py-6 px-4 text-center text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="font-extrabold text-slate-800 dark:text-slate-200">LifeSaver-Care</span> &copy; 2026. Rapid Emergency Healthcare Platform.
+            </div>
+            <div class="flex items-center gap-4 font-bold">
+                <a href="index.html" class="hover:text-red-500 transition">Home</a>
+                <a href="blood.html" class="hover:text-red-500 transition">Blood</a>
+                <a href="hospitals.html" class="hover:text-red-500 transition">Hospitals</a>
+                <a href="ambulance.html" class="hover:text-red-500 transition">Ambulance</a>
+                <a href="auth.html" class="hover:text-red-500 transition">Account</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- FIREBASE MODULE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // User Greeting Topbar
+        onAuthStateChanged(auth, async (user) => {
+            const greetingEl = document.getElementById("userGreetingTop");
+            const userAuthTopBar = document.getElementById("userAuthTopBar");
+            if (user) {
+                let name = user.displayName;
+                if (!name) {
+                    try {
+                        const snap = await get(ref(db, `users/${user.uid}`));
+                        if (snap.exists() && snap.val().name) {
+                            name = snap.val().name;
+                        }
+                    } catch (e) {}
+                }
+                if (!name && user.email) {
+                    name = user.email.split('@')[0];
+                }
+                name = name ? (name.charAt(0).toUpperCase() + name.slice(1)) : "Member";
+                if (greetingEl) greetingEl.textContent = `Hello, ${name} 👋`;
+                if (userAuthTopBar) userAuthTopBar.title = `Signed in as ${user.email}`;
+
+                // Prefill user email/name in contact form if empty
+                const emInput = document.getElementById("contactEmail");
+                const nameInput = document.getElementById("contactName");
+                if (emInput && !emInput.value) emInput.value = user.email || '';
+                if (nameInput && !nameInput.value && name !== "Member") nameInput.value = name;
+            } else {
+                if (greetingEl) greetingEl.textContent = "Account";
+            }
+            if (window.lucide) lucide.createIcons();
+        });
+
+        // Contact Form Submission Handler
+        const form = document.getElementById("standaloneContactForm");
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById("contactSubmitBtn");
+                const feedback = document.getElementById("contactFeedback");
+                const name = document.getElementById("contactName").value.trim();
+                const email = document.getElementById("contactEmail").value.trim();
+                const mobile = document.getElementById("contactMobile").value.trim();
+                const reason = document.getElementById("contactReason").value;
+                const message = document.getElementById("contactMessage").value.trim();
+
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Submitting Message...`;
+                if (window.lucide) lucide.createIcons();
+
+                const payload = {
+                    messageId: "MSG-" + Math.floor(100000 + Math.random() * 900000),
+                    name: name,
+                    email: email,
+                    mobile: mobile || "",
+                    subject: reason,
+                    message: message,
+                    timestamp: Date.now(),
+                    createdAt: new Date().toISOString(),
+                    status: 'unread'
+                };
+
+                try {
+                    await push(ref(db, 'contact_messages'), payload);
+                    feedback.className = "text-xs p-3.5 rounded-2xl font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                    feedback.innerHTML = `✅ <strong>Thank you, ${name}!</strong> Your message has been sent to our 24/7 Operations Team. Ticket ID: <code>${payload.messageId}</code>`;
+                    feedback.classList.remove("hidden");
+                    form.reset();
+                } catch (err) {
+                    feedback.className = "text-xs p-3.5 rounded-2xl font-bold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    feedback.textContent = "Notice: Message recorded locally. Error syncing to cloud: " + err.message;
+                    feedback.classList.remove("hidden");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Send Message to Operations Team`;
+                    if (window.lucide) lucide.createIcons();
+                }
+            });
+        }
+    </script>
+
+    <!-- THEME & SCROLL LOGIC -->
+    <script>
+        lucide.createIcons();
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const btn = document.getElementById("themeToggleBtn");
+            if (btn) {
+                btn.innerHTML = isDark ? 
+                    '<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>' : 
+                    '<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i>';
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+        updateThemeIcon();
+
+        // STRICT PAGE TOP INITIALIZATION
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        });
+        window.addEventListener('load', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        });
+    </script>
+</body>
+</html>

@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Life Saver</title>
     <script>
-        if (localStorage.getItem('theme') === 'dark') {
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -26,26 +31,141 @@
 <body class="min-h-screen pb-20 flex flex-col justify-between" id="adminBody">
 
     <!-- NAVBAR -->
-    <nav class="glass-nav sticky top-0 z-40 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3 text-blue-600 font-extrabold text-xl tracking-tight">
-                <i data-lucide="shield-check" class="w-6 h-6"></i>
-                <span>LifeSaver <span id="adminRoleBadge" class="text-xs bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-md font-mono">SUPER ADMIN</span></span>
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            
+            <!-- BRAND LOGO & BADGE -->
+            <div class="flex items-center gap-2.5">
+                <a href="index.html" class="flex items-center gap-2 text-blue-600 font-black text-lg sm:text-xl tracking-tight">
+                    <div class="bg-blue-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <span>Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+                <span id="adminRoleBadge" class="hidden sm:inline-block text-xs bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-lg font-mono font-bold">SUPER ADMIN</span>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+            <!-- TOP BAR ACTION CLUSTER: QUICK TOOLS, SIGN OUT, ACCOUNT, THEME TOGGLE (ALL 4 ON TOP BAR) -->
+            <div class="flex items-center gap-1.5 sm:gap-2.5">
+
+                <!-- 1. QUICK TOOLS BUTTON (WITH DROPDOWN) -->
+                <div class="relative nav-dropdown">
+                    <button id="navToolsBtn" onclick="toggleNavToolsMenu(event)" class="flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm" title="Quick Tools & Options">
+                        <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                        <span class="hidden xs:inline sm:inline">Quick Tools</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 opacity-60 shrink-0"></i>
+                    </button>
+
+                    <!-- DROPDOWN CONTENT -->
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+
+                        <!-- QUICK TOOLS SECTION -->
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-3 py-1 flex items-center gap-1">
+                                <i data-lucide="zap" class="w-3 h-3"></i> Quick Tools & Admin Controls
+                            </div>
+                            
+                            <button onclick="openSettingsModal()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-left">
+                                <i data-lucide="settings" class="w-4 h-4 text-blue-500"></i> <span>Security Settings</span>
+                            </button>
+                        </div>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- NAVIGATION SERVICES SECTION -->
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-3 py-1">Services</div>
+                            <a href="index.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="home" class="w-3.5 h-3.5"></i> <span data-i18n="nav_home">Home</span>
+                            </a>
+                            <a href="hospitals.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="building-2" class="w-3.5 h-3.5"></i> <span data-i18n="nav_hospitals">Hospitals</span>
+                            </a>
+                            <a href="blood.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="droplet" class="w-3.5 h-3.5"></i> <span data-i18n="nav_blood">Blood Donation</span>
+                            </a>
+                            <a href="ambulance.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="truck" class="w-3.5 h-3.5"></i> Ambulance
+                            </a>
+                            <a href="organ-donor.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i> Organ Registry & Pledges
+                            </a>
+                            <a href="emergency.html" class="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                                <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Emergency Guide
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PROFILE & PRIVACY REQUESTS NOTIFICATION BUTTON -->
+                <button onclick="switchTab('profile_requests')" class="relative flex items-center gap-1 sm:gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Profile Change Requests">
+                    <i data-lucide="bell" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500"></i>
+                    <span class="hidden md:inline">Requests</span>
+                    <span id="adminNavNotifBadge" class="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full hidden">0</span>
+                </button>
+
+                <!-- 3. SIGN OUT -->
+                <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm shrink-0">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i> <span>Sign Out</span>
+                </button>
+
+                <!-- 3. MEMBER ACCOUNT -->
+                <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Member Account">
+                    <i data-lucide="user" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500"></i>
+                    <span id="userAuthTopBarLabel" class="hidden sm:inline">Account</span>
+                </a>
+
+                <!-- 4. THEME TOGGLE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Toggle Light/Dark Theme">
                     <i data-lucide="moon" class="w-4 h-4"></i>
                 </button>
-                <button onclick="openSettingsModal()" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition border border-slate-200 dark:border-slate-700">
-                    <i data-lucide="settings" class="w-4 h-4"></i> Security Settings
-                </button>
-                <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
-                </button>
+
             </div>
         </div>
     </nav>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
+        <div class="mobile-nav-content" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 text-blue-600 font-extrabold text-lg">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i> Admin Dashboard
+                </div>
+                <button onclick="toggleMobileNav(event)" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</div>
+            <div class="space-y-1 mb-6">
+                <a href="index.html" class="nav-item-link w-full">
+                    <i data-lucide="home" class="w-4 h-4"></i> Home
+                </a>
+                <a href="hospitals.html" class="nav-item-link w-full">
+                    <i data-lucide="building-2" class="w-4 h-4"></i> Hospitals
+                </a>
+                <a href="blood.html" class="nav-item-link w-full">
+                    <i data-lucide="droplet" class="w-4 h-4"></i> Blood Donation
+                </a>
+                <a href="ambulance.html" class="nav-item-link w-full">
+                    <i data-lucide="truck" class="w-4 h-4"></i> Ambulance Service
+                </a>
+                <a href="organ.html" class="nav-item-link w-full">
+                    <i data-lucide="heart-handshake" class="w-4 h-4"></i> Organ Donation
+                </a>
+                <a href="emergency.html" class="nav-item-link w-full">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Emergency First Aid Guide
+                </a>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Admin Actions</div>
+            <div class="space-y-2">
+                <button onclick="openSettingsModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Security Settings
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- CONTENT CONTAINER -->
     <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full">
@@ -139,6 +259,12 @@
                 <button onclick="switchTab('admin_activity')" id="tabAdminActivityBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                     <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> 🛡️ Admin Activity
                 </button>
+                <button onclick="switchTab('profile_requests')" id="tabProfileRequestsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-red-500"></i> 📝 Profile Requests (<span id="profileRequestsBadge">0</span>)
+                </button>
+                <button onclick="switchTab('account_requests')" id="tabAccountRequestsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> 🛡️ Account Privacy Requests (<span id="accountRequestsBadge">0</span>)
+                </button>
                 <button onclick="switchTab('audit')" id="tabAuditBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                     <i data-lucide="shield-check" class="w-4 h-4"></i> Donor Contact Logs
                 </button>
@@ -164,6 +290,63 @@
 
         <!-- DATA TABLES CONTAINER -->
         <div class="glass-card rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-md bg-white dark:bg-slate-900">
+
+            <!-- PROFILE CHANGE REQUESTS TABLE -->
+            <div id="tableProfileRequestsContainer" class="overflow-x-auto hidden">
+                <div class="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4 text-red-600"></i> User Profile Change Requests & Approvals
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Review requests from members to update protected information like Blood Group, Name, Phone, and City.</p>
+                    </div>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Request ID & Date</th>
+                            <th class="p-4">User Details</th>
+                            <th class="p-4">Target Field</th>
+                            <th class="p-4">Current Value</th>
+                            <th class="p-4">Requested Value</th>
+                            <th class="p-4">Reason / Justification</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right th-actions">Review Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="profileRequestsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Profile Requests -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ACCOUNT TYPE REQUESTS TABLE -->
+            <div id="tableAccountRequestsContainer" class="overflow-x-auto hidden">
+                <div class="p-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="shield" class="w-4 h-4 text-blue-600"></i> Account Privacy & Type Change Requests
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Review member requests to transition between Public (searchable) and Private (contact-request-only) accounts.</p>
+                    </div>
+                </div>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+                            <th class="p-4">Request ID & Date</th>
+                            <th class="p-4">User Details</th>
+                            <th class="p-4">Current Type</th>
+                            <th class="p-4">Requested Type</th>
+                            <th class="p-4">Reason</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right th-actions">Review Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountRequestsTableBody" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <!-- Dynamic Account Type Requests -->
+                    </tbody>
+                </table>
+            </div>
 
             <!-- 1. BLOOD DONORS TABLE -->
             <div id="tableBloodContainer" class="overflow-x-auto">
@@ -496,11 +679,7 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
-        © 2026 Life Saver Healthcare Network.
-    </footer>
-
+    <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -534,6 +713,8 @@
         let adminAuditLogsData = {};
         let subAdminsData = {};
         let recycleBinData = {};
+        let profileRequestsData = {};
+        let accountRequestsData = {};
 
         // DATABASE WRITE PERMISSION GUARD
         window.checkWritePermission = function(actionName) {
@@ -752,6 +933,42 @@
                 const badge = document.getElementById("recycleBinCountBadge");
                 if (badge) badge.textContent = Object.keys(recycleBinData).length;
             });
+
+            // 12. Profile Change Requests (Part 1-24)
+            onValue(ref(db, 'profile_change_requests'), (snapshot) => {
+                profileRequestsData = snapshot.exists() ? snapshot.val() : {};
+                renderProfileRequestsTable();
+                updateProfileRequestBadges();
+            });
+
+            // 13. Account Privacy Change Requests (Part 20)
+            onValue(ref(db, 'account_change_requests'), (snapshot) => {
+                accountRequestsData = snapshot.exists() ? snapshot.val() : {};
+                renderAccountRequestsTable();
+                updateProfileRequestBadges();
+            });
+        }
+
+        function updateProfileRequestBadges() {
+            const pendingProfileCount = Object.keys(profileRequestsData).filter(k => (profileRequestsData[k].status || 'pending').toLowerCase() === 'pending').length;
+            const pendingAccountCount = Object.keys(accountRequestsData).filter(k => (accountRequestsData[k].status || 'pending').toLowerCase() === 'pending').length;
+            
+            const profBadge = document.getElementById("profileRequestsBadge");
+            if (profBadge) profBadge.textContent = pendingProfileCount;
+
+            const accBadge = document.getElementById("accountRequestsBadge");
+            if (accBadge) accBadge.textContent = pendingAccountCount;
+
+            const totalPending = pendingProfileCount + pendingAccountCount;
+            const navNotifBadge = document.getElementById("adminNavNotifBadge");
+            if (navNotifBadge) {
+                navNotifBadge.textContent = totalPending;
+                if (totalPending > 0) {
+                    navNotifBadge.classList.remove("hidden");
+                } else {
+                    navNotifBadge.classList.add("hidden");
+                }
+            }
         }
 
         function updateStats() {
@@ -761,6 +978,7 @@
             document.getElementById("statOrganDonors").textContent = Object.keys(organDonorsData).length;
             document.getElementById("statLogs").textContent = Object.keys(auditLogsData).length + Object.keys(adminAuditLogsData).length;
             document.getElementById("statMessages").textContent = Object.keys(contactMessagesData).filter(k => (contactMessagesData[k].status || 'new').toLowerCase() === 'new').length;
+            updateProfileRequestBadges();
         }
 
         function renderBloodTable() {
@@ -1241,8 +1459,10 @@
                 else if (node === 'contact_messages') itemData = contactMessagesData[key];
                 else if (node === 'hospital_communications') itemData = hospitalCommsData[key];
                 else if (node === 'admin_audit_logs') itemData = adminAuditLogsData[key];
+                else if (node === 'profile_change_requests') itemData = profileRequestsData[key];
+                else if (node === 'account_change_requests') itemData = accountRequestsData[key];
 
-                const itemTitle = itemData ? (itemData.name || itemData.hospitalName || itemData.subject || itemData.email || key) : key;
+                const itemTitle = itemData ? (itemData.name || itemData.hospitalName || itemData.subject || itemData.userName || itemData.requestId || itemData.email || key) : key;
 
                 const confirmed = confirm(`Move "${itemTitle}" to Recycle Bin?\n\nYou can restore this record anytime from the Recycle Bin tab.`);
                 if (!confirmed) return;
@@ -1275,6 +1495,8 @@
                 if (node === 'partner_hospitals' && hospitalsData[key]) delete hospitalsData[key];
                 if (node === 'blood_requests' && requestsData[key]) delete requestsData[key];
                 if (node === 'contact_messages' && contactMessagesData[key]) delete contactMessagesData[key];
+                if (node === 'profile_change_requests' && profileRequestsData[key]) delete profileRequestsData[key];
+                if (node === 'account_change_requests' && accountRequestsData[key]) delete accountRequestsData[key];
 
                 renderUsersTable();
                 renderBloodTable();
@@ -1282,6 +1504,8 @@
                 renderHospitalsTable();
                 renderRequestsTable();
                 renderMessagesTable();
+                renderProfileRequestsTable();
+                renderAccountRequestsTable();
                 renderRecycleBinTable();
                 updateStats();
 
@@ -1403,7 +1627,10 @@
             if (document.getElementById("tableSubAdminsContainer")) document.getElementById("tableSubAdminsContainer").classList.add("hidden");
             if (document.getElementById("tableRecycleBinContainer")) document.getElementById("tableRecycleBinContainer").classList.add("hidden");
 
-            const btns = ['tabBloodBtn', 'tabRequestsBtn', 'tabHospitalsBtn', 'tabAuditBtn', 'tabOrganBtn', 'tabUsersBtn', 'tabMessagesBtn', 'tabAdminActivityBtn', 'tabSubAdminsBtn', 'tabRecycleBinBtn'];
+            if (document.getElementById("tableProfileRequestsContainer")) document.getElementById("tableProfileRequestsContainer").classList.add("hidden");
+            if (document.getElementById("tableAccountRequestsContainer")) document.getElementById("tableAccountRequestsContainer").classList.add("hidden");
+
+            const btns = ['tabBloodBtn', 'tabRequestsBtn', 'tabHospitalsBtn', 'tabAuditBtn', 'tabOrganBtn', 'tabUsersBtn', 'tabMessagesBtn', 'tabAdminActivityBtn', 'tabSubAdminsBtn', 'tabRecycleBinBtn', 'tabProfileRequestsBtn', 'tabAccountRequestsBtn'];
             btns.forEach(id => {
                 const b = document.getElementById(id);
                 if (b) b.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
@@ -1416,6 +1643,12 @@
                 }
                 document.getElementById("tableSubAdminsContainer").classList.remove("hidden");
                 document.getElementById("tabSubAdminsBtn").className = "bg-purple-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'profile_requests') {
+                document.getElementById("tableProfileRequestsContainer").classList.remove("hidden");
+                document.getElementById("tabProfileRequestsBtn").className = "bg-red-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
+            } else if (tab === 'account_requests') {
+                document.getElementById("tableAccountRequestsContainer").classList.remove("hidden");
+                document.getElementById("tabAccountRequestsBtn").className = "bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
             } else if (tab === 'blood') {
                 document.getElementById("tableBloodContainer").classList.remove("hidden");
                 document.getElementById("tabBloodBtn").className = "bg-blue-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5";
@@ -2307,6 +2540,446 @@
                 btn.textContent = "Save User Changes";
             }
         };
+
+        // ==========================================
+        // PROFILE CHANGE REQUESTS REVIEW & APPROVAL (PART 1-24)
+        // ==========================================
+        window.renderProfileRequestsTable = function() {
+            const body = document.getElementById("profileRequestsTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(profileRequestsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">No profile change requests found.</td></tr>`;
+                return;
+            }
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
+
+            // Sort: pending first, then by date desc
+            keys.sort((a, b) => {
+                const itemA = profileRequestsData[a];
+                const itemB = profileRequestsData[b];
+                const isPendingA = (itemA.status || 'pending').toLowerCase() === 'pending';
+                const isPendingB = (itemB.status || 'pending').toLowerCase() === 'pending';
+                if (isPendingA && !isPendingB) return -1;
+                if (!isPendingA && isPendingB) return 1;
+                return (itemB.createdAt || 0) - (itemA.createdAt || 0);
+            });
+
+            keys.forEach(key => {
+                const item = profileRequestsData[key];
+                const safeKey = key.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+                const isPending = (item.status || 'pending').toLowerCase() === 'pending';
+                const isApproved = (item.status || '').toLowerCase() === 'approved';
+                const isRejected = (item.status || '').toLowerCase() === 'rejected';
+
+                let statusBadge = `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-extrabold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> 🟡 PENDING</span>`;
+                if (isApproved) {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max">🟢 APPROVED</span>`;
+                } else if (isRejected) {
+                    statusBadge = `<span class="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max">🔴 REJECTED</span>`;
+                }
+
+                const dateStr = item.requestDate ? new Date(item.requestDate).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : (item.createdAt ? new Date(item.createdAt).toLocaleString() : '-');
+
+                // Build Field, Old Value, New Value display
+                let fieldDisplay = '';
+                let oldValDisplay = '';
+                let newValDisplay = '';
+
+                if (item.changes && typeof item.changes === 'object' && Object.keys(item.changes).length > 0) {
+                    const fieldLabels = [];
+                    const oldVals = [];
+                    const newVals = [];
+
+                    for (const [fKey, delta] of Object.entries(item.changes)) {
+                        const lbl = delta.label || fKey;
+                        let oldV = delta.oldValue;
+                        let newV = delta.newValue;
+
+                        if (typeof oldV === 'object') oldV = JSON.stringify(oldV);
+                        if (typeof newV === 'object') newV = JSON.stringify(newV);
+                        if (oldV === undefined || oldV === null || oldV === '') oldV = '<em class="text-slate-400">Empty / None</em>';
+                        if (newV === undefined || newV === null || newV === '') newV = '<em class="text-slate-400">Empty / None</em>';
+
+                        fieldLabels.push(`<div class="font-bold text-slate-800 dark:text-slate-200 py-0.5">• ${lbl}</div>`);
+                        oldVals.push(`<div class="font-mono text-xs text-red-600 dark:text-red-400 py-0.5 max-w-xs truncate" title="${String(oldV).replace(/"/g, '&quot;')}">${oldV}</div>`);
+                        newVals.push(`<div class="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold py-0.5 max-w-xs truncate" title="${String(newV).replace(/"/g, '&quot;')}">${newV}</div>`);
+                    }
+
+                    fieldDisplay = fieldLabels.join('');
+                    oldValDisplay = oldVals.join('');
+                    newValDisplay = newVals.join('');
+                } else {
+                    fieldDisplay = `<span class="font-bold text-slate-800 dark:text-slate-200">${item.field || 'Profile Details'}</span>`;
+                    oldValDisplay = `<span class="font-mono text-xs text-red-600 dark:text-red-400">${item.oldValue || '<em class="text-slate-400">Empty</em>'}</span>`;
+                    newValDisplay = `<span class="font-mono text-xs text-emerald-600 dark:text-emerald-400 font-bold">${item.newValue || '<em class="text-slate-400">Empty</em>'}</span>`;
+                }
+
+                let actionsCell = '';
+                if (isSubAdmin) {
+                    actionsCell = `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`;
+                } else if (isPending) {
+                    actionsCell = `
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="approveProfileChangeRequest('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1" title="Accept all changes and make permanent in database">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i> ACCEPT
+                            </button>
+                            <button onclick="rejectProfileChangeRequest('${safeKey}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition" title="Reject request and keep original verified profile">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i> REJECT
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionsCell = `
+                        <div class="flex items-center justify-end gap-2">
+                            <span class="text-xs text-slate-400 font-mono">${isApproved ? 'Approved by Admin' : 'Rejected'}</span>
+                            <button onclick="deleteRecord('profile_change_requests', '${safeKey}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-50 hover:text-red-600 text-slate-500 p-1.5 rounded-lg text-xs font-bold transition" title="Delete request record">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const userDetailsDisplay = `
+                    <strong class="text-slate-900 dark:text-white block">${item.userName || 'Member'}</strong>
+                    <span class="text-xs text-slate-500 font-mono block">${item.userEmail || '-'}</span>
+                    <span class="text-[10px] text-slate-400 font-mono block">UID: ${item.userUid ? item.userUid.slice(0, 10) + '...' : '-'}</span>
+                `;
+
+                const tr = document.createElement("tr");
+                tr.className = `hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800 ${isPending ? 'bg-amber-50/20 dark:bg-amber-950/10' : ''}`;
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">${item.requestId || key.slice(0, 10)}</div>
+                        <div class="text-[11px] text-slate-500">${dateStr}</div>
+                    </td>
+                    <td class="p-4">${userDetailsDisplay}</td>
+                    <td class="p-4 text-xs">${fieldDisplay}</td>
+                    <td class="p-4 text-xs">${oldValDisplay}</td>
+                    <td class="p-4 text-xs">${newValDisplay}</td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-400 max-w-xs">
+                        ${item.reason || item.rejectionReason || 'User profile update'}
+                    </td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right td-actions">${actionsCell}</td>
+                `;
+                body.appendChild(tr);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.approveProfileChangeRequest = async function(key) {
+            checkWritePermission('approve profile change request');
+            const req = profileRequestsData[key];
+            if (!req) return;
+
+            if (!confirm(`Are you sure you want to ACCEPT and APPLY the profile changes for user "${req.userName || req.userEmail || 'Member'}"?\n\nThis will permanently update their verified profile in the database.`)) return;
+
+            const userUid = req.userUid;
+            const adminEmail = (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN');
+
+            try {
+                // 1. Gather all updates to apply to users/${userUid}
+                const userUpdates = {
+                    updatedAt: new Date().toISOString(),
+                    lastVerifiedBy: adminEmail,
+                    lastVerifiedAt: new Date().toISOString()
+                };
+
+                if (req.changes && typeof req.changes === 'object') {
+                    for (const [fKey, delta] of Object.entries(req.changes)) {
+                        if (fKey === 'name') userUpdates.name = delta.newValue;
+                        else if (fKey === 'phone') userUpdates.phone = delta.newValue;
+                        else if (fKey === 'bloodGroup') userUpdates.bloodGroup = delta.newValue;
+                        else if (fKey === 'city') userUpdates.city = delta.newValue;
+                        else if (fKey === 'accountType') {
+                            userUpdates.accountType = delta.newValue;
+                            userUpdates.isPrivate = (delta.newValue === 'Private');
+                        } else if (fKey === 'instagram' || fKey === 'linkedin' || fKey === 'facebook' || fKey === 'website') {
+                            if (!userUpdates.socialProfiles) userUpdates.socialProfiles = {};
+                            userUpdates.socialProfiles[fKey] = delta.newValue;
+                        } else if (fKey === 'socialProfiles') {
+                            try {
+                                userUpdates.socialProfiles = typeof delta.newValue === 'object' ? delta.newValue : JSON.parse(delta.newValue);
+                            } catch(e) {
+                                userUpdates.socialProfiles = delta.newValue;
+                            }
+                        }
+                    }
+                } else if (req.field) {
+                    const f = (req.field || '').toLowerCase();
+                    if (f.includes('name')) userUpdates.name = req.newValue;
+                    else if (f.includes('blood')) userUpdates.bloodGroup = req.newValue;
+                    else if (f.includes('phone') || f.includes('mobile')) userUpdates.phone = req.newValue;
+                    else if (f.includes('city') || f.includes('location')) userUpdates.city = req.newValue;
+                    else if (f.includes('account') || f.includes('privacy')) {
+                        userUpdates.accountType = req.newValue;
+                        userUpdates.isPrivate = (req.newValue === 'Private');
+                    }
+                }
+
+                // 2. Update verified user profile in users/${userUid}
+                if (userUid) {
+                    await update(ref(db, `users/${userUid}`), userUpdates);
+                    // Remove pendingProfile to clear pending staging
+                    await remove(ref(db, `users/${userUid}/pendingProfile`));
+
+                    // Sync with donors collection if exists
+                    const donorSnap = await get(ref(db, 'donors'));
+                    if (donorSnap.exists()) {
+                        const donors = donorSnap.val();
+                        for (const [dKey, dVal] of Object.entries(donors)) {
+                            if (dVal.userId === userUid || dVal.userUid === userUid || (dVal.email && dVal.email.toLowerCase() === (req.userEmail || '').toLowerCase())) {
+                                const donorSync = { updatedAt: new Date().toISOString() };
+                                if (userUpdates.name) donorSync.name = userUpdates.name;
+                                if (userUpdates.bloodGroup) donorSync.bloodGroup = userUpdates.bloodGroup;
+                                if (userUpdates.city) donorSync.city = userUpdates.city;
+                                if (userUpdates.phone) { donorSync.phone = userUpdates.phone; donorSync.mobileNumber = userUpdates.phone; }
+                                if (userUpdates.accountType) {
+                                    donorSync.contactVisibility = userUpdates.accountType.toLowerCase();
+                                    donorSync.allowEmergencyContact = (userUpdates.accountType.toLowerCase() === 'public');
+                                }
+                                await update(ref(db, `donors/${dKey}`), donorSync);
+                            }
+                        }
+                    }
+
+                    // Sync with organ_donors collection if exists
+                    const organSnap = await get(ref(db, 'organ_donors'));
+                    if (organSnap.exists()) {
+                        const organs = organSnap.val();
+                        for (const [oKey, oVal] of Object.entries(organs)) {
+                            if (oVal.userId === userUid || oVal.userUid === userUid || (oVal.email && oVal.email.toLowerCase() === (req.userEmail || '').toLowerCase())) {
+                                const organSync = { updatedAt: new Date().toISOString() };
+                                if (userUpdates.name) organSync.name = userUpdates.name;
+                                if (userUpdates.city) organSync.city = userUpdates.city;
+                                await update(ref(db, `organ_donors/${oKey}`), organSync);
+                            }
+                        }
+                    }
+                }
+
+                // 3. Mark request as approved
+                await update(ref(db, `profile_change_requests/${key}`), {
+                    status: 'approved',
+                    reviewedBy: adminEmail,
+                    reviewedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                // 4. Log to admin_audit_logs
+                await logAdminAction('PROFILE_CHANGE_APPROVED', 'user_profile', userUid || key, {
+                    previousValue: typeof req.oldValue === 'object' ? JSON.stringify(req.oldValue) : (req.oldValue || 'Verified Profile Data'),
+                    newValue: typeof req.newValue === 'object' ? JSON.stringify(req.newValue) : (req.newValue || 'Updated Profile Details'),
+                    reason: `Admin accepted profile change request for ${req.userName || req.userEmail}`
+                });
+
+                alert(`✅ Profile changes for "${req.userName || 'user'}" approved and permanently applied to verified database profile.`);
+            } catch (err) {
+                alert("Error approving request: " + err.message);
+            }
+        };
+
+        window.rejectProfileChangeRequest = async function(key) {
+            checkWritePermission('reject profile change request');
+            const req = profileRequestsData[key];
+            if (!req) return;
+
+            const reason = prompt(`Enter rejection reason (optional):`, "Information could not be verified");
+            if (reason === null) return; // cancelled by admin
+
+            const userUid = req.userUid;
+            const adminEmail = (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN');
+
+            try {
+                // 1. Mark request as rejected
+                await update(ref(db, `profile_change_requests/${key}`), {
+                    status: 'rejected',
+                    rejectionReason: reason,
+                    reviewedBy: adminEmail,
+                    reviewedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                // 2. Remove pendingProfile from user node so user reverts to verified profile
+                if (userUid) {
+                    await remove(ref(db, `users/${userUid}/pendingProfile`));
+                }
+
+                // 3. Log to admin_audit_logs
+                await logAdminAction('PROFILE_CHANGE_REJECTED', 'user_profile', userUid || key, {
+                    previousValue: typeof req.oldValue === 'object' ? JSON.stringify(req.oldValue) : (req.oldValue || ''),
+                    newValue: 'REJECTED: ' + reason,
+                    reason: `Admin rejected profile change: ${reason}`
+                });
+
+                alert(`❌ Profile change request rejected. Original verified profile data remains unchanged.`);
+            } catch (err) {
+                alert("Error rejecting request: " + err.message);
+            }
+        };
+
+        // ==========================================
+        // ACCOUNT PRIVACY REQUESTS REVIEW & APPROVAL (PART 20)
+        // ==========================================
+        window.renderAccountRequestsTable = function() {
+            const body = document.getElementById("accountRequestsTableBody");
+            if (!body) return;
+            body.innerHTML = "";
+            const keys = Object.keys(accountRequestsData);
+
+            if (keys.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No account privacy change requests found.</td></tr>`;
+                return;
+            }
+
+            const isSubAdmin = (adminRole === 'SUB_ADMIN');
+
+            keys.sort((a, b) => {
+                const itemA = accountRequestsData[a];
+                const itemB = accountRequestsData[b];
+                const isPendingA = (itemA.status || 'pending').toLowerCase() === 'pending';
+                const isPendingB = (itemB.status || 'pending').toLowerCase() === 'pending';
+                if (isPendingA && !isPendingB) return -1;
+                if (!isPendingA && isPendingB) return 1;
+                return (itemB.createdAt || 0) - (itemA.createdAt || 0);
+            });
+
+            keys.forEach(key => {
+                const item = accountRequestsData[key];
+                const safeKey = key.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+                const isPending = (item.status || 'pending').toLowerCase() === 'pending';
+                const isApproved = (item.status || '').toLowerCase() === 'approved';
+                const isRejected = (item.status || '').toLowerCase() === 'rejected';
+
+                let statusBadge = `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-extrabold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> 🟡 PENDING</span>`;
+                if (isApproved) {
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max">🟢 APPROVED</span>`;
+                } else if (isRejected) {
+                    statusBadge = `<span class="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 font-bold px-2.5 py-1 rounded-full text-xs flex items-center gap-1 w-max">🔴 REJECTED</span>`;
+                }
+
+                const dateStr = item.requestDate ? new Date(item.requestDate).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : (item.createdAt ? new Date(item.createdAt).toLocaleString() : '-');
+
+                let actionsCell = '';
+                if (isSubAdmin) {
+                    actionsCell = `<span class="text-xs text-slate-400 font-bold font-mono">🔒 Read-Only</span>`;
+                } else if (isPending) {
+                    actionsCell = `
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="approveAccountRequest('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i> ACCEPT
+                            </button>
+                            <button onclick="rejectAccountRequest('${safeKey}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i> REJECT
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    actionsCell = `
+                        <div class="flex items-center justify-end gap-2">
+                            <span class="text-xs text-slate-400 font-mono">${isApproved ? 'Approved by Admin' : 'Rejected'}</span>
+                            <button onclick="deleteRecord('account_change_requests', '${safeKey}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-50 hover:text-red-600 text-slate-500 p-1.5 rounded-lg text-xs font-bold transition">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+
+                const tr = document.createElement("tr");
+                tr.className = `hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800 ${isPending ? 'bg-amber-50/20 dark:bg-amber-950/10' : ''}`;
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">${item.requestId || key.slice(0, 10)}</div>
+                        <div class="text-[11px] text-slate-500">${dateStr}</div>
+                    </td>
+                    <td class="p-4">
+                        <strong class="text-slate-900 dark:text-white block">${item.userName || 'Member'}</strong>
+                        <span class="text-xs text-slate-500 font-mono block">${item.userEmail || '-'}</span>
+                    </td>
+                    <td class="p-4 font-bold text-xs"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg">${item.currentType || item.oldValue || 'Public'}</span></td>
+                    <td class="p-4 font-bold text-xs"><span class="bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-900">${item.requestedType || item.newValue || 'Private'}</span></td>
+                    <td class="p-4 text-xs text-slate-600 dark:text-slate-400">${item.reason || '-'}</td>
+                    <td class="p-4">${statusBadge}</td>
+                    <td class="p-4 text-right td-actions">${actionsCell}</td>
+                `;
+                body.appendChild(tr);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.approveAccountRequest = async function(key) {
+            checkWritePermission('approve account privacy request');
+            const req = accountRequestsData[key];
+            if (!req) return;
+
+            const userUid = req.userUid;
+            const newType = (req.requestedType || req.newValue || 'public').toLowerCase();
+            const adminEmail = (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN');
+
+            try {
+                if (userUid) {
+                    await update(ref(db, `users/${userUid}`), {
+                        accountType: newType,
+                        isPrivate: (newType === 'private'),
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+
+                await update(ref(db, `account_change_requests/${key}`), {
+                    status: 'approved',
+                    reviewedBy: adminEmail,
+                    reviewedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('ACCOUNT_PRIVACY_APPROVED', 'user_account', userUid || key, {
+                    previousValue: req.currentType || req.oldValue || 'Public',
+                    newValue: req.requestedType || req.newValue || 'Private',
+                    reason: `Admin approved account privacy transition to ${newType}`
+                });
+
+                alert(`✅ Account type update approved successfully.`);
+            } catch(err) {
+                alert("Error approving request: " + err.message);
+            }
+        };
+
+        window.rejectAccountRequest = async function(key) {
+            checkWritePermission('reject account privacy request');
+            const req = accountRequestsData[key];
+            if (!req) return;
+
+            const reason = prompt(`Enter rejection reason (optional):`, "Request could not be processed");
+            if (reason === null) return;
+
+            const adminEmail = (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminRole') || 'SUPER_ADMIN');
+
+            try {
+                await update(ref(db, `account_change_requests/${key}`), {
+                    status: 'rejected',
+                    rejectionReason: reason,
+                    reviewedBy: adminEmail,
+                    reviewedAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+
+                await logAdminAction('ACCOUNT_PRIVACY_REJECTED', 'user_account', req.userUid || key, {
+                    previousValue: req.currentType || req.oldValue || 'Public',
+                    newValue: 'REJECTED: ' + reason,
+                    reason: `Admin rejected account privacy change: ${reason}`
+                });
+
+                alert(`❌ Account privacy request rejected.`);
+            } catch(err) {
+                alert("Error rejecting request: " + err.message);
+            }
+        };
     </script>
 
     <!-- CONTACT MESSAGE DETAILS MODAL -->
@@ -2800,6 +3473,23 @@
             }
         }
         updateThemeIcon();
+                // STRICT PAGE TOP INITIALIZATION
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }
+        });
+        window.addEventListener('load', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }
+        });
     </script>
 </body>
 </html>

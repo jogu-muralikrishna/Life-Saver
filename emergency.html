@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📚 Health Knowledge Library - Life Saver</title>
     <script>
-        if (localStorage.getItem('theme') === 'dark') {
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -20,28 +25,160 @@
 <body class="min-h-screen pb-20 flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
 
     <!-- NAVBAR -->
-    <nav class="glass-nav sticky top-0 z-40 px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="index.html" class="flex items-center gap-3 text-red-600 font-extrabold text-xl tracking-tight">
-                <i data-lucide="heart-pulse" class="w-6 h-6"></i>
-                <span>Life <span class="text-emerald-600">Saver</span></span>
-            </a>
-            <div class="flex items-center gap-3">
-                <div id="userAuthBadge" class="hidden items-center gap-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-900 text-xs font-bold">
-                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> <span id="userAuthEmail">Registered Member</span>
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+            
+            <!-- BRAND LOGO -->
+            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
                 </div>
-                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                <span>Life <span class="text-emerald-500">Saver</span></span>
+            </a>
+
+            <!-- GREETING / DYNAMIC USER NAME -->
+            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                <span id="userGreetingTop" class="truncate">Account</span>
+            </a>
+
+            <!-- 3 DIRECTLY VISIBLE QUICK TOOLS + CONTROLS -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                
+                <!-- TOOL 1: AI TRIAGE (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=triage" class="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-blue-200/80 dark:border-blue-900/50 transition shadow-sm shrink-0" title="AI Medical Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>AI Triage</span>
+                </a>
+
+                <!-- TOOL 2: CONTACT (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="index.html?action=contact" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Contact</span>
+                </a>
+
+                <!-- TOOL 3: INSTALL APP (VISIBLE ON DESKTOP) -->
+                <button onclick="window.location.href=\'index.html?action=install\'" class="hidden md:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span>Install App</span>
+                </button>
+
+                <!-- THEME TOGGLE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0" title="Toggle Light/Dark Theme">
                     <i data-lucide="moon" class="w-4 h-4"></i>
                 </button>
-                <a href="admin-login.html" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-400"></i> Admin Login
-                </a>
-                <a href="index.html" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
-                </a>
+
+                <!-- THREE-DOT MENU -->
+                <div class="relative nav-dropdown">
+                    <button id="navThreeDotsBtn" onclick="toggleNavToolsMenu(event)" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 flex items-center justify-center font-black" title="Menu & More Options">
+                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- DROPDOWN PANEL -->
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+                        <!-- MOBILE QUICK TOOLS -->
+                        <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
+                            <a href="index.html?action=triage" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg"><i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant</a>
+                            <a href="contact.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg"><i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us</a>
+                            <a href="index.html?action=install" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 rounded-lg"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Install Web App</a>
+                        </div>
+
+                        <!-- 🏆 REFERRAL LEADERBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-2 text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50/80 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-lg transition mb-1 border border-amber-200/60 dark:border-amber-900/40">
+                            <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                            <span>🏆 Referral Leaderboard</span>
+                        </a>
+
+                        <!-- DASHBOARD -->
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                            <span>Dashboard & Referral</span>
+                        </a>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- SERVICES -->
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 px-2.5 py-1">Services</div>
+                        <a href="index.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="home" class="w-3.5 h-3.5 text-slate-500"></i> Home
+                        </a>
+                        <a href="hospitals.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="building-2" class="w-3.5 h-3.5 text-cyan-500"></i> Hospital Network
+                        </a>
+                        <a href="blood.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Center
+                        </a>
+                        <a href="find-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-emerald-500"></i> Find Donors
+                        </a>
+                        <a href="ambulance.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-500"></i> Live Ambulance
+                        </a>
+                        <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500"></i> Organ Registry
+                        </a>
+
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                        <!-- ADMIN PORTAL -->
+                        <a href="admin-login.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-500"></i> Admin Portal
+                        </a>
+
+                        <!-- SIGN OUT -->
+                        <button id="menuSignOutBtn" onclick="handleUserSignOut()" class="hidden w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition text-left mt-1 border-t border-slate-100 dark:border-slate-800">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 text-red-500"></i> Sign Out
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </nav>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
+        <div class="mobile-nav-content" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 text-red-600 font-extrabold text-lg">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i> <span data-i18n="nav_emergency">First Aid Guide</span>
+                </div>
+                <button onclick="toggleMobileNav(event)" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Navigation</div>
+            <div class="space-y-1 mb-6">
+                <a href="index.html" class="nav-item-link w-full">
+                    <i data-lucide="home" class="w-4 h-4"></i> <span data-i18n="nav_home">Home</span>
+                </a>
+                <a href="hospitals.html" class="nav-item-link w-full">
+                    <i data-lucide="building-2" class="w-4 h-4"></i> <span data-i18n="nav_hospitals">Hospitals</span>
+                </a>
+                <a href="blood.html" class="nav-item-link w-full">
+                    <i data-lucide="droplet" class="w-4 h-4"></i> <span data-i18n="nav_blood">Blood Donation</span>
+                </a>
+                <a href="ambulance.html" class="nav-item-link w-full">
+                    <i data-lucide="truck" class="w-4 h-4"></i> <span data-i18n="nav_ambulance">Ambulance Service</span>
+                </a>
+                <a href="organ.html" class="nav-item-link w-full">
+                    <i data-lucide="heart-handshake" class="w-4 h-4"></i> <span data-i18n="nav_organ">Organ Donation</span>
+                </a>
+                <a href="emergency.html" class="nav-item-link active w-full">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i> <span data-i18n="nav_emergency">Emergency First Aid Guide</span>
+                </a>
+            </div>
+
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Portal</div>
+            <div class="space-y-2">
+                <a href="admin-login.html" class="w-full flex items-center gap-2 bg-slate-900 dark:bg-slate-800 text-white p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> <span data-i18n="btn_admin">Admin Portal</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- MAIN CONTENT -->
     <main class="max-w-5xl mx-auto px-6 py-10 flex-1 w-full space-y-10">
@@ -51,8 +188,8 @@
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs mb-4 uppercase tracking-wider">
                 <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span> National Emergency & Health Education Network
             </div>
-            <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">📚 Health Knowledge Library</h1>
-            <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-2xl mx-auto">
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-3" data-i18n="emg_knowledge_title">📚 Health Knowledge Library</h1>
+            <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base max-w-2xl mx-auto" data-i18n="emg_knowledge_sub">
                 Public 24/7 Emergency Helplines, 30-Second Bystander Survival Protocols, and Verified Health Education Resources for Registered Life Saver Members.
             </p>
         </div>
@@ -66,24 +203,24 @@
                     <i data-lucide="activity" class="w-7 h-7"></i>
                 </div>
                 <div>
-                    <h2 class="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-400">🚨 30-Second Bystander Survival Protocols</h2>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Immediate public rescue steps to keep a patient alive until the 108 ambulance arrives</p>
+                    <h2 class="text-xl md:text-2xl font-black text-emerald-700 dark:text-emerald-400" data-i18n="emg_protocols_title">🚨 30-Second Bystander Survival Protocols</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold" data-i18n="emg_protocols_sub">Immediate public rescue steps to keep a patient alive until the 108 ambulance arrives</p>
                 </div>
             </div>
 
             <!-- PROTOCOL TABS -->
             <div class="flex flex-wrap items-center gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-4">
                 <button onclick="switchProtocol('cpr')" id="btnCpr" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    🫁 Adult CPR Protocol
+                    <span data-i18n="emg_cpr_btn">🫁 Adult CPR Protocol</span>
                 </button>
                 <button onclick="switchProtocol('choking')" id="btnChoking" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    🗣️ Choking (Heimlich)
+                    <span data-i18n="emg_choking_btn">🗣️ Choking (Heimlich)</span>
                 </button>
                 <button onclick="switchProtocol('bleeding')" id="btnBleeding" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    🩸 Bleeding Control
+                    <span data-i18n="emg_bleeding_btn">🩸 Bleeding Control</span>
                 </button>
                 <button onclick="switchProtocol('burns')" id="btnBurns" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
-                    🐍 Snakebite / Burns
+                    <span data-i18n="emg_burns_btn">🐍 Snakebite / Burns</span>
                 </button>
             </div>
 
@@ -99,13 +236,13 @@
         <div class="glass-card p-6 md:p-8 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl rounded-3xl">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2">
+                    <h2 class="text-xl font-bold text-red-600 dark:text-red-400 flex items-center gap-2" data-i18n="emg_gps_title">
                         <i data-lucide="map-pin"></i> Live GPS Location Broadcast
                     </h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1">Detect your current position to send to first responders or emergency contacts</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs mt-1" data-i18n="emg_gps_sub">Detect your current position to send to first responders or emergency contacts</p>
                 </div>
                 <button onclick="detectGPS()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
-                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh Geolocation
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i> <span data-i18n="emg_gps_refresh">Refresh Geolocation</span>
                 </button>
             </div>
 
@@ -115,10 +252,10 @@
 
             <div class="flex flex-wrap gap-3">
                 <button onclick="shareWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition shadow-sm">
-                    <i data-lucide="share-2" class="w-4 h-4"></i> Share Coordinates on WhatsApp
+                    <i data-lucide="share-2" class="w-4 h-4"></i> <span data-i18n="emg_gps_share">Share Coordinates on WhatsApp</span>
                 </button>
                 <button onclick="copyGPS()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition">
-                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Location Link
+                    <i data-lucide="copy" class="w-4 h-4"></i> <span data-i18n="emg_gps_copy">Copy Location Link</span>
                 </button>
             </div>
         </div>
@@ -127,7 +264,7 @@
         <!-- PRESERVED DATA SECTION 3: IMMEDIATE HELPLINE DIRECTORY    -->
         <!-- ========================================================= -->
         <div>
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2" data-i18n="emg_helplines_title">
                 <i data-lucide="phone-call" class="text-blue-600 dark:text-blue-400"></i> Immediate Helpline Directory (Public 24/7 Access)
             </h2>
 
@@ -138,7 +275,7 @@
                             <i data-lucide="ambulance" class="w-8 h-8"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">National Ambulance</h3>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg" data-i18n="emg_helpline_ambulance">National Ambulance</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400">Medical Emergency Response</p>
                         </div>
                     </div>
@@ -151,7 +288,7 @@
                             <i data-lucide="shield-alert" class="w-8 h-8"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">Police Control Room</h3>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg" data-i18n="emg_helpline_police">Police Control Room</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400">Law Enforcement & Safety</p>
                         </div>
                     </div>
@@ -164,7 +301,7 @@
                             <i data-lucide="flame" class="w-8 h-8"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900 dark:text-white text-lg">Fire Brigade</h3>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-lg" data-i18n="emg_helpline_fire">Fire Brigade</h3>
                             <p class="text-xs text-slate-500 dark:text-slate-400">Fire & Rescue Service</p>
                         </div>
                     </div>
@@ -618,103 +755,74 @@
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-6 text-center text-xs text-slate-500 dark:text-slate-400 mt-auto">
-        © 2026 Life Saver Healthcare Network.
-    </footer>
-
-    <!-- REALTIME FIREBASE AUTH & UI LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-            authDomain: "life-saver-be5cf.firebaseapp.com",
-            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "life-saver-be5cf",
-            storageBucket: "life-saver-be5cf.firebasestorage.app",
-            messagingSenderId: "549675407162",
-            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        /* AUTH SESSION LISTENER */
-        onAuthStateChanged(auth, (user) => {
-            const publicNotice = document.getElementById("publicLockedNotice");
-            const regLibrary = document.getElementById("registeredLibraryContainer");
-            const userBadge = document.getElementById("userAuthBadge");
-            const userEmail = document.getElementById("userAuthEmail");
-
-            if (user) {
-                // AUTHENTICATED REGISTERED USER
-                if (publicNotice) publicNotice.classList.add("hidden");
-                if (regLibrary) regLibrary.classList.remove("hidden");
-                if (userBadge) userBadge.classList.remove("hidden");
-                if (userBadge) userBadge.classList.add("flex");
-                if (userEmail) userEmail.textContent = user.email || "Registered Member";
-            } else {
-                // PUBLIC GUEST USER
-                if (publicNotice) publicNotice.classList.remove("hidden");
-                if (regLibrary) regLibrary.classList.add("hidden");
-                if (userBadge) userBadge.classList.add("hidden");
-            }
-        });
-    </script>
-
     <!-- UTILITY SCRIPTS (PRESERVED PROTOCOLS & GEOLOCATION) -->
     <script>
         lucide.createIcons();
         let lat = null, lng = null;
 
-        const protocols = {
-            cpr: `
-                <div class="text-emerald-700 dark:text-emerald-400 font-extrabold text-base mb-2">🫁 Adult CPR Protocol (Chest Compressions)</div>
-                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    <li>Place the heel of one hand in the center of the patient's chest. Interlock your other hand on top.</li>
-                    <li>Push hard and fast (100 to 120 compressions per minute) to the beat of "Stayin' Alive".</li>
-                    <li>Allow chest to recoil fully between compressions. Repeat until ambulance 108 arrives.</li>
-                </ol>
-            `,
-            choking: `
-                <div class="text-amber-700 dark:text-amber-400 font-extrabold text-base mb-2">🗣️ Choking Rescue (Heimlich Maneuver)</div>
-                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    <li>Stand behind the choking person and wrap your arms around their waist.</li>
-                    <li>Make a fist with one hand, place thumb side above navel, and grasp fist with other hand.</li>
-                    <li>Perform quick upward abdominal thrusts until the lodged object is dislodged.</li>
-                </ol>
-            `,
-            bleeding: `
-                <div class="text-red-700 dark:text-red-400 font-extrabold text-base mb-2">🩸 Bleeding Control & Pressure Protocol</div>
-                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    <li>Apply firm, continuous direct pressure to the wound using a clean cloth or sterile gauze.</li>
-                    <li>Elevate the injured limb above heart level if no bone fracture is suspected.</li>
-                    <li>Do not remove soaked cloths; place additional cloths directly on top and maintain pressure.</li>
-                </ol>
-            `,
-            burns: `
-                <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2">🐍 Snakebite & Severe Burn Protocol</div>
-                <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
-                    <li><strong>Snakebite:</strong> Keep patient calm and limb immobilized below heart level. Do NOT cut wound or suck venom!</li>
-                    <li><strong>Burns:</strong> Cool the burn under cool running tap water for 10-15 minutes. Do NOT apply ice or toothpaste! Cover with clean cloth.</li>
-                </ol>
-            `
-        };
+        window.currentProtocolType = 'cpr';
 
         function switchProtocol(type) {
-            document.getElementById("protocolBox").innerHTML = protocols[type];
+            if (type) window.currentProtocolType = type;
+            const activeType = window.currentProtocolType || 'cpr';
+            const lang = localStorage.getItem('site_lang') || 'EN';
+            const dict = (typeof i18nDict !== 'undefined' && i18nDict[lang]) ? i18nDict[lang] : (typeof i18nDict !== 'undefined' ? i18nDict.EN : {});
 
-            document.getElementById("btnCpr").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            document.getElementById("btnChoking").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            document.getElementById("btnBleeding").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            document.getElementById("btnBurns").className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            let contentHtml = '';
+            if (activeType === 'cpr') {
+                contentHtml = `
+                    <div class="text-emerald-700 dark:text-emerald-400 font-extrabold text-base mb-2">${dict.emg_cpr_title || "🫁 Adult CPR Protocol"}</div>
+                    <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                        <li>${dict.emg_cpr_step1 || "Place heel of one hand in center of victim's chest."}</li>
+                        <li>${dict.emg_cpr_step2 || "Push hard and fast: 100 to 120 compressions per minute."}</li>
+                        <li>${dict.emg_cpr_step3 || "Allow full chest recoil. Do not stop until ambulance arrives."}</li>
+                    </ol>
+                `;
+            } else if (activeType === 'choking') {
+                contentHtml = `
+                    <div class="text-amber-700 dark:text-amber-400 font-extrabold text-base mb-2">${dict.emg_choking_title || "🗣️ Choking Rescue"}</div>
+                    <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                        <li>${dict.emg_choking_step1 || "Stand behind person, wrap arms around waist."}</li>
+                        <li>${dict.emg_choking_step2 || "Place fist above navel, perform upward thrusts."}</li>
+                        <li>${dict.emg_choking_step3 || "Repeat thrusts until lodged object is dislodged."}</li>
+                    </ol>
+                `;
+            } else if (activeType === 'bleeding') {
+                contentHtml = `
+                    <div class="text-red-700 dark:text-red-400 font-extrabold text-base mb-2">${dict.emg_bleeding_title || "🩸 Bleeding Control"}</div>
+                    <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                        <li>${dict.emg_bleeding_step1 || "Apply firm, continuous direct pressure with clean cloth."}</li>
+                        <li>${dict.emg_bleeding_step2 || "Elevate limb above heart level."}</li>
+                        <li>${dict.emg_bleeding_step3 || "Do not remove soaked cloths, add more on top."}</li>
+                    </ol>
+                `;
+            } else if (activeType === 'burns') {
+                contentHtml = `
+                    <div class="text-purple-700 dark:text-purple-400 font-extrabold text-base mb-2">${dict.emg_burns_title || "🐍 Snakebite / Burns"}</div>
+                    <ol class="list-decimal pl-5 space-y-2 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                        <li>${dict.emg_burns_step1 || "Snakebite: Keep patient calm. Do NOT cut wound or suck venom!"}</li>
+                        <li>${dict.emg_burns_step2 || "Burns: Cool burn under cool running tap water for 10-15 minutes."}</li>
+                    </ol>
+                `;
+            }
 
-            if (type === 'cpr') document.getElementById("btnCpr").className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            if (type === 'choking') document.getElementById("btnChoking").className = "bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            if (type === 'bleeding') document.getElementById("btnBleeding").className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
-            if (type === 'burns') document.getElementById("btnBurns").className = "bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            const box = document.getElementById("protocolBox");
+            if (box) box.innerHTML = contentHtml;
+
+            const btnCpr = document.getElementById("btnCpr");
+            const btnChoking = document.getElementById("btnChoking");
+            const btnBleeding = document.getElementById("btnBleeding");
+            const btnBurns = document.getElementById("btnBurns");
+
+            if (btnCpr) btnCpr.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (btnChoking) btnChoking.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (btnBleeding) btnBleeding.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (btnBurns) btnBurns.className = "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+
+            if (activeType === 'cpr' && btnCpr) btnCpr.className = "bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (activeType === 'choking' && btnChoking) btnChoking.className = "bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (activeType === 'bleeding' && btnBleeding) btnBleeding.className = "bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
+            if (activeType === 'burns' && btnBurns) btnBurns.className = "bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2";
         }
 
         switchProtocol('cpr');
@@ -805,6 +913,117 @@
             }
         }
         updateThemeIcon();
+                // STRICT PAGE TOP INITIALIZATION
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+            }
+        });
+        window.addEventListener('load', () => {
+            if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }
+        });
+
+        function toggleNavToolsMenu(e) {
+            if (e) e.stopPropagation();
+            const dd = document.getElementById("navToolsDropdown");
+            if (dd) dd.classList.toggle("show");
+        }
+        document.addEventListener("click", (e) => {
+            const dd = document.getElementById("navToolsDropdown");
+            const btn = document.getElementById("navThreeDotsBtn");
+            if (dd && dd.classList.contains("show") && btn && !btn.contains(e.target) && !dd.contains(e.target)) {
+                dd.classList.remove("show");
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        onAuthStateChanged(auth, async (user) => {
+            const greetingEl = document.getElementById("userGreetingTop");
+            const authLink = document.getElementById("userAuthTopBar");
+            const signOutBtn = document.getElementById("menuSignOutBtn");
+            const publicNotice = document.getElementById("publicLockedNotice");
+            const regLibrary = document.getElementById("registeredLibraryContainer");
+            const userBadge = document.getElementById("userAuthBadge");
+            const userEmail = document.getElementById("userAuthEmail");
+
+            if (user) {
+                let displayName = user.displayName;
+                if (!displayName) {
+                    try {
+                        const snap = await get(ref(db, 'users/' + user.uid));
+                        if (snap.exists() && snap.val().name) {
+                            displayName = snap.val().name;
+                        }
+                    } catch(e) {}
+                }
+                if (!displayName && user.email) {
+                    displayName = user.email.split('@')[0];
+                }
+                const finalName = displayName ? (displayName.charAt(0).toUpperCase() + displayName.slice(1)) : 'Member';
+                if (greetingEl) greetingEl.textContent = `Hello, ${finalName} 👋`;
+                if (authLink) {
+                    authLink.href = 'auth.html';
+                    authLink.title = `Signed in as ${finalName}`;
+                }
+                if (signOutBtn) signOutBtn.classList.remove('hidden');
+
+                // UNLOCK REGISTERED CONTENT
+                if (publicNotice) publicNotice.classList.add("hidden");
+                if (regLibrary) regLibrary.classList.remove("hidden");
+                if (userBadge) {
+                    userBadge.classList.remove("hidden");
+                    userBadge.classList.add("flex");
+                }
+                if (userEmail) userEmail.textContent = user.email || finalName;
+            } else {
+                if (greetingEl) greetingEl.textContent = 'Sign In';
+                if (authLink) {
+                    authLink.href = 'auth.html';
+                    authLink.title = 'Sign In / Register';
+                }
+                if (signOutBtn) signOutBtn.classList.add('hidden');
+
+                if (publicNotice) publicNotice.classList.remove("hidden");
+                if (regLibrary) regLibrary.classList.add("hidden");
+                if (userBadge) userBadge.classList.add("hidden");
+            }
+        });
+
+        window.handleUserSignOut = async function() {
+            try {
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch(err) {
+                console.error("Sign out error:", err);
+            }
+        };
     </script>
 </body>
 </html>
