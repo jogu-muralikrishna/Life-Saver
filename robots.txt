@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin-login.html
 
-Sitemap: https://jogu-muralikrishna.github.io/Life-Saver/sitemap.xml
+Sitemap: https://life-saver-care.vercel.app/sitemap.xml

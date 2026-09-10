@@ -1852,7 +1852,7 @@
                 alert("Generating your unique referral code. Please tap in 1 second!");
                 return;
             }
-            const referralUrl = `https://lifesaver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
+            const referralUrl = `https://life-saver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
             const message = `🩸 Join LifeSaver-Care\n\nHelp us build a stronger emergency donor network.\n\nRegister as a voluntary donor and explore our emergency healthcare platform.\n\nJoin using my referral link:\n${referralUrl}\n\nTogether, we can make emergency connections faster. ❤️`;
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
             window.open(waUrl, '_blank');
@@ -1865,7 +1865,7 @@
                 alert("Generating your referral link. Please try in 1 second!");
                 return;
             }
-            const referralUrl = `https://lifesaver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
+            const referralUrl = `https://life-saver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(referralUrl).then(() => {
                     const textSpan = document.getElementById("copyLinkText");

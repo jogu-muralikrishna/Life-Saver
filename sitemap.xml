@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/index.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/index.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/blood.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/blood.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>always</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/emergency.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/emergency.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/find-donor.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/find-donor.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/register-donor.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/register-donor.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/organ.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/organ.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/organ-donor.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/organ-donor.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/hospitals.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/hospitals.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://jogu-muralikrishna.github.io/Life-Saver/ambulance.html</loc>
-    <lastmod>2026-08-20</lastmod>
+    <loc>https://life-saver-care.vercel.app/ambulance.html</loc>
+    <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
