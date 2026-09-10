@@ -15,6 +15,9 @@
         } else {
             document.documentElement.classList.remove('dark');
         }
+        if (localStorage.getItem('adminRole') === 'SUB_ADMIN') {
+            document.documentElement.classList.add('sub-admin-mode');
+        }
     </script>
     <link rel="stylesheet" href="index.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,9 +30,23 @@
         html.sub-admin-mode .td-dob,
         html.sub-admin-mode .th-preference,
         html.sub-admin-mode .td-preference,
-        html.sub-admin-mode .th-organ-dob,
-        html.sub-admin-mode .td-organ-dob,
-        html.sub-admin-mode .sub-admin-restricted {
+        html.sub-admin-mode #subAdminReadOnlyBanner,
+        html.sub-admin-mode #tabHospitalsBtn,
+        html.sub-admin-mode #tabMessagesBtn,
+        html.sub-admin-mode #tabAdminActivityBtn,
+        html.sub-admin-mode #tabProfileRequestsBtn,
+        html.sub-admin-mode #tabAccountRequestsBtn,
+        html.sub-admin-mode #tabAuditBtn,
+        html.sub-admin-mode #tabUsersBtn,
+        html.sub-admin-mode #tabRecycleBinBtn,
+        html.sub-admin-mode #tabSubAdminsBtn,
+        html.sub-admin-mode #cardStatHospitals,
+        html.sub-admin-mode #cardStatLogs,
+        html.sub-admin-mode #cardStatMessages,
+        html.sub-admin-mode #adminNavRequestsBtn,
+        html.sub-admin-mode #exportDonorsCsvBtn,
+        html.sub-admin-mode .admin-only-tool,
+        html.sub-admin-mode .sub-admin-hidden {
             display: none !important;
         }
     </style>
@@ -67,17 +84,17 @@
                     <div id="navToolsDropdown" class="nav-dropdown-content">
 
                         <!-- QUICK TOOLS SECTION -->
-                        <div>
+                        <div class="admin-only-tool">
                             <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-3 py-1 flex items-center gap-1">
                                 <i data-lucide="zap" class="w-3 h-3"></i> Quick Tools & Admin Controls
                             </div>
                             
-                            <button id="navToolsSettingsBtn" onclick="openSettingsModal()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-left sub-admin-restricted">
+                            <button onclick="openSettingsModal()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-left">
                                 <i data-lucide="settings" class="w-4 h-4 text-blue-500"></i> <span>Security Settings</span>
                             </button>
                         </div>
 
-                        <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-800 admin-only-tool"></div>
 
                         <!-- NAVIGATION SERVICES SECTION -->
                         <div>
@@ -165,13 +182,11 @@
                 </a>
             </div>
 
-            <div class="sub-admin-restricted">
-                <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Admin Actions</div>
-                <div class="space-y-2">
-                    <button id="mobileNavSettingsBtn" onclick="openSettingsModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold sub-admin-restricted">
-                        <i data-lucide="settings" class="w-4 h-4"></i> Security Settings
-                    </button>
-                </div>
+            <div class="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 admin-only-tool">Admin Actions</div>
+            <div class="space-y-2 admin-only-tool">
+                <button onclick="openSettingsModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Security Settings
+                </button>
             </div>
         </div>
     </div>
@@ -185,7 +200,7 @@
                 <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Management & Control</h1>
                 <p class="text-slate-500 dark:text-slate-400 text-sm">Real database management of donors, partner hospitals, emergency requests, and contact audit logs</p>
             </div>
-            <button onclick="exportDonorsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
+            <button id="exportDonorsCsvBtn" onclick="exportDonorsCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm">
                 <i data-lucide="download" class="w-4 h-4"></i> Export Donors CSV
             </button>
         </div>
@@ -362,7 +377,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                            <th class="p-4">Donor Name</th>
+                            <th class="p-4">Name & Email</th>
                             <th class="p-4 th-dob">DOB</th>
                             <th class="p-4">Blood Group</th>
                             <th class="p-4">City</th>
@@ -494,8 +509,8 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
-                            <th class="p-4">Donor Name & Location</th>
-                            <th class="p-4 th-organ-dob">DOB / Age</th>
+                            <th class="p-4">Name & Email</th>
+                            <th class="p-4 th-dob">DOB / Age</th>
                             <th class="p-4">Organs Pledged</th>
                             <th class="p-4">Lifestyle & Alcohol Habits</th>
                             <th class="p-4">Medical History</th>
@@ -800,10 +815,12 @@
             ];
 
             const navReqBtn = document.getElementById('adminNavRequestsBtn');
+            const exportBtn = document.getElementById('exportDonorsCsvBtn');
 
             if (adminRole === 'SUB_ADMIN') {
                 document.documentElement.classList.add('sub-admin-mode');
                 if (banner) banner.classList.add("hidden");
+                if (exportBtn) exportBtn.classList.add("hidden");
 
                 // Completely hide all 9 restricted feature tabs
                 subAdminForbiddenTabBtns.forEach(id => {
@@ -826,12 +843,6 @@
                 // Hide topbar requests notification button for Sub-Admin
                 if (navReqBtn) navReqBtn.classList.add("hidden");
 
-                // Hide security settings buttons for Sub-Admin
-                const navSettingsBtn = document.getElementById('navToolsSettingsBtn');
-                if (navSettingsBtn) navSettingsBtn.classList.add("hidden");
-                const mobSettingsBtn = document.getElementById('mobileNavSettingsBtn');
-                if (mobSettingsBtn) mobSettingsBtn.classList.add("hidden");
-
                 // Hide hospital add form if any
                 const addHospFormCard = document.getElementById("addPartnerHospitalForm")?.closest('.bg-slate-50');
                 if (addHospFormCard) addHospFormCard.classList.add("hidden");
@@ -841,6 +852,7 @@
             } else {
                 document.documentElement.classList.remove('sub-admin-mode');
                 if (banner) banner.classList.add("hidden");
+                if (exportBtn) exportBtn.classList.remove("hidden");
 
                 subAdminForbiddenTabBtns.forEach(id => {
                     const el = document.getElementById(id);
@@ -853,11 +865,6 @@
                 });
 
                 if (navReqBtn) navReqBtn.classList.remove("hidden");
-
-                const navSettingsBtn = document.getElementById('navToolsSettingsBtn');
-                if (navSettingsBtn) navSettingsBtn.classList.remove("hidden");
-                const mobSettingsBtn = document.getElementById('mobileNavSettingsBtn');
-                if (mobSettingsBtn) mobSettingsBtn.classList.remove("hidden");
             }
         }
 
@@ -1107,6 +1114,9 @@
                     ? `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-extrabold px-2 py-0.5 rounded text-xs border border-amber-300 dark:border-amber-800">🍺 YES (Drunk <24h)</span>`
                     : `<span class="bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 font-bold px-2 py-0.5 rounded text-xs border border-emerald-200 dark:border-emerald-900">🟢 NO (Sober)</span>`;
 
+                const emailSubLine = isSubAdmin ? '' : `<br/><span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}</span>`;
+                const preferenceDisplay = isPublic ? '🟢 PUBLIC' : '🔒 PRIVATE';
+
                 const actionsCell = isSubAdmin 
                     ? ''
                     : `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
@@ -1115,7 +1125,7 @@
 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">
-                        ${item.name || 'Anonymous'}${!isSubAdmin && item.email ? `<br/><span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email}</span>` : ''}
+                        ${item.name || 'Anonymous'}${emailSubLine}
                     </td>
                     <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${item.dob || '-'}</td>
                     <td class="p-4"><span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/50">${item.bloodGroup || 'O+'}</span></td>
@@ -1124,7 +1134,7 @@
                     <td class="p-4">${alcoholBadge}</td>
                     <td class="p-4 td-preference">
                         <span class="text-xs font-black px-2 py-0.5 rounded ${isPublic ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700'}">
-                            ${isPublic ? '🟢 PUBLIC' : '🔒 PRIVATE'}
+                            ${preferenceDisplay}
                         </span>
                     </td>
                     <td class="p-4">
@@ -1160,6 +1170,9 @@
                 const item = organDonorsData[key];
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
+                const rawDobDisplay = item.dob ? `${item.dob} (${item.age || '-'} yrs)` : (item.age ? `${item.age} yrs` : '-');
+                const emailSubLine = isSubAdmin ? '' : `<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}<br/></span>`;
+
                 const actionsCell = isSubAdmin
                     ? ''
                     : `<button onclick="openEditOrganDonorModal('${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
@@ -1167,9 +1180,10 @@
 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">
-                        ${item.name || 'Anonymous'}${!isSubAdmin && item.email ? `<br/><span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email}</span>` : ''}${item.city ? `<br/><span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city}</span>` : ''}
+                        ${item.name || 'Anonymous'}<br/>
+                        ${emailSubLine}<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city || '-'}</span>
                     </td>
-                    <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-organ-dob">${item.dob ? `${item.dob} (${item.age || '-'} yrs)` : (item.age ? `${item.age} yrs` : '-')}</td>
+                    <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${rawDobDisplay}</td>
                     <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-900/50">${item.organsPledged || 'All'}</span></td>
                     <td class="p-4 text-xs text-slate-600 dark:text-slate-300">🍷 ${item.alcoholHabit || 'Never'}<br/>🚬 ${item.smokingHabit || 'Non-Smoker'}</td>
                     <td class="p-4 text-xs text-slate-600 dark:text-slate-300">🩺 ${item.medicalConditions || 'Clean'}</td>
@@ -1327,17 +1341,17 @@
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
                 
                 const statusDisplay = isSubAdmin
-                    ? `<span class="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">${item.status || 'Pending'}</span>`
+                    ? `<span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-slate-200 dark:border-slate-700">${item.status || 'Pending'}</span>`
                     : `<select onchange="updateRequestStatus('${key}', this.value)" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold p-1.5 rounded-lg outline-none">
-                        <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>🟡 Pending</option>
-                        <option value="Searching" ${item.status === 'Searching' ? 'selected' : ''}>🔍 Searching</option>
-                        <option value="Donors Contacted" ${item.status === 'Donors Contacted' ? 'selected' : ''}>🔵 Donors Contacted</option>
-                        <option value="Donor Found" ${item.status === 'Donor Found' ? 'selected' : ''}>🟢 Donor Found</option>
-                        <option value="Partially Fulfilled" ${item.status === 'Partially Fulfilled' ? 'selected' : ''}>🟠 Partially Fulfilled</option>
-                        <option value="Resolved" ${item.status === 'Resolved' ? 'selected' : ''}>✅ Resolved</option>
-                        <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>🔴 Cancelled</option>
-                        <option value="Expired" ${item.status === 'Expired' ? 'selected' : ''}>⚪ Expired</option>
-                    </select>`;
+                            <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>🟡 Pending</option>
+                            <option value="Searching" ${item.status === 'Searching' ? 'selected' : ''}>🔍 Searching</option>
+                            <option value="Donors Contacted" ${item.status === 'Donors Contacted' ? 'selected' : ''}>🔵 Donors Contacted</option>
+                            <option value="Donor Found" ${item.status === 'Donor Found' ? 'selected' : ''}>🟢 Donor Found</option>
+                            <option value="Partially Fulfilled" ${item.status === 'Partially Fulfilled' ? 'selected' : ''}>🟠 Partially Fulfilled</option>
+                            <option value="Resolved" ${item.status === 'Resolved' ? 'selected' : ''}>✅ Resolved</option>
+                            <option value="Cancelled" ${item.status === 'Cancelled' ? 'selected' : ''}>🔴 Cancelled</option>
+                            <option value="Expired" ${item.status === 'Expired' ? 'selected' : ''}>⚪ Expired</option>
+                        </select>`;
 
                 const actionsCell = isSubAdmin
                     ? ''
@@ -1814,7 +1828,7 @@
 
             if (tab === 'sub_admins') {
                 if (adminRole === 'SUB_ADMIN') {
-                    alert("Access Denied: Sub-Admins cannot manage administrator accounts.");
+                    switchTab('blood');
                     return;
                 }
                 document.getElementById("tableSubAdminsContainer").classList.remove("hidden");
