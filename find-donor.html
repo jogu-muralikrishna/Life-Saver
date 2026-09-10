@@ -361,18 +361,26 @@
                 locEl.innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${contact.city || 'Emergency Registry'}`;
             }
 
+            const isPublic = contact.isPublic !== false && (contact.phoneVisibility === 'public' || contact.isPublic === true || (!contact.phoneVisibility && contact.accountType !== 'private'));
             const phoneEl = document.getElementById("privacyPhoneDisplay");
-            if (phoneEl) {
-                phoneEl.textContent = window.maskPhone(contact.phone);
-            }
-
             const lblReveal = document.getElementById("lblRevealPhone");
-            if (lblReveal) lblReveal.textContent = "Reveal Full Number";
-
             const btnCopy = document.getElementById("btnCopyPhone");
-            if (btnCopy) {
-                btnCopy.classList.add("hidden");
-                btnCopy.classList.remove("inline-flex");
+
+            if (isPublic && contact.phone) {
+                const clean = contact.phone.replace(/\D/g, '');
+                if (phoneEl) phoneEl.textContent = clean.length === 10 ? `+91 ${clean}` : contact.phone;
+                if (lblReveal) lblReveal.textContent = "🟢 Public Donor";
+                if (btnCopy) {
+                    btnCopy.classList.remove("hidden");
+                    btnCopy.classList.add("inline-flex");
+                }
+            } else {
+                if (phoneEl) phoneEl.textContent = "🔒 Private Number";
+                if (lblReveal) lblReveal.textContent = "🔒 Private Account";
+                if (btnCopy) {
+                    btnCopy.classList.add("hidden");
+                    btnCopy.classList.remove("inline-flex");
+                }
             }
 
             const respectfulMsg = `Hello ${contact.name || 'Donor'}, I am reaching out through the LifeSaver Voluntary Blood Network regarding an urgent medical requirement for ${contact.bloodGroup || 'blood'} blood in ${contact.city || 'your area'}. If you or someone you know might be available to donate, please let us know. Thank you for your noble voluntary service!`;
@@ -403,30 +411,24 @@
 
         window.toggleRevealPrivacyPhone = function() {
             if (!window.currentPrivacyContact) return;
+            const isPublic = window.currentPrivacyContact.isPublic !== false && (window.currentPrivacyContact.phoneVisibility === 'public' || window.currentPrivacyContact.isPublic === true || (!window.currentPrivacyContact.phoneVisibility && window.currentPrivacyContact.accountType !== 'private'));
+            if (!isPublic) {
+                alert("This donor has chosen to keep their phone number private. Please use the Contact Request feature to contact them.");
+                return;
+            }
             const phoneEl = document.getElementById("privacyPhoneDisplay");
             const lblReveal = document.getElementById("lblRevealPhone");
             const btnCopy = document.getElementById("btnCopyPhone");
             if (!phoneEl) return;
 
-            window.isPhoneRevealed = !window.isPhoneRevealed;
-            if (window.isPhoneRevealed) {
-                const raw = window.currentPrivacyContact.phone || '';
-                const cleanDigits = raw.replace(/\D/g, '');
-                phoneEl.textContent = cleanDigits.length === 10 ? `+91 ${cleanDigits}` : (raw || '+91 ••••• •••••');
-                if (lblReveal) lblReveal.textContent = "Hide Number";
-                if (btnCopy) {
-                    btnCopy.classList.remove("hidden");
-                    btnCopy.classList.add("inline-flex");
-                }
-            } else {
-                phoneEl.textContent = window.maskPhone(window.currentPrivacyContact.phone);
-                if (lblReveal) lblReveal.textContent = "Reveal Full Number";
-                if (btnCopy) {
-                    btnCopy.classList.add("hidden");
-                    btnCopy.classList.remove("inline-flex");
-                }
+            const raw = window.currentPrivacyContact.phone || '';
+            const cleanDigits = raw.replace(/\D/g, '');
+            phoneEl.textContent = cleanDigits.length === 10 ? `+91 ${cleanDigits}` : (raw || '-');
+            if (lblReveal) lblReveal.textContent = "🟢 Public Donor";
+            if (btnCopy) {
+                btnCopy.classList.remove("hidden");
+                btnCopy.classList.add("inline-flex");
             }
-            if (window.lucide) lucide.createIcons();
         };
 
         window.copyPrivacyPhoneNumber = function() {
@@ -449,6 +451,11 @@
 
         window.handlePrivacyDirectCall = function() {
             if (!window.currentPrivacyContact) return;
+            const isPublic = window.currentPrivacyContact.isPublic !== false && (window.currentPrivacyContact.phoneVisibility === 'public' || window.currentPrivacyContact.isPublic === true || (!window.currentPrivacyContact.phoneVisibility && window.currentPrivacyContact.accountType !== 'private'));
+            if (!isPublic) {
+                alert("This donor's phone number is private. Please send a contact request.");
+                return;
+            }
             const chk = document.getElementById("chkEmergencyAcknowledge");
             if (chk && !chk.checked) {
                 alert("Please confirm this is for a genuine medical emergency before contacting.");
@@ -464,6 +471,11 @@
 
         window.handlePrivacySendWhatsApp = function() {
             if (!window.currentPrivacyContact) return;
+            const isPublic = window.currentPrivacyContact.isPublic !== false && (window.currentPrivacyContact.phoneVisibility === 'public' || window.currentPrivacyContact.isPublic === true || (!window.currentPrivacyContact.phoneVisibility && window.currentPrivacyContact.accountType !== 'private'));
+            if (!isPublic) {
+                alert("This donor's phone number is private. Please send a contact request.");
+                return;
+            }
             const chk = document.getElementById("chkEmergencyAcknowledge");
             if (chk && !chk.checked) {
                 alert("Please confirm this is for a genuine medical emergency before contacting.");
@@ -485,42 +497,46 @@
         window.openPrivacyFindDonorByIndex = function(idx) {
             const donor = (window.currentFindDonorsList || [])[idx];
             if (donor) {
+                const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || (!donor.phoneVisibility && !donor.accountType && donor.contactVisibility !== 'private' && donor.allowEmergencyContact !== false);
                 openPrivacyContactModal({
                     type: 'donor',
                     name: donor.name,
                     bloodGroup: donor.bloodGroup,
                     city: donor.city,
-                    phone: donor.phone || (donor.publicContacts?.whatsapp?.number)
+                    phone: donor.phone || (donor.publicContacts?.whatsapp?.number),
+                    isPublic: isPublic
                 });
             }
         };
 
         function generateDonorContactHtml(donor, idx) {
-            const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || (!donor.phoneVisibility && !donor.accountType);
+            const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || (!donor.phoneVisibility && !donor.accountType && donor.contactVisibility !== 'private' && donor.allowEmergencyContact !== false);
             const contacts = donor.publicContacts || {};
             const donorUid = donor.uid || donor.userId || donor.key || '';
             const donorName = donor.name || 'Voluntary Donor';
 
             if (isPublic && donor.phone) {
                 const cleanPhone = donor.phone.replace(/\D/g, '');
-                const masked = window.maskPhone(cleanPhone);
+                const displayPhone = cleanPhone.length === 10 ? `+91 ${cleanPhone.replace(/(\d{5})(\d{5})/, '$1 $2')}` : donor.phone;
+                const respectfulMsg = `Hello ${donor.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent medical requirement for ${donor.bloodGroup || 'blood'} blood in ${donor.city || 'your area'}. If you are available to donate, please let us know. Thank you!`;
+                const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
                 return `
                     <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> ${masked}
+                            <span class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-500"></i> ${displayPhone}
                             </span>
                             <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-900">
-                                🛡️ Privacy Guarded
+                                🟢 Public
                             </span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
+                            <a href="tel:${cleanPhone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                            </button>
-                            <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                            </a>
+                            <a href="https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                            </button>
+                            </a>
                         </div>
                         <button onclick="openDirectMessageToDonor('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
@@ -532,12 +548,15 @@
             // Private Account / Private Phone cases:
             const actionButtons = [];
 
-            // WhatsApp with explicit public number routed through privacy modal
+            // WhatsApp with explicit custom number
             if (contacts.whatsapp?.enabled && contacts.whatsapp?.number) {
+                const cleanWa = contacts.whatsapp.number.replace(/\D/g, '');
+                const targetWa = cleanWa.length === 10 ? `91${cleanWa}` : cleanWa;
+                const respectfulMsg = `Hello ${donor.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent medical requirement for ${donor.bloodGroup || 'blood'} blood in ${donor.city || 'your area'}.`;
                 actionButtons.push(`
-                    <button onclick="openPrivacyFindDonorByIndex(${idx})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                    <a href="https://wa.me/${targetWa}?text=${encodeURIComponent(respectfulMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
                         <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                    </button>
+                    </a>
                 `);
             }
 
@@ -575,7 +594,15 @@
             if (actionButtons.length > 0) {
                 return `
                     <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-500"></i> Private Number
+                            </span>
+                            <span class="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full font-extrabold border border-purple-200 dark:border-purple-900">
+                                🔒 Private
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-${actionButtons.length > 1 ? '2' : '1'} gap-2">
                             ${actionButtons.join('')}
                         </div>
                         ${requestButtonHtml}
@@ -586,8 +613,13 @@
             // Purely Private account (no custom channels enabled)
             return `
                 <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <div class="w-full py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 text-xs font-bold flex items-center justify-center gap-1.5">
-                        <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-500"></i> Private Account
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                            <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-500"></i> Private Number
+                        </span>
+                        <span class="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full font-extrabold border border-purple-200 dark:border-purple-900">
+                            🔒 Private
+                        </span>
                     </div>
                     ${requestButtonHtml}
                 </div>

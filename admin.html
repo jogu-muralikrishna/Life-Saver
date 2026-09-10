@@ -1108,7 +1108,7 @@
                 const item = bloodDonorsData[key];
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
-                const isPublic = item.allowEmergencyContact === true || item.contactVisibility === 'public';
+                const isPublic = item.phoneVisibility === 'public' || item.accountType === 'public' || item.contactVisibility === 'public' || item.allowEmergencyContact === true || (!item.phoneVisibility && !item.accountType && item.contactVisibility !== 'private' && item.allowEmergencyContact !== false);
                 const isDrunk24h = item.alcoholLast24h === 'Yes';
                 const alcoholBadge = isDrunk24h 
                     ? `<span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 font-extrabold px-2 py-0.5 rounded text-xs border border-amber-300 dark:border-amber-800">🍺 YES (Drunk <24h)</span>`
@@ -1116,6 +1116,13 @@
 
                 const emailSubLine = isSubAdmin ? '' : `<br/><span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}</span>`;
                 const preferenceDisplay = isPublic ? '🟢 PUBLIC' : '🔒 PRIVATE';
+
+                const rawPhone = item.phone || item.mobileNumber || '';
+                const cleanPhone = rawPhone.replace(/\D/g, '');
+                const displayPhone = cleanPhone.length === 10 ? `+91 ${cleanPhone}` : (rawPhone || '-');
+                const phoneCellContent = isPublic 
+                    ? `<span class="text-slate-700 dark:text-slate-300 font-mono font-bold text-xs">${displayPhone}</span>` 
+                    : `<span class="inline-flex items-center gap-1 text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded font-mono font-bold text-xs border border-purple-200 dark:border-purple-900">🔒 Private</span>`;
 
                 const actionsCell = isSubAdmin 
                     ? ''
@@ -1130,7 +1137,7 @@
                     <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${item.dob || '-'}</td>
                     <td class="p-4"><span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/50">${item.bloodGroup || 'O+'}</span></td>
                     <td class="p-4 text-slate-600 dark:text-slate-300 text-xs">${item.city || '-'}</td>
-                    <td class="p-4 text-slate-600 dark:text-slate-300 font-mono font-bold text-xs">${item.phone || item.mobileNumber || '-'}</td>
+                    <td class="p-4 text-xs">${phoneCellContent}</td>
                     <td class="p-4">${alcoholBadge}</td>
                     <td class="p-4 td-preference">
                         <span class="text-xs font-black px-2 py-0.5 rounded ${isPublic ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700'}">
@@ -2220,8 +2227,11 @@
 
             let csv = "Name,BloodGroup,City,MobileNumber,ContactPreference,Status\n";
             donors.forEach(d => {
-                const isPub = d.allowEmergencyContact === true || d.contactVisibility === 'public';
-                csv += `"${d.name || ''}","${d.bloodGroup || ''}","${d.city || ''}","${d.phone || d.mobileNumber || ''}","${isPub ? 'PUBLIC' : 'PRIVATE'}","${d.status || ''}"\n`;
+                const isPub = d.phoneVisibility === 'public' || d.accountType === 'public' || d.contactVisibility === 'public' || d.allowEmergencyContact === true || (!d.phoneVisibility && !d.accountType && d.contactVisibility !== 'private' && d.allowEmergencyContact !== false);
+                const rawPhone = d.phone || d.mobileNumber || '';
+                const cleanPhone = rawPhone.replace(/\D/g, '');
+                const displayPhone = isPub ? (cleanPhone.length === 10 ? `+91 ${cleanPhone}` : rawPhone) : 'PRIVATE';
+                csv += `"${d.name || ''}","${d.bloodGroup || ''}","${d.city || ''}","${displayPhone}","${isPub ? 'PUBLIC' : 'PRIVATE'}","${d.status || ''}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
