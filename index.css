@@ -512,7 +512,7 @@ html.dark footer {
 }
 
 /* Modal Dark Theme Overrides */
-html.dark .modal-content, html.dark #triageModal > div, html.dark #reqModal > div, html.dark #corridorModal > div, html.dark #hazardModal > div, html.dark #passModal > div, html.dark #settingsModal > div, html.dark #certModal > div {
+html.dark .modal-content, html.dark #triageCard, html.dark #triageModal > div, html.dark #reqModal > div, html.dark #corridorModal > div, html.dark #hazardModal > div, html.dark #passModal > div, html.dark #settingsModal > div, html.dark #certModal > div {
   background-color: #0f172a !important;
   color: #f8fafc !important;
   border-color: #1e293b !important;

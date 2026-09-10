@@ -588,44 +588,43 @@
     </div>
 
     <!-- AI DOCTOR & MEDICAL REPORT ASSISTANT MODAL -->
-    <div id="triageModal" onclick="if(event.target === this) closeTriageModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden overflow-y-auto p-3 sm:p-6">
-        <div class="min-h-full flex items-start sm:items-center justify-center py-6 sm:py-10">
-            <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-2xl rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col my-auto">
-                <!-- CLOSE BUTTON -->
-                <button onclick="closeTriageModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
+    <div id="triageModal" onclick="if(event.target === this) closeTriageModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden overflow-y-auto pt-3 pb-10 sm:pt-6 sm:pb-16 px-3 sm:px-4">
+        <div id="triageCard" class="w-full max-w-2xl mx-auto bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col my-0">
+            <!-- CLOSE BUTTON -->
+            <button onclick="closeTriageModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
 
             <!-- MODAL HEADER -->
-            <div class="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-3 rounded-2xl border border-blue-100 dark:border-blue-900/50">
-                    <i data-lucide="bot" class="w-6 h-6"></i>
+            <div class="flex items-center gap-3 mb-3.5 pb-3.5 border-b border-slate-100 dark:border-slate-800">
+                <div class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 sm:p-3 rounded-2xl border border-blue-100 dark:border-blue-900/50 shrink-0">
+                    <i data-lucide="bot" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                 </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <h3 class="font-black text-lg text-slate-900 dark:text-white">AI Medical Report Assistant</h3>
-                        <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-emerald-200 dark:border-emerald-900">Health Assistant</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="font-black text-base sm:text-lg text-slate-900 dark:text-white">AI Medical & Triage Assistant</h3>
+                        <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-emerald-200 dark:border-emerald-900">Clinical Protocol</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Voice-enabled medical report breakdown, symptom explanation & clinical triage helper</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 truncate">Clinical rapid triage questionnaire, symptom assistant & lab report OCR breakdown</p>
                 </div>
             </div>
 
             <!-- NON-DIAGNOSIS SAFETY DISCLAIMER BANNER (FEATURE 18) -->
-            <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-xl text-[11px] text-amber-900 dark:text-amber-200 leading-snug mb-3 flex items-start gap-2">
+            <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 p-2.5 rounded-xl text-[11px] text-amber-900 dark:text-amber-200 leading-snug mb-3 flex items-start gap-2 shrink-0">
                 <i data-lucide="info" class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5"></i>
                 <div>
-                    <strong class="font-bold">Medical Disclaimer:</strong> This tool explains medical information in simpler language. It does not diagnose conditions or replace a qualified healthcare professional.
+                    <strong class="font-bold">Medical Disclaimer:</strong> This clinical triage protocol assesses emergency urgency. It does not replace qualified in-person emergency physician evaluation. In acute situations, dial 108 immediately.
                 </div>
             </div>
 
             <!-- MODAL TAB SELECTOR -->
-            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-4 border border-slate-200 dark:border-slate-800 text-xs font-bold shrink-0">
-                <button id="tabBtnDoctor" onclick="switchAITab('doctor')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5">
+            <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-3.5 border border-slate-200 dark:border-slate-800 text-xs font-bold shrink-0">
+                <button id="tabBtnTriage" onclick="switchAITab('triage')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5 font-bold">
+                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-red-500"></i> Rapid Triage
+                </button>
+                <button id="tabBtnDoctor" onclick="switchAITab('doctor')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5 font-semibold">
                     <i data-lucide="message-square" class="w-3.5 h-3.5 text-blue-500"></i> Medical Assistant
                 </button>
-                <button id="tabBtnReport" onclick="switchAITab('report')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
+                <button id="tabBtnReport" onclick="switchAITab('report')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5 font-semibold">
                     <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-500"></i> Report Analyzer
-                </button>
-                <button id="tabBtnTriage" onclick="switchAITab('triage')" class="flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5">
-                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-red-500"></i> Rapid Triage
                 </button>
             </div>
 
@@ -812,7 +811,6 @@
                         </button>
                     </div>
                 </div>
-            </div>
             </div>
         </div>
     </div>
@@ -1543,24 +1541,32 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        function openTriageModal() {
+        function openTriageModal(defaultTab = 'triage') {
             const modal = document.getElementById("triageModal");
             if (modal) {
-                window.lockBodyScroll();
+                if (typeof window.lockBodyScroll === 'function') {
+                    try { window.lockBodyScroll(); } catch(e) {}
+                } else {
+                    document.body.style.overflow = 'hidden';
+                }
                 modal.classList.remove("hidden");
                 modal.scrollTop = 0;
-                switchAITab('doctor');
+                switchAITab(defaultTab || 'triage');
                 setTimeout(() => {
-                    const queryInput = document.getElementById("aiDoctorInput") || document.getElementById("aiQueryInput");
-                    if (queryInput) {
-                        queryInput.focus({ preventScroll: true });
+                    if (defaultTab === 'doctor') {
+                        const queryInput = document.getElementById("aiDoctorInput") || document.getElementById("aiQueryInput");
+                        if (queryInput) queryInput.focus({ preventScroll: true });
                     }
                 }, 150);
             }
         }
 
         function closeTriageModal() {
-            window.unlockBodyScroll();
+            if (typeof window.unlockBodyScroll === 'function') {
+                try { window.unlockBodyScroll(); } catch(e) {}
+            } else {
+                document.body.style.overflow = '';
+            }
             const modal = document.getElementById("triageModal");
             if (modal) {
                 modal.classList.add("hidden");
@@ -1582,23 +1588,36 @@
             const activeClass = "flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition flex items-center justify-center gap-1.5";
             const inactiveClass = "flex-1 py-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center justify-center gap-1.5";
 
-            tabDoc.className = tab === 'doctor' ? activeClass : inactiveClass;
-            tabRep.className = tab === 'report' ? activeClass : inactiveClass;
-            tabTri.className = tab === 'triage' ? activeClass : inactiveClass;
+            if (tabDoc) tabDoc.className = tab === 'doctor' ? activeClass : inactiveClass;
+            if (tabRep) tabRep.className = tab === 'report' ? activeClass : inactiveClass;
+            if (tabTri) tabTri.className = tab === 'triage' ? activeClass : inactiveClass;
 
-            secDoc.classList.toggle("hidden", tab !== 'doctor');
-            secDoc.classList.toggle("flex", tab === 'doctor');
+            if (secDoc) {
+                secDoc.classList.toggle("hidden", tab !== 'doctor');
+                secDoc.classList.toggle("flex", tab === 'doctor');
+            }
 
-            secRep.classList.toggle("hidden", tab !== 'report');
-            secRep.classList.toggle("flex", tab === 'report');
+            if (secRep) {
+                secRep.classList.toggle("hidden", tab !== 'report');
+                secRep.classList.toggle("flex", tab === 'report');
+            }
 
-            secTri.classList.toggle("hidden", tab !== 'triage');
-            secTri.classList.toggle("flex", tab === 'triage');
+            if (secTri) {
+                secTri.classList.toggle("hidden", tab !== 'triage');
+                secTri.classList.toggle("flex", tab === 'triage');
+            }
 
             if (tab === 'triage') resetTriage();
 
             if (window.lucide) lucide.createIcons();
         }
+
+        // Global export for bulletproof cross-scope and onclick access
+        window.openTriageModal = openTriageModal;
+        window.closeTriageModal = closeTriageModal;
+        window.switchAITab = switchAITab;
+        window.answerTriage = answerTriage;
+        window.resetTriage = resetTriage;
 
         /* VOICE INPUT (SPEECH-TO-TEXT) */
         function toggleVoiceInput() {
@@ -2577,11 +2596,10 @@
             if (action === 'contact' || window.location.hash === '#contact' || window.location.hash === '#contactModal') {
                 window.location.href = 'contact.html';
                 return;
-            }
             } else if (action === 'triage' || window.location.hash === '#triage' || window.location.hash === '#triageModal') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 setTimeout(() => {
-                    openTriageModal();
+                    openTriageModal('triage');
                 }, 50);
             } else if (action === 'leaderboard' || window.location.hash === '#leaderboard') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
