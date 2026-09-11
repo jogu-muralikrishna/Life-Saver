@@ -127,35 +127,35 @@ function ensureEmergencyBanner() {
             banner.id = "liveSOSAlertBanner";
             banner.setAttribute("aria-label", "Urgent Emergency Blood Alerts");
         }
-        banner.className = "hidden sticky z-30 w-full px-3 sm:px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 dark:from-red-950/95 dark:via-slate-900/95 dark:to-red-950/95 text-white shadow-xl border-b border-red-400/50 dark:border-red-900/60 backdrop-blur-md transition-all";
+        banner.className = "hidden sticky z-30 w-full px-3 sm:px-4 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 dark:from-red-950/95 dark:via-slate-900/95 dark:to-red-950/95 text-white shadow-lg border-b border-red-400/50 dark:border-red-900/60 backdrop-blur-md transition-all";
         banner.innerHTML = `
-            <div class="max-w-7xl mx-auto flex flex-col gap-2">
-                <!-- Banner Top Row: Status Header & Quick Actions -->
-                <div class="flex items-center justify-between gap-2 text-xs">
+            <div class="max-w-7xl mx-auto flex flex-col gap-1.5">
+                <!-- Compact Top Row: Status Header & Quick Actions -->
+                <div class="flex items-center justify-between gap-2 text-[11px]">
                     <div class="flex items-center gap-2 font-bold shrink-0">
-                        <span class="bg-white text-red-600 dark:bg-red-600 dark:text-white text-[10px] sm:text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 shadow-sm flex items-center gap-1.5 border border-red-200 dark:border-red-500">
-                            <span class="w-2 h-2 rounded-full bg-red-600 dark:bg-white animate-ping inline-block"></span>
-                            🩸 URGENT BLOOD NEEDED (<span id="liveSOSCount">0</span>)
+                        <span class="bg-white text-red-600 dark:bg-red-600 dark:text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 shadow-sm flex items-center gap-1 border border-red-200 dark:border-red-500">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-600 dark:bg-white animate-ping inline-block"></span>
+                            🩸 URGENT BLOOD (<span id="liveSOSCount">0</span>)
                         </span>
-                        <span class="hidden md:inline text-[11px] text-white/90 font-medium">
-                            Active patient emergency requests broadcasting live across LifeSaver-Care
+                        <span class="hidden sm:inline text-[10px] text-white/85 font-medium truncate">
+                            Live patient emergency requests broadcasting across LifeSaver-Care
                         </span>
                     </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <a href="blood.html#postNeedBloodSection" id="liveSosPostBtn" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1 rounded-xl text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer">
-                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <a href="blood.html#postNeedBloodSection" id="liveSosPostBtn" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-2.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer">
+                            <i data-lucide="plus-circle" class="w-3 h-3"></i>
                             <span>Post Blood Request</span>
                         </a>
-                        <a href="blood.html" class="bg-white/20 hover:bg-white/30 text-white font-bold px-3 py-1 rounded-xl text-xs transition border border-white/30 flex items-center gap-1 shrink-0">
-                            <i data-lucide="list" class="w-3.5 h-3.5"></i>
+                        <a href="blood.html" class="bg-white/20 hover:bg-white/30 text-white font-bold px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] transition border border-white/30 flex items-center gap-1 shrink-0">
+                            <i data-lucide="list" class="w-3 h-3"></i>
                             <span>All Requests</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- Banner Bottom Row: Multiple Emergency Alerts (Side-by-Side on Desktop, Responsive Horizontal Track on Mobile) -->
-                <div id="liveSOSCardsTrack" class="flex items-stretch gap-3 overflow-x-auto py-1 scrollbar-thin scroll-smooth min-w-0">
-                    <!-- Dynamically populated emergency request cards -->
+                <!-- Compact Bottom Row: Sleek, compact cards side-by-side -->
+                <div id="liveSOSCardsTrack" class="flex items-stretch gap-2.5 overflow-x-auto py-0.5 scrollbar-thin scroll-smooth min-w-0">
+                    <!-- Dynamically populated compact emergency request cards -->
                 </div>
             </div>
         `;
@@ -199,6 +199,118 @@ function ensureEmergencyBanner() {
     return banner;
 }
 
+// Standalone Top-Middle View & Help Dialog
+function openEmergencyViewHelpModal(req) {
+    let modal = document.getElementById("emergencyViewHelpModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "emergencyViewHelpModal";
+        modal.className = "fixed inset-0 z-[100] flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto";
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.classList.add("hidden");
+        };
+        document.body.appendChild(modal);
+    }
+
+    const attendant = req.requesterName || req.name || 'Patient Attendant';
+    const bloodGroup = (req.bloodGroup || 'Blood').toUpperCase();
+    const units = parseInt(req.units, 10) || 1;
+    const hospital = req.hospital || 'Hospital';
+    const hospitalAddress = req.hospitalAddress || '';
+    const city = req.city || 'Emergency Registry';
+    const rawPhone = req.contactNumber || req.phone || '';
+    const details = req.emergencyDetails || 'Urgent transfusion required for hospitalized patient.';
+    const timeAgo = formatTimeAgo(req.createdAt || req.timestamp);
+
+    const isExplicitlyPrivate = req.privacy === 'private' || req.phonePrivacy === 'private' || req.isPublic === false;
+    const cleanPhone = rawPhone.replace(/\D/g, '');
+
+    modal.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-2xl p-4 sm:p-5 border-2 border-red-500/80 shadow-2xl relative my-0 animate-in fade-in slide-in-from-top-4 duration-200">
+            <!-- Close Button -->
+            <button onclick="document.getElementById('emergencyViewHelpModal').classList.add('hidden')" class="absolute top-3.5 right-3.5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-xl text-base transition cursor-pointer" title="Close">✕</button>
+
+            <!-- Modal Header -->
+            <div class="flex items-center gap-2.5 mb-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center text-base shadow-md shadow-red-500/25 shrink-0 font-black">
+                    🩸
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900">Live SOS Broadcast</span>
+                        <span class="text-[9px] font-mono text-slate-400">${timeAgo}</span>
+                    </div>
+                    <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white mt-0.5">${bloodGroup} Blood Needed (${units} ${units === 1 ? 'Unit' : 'Units'})</h2>
+                </div>
+            </div>
+
+            <!-- Urgent Requirement Details Card -->
+            <div class="bg-red-50/70 dark:bg-red-950/30 rounded-xl p-3 border border-red-200/80 dark:border-red-900/50 mb-3 space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-600 dark:text-slate-400 text-[11px]">Patient Attendant:</span>
+                    <strong class="text-slate-900 dark:text-white font-bold text-[11px]">${attendant}</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-600 dark:text-slate-400 text-[11px]">Units Required:</span>
+                    <span class="bg-red-600 text-white font-black text-[10px] px-2 py-0.5 rounded-md shadow-sm">${units} ${units === 1 ? 'Unit' : 'Units'} (${bloodGroup})</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-600 dark:text-slate-400 text-[11px]">Hospital:</span>
+                    <strong class="text-slate-900 dark:text-white font-bold text-[11px] text-right truncate max-w-[180px]" title="${hospital}">${hospital}</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-600 dark:text-slate-400 text-[11px]">Address & City:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-semibold text-[11px] text-right truncate max-w-[190px]">${hospitalAddress ? hospitalAddress + ', ' + city : city}</span>
+                </div>
+                ${details ? `
+                <div class="pt-1 border-t border-red-200/60 dark:border-red-900/40 text-[10px]">
+                    <span class="text-slate-500 dark:text-slate-400">Emergency Details:</span>
+                    <p class="text-slate-800 dark:text-slate-200 font-medium italic mt-0.5">${details}</p>
+                </div>
+                ` : ''}
+            </div>
+
+            <!-- Action Buttons: Call, WhatsApp, Match Donors -->
+            <div class="space-y-1.5">
+                ${!isExplicitlyPrivate && cleanPhone ? `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    <a href="tel:${cleanPhone}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer text-center no-underline">
+                        <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
+                        <span>Call: ${rawPhone}</span>
+                    </a>
+                    <a href="https://wa.me/91${cleanPhone.slice(-10)}?text=${encodeURIComponent('Hello ' + attendant + ', I saw your urgent request for ' + bloodGroup + ' blood at ' + hospital + ' on LifeSaver-Care. I would like to help.')}" target="_blank" rel="noopener noreferrer" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-2 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer text-center no-underline">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+                ` : `
+                <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                    🛡️ Requester Phone: <span class="font-mono font-bold">${maskGuardedPhone(rawPhone)}</span> (Guarded Contact)
+                </div>
+                `}
+
+                <a href="blood.html?ticket=${encodeURIComponent(req.key)}" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black py-2 px-3 rounded-xl text-xs transition shadow-md shadow-red-500/20 flex items-center justify-center gap-1.5 cursor-pointer text-center no-underline">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                    <span>🎯 Open Full Ticket & Match Donors</span>
+                </a>
+            </div>
+
+            <!-- Footer Close -->
+            <div class="mt-2.5 pt-1.5 text-center border-t border-slate-100 dark:border-slate-800">
+                <button onclick="document.getElementById('emergencyViewHelpModal').classList.add('hidden')" class="text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.classList.remove("hidden");
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+    }
+}
+window.openEmergencyViewHelpModal = openEmergencyViewHelpModal;
+
 // Track rendered cards to avoid duplicate rendering or jarring reflow
 let previousCardKeys = [];
 
@@ -232,12 +344,10 @@ function renderEmergencyCards(activeList) {
     previousCardKeys = currentKeys;
     track.innerHTML = "";
 
-    const isBloodPage = window.location.pathname.endsWith("blood.html");
-
     activeList.forEach(req => {
         const card = document.createElement("div");
         card.id = `sos-card-${req.key}`;
-        card.className = "emergency-alert-card-enter flex flex-col justify-between p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-red-500 shadow-md shrink-0 w-[290px] sm:w-[320px] md:w-[350px] text-xs transition";
+        card.className = "emergency-alert-card-enter flex flex-col justify-between p-2 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-red-500/80 shadow-md shrink-0 w-[220px] sm:w-[245px] md:w-[255px] text-[10px] transition";
         
         const attendant = req.requesterName || req.name || 'Patient Attendant';
         const bloodGroup = (req.bloodGroup || 'Blood').toUpperCase();
@@ -249,49 +359,45 @@ function renderEmergencyCards(activeList) {
         const timeAgo = formatTimeAgo(req.createdAt || req.timestamp);
 
         // Privacy System Adherence:
-        // By default on urgent blood requests, display direct clickable phone link
-        // If explicitly set to private, display protected guarded masking
         const isExplicitlyPrivate = req.privacy === 'private' || req.phonePrivacy === 'private' || req.isPublic === false;
         const phoneDisplay = !isExplicitlyPrivate && rawPhone 
             ? `<a href="tel:${rawPhone}" class="font-mono text-red-600 dark:text-red-400 font-bold hover:underline" onclick="event.stopPropagation();">${rawPhone}</a>`
-            : `<strong class="font-mono text-slate-700 dark:text-slate-300">${maskGuardedPhone(rawPhone)}</strong> <span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.2 rounded font-bold border border-emerald-200 dark:border-emerald-900">🛡️ Guarded</span>`;
+            : `<strong class="font-mono text-slate-700 dark:text-slate-300">${maskGuardedPhone(rawPhone)}</strong> <span class="text-[8px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-1 py-0.1 rounded font-bold">🛡️</span>`;
 
         card.innerHTML = `
             <div>
                 <!-- Card Header: Blood Group Needed & Units -->
-                <div class="flex items-center justify-between gap-1.5 border-b border-red-100 dark:border-red-900/40 pb-1.5 mb-1.5">
-                    <span class="inline-flex items-center gap-1 text-[11px] font-black text-red-600 dark:text-red-400 uppercase tracking-wide">
-                        <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span> 🩸 URGENT BLOOD
+                <div class="flex items-center justify-between gap-1 border-b border-red-100 dark:border-red-900/40 pb-0.5 mb-1">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-tight">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+                        🩸 ${bloodGroup} • ${units} ${units === 1 ? 'Unit' : 'Units'}
                     </span>
-                    <span class="bg-red-600 text-white font-black text-[11px] px-2 py-0.5 rounded-lg shadow-sm">
-                        ${bloodGroup} • ${units} ${units === 1 ? 'Unit' : 'Units'}
-                    </span>
+                    <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500 shrink-0">${timeAgo}</span>
                 </div>
 
                 <!-- Requester Need Description -->
-                <div class="font-black text-xs text-slate-900 dark:text-white leading-snug mb-1">
-                    ${attendant} needs <span class="text-red-600 dark:text-red-400 font-black">${bloodGroup}</span> blood
+                <div class="font-black text-[10px] text-slate-900 dark:text-white truncate leading-tight mb-0.5" title="${attendant} needs ${bloodGroup} blood">
+                    ${attendant} needs <span class="text-red-600 dark:text-red-400">${bloodGroup}</span>
                 </div>
 
                 <!-- Hospital & Address Information -->
-                <div class="space-y-0.5 text-[11px] text-slate-700 dark:text-slate-300">
-                    <div class="font-bold truncate flex items-center gap-1" title="${hospital}">
+                <div class="space-y-0.2 text-[9px] text-slate-600 dark:text-slate-300">
+                    <div class="truncate flex items-center gap-1 font-semibold" title="${hospital}">
                         <span>🏥</span> <span class="truncate">${hospital}</span>
                     </div>
-                    <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1" title="${hospitalAddress ? hospitalAddress + ', ' + city : city}">
+                    <div class="truncate flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[8.5px]" title="${hospitalAddress ? hospitalAddress + ', ' + city : city}">
                         <span>📍</span> <span class="truncate">${hospitalAddress ? hospitalAddress + ' (' + city + ')' : city}</span>
-                    </div>
-                    <div class="text-[11px] pt-1 flex items-center gap-1">
-                        <span>📞</span> <span class="truncate">Contact: ${phoneDisplay}</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Card Footer: Time Stamp & Action Button -->
-            <div class="pt-2 mt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500">${timeAgo}</span>
-                <button type="button" class="btn-sos-help bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-xs px-3 py-1.5 rounded-xl shadow-md shadow-red-500/20 transition flex items-center gap-1.5 cursor-pointer">
-                    <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-white"></i>
+            <!-- Card Footer: Contact & Action Button -->
+            <div class="pt-1 mt-1 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-1">
+                <div class="text-[9.5px] truncate max-w-[125px] sm:max-w-[145px]">
+                    <span>📞</span> ${phoneDisplay}
+                </div>
+                <button type="button" class="btn-sos-help bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md shadow-sm transition flex items-center gap-0.5 shrink-0 cursor-pointer">
+                    <i data-lucide="heart-handshake" class="w-3 h-3 text-white"></i>
                     <span>VIEW / HELP</span>
                 </button>
             </div>
@@ -299,16 +405,11 @@ function renderEmergencyCards(activeList) {
 
         const helpBtn = card.querySelector(".btn-sos-help");
         if (helpBtn) {
-            helpBtn.onclick = () => {
-                if (isBloodPage) {
-                    if (typeof window.openBloodMatchModal === 'function') {
-                        window.openBloodMatchModal(req.key);
-                    } else if (typeof window.openPrivacyTicketByKey === 'function') {
-                        window.openPrivacyTicketByKey(req.key);
-                    }
-                } else {
-                    window.location.href = `blood.html?ticket=${encodeURIComponent(req.key)}`;
-                }
+            helpBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Opens View & Help Dialog directly at the TOP SIDE MIDDLE OF THE PAGE
+                openEmergencyViewHelpModal(req);
             };
         }
 
@@ -316,6 +417,7 @@ function renderEmergencyCards(activeList) {
     });
 
     banner.classList.remove("hidden");
+    updateBannerNavOffset();
     if (window.lucide && typeof window.lucide.createIcons === 'function') {
         window.lucide.createIcons();
     }
