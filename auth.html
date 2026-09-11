@@ -4065,6 +4065,40 @@
             }
         };
 
+        // Robust Certificate URL Builder (No 404s on WhatsApp shares or subpaths)
+        function getAppBaseUrl() {
+            try {
+                if (window.location && window.location.href && !window.location.href.startsWith('file:') && window.location.origin && window.location.origin !== 'null') {
+                    const pathname = window.location.pathname || '';
+                    const dir = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+                    const base = `${window.location.origin}${dir}`;
+                    return base.endsWith('/') ? base : (base + '/');
+                }
+            } catch(e) {}
+            return 'https://life-saver-care.vercel.app/';
+        }
+
+        function getCertificateVerifyUrl(id) {
+            const cleanId = (id || '').toString().trim();
+            const base = getAppBaseUrl();
+            return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+        }
+
+        // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
+        function formatSingleBloodGroup(rawBg) {
+            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            const clean = rawBg.trim();
+            const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
+            if (match) {
+                return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
+            }
+            const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
+            if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
+                return singleWord;
+            }
+            return 'O+';
+        }
+
         async function loadUserCertificates(user) {
             if (!user) return;
             const bloodActive = document.getElementById('dashBloodCertActiveContent');
@@ -4126,7 +4160,7 @@
 
                 if (bloodDonor && bloodDonor.name && bloodDonor.bloodGroup) {
                     const donorName = bloodDonor.name;
-                    const bloodGroup = bloodDonor.bloodGroup;
+                    const bloodGroup = formatSingleBloodGroup(bloodDonor.bloodGroup);
                     const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
                     const donationCount = parseInt(bloodDonor.donationCount !== undefined ? bloodDonor.donationCount : (bloodDonor.timesDonated || 0), 10);
                     const tier = getMilestoneTier(donationCount);
@@ -4184,7 +4218,7 @@
                         pPillEl.style.borderColor = tier.pillBorderColor;
                     }
 
-                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                    const verifyUrl = getCertificateVerifyUrl(certId);
                     window.userBloodDonorData.verifyUrl = verifyUrl;
                     const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
@@ -4253,7 +4287,7 @@
 
                 if (organDonor && organDonor.name) {
                     const donorName = organDonor.name;
-                    const bloodGroup = organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || (userProfile && userProfile.bloodGroup) || 'O+';
+                    const bloodGroup = formatSingleBloodGroup(organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || (userProfile && userProfile.bloodGroup) || 'O+');
                     const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || fallbackCertIdOD;
 
                     window.userOrganDonorData = {
@@ -4298,7 +4332,7 @@
                         });
                     }
 
-                    const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                    const verifyUrl = getCertificateVerifyUrl(certId);
                     window.userOrganDonorData.verifyUrl = verifyUrl;
                     const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
@@ -4334,7 +4368,7 @@
             window.lockBodyScroll();
             const donor = window.userBloodDonorData || {};
             const name = donor.name || 'Member';
-            const bg = donor.bloodGroup || 'O+';
+            const bg = formatSingleBloodGroup(donor.bloodGroup || 'O+');
             const certId = donor.certId || `LSC-BD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashBloodCertName');
@@ -4346,7 +4380,7 @@
 
             const qrEl = document.getElementById('dashBloodCertQR');
             if (qrEl) {
-                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                const verifyUrl = getCertificateVerifyUrl(certId);
                 qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             }
 
@@ -4378,7 +4412,7 @@
 
         window.downloadBloodCertImage = async function() {
             const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || document.getElementById('dashBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || 'Voluntary Donor';
-            const bg = document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+';
+            const bg = formatSingleBloodGroup(document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+');
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || document.getElementById('dashBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482';
             const qrImg = document.getElementById('dashPanelBloodCertQR') || document.getElementById('dashBloodCertQR');
 
@@ -4399,14 +4433,17 @@
                     await document.fonts.load('bold 54px "Alex Brush"');
                 } catch(e) {}
 
-                // Draw Recipient Name
-                ctx.font = 'bold 54px "Alex Brush", "Dancing Script", cursive';
+                // Draw Recipient Name with dynamic font size
+                let fontSize = 54;
+                if (name.length > 25) fontSize = 42;
+                if (name.length > 35) fontSize = 34;
+                ctx.font = `bold ${fontSize}px "Alex Brush", "Dancing Script", cursive`;
                 ctx.fillStyle = '#8B0000';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
 
-                // Draw Blood Group in badge
+                // Draw Single Blood Group in badge
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
@@ -4457,14 +4494,15 @@
         window.shareBloodCertWhatsApp = function() {
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
             const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-            const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
+            const bg = formatSingleBloodGroup(document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+');
+            const verifyUrl = getCertificateVerifyUrl(certId);
+            const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nBlood Group: *${bg}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         };
 
         window.copyBloodCertUrl = function() {
             const certId = window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+            const verifyUrl = getCertificateVerifyUrl(certId);
             navigator.clipboard?.writeText(verifyUrl).then(() => {
                 alert("✅ Certificate verification URL copied to clipboard!\n\n" + verifyUrl);
             }).catch(() => {
@@ -4478,7 +4516,7 @@
             const profile = window.currentActiveUserProfile || {};
             const donor = window.userOrganDonorData || {};
             const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
-            const bg = (donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+');
+            const bg = formatSingleBloodGroup((donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+'));
             const certId = donor.certId || `LSC-OD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashOrganCertName');
@@ -4508,7 +4546,7 @@
 
             const qrEl = document.getElementById('dashOrganCertQR');
             if (qrEl) {
-                const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                const verifyUrl = getCertificateVerifyUrl(certId);
                 qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             }
 
@@ -4535,7 +4573,7 @@
 
         window.downloadOrganCertImage = async function() {
             const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || document.getElementById('dashOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || 'Voluntary Pledger';
-            const bg = document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+';
+            const bg = formatSingleBloodGroup(document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+');
             const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || document.getElementById('dashOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482';
             const qrImg = document.getElementById('dashPanelOrganCertQR') || document.getElementById('dashOrganCertQR');
 
@@ -4555,14 +4593,17 @@
                     await document.fonts.load('bold 54px "Alex Brush"');
                 } catch(e) {}
 
-                // Draw Recipient Name
-                ctx.font = 'bold 54px "Alex Brush", "Dancing Script", cursive';
+                // Draw Recipient Name with dynamic font size
+                let fontSize = 54;
+                if (name.length > 25) fontSize = 42;
+                if (name.length > 35) fontSize = 34;
+                ctx.font = `bold ${fontSize}px "Alex Brush", "Dancing Script", cursive`;
                 ctx.fillStyle = '#0f4c81';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
 
-                // Draw Blood Group
+                // Draw Single Blood Group
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = '#0f4c81';
                 ctx.textAlign = 'center';
@@ -4613,14 +4654,15 @@
         window.shareOrganCertWhatsApp = function() {
             const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
             const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Member';
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
-            const text = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\nPledged by: *${name}*\nCertificate ID: *${certId}*\n\nVerify official pledge certificate online:\n${verifyUrl}\n\nGive someone a second chance at life! 🌟`;
+            const bg = formatSingleBloodGroup(document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+');
+            const verifyUrl = getCertificateVerifyUrl(certId);
+            const text = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\nPledged by: *${name}*\nBlood Group: *${bg}*\nCertificate ID: *${certId}*\n\nVerify official pledge certificate online:\n${verifyUrl}\n\nGive someone a second chance at life! 🌟`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         };
 
         window.copyOrganCertUrl = function() {
             const certId = window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+            const verifyUrl = getCertificateVerifyUrl(certId);
             navigator.clipboard?.writeText(verifyUrl).then(() => {
                 alert("✅ Pledge Certificate verification URL copied to clipboard!\n\n" + verifyUrl);
             }).catch(() => {
@@ -4647,11 +4689,11 @@
                 ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || profile.name || 'Member')
                 : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
 
-            const bg = isBlood
+            const bg = formatSingleBloodGroup(isBlood
                 ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
-                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+');
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+'));
 
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+            const verifyUrl = getCertificateVerifyUrl(certId);
 
             const emailInput = document.getElementById("certEmailRecipientInput");
             if (emailInput) emailInput.value = userEmail;
@@ -4726,10 +4768,10 @@
             const name = isBlood
                 ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || profile.name || 'Member')
                 : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
-            const bg = isBlood
+            const bg = formatSingleBloodGroup(isBlood
                 ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
-                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+');
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${encodeURIComponent(certId)}`;
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+'));
+            const verifyUrl = getCertificateVerifyUrl(certId);
 
             return `Dear Recipient,\n\n` +
                 `This is an official credential verification dispatch from LifeSaver-Care.\n\n` +
@@ -4747,7 +4789,7 @@
                 `${verifyUrl}\n\n` +
                 `Warm regards,\n` +
                 `LifeSaver-Care Emergency & Donor Network\n` +
-                `${window.location.origin}`;
+                `${getAppBaseUrl()}`;
         };
 
         window.sendCertificateMailClient = function() {

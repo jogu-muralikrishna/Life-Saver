@@ -430,6 +430,31 @@
             </form>
         </div>
     </div>
+    <script>
+        window.openPostRequirementModal = function() {
+            const modal = document.getElementById("reqModal");
+            if (modal) {
+                if (window.lockBodyScroll) window.lockBodyScroll();
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+                setTimeout(() => {
+                    const firstField = document.getElementById("reqName") || document.getElementById("reqBg");
+                    if (firstField) firstField.focus({ preventScroll: true });
+                }, 80);
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+        window.openReqModal = window.openPostRequirementModal;
+        window.closePostRequirementModal = function() {
+            if (window.unlockBodyScroll) window.unlockBodyScroll();
+            const modal = document.getElementById("reqModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        };
+        window.closeReqModal = window.closePostRequirementModal;
+    </script>
 
     <!-- 🚨 FEATURE 4: EMERGENCY BLOOD MATCH & DONOR ALERT BROADCAST MODAL -->
     <div id="bloodMatchModal"
@@ -1310,7 +1335,6 @@
             const cachedDonors = JSON.parse(localStorage.getItem('ls_donors_cache') || 'null');
             if (cachedDonors && Array.isArray(cachedDonors) && cachedDonors.length > 0) {
                 allDonors = cachedDonors;
-                renderDonors();
             }
             const cachedRequests = JSON.parse(localStorage.getItem('ls_requests_cache') || 'null');
             if (cachedRequests && typeof cachedRequests === 'object') {

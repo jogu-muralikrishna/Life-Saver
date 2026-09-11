@@ -875,7 +875,26 @@
             if (document.getElementById("passDateDisplay")) document.getElementById("passDateDisplay").textContent = todayDate;
             if (document.getElementById("passDateFooter")) document.getElementById("passDateFooter").textContent = "Date: " + todayDate;
             
-            const verifyUrl = window.location.origin + "/certificate.html?id=" + credentialID;
+            // Robust Certificate URL Builder (No 404s on WhatsApp shares or subpaths)
+            function getAppBaseUrl() {
+                try {
+                    if (window.location && window.location.href && !window.location.href.startsWith('file:') && window.location.origin && window.location.origin !== 'null') {
+                        const pathname = window.location.pathname || '';
+                        const dir = pathname.substring(0, pathname.lastIndexOf('/') + 1);
+                        const base = `${window.location.origin}${dir}`;
+                        return base.endsWith('/') ? base : (base + '/');
+                    }
+                } catch(e) {}
+                return 'https://life-saver-care.vercel.app/';
+            }
+
+            function getCertificateVerifyUrl(id) {
+                const cleanId = (id || '').toString().trim();
+                const base = getAppBaseUrl();
+                return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+            }
+
+            const verifyUrl = getCertificateVerifyUrl(credentialID);
             const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             document.getElementById("passQR").src = qrUrl;
 
@@ -895,7 +914,8 @@
             document.getElementById("passOrgans").textContent = "🎁 All Organs & Tissues";
             document.getElementById("passID").textContent = credentialID;
             
-            const verifyUrl = window.location.origin + "/certificate.html?id=" + credentialID;
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${credentialID}`;
             const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
             document.getElementById("passQR").src = qrUrl;
 
@@ -913,7 +933,8 @@
 
         window.copyOrganCredentialID = function() {
             const id = document.getElementById("passID").textContent;
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${id}`;
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${id}`;
             navigator.clipboard.writeText(verifyUrl).then(() => {
                 alert("Organ Certificate Verification Link copied: " + verifyUrl);
             });
@@ -921,9 +942,13 @@
 
         window.shareOrganWhatsApp = function() {
             const id = document.getElementById("passID").textContent;
-            const verifyUrl = `${window.location.origin}/certificate.html?id=${id}`;
-            const msg = `🏆 I officially signed my Organ Donation Pledge on LifeSaver-Care! (Certificate ID: ${id}). View & verify my official certificate here: ${verifyUrl}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${id}`;
+            const msg = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\n` +
+                `Certificate ID: *${id}*\n\n` +
+                `View & verify official certificate online:\n${verifyUrl}\n\n` +
+                `Together We Save Lives! 🌟`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         // Load organ donors
