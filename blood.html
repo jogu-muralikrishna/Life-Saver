@@ -220,9 +220,21 @@
                     🩸 Save Up To 3 Lives With 1 Unit of Blood
                 </div>
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Blood Donor & Emergency Board</h1>
-                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-6">
+                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-5">
                     Connect directly with voluntary blood donors or post an emergency request for immediate donor response.
                 </p>
+
+                <!-- PROMINENT HIGH-VISIBILITY CALL TO ACTION BUTTONS -->
+                <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+                    <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-red-500/25 flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer">
+                        <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span>Post Urgent Blood Need (Broadcast to All)</span>
+                    </button>
+                    <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span>Register as Donor</span>
+                    </a>
+                </div>
 
                 <!-- CITY SEARCH INPUT -->
                 <div class="relative max-w-xl mx-auto mb-5">
@@ -314,9 +326,14 @@
 
         <!-- URGENT BLOOD REQUIREMENTS LIST -->
         <div class="mb-10">
-            <h2 class="text-xl font-bold mb-4 flex items-center gap-2 text-red-600 dark:text-red-400">
-                <i data-lucide="alert-circle" class="animate-bounce"></i> Active Urgent Blood Requirement Tickets
-            </h2>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 class="text-xl font-bold flex items-center gap-2 text-red-600 dark:text-red-400">
+                    <i data-lucide="alert-circle" class="animate-bounce"></i> Active Urgent Blood Requirement Tickets
+                </h2>
+                <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Blood Need
+                </button>
+            </div>
             <div id="urgentReqsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <p class="text-slate-500 dark:text-slate-400 text-xs">Loading active urgent requests...</p>
             </div>
@@ -1363,9 +1380,24 @@
 
         let knownBloodReqKeys = null;
 
+        // Instant Local Cache Hydration for 0ms Rendering
+        try {
+            const cachedDonors = JSON.parse(localStorage.getItem('ls_donors_cache') || 'null');
+            if (cachedDonors && Array.isArray(cachedDonors) && cachedDonors.length > 0) {
+                allDonors = cachedDonors;
+                renderDonors();
+            }
+            const cachedRequests = JSON.parse(localStorage.getItem('ls_requests_cache') || 'null');
+            if (cachedRequests && typeof cachedRequests === 'object') {
+                window.activeUrgentBloodTickets = cachedRequests;
+                renderUrgentBloodTickets();
+            }
+        } catch (e) {}
+
         // Listen to active urgent requests in real time
         onValue(ref(db, 'blood_requests'), (snapshot) => {
             const currentData = snapshot.exists() ? snapshot.val() : {};
+            try { localStorage.setItem('ls_requests_cache', JSON.stringify(currentData)); } catch(e) {}
             const currentKeys = Object.keys(currentData);
 
             if (knownBloodReqKeys !== null) {
@@ -1382,14 +1414,49 @@
             knownBloodReqKeys = currentKeys;
             window.activeUrgentBloodTickets = currentData;
             renderUrgentBloodTickets();
+        }, (err) => {
+            console.warn("Blood requests realtime notice:", err);
+            try {
+                const cached = JSON.parse(localStorage.getItem('ls_requests_cache') || '{}');
+                window.activeUrgentBloodTickets = cached;
+                renderUrgentBloodTickets();
+            } catch(e) {}
         });
 
-        // Listen to voluntary donors
+        // Listen to voluntary donors with real-time update and caching
         onValue(ref(db, 'donors'), (snapshot) => {
-            allDonors = snapshot.exists() ? Object.values(snapshot.val()) : [];
+            if (snapshot.exists()) {
+                allDonors = Object.values(snapshot.val());
+                try { localStorage.setItem('ls_donors_cache', JSON.stringify(allDonors)); } catch(e) {}
+            } else {
+                allDonors = [];
+            }
             renderDonors();
             renderUrgentBloodTickets();
+        }, (err) => {
+            console.warn("Donors realtime notice:", err);
+            if (allDonors.length === 0) {
+                try {
+                    const cached = JSON.parse(localStorage.getItem('ls_donors_cache') || '[]');
+                    if (cached.length > 0) {
+                        allDonors = cached;
+                        renderDonors();
+                    }
+                } catch(e) {}
+            }
         });
+
+        // 1.2s Fast Fallback to prevent long spinning loaders
+        setTimeout(() => {
+            const dGrid = document.getElementById("donorGrid");
+            if (dGrid && allDonors.length === 0 && dGrid.innerHTML.includes("Fetching active donors")) {
+                renderDonors();
+            }
+            const rGrid = document.getElementById("urgentReqsGrid") || document.getElementById("urgentRequestsGrid");
+            if (rGrid && Object.keys(window.activeUrgentBloodTickets || {}).length === 0 && rGrid.innerHTML.includes("Loading active urgent requests")) {
+                renderUrgentBloodTickets();
+            }
+        }, 1200);
 
         /* POST REQUIREMENT MODAL */
         window.openPostRequirementModal = function () {

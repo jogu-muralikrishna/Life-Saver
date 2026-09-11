@@ -836,10 +836,20 @@
             lucide.createIcons();
         }
 
+        // Instant Local Cache Hydration for 0ms Result Rendering
+        try {
+            const cachedDonors = JSON.parse(localStorage.getItem('ls_donors_cache') || 'null');
+            if (cachedDonors && Array.isArray(cachedDonors) && cachedDonors.length > 0) {
+                donorsList = cachedDonors;
+                renderResults();
+            }
+        } catch (e) {}
+
         const donorsRef = ref(db, 'donors');
         onValue(donorsRef, (snapshot) => {
             if (snapshot.exists()) {
                 donorsList = Object.values(snapshot.val());
+                try { localStorage.setItem('ls_donors_cache', JSON.stringify(donorsList)); } catch(e) {}
             } else {
                 donorsList = [];
             }
