@@ -424,18 +424,22 @@
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Add a hospital that has collaborated with Life Saver.</p>
                     
                     <form id="addPartnerHospitalForm" onsubmit="addPartnerHospital(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hospital Name *</label>
                                 <input type="text" id="addHospName" required placeholder="e.g. Apollo Hospitals" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mobile / Phone Number *</label>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location / City *</label>
+                                <input type="text" id="addHospLocation" required placeholder="e.g. Jubilee Hills, Hyderabad" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">General Contact Phone *</label>
                                 <input type="tel" id="addHospMobile" required placeholder="e.g. +91 9876543210 / 040-23607777" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location *</label>
-                                <input type="text" id="addHospLocation" required placeholder="e.g. Jubilee Hills, Hyderabad" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-emerald-500 font-bold">
+                                <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">🚑 Ambulance Hotline *</label>
+                                <input type="tel" id="addHospAmbulance" placeholder="e.g. +91 9876501234 / 040-23608888" class="w-full bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700/60 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-amber-500 font-bold">
                             </div>
                         </div>
 
@@ -473,6 +477,7 @@
                                 <th class="p-4">Hospital Name</th>
                                 <th class="p-4">Location</th>
                                 <th class="p-4">Mobile / Phone</th>
+                                <th class="p-4 text-amber-600 dark:text-amber-400">🚑 Ambulance Hotline</th>
                                 <th class="p-4">Sub-branches</th>
                                 <th class="p-4">Details / Services</th>
                                 <th class="p-4">Partnership Status</th>
@@ -1400,7 +1405,7 @@
             if (statEl) statEl.textContent = activeCount;
 
             if (keys.length === 0) {
-                body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">0 Colab Hospitals. No colab hospitals added yet.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">0 Colab Hospitals. No colab hospitals added yet.</td></tr>`;
                 return;
             }
 
@@ -1415,6 +1420,7 @@
                     : `<span class="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1 w-max">⚪ Inactive</span>`;
 
                 const phoneDisplay = item.mobile || item.phone || item.contact || item.note || '-';
+                const ambulanceDisplay = item.ambulancePhone || item.ambulanceNumber || item.mobile || '-';
 
                 const subBranchesList = (item.subBranches || '')
                     .split(',')
@@ -1432,17 +1438,18 @@
                     <td class="p-4 font-bold text-slate-900 dark:text-white">🏥 ${item.name || 'Hospital Name'}</td>
                     <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-semibold">📍 ${item.location || item.city || '-'}</td>
                     <td class="p-4 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold">📞 ${phoneDisplay}</td>
+                    <td class="p-4 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold">🚑 ${ambulanceDisplay}</td>
                     <td class="p-4">${subBranchesHtml}</td>
                     <td class="p-4">${detailsHtml}</td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-right space-x-1.5 td-actions">
-                        <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
                             ${isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button onclick="openEditPartnerHospitalModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        <button onclick="openEditPartnerHospitalModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
                             Edit
                         </button>
-                        <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">
+                        <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
                             Remove
                         </button>
                     </td>
@@ -1458,6 +1465,7 @@
 
             const name = document.getElementById("addHospName").value.trim();
             const mobile = document.getElementById("addHospMobile").value.trim();
+            const ambulancePhone = document.getElementById("addHospAmbulance")?.value.trim() || mobile;
             const location = document.getElementById("addHospLocation").value.trim();
             const subBranches = document.getElementById("addHospSubBranches").value.trim();
             const details = document.getElementById("addHospDetails").value.trim();
@@ -1480,6 +1488,8 @@
                 mobile: mobile,
                 phone: mobile,
                 contact: mobile,
+                ambulancePhone: ambulancePhone,
+                ambulanceNumber: ambulancePhone,
                 location: location,
                 subBranches: subBranches || "",
                 details: details || "",
@@ -1534,6 +1544,9 @@
             if (!hosp) return;
             document.getElementById("editHospName").value = hosp.name || "";
             document.getElementById("editHospMobile").value = hosp.mobile || hosp.phone || hosp.contact || hosp.note || "";
+            if (document.getElementById("editHospAmbulance")) {
+                document.getElementById("editHospAmbulance").value = hosp.ambulancePhone || hosp.ambulanceNumber || hosp.mobile || "";
+            }
             document.getElementById("editHospLocation").value = hosp.location || hosp.city || "";
             document.getElementById("editHospSubBranches").value = hosp.subBranches || "";
             document.getElementById("editHospDetails").value = hosp.details || "";
@@ -1558,6 +1571,7 @@
             if (!activeEditHospKey) return;
             const name = document.getElementById("editHospName").value.trim();
             const mobile = document.getElementById("editHospMobile").value.trim();
+            const ambulancePhone = document.getElementById("editHospAmbulance")?.value.trim() || mobile;
             const location = document.getElementById("editHospLocation").value.trim();
             const subBranches = document.getElementById("editHospSubBranches").value.trim();
             const details = document.getElementById("editHospDetails").value.trim();
@@ -1581,6 +1595,8 @@
                     mobile: mobile,
                     phone: mobile,
                     contact: mobile,
+                    ambulancePhone: ambulancePhone,
+                    ambulanceNumber: ambulancePhone,
                     location: location,
                     subBranches: subBranches,
                     details: details,
@@ -3451,9 +3467,14 @@
                         <input type="tel" id="editHospMobile" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location *</label>
-                        <input type="text" id="editHospLocation" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
+                        <label class="block text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">🚑 Ambulance Hotline *</label>
+                        <input type="tel" id="editHospAmbulance" placeholder="e.g. +91 9876501234 / 040-23608888" class="w-full bg-slate-50 dark:bg-slate-950 border border-amber-300 dark:border-amber-700/60 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-amber-500">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Primary Location / City *</label>
+                    <input type="text" id="editHospLocation" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-bold outline-none focus:border-emerald-500">
                 </div>
 
                 <div>

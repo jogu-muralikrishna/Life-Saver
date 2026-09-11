@@ -217,11 +217,11 @@
             <div class="max-w-3xl mx-auto relative z-10">
                 <div
                     class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs uppercase tracking-wider mb-4 border border-red-200 dark:border-red-900/50">
-                    🩸 Save Up To 3 Lives With 1 Unit of Blood
+                    🩸 Live Emergency Blood Requirement Hub
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Blood Donor & Emergency Board</h1>
-                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-5">
-                    Connect directly with voluntary blood donors or post an emergency request for immediate donor response.
+                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Emergency Blood Requirement Board</h1>
+                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-6">
+                    Post emergency patient blood requirements to broadcast alerts to voluntary donors, or search and manage active requirement tickets.
                 </p>
 
                 <!-- PROMINENT HIGH-VISIBILITY CALL TO ACTION BUTTONS -->
@@ -230,41 +230,45 @@
                         <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         <span>Post Urgent Blood Need (Broadcast to All)</span>
                     </button>
+                    <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
+                        <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span>Find Blood Donors Directory</span>
+                    </a>
                     <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         <span>Register as Donor</span>
                     </a>
                 </div>
 
-                <!-- CITY SEARCH INPUT -->
+                <!-- TICKET SEARCH INPUT -->
                 <div class="relative max-w-xl mx-auto mb-5">
-                    <i data-lucide="map-pin" class="w-5 h-5 absolute left-4 top-3.5 text-slate-400"></i>
-                    <input type="text" id="citySearchInput" oninput="renderDonors()"
-                        placeholder="Type city manually (e.g. Hyderabad, Khammam, Nalgonda)..."
+                    <i data-lucide="search" class="w-5 h-5 absolute left-4 top-3.5 text-slate-400"></i>
+                    <input type="text" id="reqSearchInput" oninput="renderUrgentBloodTickets()"
+                        placeholder="Search urgent tickets by hospital, city, or requester..."
                         class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-semibold py-3.5 pl-12 pr-4 rounded-2xl outline-none focus:border-red-500 shadow-sm text-sm">
                 </div>
 
-                <!-- BLOOD GROUP SELECTOR PILLS -->
+                <!-- BLOOD GROUP SELECTOR PILLS (FOR REQUIREMENTS) -->
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
-                    <button onclick="filterBloodGroup('ALL')"
-                        class="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-700 transition">ALL
+                    <button data-bg="ALL" onclick="filterTicketBloodGroup('ALL')"
+                        class="ticket-bg-pill bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold transition shadow-md shadow-red-500/20">ALL
                         GROUPS</button>
-                    <button onclick="filterBloodGroup('A+')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A+</button>
-                    <button onclick="filterBloodGroup('A-')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A-</button>
-                    <button onclick="filterBloodGroup('B+')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B+</button>
-                    <button onclick="filterBloodGroup('B-')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B-</button>
-                    <button onclick="filterBloodGroup('O+')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O+</button>
-                    <button onclick="filterBloodGroup('O-')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O-</button>
-                    <button onclick="filterBloodGroup('AB+')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB+</button>
-                    <button onclick="filterBloodGroup('AB-')"
-                        class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB-</button>
+                    <button data-bg="A+" onclick="filterTicketBloodGroup('A+')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A+</button>
+                    <button data-bg="A-" onclick="filterTicketBloodGroup('A-')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A-</button>
+                    <button data-bg="B+" onclick="filterTicketBloodGroup('B+')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B+</button>
+                    <button data-bg="B-" onclick="filterTicketBloodGroup('B-')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B-</button>
+                    <button data-bg="O+" onclick="filterTicketBloodGroup('O+')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O+</button>
+                    <button data-bg="O-" onclick="filterTicketBloodGroup('O-')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O-</button>
+                    <button data-bg="AB+" onclick="filterTicketBloodGroup('AB+')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB+</button>
+                    <button data-bg="AB-" onclick="filterTicketBloodGroup('AB-')"
+                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB-</button>
                 </div>
 
                 <!-- ⏱️ SLEEK INSPIRATIONAL MOTTO -->
@@ -324,36 +328,26 @@
             </div>
         </div>
 
-        <!-- URGENT BLOOD REQUIREMENTS LIST -->
+        <!-- URGENT BLOOD REQUIREMENTS BOARD -->
         <div class="mb-10">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                <h2 class="text-xl font-bold flex items-center gap-2 text-red-600 dark:text-red-400">
-                    <i data-lucide="alert-circle" class="animate-bounce"></i> Active Urgent Blood Requirement Tickets
-                </h2>
-                <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Blood Need
-                </button>
+                <div>
+                    <h2 class="text-xl font-bold flex items-center gap-2 text-red-600 dark:text-red-400">
+                        <i data-lucide="alert-circle" class="animate-bounce"></i> Live Urgent Blood Requirement Tickets
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Emergency patient tickets posted by attendants and hospitals.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="ticketCountBadge" class="text-xs bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold px-3 py-1.5 rounded-full border border-red-200 dark:border-red-900">
+                        Loading tickets...
+                    </span>
+                    <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Post Urgent Blood Need
+                    </button>
+                </div>
             </div>
             <div id="urgentReqsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <p class="text-slate-500 dark:text-slate-400 text-xs">Loading active urgent requests...</p>
-            </div>
-        </div>
-
-        <!-- DONORS LIST HEADER -->
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i data-lucide="users" class="text-red-600 dark:text-red-400"></i> Registered Voluntary Donors
-            </h2>
-            <a href="find-donor.html"
-                class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-                Advanced Filter Page <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </a>
-        </div>
-
-        <div id="donorGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="col-span-full text-center py-12 text-slate-400">
-                <i data-lucide="loader" class="w-8 h-8 animate-spin mx-auto mb-2 text-red-600"></i>
-                <p>Fetching active donors from database...</p>
             </div>
         </div>
     </main>
@@ -912,109 +906,18 @@
         };
 
         let allDonors = [];
-        let activeGroupFilter = "ALL";
+        let activeTicketGroupFilter = "ALL";
 
-        window.filterBloodGroup = function (group) {
-            activeGroupFilter = group;
-            renderDonors();
-        };
-
-        window.renderDonors = function () {
-            const grid = document.getElementById("donorGrid");
-            grid.innerHTML = "";
-
-            const cityQuery = (document.getElementById("citySearchInput")?.value || "").trim().toLowerCase();
-
-            const filtered = allDonors.filter(d => {
-                const matchBg = activeGroupFilter === "ALL" || (d.bloodGroup || '').toUpperCase() === activeGroupFilter;
-                const matchCity = !cityQuery || (d.city || '').toLowerCase().includes(cityQuery);
-                return matchBg && matchCity;
-            });
-
-            window.currentRenderedDonors = filtered;
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full text-center py-12 glass-card">
-                        <i data-lucide="frown" class="w-10 h-10 mx-auto mb-2 text-slate-400"></i>
-                        <p class="text-slate-600 dark:text-slate-300 font-semibold">No registered donors found ${cityQuery ? 'in "' + cityQuery + '"' : ''}</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-
-            filtered.forEach((donor, idx) => {
-                const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || donor.contactVisibility === 'public' || donor.allowEmergencyContact === true || (!donor.phoneVisibility && !donor.accountType && donor.contactVisibility !== 'private' && donor.allowEmergencyContact !== false);
-                const rawPhone = donor.phone || donor.mobileNumber || '';
-                const cleanPhone = rawPhone.replace(/\D/g, '');
-                const displayPhone = cleanPhone.length === 10 ? `+91 ${cleanPhone.replace(/(\d{5})(\d{5})/, '$1 $2')}` : (rawPhone || 'Not provided');
-                const card = document.createElement("div");
-                card.className = "glass-card p-6 flex flex-col justify-between hover:border-red-500 transition";
-
-                let contactSectionHtml = "";
-                if (isPublic && cleanPhone) {
-                    const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-                    const respectfulMsg = `Hello ${donor.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent medical requirement for ${donor.bloodGroup || 'blood'} blood in ${donor.city || 'your area'}. If you are available to donate, please let us know. Thank you!`;
-                    contactSectionHtml = `
-                        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div class="flex items-center justify-between mb-2.5">
-                                <span class="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                                    <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-500"></i> ${displayPhone}
-                                </span>
-                                <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-extrabold border border-emerald-200 dark:border-emerald-900">
-                                    🟢 Public
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="tel:${cleanPhone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
-                                    <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
-                                </a>
-                                <a href="https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
-                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
-                                </a>
-                            </div>
-                        </div>
-                    `;
+        window.filterTicketBloodGroup = function (group) {
+            activeTicketGroupFilter = group;
+            document.querySelectorAll('.ticket-bg-pill').forEach(btn => {
+                if (btn.getAttribute('data-bg') === group) {
+                    btn.className = "ticket-bg-pill bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold transition shadow-md shadow-red-500/20";
                 } else {
-                    contactSectionHtml = `
-                        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            <div class="flex items-center justify-between mb-2.5">
-                                <span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                                    <i data-lucide="lock" class="w-3.5 h-3.5 text-purple-500"></i> Private Number
-                                </span>
-                                <span class="text-[10px] bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full font-extrabold border border-purple-200 dark:border-purple-900">
-                                    🔒 Private
-                                </span>
-                            </div>
-                            <a href="find-donor.html" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-purple-600/20">
-                                <i data-lucide="shield" class="w-3.5 h-3.5"></i> Request Contact via Portal
-                            </a>
-                        </div>
-                    `;
+                    btn.className = "ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition";
                 }
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="bg-red-600 text-white text-base font-black px-3.5 py-1 rounded-xl shadow-sm">
-                                ${donor.bloodGroup || 'O+'}
-                            </span>
-                            <span class="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ${donor.status || 'Available'}
-                            </span>
-                        </div>
-                        <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-1">${donor.name || 'Anonymous Donor'}</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> ${donor.city || 'Hyderabad'}
-                        </p>
-                    </div>
-
-                    ${contactSectionHtml}
-                `;
-                grid.appendChild(card);
             });
-            lucide.createIcons();
+            renderUrgentBloodTickets();
         };
 
         // CLOSE & DELETE TICKET WHEN BLOOD IS RECEIVED / FOUND
@@ -1055,19 +958,41 @@
         // RENDER ACTIVE BLOOD REQUIREMENTS
         window.renderUrgentBloodTickets = function () {
             const reqGrid = document.getElementById("urgentReqsGrid") || document.getElementById("urgentRequestsGrid");
+            const badgeEl = document.getElementById("ticketCountBadge");
             if (!reqGrid) return;
             reqGrid.innerHTML = "";
 
-            const keys = Object.keys(window.activeUrgentBloodTickets || {});
-            if (keys.length === 0) {
+            const allKeys = Object.keys(window.activeUrgentBloodTickets || {});
+            if (badgeEl) {
+                badgeEl.textContent = `${allKeys.length} Active Ticket${allKeys.length === 1 ? '' : 's'}`;
+            }
+
+            if (allKeys.length === 0) {
                 reqGrid.innerHTML = `<div class="col-span-full text-center py-8 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">No active emergency blood requirement tickets currently posted. You can post a new requirement using the 'Post Urgent Blood Need' button above.</p></div>`;
+                return;
+            }
+
+            const searchQuery = (document.getElementById("reqSearchInput")?.value || "").trim().toLowerCase();
+            const filteredKeys = allKeys.filter(key => {
+                const r = window.activeUrgentBloodTickets[key];
+                if (!r) return false;
+                const matchBg = activeTicketGroupFilter === "ALL" || (r.bloodGroup || '').toUpperCase() === activeTicketGroupFilter;
+                const matchSearch = !searchQuery || 
+                    (r.hospital || '').toLowerCase().includes(searchQuery) ||
+                    (r.city || '').toLowerCase().includes(searchQuery) ||
+                    (r.requesterName || r.name || '').toLowerCase().includes(searchQuery);
+                return matchBg && matchSearch;
+            });
+
+            if (filteredKeys.length === 0) {
+                reqGrid.innerHTML = `<div class="col-span-full text-center py-8 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">No requirement tickets matching "${activeTicketGroupFilter !== 'ALL' ? activeTicketGroupFilter : ''} ${searchQuery}". Try adjusting your filter or search keywords.</p></div>`;
                 return;
             }
 
             const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
             const currentUid = auth.currentUser ? auth.currentUser.uid : null;
 
-            keys.forEach(key => {
+            filteredKeys.forEach(key => {
                 const r = window.activeUrgentBloodTickets[key];
                 const compatibleGroups = BLOOD_COMPATIBILITY[r.bloodGroup] || [r.bloodGroup];
                 const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
@@ -1081,10 +1006,10 @@
                     : '';
 
                 const deleteBtnHtml = isMyPost
-                    ? `<button onclick="deleteMyBloodTicket('${key}', true)" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md shadow-red-500/20" title="Manually delete your emergency post once blood is found">
+                    ? `<button onclick="deleteMyBloodTicket('${key}', true)" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md shadow-red-500/20 cursor-pointer" title="Manually delete your emergency post once blood is found">
                          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Post (Blood Found)
                        </button>`
-                    : `<button onclick="closeBloodTicket('${key}', false)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
+                    : `<button onclick="closeBloodTicket('${key}', false)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Mark request as fulfilled and delete ticket">
                          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Found • Remove
                        </button>`;
 
@@ -1116,7 +1041,7 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-red-200/60 dark:border-red-900/40 justify-between">
-                        <button onclick="openBloodMatchModal('${key}')" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white text-xs font-black px-3.5 py-2 rounded-xl shadow-md shadow-red-500/20 transition flex items-center gap-2 group">
+                        <button onclick="openBloodMatchModal('${key}')" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white text-xs font-black px-3.5 py-2 rounded-xl shadow-md shadow-red-500/20 transition flex items-center gap-2 group cursor-pointer">
                             <span class="relative flex h-2 w-2">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                 <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
@@ -1128,7 +1053,7 @@
                             </span>
                         </button>
                         <div class="flex items-center gap-1.5">
-                            <button onclick="openPrivacyTicketByKey('${key}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
+                            <button onclick="openPrivacyTicketByKey('${key}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Attendant
                             </button>
                             ${deleteBtnHtml}
@@ -1423,7 +1348,7 @@
             } catch(e) {}
         });
 
-        // Listen to voluntary donors with real-time update and caching
+        // Listen to voluntary donors in background for instant SOS compatibility matching
         onValue(ref(db, 'donors'), (snapshot) => {
             if (snapshot.exists()) {
                 allDonors = Object.values(snapshot.val());
@@ -1431,7 +1356,6 @@
             } else {
                 allDonors = [];
             }
-            renderDonors();
             renderUrgentBloodTickets();
         }, (err) => {
             console.warn("Donors realtime notice:", err);
@@ -1440,7 +1364,6 @@
                     const cached = JSON.parse(localStorage.getItem('ls_donors_cache') || '[]');
                     if (cached.length > 0) {
                         allDonors = cached;
-                        renderDonors();
                     }
                 } catch(e) {}
             }
@@ -1448,10 +1371,6 @@
 
         // 1.2s Fast Fallback to prevent long spinning loaders
         setTimeout(() => {
-            const dGrid = document.getElementById("donorGrid");
-            if (dGrid && allDonors.length === 0 && dGrid.innerHTML.includes("Fetching active donors")) {
-                renderDonors();
-            }
             const rGrid = document.getElementById("urgentReqsGrid") || document.getElementById("urgentRequestsGrid");
             if (rGrid && Object.keys(window.activeUrgentBloodTickets || {}).length === 0 && rGrid.innerHTML.includes("Loading active urgent requests")) {
                 renderUrgentBloodTickets();

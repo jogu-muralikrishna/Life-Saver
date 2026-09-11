@@ -276,6 +276,29 @@
         <div id="ambulanceList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Dynamic Ambulance Cards -->
         </div>
+
+        <!-- COLLABORATED HOSPITALS AMBULANCES SECTION -->
+        <div class="mt-14 mb-8">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i data-lucide="building-2" class="text-emerald-600 dark:text-emerald-400"></i> Collaborated Hospital Ambulance Network
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Approved partner hospitals with dedicated 24/7 ambulance response & emergency helplines.</p>
+                </div>
+                <span id="colabAmbCount" class="text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-900">
+                    Loading Colab Ambulances...
+                </span>
+            </div>
+            
+            <div id="colabHospitalAmbulanceList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamic Partner Hospital Ambulances -->
+                <div class="col-span-full text-center py-8 text-slate-400">
+                    <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600"></i>
+                    <p class="text-xs">Loading collaborated hospital ambulance network...</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- GREEN CORRIDOR MODAL -->
@@ -358,7 +381,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, push, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -650,6 +673,114 @@
                 btn.innerText = "Broadcast Traffic Alert";
                 btn.disabled = false;
             }
+        });
+
+        // RENDER COLLABORATED HOSPITAL AMBULANCES (CONTROLLED BY SUPER ADMIN VIA ADMIN PANEL)
+        function renderColabHospitalAmbulances(hospitalsMap) {
+            const container = document.getElementById("colabHospitalAmbulanceList");
+            const badge = document.getElementById("colabAmbCount");
+            if (!container) return;
+            container.innerHTML = "";
+
+            const keys = Object.keys(hospitalsMap || {});
+            const activeColabs = keys
+                .map(k => ({ key: k, ...hospitalsMap[k] }))
+                .filter(h => h.status === 'Active Partner' || h.status === 'Verified Partner' || h.status === 'Active');
+
+            if (badge) {
+                badge.textContent = `${activeColabs.length} Collaborated Hospital${activeColabs.length === 1 ? '' : 's'}`;
+            }
+
+            if (activeColabs.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-10 glass-card p-6 border border-slate-200 dark:border-slate-800 rounded-3xl">
+                        <i data-lucide="building-2" class="w-10 h-10 mx-auto mb-2 text-slate-400"></i>
+                        <h4 class="font-bold text-slate-800 dark:text-slate-200 mb-1">No Collaborated Hospitals Active Yet</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Collaborating partner hospitals added by Super Admin in the admin panel will be displayed here with direct ambulance hotlines.</p>
+                    </div>
+                `;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            activeColabs.forEach(h => {
+                const ambPhone = h.ambulancePhone || h.ambulanceNumber || h.mobile || h.phone || '108';
+                const cleanAmbPhone = ambPhone.replace(/\D/g, '');
+                const rawGeneralPhone = h.mobile || h.phone || h.contact || '';
+                const cleanGeneralPhone = rawGeneralPhone.replace(/\D/g, '');
+
+                const subBranchesList = (h.subBranches || '')
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+                const subBranchesHtml = subBranchesList.length > 0
+                    ? `<div class="flex flex-wrap gap-1 mt-1.5">${subBranchesList.map(b => `<span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-900/50 px-2 py-0.5 rounded-full text-[10px] font-bold">🏢 ${b}</span>`).join('')}</div>`
+                    : '';
+
+                const mapsQuery = encodeURIComponent(`${h.name} ${h.location || ''}`);
+                const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+                const card = document.createElement("div");
+                card.className = "glass-card p-6 flex flex-col justify-between hover:border-emerald-500 transition shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-3xl";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-900 flex items-center gap-1.5 shadow-sm">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 🟢 Verified Colab Partner
+                            </span>
+                            <span class="text-[10px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-900/50">
+                                🏥 24/7 Dispatch
+                            </span>
+                        </div>
+
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg mb-1">${h.name || 'Hospital Name'}</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> ${h.location || h.city || 'Hyderabad'}
+                        </p>
+
+                        ${subBranchesHtml}
+
+                        ${h.details ? `<p class="text-xs text-slate-600 dark:text-slate-300 mt-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 font-medium line-clamp-2">${h.details}</p>` : ''}
+
+                        <!-- AMBULANCE NUMBER HIGHLIGHT BOX -->
+                        <div class="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200 dark:border-amber-900/60 shadow-sm">
+                            <div class="text-[10px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 mb-0.5 flex items-center gap-1">
+                                <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-600"></i> Direct Hospital Ambulance Hotline
+                            </div>
+                            <div class="text-base sm:text-lg font-mono font-black text-amber-900 dark:text-amber-200 flex items-center justify-between">
+                                <span>${ambPhone}</span>
+                                <span class="text-[10px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 px-2 py-0.5 rounded-md font-sans font-extrabold">Instant Connect</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="tel:${cleanAmbPhone || '108'}" class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-xs font-black py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-md shadow-red-500/20">
+                                <i data-lucide="phone-call" class="w-3.5 h-3.5"></i> Call Ambulance
+                            </a>
+                            <a href="${googleMapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="navigation" class="w-3.5 h-3.5"></i> Route / Map
+                            </a>
+                        </div>
+                        ${cleanGeneralPhone ? `
+                            <a href="tel:${cleanGeneralPhone}" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 transition border border-slate-200 dark:border-slate-700">
+                                <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Hospital Desk (${rawGeneralPhone})
+                            </a>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // LISTEN TO REAL-TIME PARTNER HOSPITALS (AMBULANCE NETWORK)
+        onValue(ref(db, 'partner_hospitals'), (snapshot) => {
+            const data = snapshot.exists() ? snapshot.val() : {};
+            renderColabHospitalAmbulances(data);
+        }, (err) => {
+            console.warn("Partner hospitals notice in ambulance:", err);
         });
 
         // Initialize Map & Render Data Immediately
