@@ -260,7 +260,7 @@
                 <div id="printableActiveCertWrapper" class="printable-active-cert relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl select-none bg-[#fffbf8] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-blood-clean.jpg');">
                     <!-- Recipient Name -->
                     <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
-                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">${data.name || 'Voluntary Blood Donor'}</span>
+                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#8B0000] tracking-wide" style="line-height: 1;">${data.name || 'Blood Donor'}</span>
                     </div>
 
                     <!-- Blood Group -->
@@ -284,7 +284,7 @@
                 <div id="printableActiveCertWrapper" class="printable-active-cert relative w-full aspect-[1024/682] max-w-4xl mx-auto rounded-3xl overflow-hidden shadow-2xl select-none bg-[#fcfdff] bg-contain bg-no-repeat bg-center border border-slate-200/80" style="background-image: url('cert-organ-clean.jpg');">
                     <!-- Recipient Name -->
                     <div class="absolute w-full text-center pointer-events-none flex items-center justify-center" style="top: 33.5%; left: 0; height: 13%;">
-                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">${data.name || 'Voluntary Organ Pledger'}</span>
+                        <span class="cert-script-name text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#0f4c81] tracking-wide" style="line-height: 1;">${data.name || 'Organ Pledger'}</span>
                     </div>
 
                     <!-- Blood Group -->
@@ -312,7 +312,7 @@
         window.downloadCertificateImage = async function() {
             if (!activeCertData) return;
             const isBlood = activeCertData.certType === 'blood';
-            const name = activeCertData.name || (isBlood ? 'Voluntary Blood Donor' : 'Voluntary Organ Pledger');
+            const name = activeCertData.name || (isBlood ? 'Blood Donor' : 'Organ Pledger');
             const bg = activeCertData.bloodGroup || 'O+';
             const certId = activeCertData.certId || 'LSC-2026-00482';
 

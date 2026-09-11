@@ -577,12 +577,6 @@
                                 <img id="dashPanelBloodCertQR" src="" alt="Verify QR" class="w-full h-full object-contain" />
                             </div>
 
-                            <!-- Dynamic Milestone Ribbon Badge on In-Panel Preview -->
-                            <div id="dashPanelBloodMilestonePill" class="absolute pointer-events-none text-center flex items-center justify-center gap-1 px-2.5 py-0.5 rounded-full shadow-md border font-black text-[7px] sm:text-[9px] uppercase tracking-wider transition" style="top: 48.5%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, rgba(254, 243, 199, 0.95), rgba(253, 230, 138, 0.95)); color: #92400e; border-color: #f59e0b;">
-                                <span id="dashPanelBloodMilestonePillEmoji">🥉</span>
-                                <span id="dashPanelBloodMilestonePillText">Bronze Lifesaver • 1 Donation</span>
-                            </div>
-
                             <!-- Dynamic Certificate ID -->
                             <div class="absolute font-mono font-bold text-[7px] sm:text-[9px] text-slate-700 bg-slate-100/95 px-1.5 py-0.5 rounded border border-slate-300 shadow-sm whitespace-nowrap" style="left: 72.5%; top: 92.2%; transform: translate(-50%, -50%);" id="dashPanelBloodCertId">
                                 LSC-BD-2026-00482
@@ -4411,64 +4405,6 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
-
-                // Draw Milestone Honor Badge Pill on Certificate Canvas
-                const donationCount = parseInt(window.userBloodDonorData?.donationCount !== undefined ? window.userBloodDonorData.donationCount : (window.userBloodDonorData?.timesDonated || 0), 10);
-                const tierInfo = window.getMilestoneTier ? window.getMilestoneTier(donationCount) : { badge: '🥉', title: 'Bronze Lifesaver', tier: 'BRONZE', ribbonColor: '#ea580c' };
-
-                ctx.save();
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                const badgeText = `${tierInfo.badge}  ${tierInfo.title.toUpperCase()} • ${donationCount} ${donationCount === 1 ? 'DONATION' : 'DONATIONS'}`;
-                ctx.font = 'bold 13px system-ui, -apple-system, sans-serif';
-                const textWidth = ctx.measureText(badgeText).width + 36;
-                const badgeHeight = 26;
-                const badgeX = 512 - (textWidth / 2);
-                const badgeY = 320;
-
-                // Gradient background based on tier
-                let grad = ctx.createLinearGradient(badgeX, badgeY, badgeX + textWidth, badgeY + badgeHeight);
-                if (tierInfo.tier === 'DIAMOND') {
-                    grad.addColorStop(0, '#e0e7ff');
-                    grad.addColorStop(0.5, '#c7d2fe');
-                    grad.addColorStop(1, '#818cf8');
-                } else if (tierInfo.tier === 'GOLD') {
-                    grad.addColorStop(0, '#fef08a');
-                    grad.addColorStop(0.5, '#fde047');
-                    grad.addColorStop(1, '#ca8a04');
-                } else if (tierInfo.tier === 'SILVER') {
-                    grad.addColorStop(0, '#f8fafc');
-                    grad.addColorStop(0.5, '#e2e8f0');
-                    grad.addColorStop(1, '#94a3b8');
-                } else if (tierInfo.tier === 'BRONZE') {
-                    grad.addColorStop(0, '#ffedd5');
-                    grad.addColorStop(0.5, '#fed7aa');
-                    grad.addColorStop(1, '#ea580c');
-                } else {
-                    grad.addColorStop(0, '#ecfdf5');
-                    grad.addColorStop(0.5, '#d1fae5');
-                    grad.addColorStop(1, '#059669');
-                }
-
-                ctx.fillStyle = grad;
-                ctx.shadowColor = 'rgba(0,0,0,0.14)';
-                ctx.shadowBlur = 6;
-                ctx.shadowOffsetY = 2;
-                ctx.beginPath();
-                ctx.roundRect(badgeX, badgeY, textWidth, badgeHeight, 13);
-                ctx.fill();
-
-                // Border
-                ctx.shadowColor = 'transparent';
-                ctx.strokeStyle = tierInfo.ribbonColor || '#ea580c';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                // Text
-                ctx.fillStyle = (tierInfo.tier === 'BRONZE' || tierInfo.tier === 'GOLD') ? '#78350f' : (tierInfo.tier === 'DIAMOND' ? '#312e81' : (tierInfo.tier === 'SILVER' ? '#1e293b' : '#065f46'));
-                ctx.fillText(badgeText, 512, badgeY + (badgeHeight / 2));
-                ctx.restore();
 
                 // Draw Blood Group in badge
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';

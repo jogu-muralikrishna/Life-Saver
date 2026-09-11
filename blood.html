@@ -144,6 +144,22 @@
         </div>
     </nav>
 
+    <!-- 🚨 REAL-TIME LIVE SOS NOTIFICATION BANNER (DISPATCHED FOR ALL USERS) -->
+    <div id="liveSOSAlertBanner" class="hidden sticky top-[54px] sm:top-[60px] z-30 px-3 sm:px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-lg border-b border-red-500/40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2 font-bold truncate">
+                <span class="bg-white text-red-600 text-[10px] font-black px-2 py-0.5 rounded-full uppercase shrink-0 shadow-sm animate-pulse">🚨 Live SOS</span>
+                <span id="liveSOSAlertText" class="truncate font-semibold">Urgent Blood Need Broadcasted!</span>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="scrollToUrgentRequests()" class="bg-white text-red-700 hover:bg-red-50 font-black px-3 py-1 rounded-lg text-xs transition shadow-sm flex items-center gap-1">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View Details
+                </button>
+                <button onclick="dismissLiveSOSAlert()" class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition" title="Dismiss">✕</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE NAVIGATION DRAWER -->
     <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
@@ -340,6 +356,12 @@
                 registered donors</p>
 
             <form id="reqForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Requester / Attendant Name</label>
+                    <input type="text" id="reqName" required placeholder="e.g. Ramesh (Patient Attendant)"
+                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label
@@ -391,8 +413,8 @@
                 </div>
 
                 <button type="submit" id="reqSubmitBtn"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-sm transition shadow-md shadow-red-500/20">
-                    Broadcast Urgent Blood Requirement
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-sm transition shadow-md shadow-red-500/20 flex items-center justify-center gap-2">
+                    <i data-lucide="bell-ring" class="w-4 h-4"></i> Broadcast Urgent Blood Need & Notify All
                 </button>
             </form>
         </div>
@@ -978,18 +1000,25 @@
             lucide.createIcons();
         };
 
-        // CLOSE TICKET WHEN BLOOD IS RECEIVED
-        window.closeBloodTicket = async function (key, units) {
-            if (confirm(`Confirm: Have all ${units} unit(s) of blood been received for this patient? This emergency ticket will be deleted from the live system so everyone knows blood has been provided.`)) {
+        // CLOSE & DELETE TICKET WHEN BLOOD IS RECEIVED / FOUND
+        window.deleteMyBloodTicket = async function (key, isOwner = false) {
+            const confirmMsg = isOwner
+                ? "Confirm: Has blood been received/found for your emergency request? Click OK to permanently delete your post from the live board."
+                : "Confirm: Has blood been found/received for this patient? Click OK to delete and remove this emergency ticket from the live board.";
+            
+            if (confirm(confirmMsg)) {
                 try {
                     await remove(ref(db, `blood_requests/${key}`));
-                    alert("Blood requirement ticket deleted successfully! Thank you to all voluntary donors.");
+                    const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
+                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    alert("Emergency blood requirement post has been successfully deleted! Thank you for saving lives.");
                 } catch (err) {
                     console.warn("Closing ticket error:", err);
-                    alert("Requirement ticket deleted!");
+                    alert("Error deleting ticket: " + err.message);
                 }
             }
         };
+        window.closeBloodTicket = window.deleteMyBloodTicket;
 
         // BLOOD COMPATIBILITY MATRIX
         const BLOOD_COMPATIBILITY = {
@@ -1008,23 +1037,42 @@
 
         // RENDER ACTIVE BLOOD REQUIREMENTS
         window.renderUrgentBloodTickets = function () {
-            const reqGrid = document.getElementById("urgentRequestsGrid");
+            const reqGrid = document.getElementById("urgentReqsGrid") || document.getElementById("urgentRequestsGrid");
             if (!reqGrid) return;
             reqGrid.innerHTML = "";
 
             const keys = Object.keys(window.activeUrgentBloodTickets || {});
             if (keys.length === 0) {
-                reqGrid.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-xs">No active emergency blood requirement tickets currently posted.</p>`;
+                reqGrid.innerHTML = `<div class="col-span-full text-center py-8 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">No active emergency blood requirement tickets currently posted. You can post a new requirement using the 'Post Urgent Blood Need' button above.</p></div>`;
                 return;
             }
+
+            const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
+            const currentUid = auth.currentUser ? auth.currentUser.uid : null;
 
             keys.forEach(key => {
                 const r = window.activeUrgentBloodTickets[key];
                 const compatibleGroups = BLOOD_COMPATIBILITY[r.bloodGroup] || [r.bloodGroup];
                 const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
+                const isMyPost = (currentUid && r.userId === currentUid) || myPostedKeys.includes(key);
 
                 const card = document.createElement("div");
-                card.className = "glass-card p-5 border border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 flex flex-col justify-between gap-3 hover:border-red-400 transition";
+                card.className = `glass-card p-5 border ${isMyPost ? 'border-amber-400 dark:border-amber-600 bg-amber-50/40 dark:bg-amber-950/20 shadow-md ring-1 ring-amber-400/30' : 'border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20'} flex flex-col justify-between gap-3 hover:border-red-400 transition`;
+                
+                const myPostBadge = isMyPost 
+                    ? `<span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-black px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700 flex items-center gap-1 shadow-sm">⭐ Your Post</span>` 
+                    : '';
+
+                const deleteBtnHtml = isMyPost
+                    ? `<button onclick="deleteMyBloodTicket('${key}', true)" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md shadow-red-500/20" title="Manually delete your emergency post once blood is found">
+                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Post (Blood Found)
+                       </button>`
+                    : `<button onclick="closeBloodTicket('${key}', false)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
+                         <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Found • Remove
+                       </button>`;
+
+                const requesterTitle = r.requesterName || r.name || 'Patient Attendant';
+
                 card.innerHTML = `
                     <div>
                         <div class="flex items-center justify-between gap-2 mb-2">
@@ -1035,6 +1083,7 @@
                                 <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-900">
                                     Active Need
                                 </span>
+                                ${myPostBadge}
                             </div>
                             <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
                                 📍 ${r.city}
@@ -1042,7 +1091,8 @@
                         </div>
                         <h4 class="font-black text-slate-900 dark:text-white text-sm sm:text-base">${r.hospital}</h4>
                         <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
-                            Emergency Contact:
+                            Attendant: <strong class="text-slate-800 dark:text-slate-200">${requesterTitle}</strong> •
+                            Contact:
                             <strong class="font-mono text-slate-900 dark:text-white">${window.maskPhone(r.phone)}</strong>
                             <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-900">🛡️ Guarded</span>
                         </p>
@@ -1064,9 +1114,7 @@
                             <button onclick="openPrivacyTicketByKey('${key}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Attendant
                             </button>
-                            <button onclick="closeBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm" title="Mark request as fulfilled and delete ticket">
-                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Received
-                            </button>
+                            ${deleteBtnHtml}
                         </div>
                     </div>
                 `;
@@ -1235,6 +1283,57 @@
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
+        window.playEmergencyBeep = function() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.45);
+            } catch(e) {}
+        };
+
+        window.showLiveSOSNotification = function(req) {
+            if (!req) return;
+            const banner = document.getElementById("liveSOSAlertBanner");
+            const bannerText = document.getElementById("liveSOSAlertText");
+            if (banner && bannerText) {
+                const title = req.requesterName || req.name || 'Emergency Patient';
+                bannerText.textContent = `🚨 URGENT: ${req.bloodGroup} (${req.units || 1} Units) needed at ${req.hospital}, ${req.city} • Attendant: ${title} (${window.maskPhone(req.phone)})`;
+                banner.classList.remove("hidden");
+            }
+
+            // Web Browser Notification
+            if ("Notification" in window && Notification.permission === "granted") {
+                try {
+                    new Notification(`🚨 Urgent Blood Needed: ${req.bloodGroup}`, {
+                        body: `${req.units || 1} Unit(s) needed at ${req.hospital}, ${req.city}. Phone: ${req.phone}`,
+                        icon: 'hero-heart.png'
+                    });
+                } catch(e) {}
+            }
+            window.playEmergencyBeep();
+        };
+
+        window.dismissLiveSOSAlert = function() {
+            const banner = document.getElementById("liveSOSAlertBanner");
+            if (banner) banner.classList.add("hidden");
+        };
+
+        window.scrollToUrgentRequests = function() {
+            const section = document.getElementById("urgentReqsGrid") || document.getElementById("urgentRequestsGrid");
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        };
+
         window.triggerBrowserAlert = function() {
             if (!window.currentActiveMatchTicket) return;
             const t = window.currentActiveMatchTicket;
@@ -1245,7 +1344,7 @@
             if (Notification.permission === "granted") {
                 new Notification(`🚨 Urgent Blood Needed: ${t.bloodGroup}`, {
                     body: `${t.units || 1} unit(s) needed at ${t.hospital}, ${t.city}. Attendant: ${t.phone}`,
-                    icon: 'icon.png'
+                    icon: 'hero-heart.png'
                 });
                 alert("🔔 Emergency Alert notification dispatched to your browser!");
             } else if (Notification.permission !== "denied") {
@@ -1253,7 +1352,7 @@
                     if (permission === "granted") {
                         new Notification(`🚨 Urgent Blood Needed: ${t.bloodGroup}`, {
                             body: `${t.units || 1} unit(s) needed at ${t.hospital}, ${t.city}. Attendant: ${t.phone}`,
-                            icon: 'icon.png'
+                            icon: 'hero-heart.png'
                         });
                     }
                 });
@@ -1262,9 +1361,26 @@
             }
         };
 
-        // Listen to active urgent requests
+        let knownBloodReqKeys = null;
+
+        // Listen to active urgent requests in real time
         onValue(ref(db, 'blood_requests'), (snapshot) => {
-            window.activeUrgentBloodTickets = snapshot.exists() ? snapshot.val() : {};
+            const currentData = snapshot.exists() ? snapshot.val() : {};
+            const currentKeys = Object.keys(currentData);
+
+            if (knownBloodReqKeys !== null) {
+                // Check if any new emergency ticket arrived
+                const newKeys = currentKeys.filter(k => !knownBloodReqKeys.includes(k));
+                if (newKeys.length > 0) {
+                    const latestKey = newKeys[newKeys.length - 1];
+                    const latestTicket = currentData[latestKey];
+                    if (latestTicket) {
+                        window.showLiveSOSNotification(latestTicket);
+                    }
+                }
+            }
+            knownBloodReqKeys = currentKeys;
+            window.activeUrgentBloodTickets = currentData;
             renderUrgentBloodTickets();
         });
 
@@ -1283,7 +1399,7 @@
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
                 setTimeout(() => {
-                    const firstField = document.getElementById("reqBg") || document.getElementById("reqHospital");
+                    const firstField = document.getElementById("reqName") || document.getElementById("reqBg");
                     if (firstField) {
                         firstField.focus({ preventScroll: true });
                     }
@@ -1306,12 +1422,13 @@
         document.getElementById("reqForm").addEventListener("submit", async (e) => {
             e.preventDefault();
             const btn = document.getElementById("reqSubmitBtn");
-            btn.innerText = "Broadcasting Need...";
+            btn.innerText = "Broadcasting Need & Notifying All...";
             btn.disabled = true;
 
             try {
                 const user = auth.currentUser;
-                await push(ref(db, 'blood_requests'), {
+                const reqPayload = {
+                    requesterName: document.getElementById("reqName")?.value || "Patient Attendant",
                     bloodGroup: document.getElementById("reqBg").value,
                     units: document.getElementById("reqUnits").value,
                     hospital: document.getElementById("reqHospital").value,
@@ -1319,15 +1436,35 @@
                     phone: document.getElementById("reqPhone").value,
                     userId: user ? user.uid : null,
                     userEmail: user ? user.email : null,
+                    status: "Active",
                     timestamp: new Date().toISOString()
-                });
-                alert("Emergency Blood Requirement Broadcasted Successfully!");
+                };
+
+                const newReqRef = await push(ref(db, 'blood_requests'), reqPayload);
+
+                // Save key in localStorage so the user can easily delete their post later
+                if (newReqRef.key) {
+                    const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
+                    myReqs.push(newReqRef.key);
+                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                }
+
+                // Request browser notifications if not asked yet
+                if ("Notification" in window && Notification.permission === "default") {
+                    try { Notification.requestPermission(); } catch(e) {}
+                }
+
+                window.showLiveSOSNotification(reqPayload);
+
+                alert("🚨 Emergency Blood Requirement Broadcasted to All Users Successfully!\n\nOnce blood has been found/received, you can manually delete your post at any time from this board using the 'Delete My Post (Blood Found)' button.");
+                document.getElementById("reqForm").reset();
                 closePostRequirementModal();
             } catch (err) {
                 alert("Error posting requirement: " + err.message);
             } finally {
-                btn.innerText = "Broadcast Urgent Blood Requirement";
+                btn.innerHTML = '<i data-lucide="bell-ring" class="w-4 h-4"></i> Broadcast Urgent Blood Need & Notify All';
                 btn.disabled = false;
+                if (window.lucide) lucide.createIcons();
             }
         });
     </script>
