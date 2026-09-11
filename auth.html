@@ -1985,16 +1985,102 @@
             });
         }
 
-        window.deleteMyBloodTicket = async function(key, units) {
-            if (confirm(`Confirm: Has blood been received for this emergency request? This will delete the request ticket from the live network.`)) {
+        // LOAD AND MANAGE USER'S POSTED BLOOD REQUESTS
+        function loadMyBloodRequests(user) {
+            const grid = document.getElementById("myRequestsGrid");
+            if (!grid) return;
+            if (!user) {
+                grid.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">Please sign in to view your posted blood requests.</div>`;
+                return;
+            }
+
+            const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
+            const userEmail = (user.email || '').toLowerCase();
+            const uid = user.uid || '';
+
+            onValue(ref(db, 'blood_requests'), (snapshot) => {
+                grid.innerHTML = "";
+                if (!snapshot.exists()) {
+                    grid.innerHTML = `
+                        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-2">You have no active emergency blood requests posted.</p>
+                            <a href="blood.html" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow-sm">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need Now
+                            </a>
+                        </div>`;
+                    if (window.lucide) lucide.createIcons();
+                    return;
+                }
+
+                const allRequests = snapshot.val();
+                const myReqEntries = [];
+
+                Object.keys(allRequests).forEach(key => {
+                    const r = allRequests[key];
+                    const matchUid = uid && r.userId === uid;
+                    const matchEmail = userEmail && r.userEmail && r.userEmail.toLowerCase() === userEmail;
+                    const matchStoredKey = myPostedKeys.includes(key);
+
+                    if (matchUid || matchEmail || matchStoredKey) {
+                        myReqEntries.push({ key, ...r });
+                    }
+                });
+
+                if (myReqEntries.length === 0) {
+                    grid.innerHTML = `
+                        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-2">You have no active emergency blood requests posted.</p>
+                            <a href="blood.html" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow-sm">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need Now
+                            </a>
+                        </div>`;
+                } else {
+                    myReqEntries.forEach(item => {
+                        const card = document.createElement("div");
+                        card.className = "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                        card.innerHTML = `
+                            <div class="flex items-start gap-3">
+                                <span class="bg-red-600 text-white font-black text-sm px-2.5 py-1 rounded-xl shadow-sm shrink-0">
+                                    ${item.bloodGroup}
+                                </span>
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="text-sm font-black text-slate-900 dark:text-white">${item.hospital}</h4>
+                                        <span class="text-[10px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold px-2 py-0.5 rounded-full border border-red-200 dark:border-red-900">
+                                            ${item.units || 1} Unit(s) Needed
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        📍 ${item.city || 'City'} • Attendant: <strong>${item.requesterName || item.name || 'Attendant'}</strong> (${item.phone})
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button onclick="deleteMyBloodTicketFromAccount('${item.key}')" class="bg-red-600 hover:bg-red-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer" title="Delete post when blood is found">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Post (Blood Found)
+                                </button>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                }
+                if (window.lucide) lucide.createIcons();
+            });
+        }
+
+        window.deleteMyBloodTicketFromAccount = async function(key) {
+            if (confirm("Confirm: Has blood been received/found for your emergency request? Click OK to permanently delete your post from the live board and top banner.")) {
                 try {
                     await remove(ref(db, `blood_requests/${key}`));
-                    alert("Blood requirement ticket deleted successfully! Thank you to all donors.");
+                    const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
+                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    alert("Emergency blood request post has been deleted successfully! Thank you for saving lives.");
                 } catch (err) {
-                    alert("Error deleting ticket: " + err.message);
+                    alert("Error deleting request: " + err.message);
                 }
             }
         };
+        window.deleteMyBloodTicket = window.deleteMyBloodTicketFromAccount;
 
         // FORM SUBMIT HANDLER (DATABASE-BACKED AUTHENTICATION & ACCURATE VERIFICATION)
         const authFormEl = document.getElementById('authForm');
@@ -2488,6 +2574,9 @@
                 if (document.getElementById("visShowCity")) document.getElementById("visShowCity").checked = vs.showCity !== false;
                 if (document.getElementById("visShowInstagram")) document.getElementById("visShowInstagram").checked = vs.showInstagram !== false;
                 if (document.getElementById("visShowSocial")) document.getElementById("visShowSocial").checked = vs.showSocial !== false;
+
+                // Load User's Active Blood Requests with delete option
+                loadMyBloodRequests(user);
 
                 if (window.lucide) lucide.createIcons();
             } catch (err) {

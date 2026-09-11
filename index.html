@@ -237,6 +237,29 @@
         </div>
     </nav>
 
+    <!-- 🚨 REAL-TIME LIVE SOS TOP CONTINUOUS FLOATING BANNER (DISPLAYS ALL ACTIVE BLOOD NEEDS SIDE BY SIDE) -->
+    <div id="liveSOSAlertBanner" class="hidden sticky top-[54px] sm:top-[60px] z-30 px-3 sm:px-6 py-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-xl border-b border-red-500/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 font-bold shrink-0">
+                <span class="bg-white text-red-600 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shrink-0 shadow-sm animate-pulse flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-red-600 animate-ping inline-block"></span> 🚨 Live Urgent Blood Needs (<span id="liveSOSCount">0</span>)
+                </span>
+            </div>
+            <!-- SIDE BY SIDE ACTIVE BLOOD CARDS TRACK -->
+            <div id="liveSOSCardsTrack" class="flex items-center gap-2.5 overflow-x-auto py-1 scrollbar-thin flex-1 min-w-0">
+                <!-- Dynamically populated side-by-side cards -->
+            </div>
+            <div class="flex items-center gap-2 shrink-0 self-end md:self-center">
+                <a href="blood.html#postNeedBloodSection" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-3 py-1.5 rounded-xl text-xs transition shadow-sm flex items-center gap-1 shrink-0">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Need
+                </a>
+                <a href="blood.html" class="bg-white text-red-700 hover:bg-red-50 font-black px-3 py-1.5 rounded-xl text-xs transition shadow-sm flex items-center gap-1 shrink-0">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> View All
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE NAVIGATION DRAWER -->
     <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
@@ -1119,20 +1142,58 @@
             return `+91 ${firstTwo}••• ••${lastThree}`;
         }
 
-        // Listen to urgent blood requests
+        // Listen to urgent blood requests & update continuous top floating banner
         onValue(ref(db, 'blood_requests'), (snapshot) => {
             const tickerWrap = document.getElementById("urgentTickerWrap");
             const tickerContent = document.getElementById("urgentTickerContent");
+            const banner = document.getElementById("liveSOSAlertBanner");
+            const track = document.getElementById("liveSOSCardsTrack");
+            const countEl = document.getElementById("liveSOSCount");
 
             if (snapshot.exists()) {
-                const reqs = Object.values(snapshot.val());
-                tickerContent.innerHTML = reqs.map(r => `
-                    <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • <a href="blood.html" class="hover:underline font-mono text-white/90">Contact: ${maskPhone(r.phone)} 🛡️</a></span>
-                `).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
-                tickerWrap.classList.remove("hidden");
+                const data = snapshot.val();
+                const reqKeys = Object.keys(data);
+                const reqs = Object.values(data);
+
+                // Update ticker
+                if (tickerWrap && tickerContent) {
+                    tickerContent.innerHTML = reqs.map(r => `
+                        <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • <a href="blood.html" class="hover:underline font-mono text-white/90">Contact: ${maskPhone(r.phone)} 🛡️</a></span>
+                    `).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
+                    tickerWrap.classList.remove("hidden");
+                }
+
+                // Update Top Continuous Live SOS Banner with Side-by-Side Cards
+                if (banner && track) {
+                    if (countEl) countEl.textContent = reqKeys.length;
+                    track.innerHTML = "";
+                    reqKeys.forEach(key => {
+                        const req = data[key];
+                        if (!req) return;
+                        const card = document.createElement("a");
+                        card.href = "blood.html";
+                        card.className = "inline-flex items-center gap-2 bg-black/30 hover:bg-black/45 border border-white/30 px-3 py-1.5 rounded-xl text-xs shrink-0 transition backdrop-blur-sm shadow-sm cursor-pointer text-white no-underline";
+                        const attendant = req.requesterName || req.name || 'Attendant';
+                        card.innerHTML = `
+                            <span class="bg-white text-red-600 font-black text-[11px] px-2 py-0.5 rounded-lg shadow-sm shrink-0">
+                                ${req.bloodGroup} (${req.units || 1}U)
+                            </span>
+                            <span class="font-bold text-white truncate max-w-[150px] sm:max-w-[220px]" title="${req.hospital}, ${req.city}">
+                                🏥 ${req.hospital} (${req.city})
+                            </span>
+                            <span class="text-white/90 text-[11px] shrink-0 font-medium">
+                                📞 ${attendant}: <strong class="font-mono text-white">${maskPhone(req.phone)}</strong>
+                            </span>
+                        `;
+                        track.appendChild(card);
+                    });
+                    banner.classList.remove("hidden");
+                }
             } else {
-                tickerWrap.classList.add("hidden");
+                if (tickerWrap) tickerWrap.classList.add("hidden");
+                if (banner) banner.classList.add("hidden");
             }
+            if (window.lucide) lucide.createIcons();
         });
 
         // Contact Modal Logic
