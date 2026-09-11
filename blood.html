@@ -211,71 +211,147 @@
 
     <!-- MAIN CONTENT -->
     <main class="max-w-7xl mx-auto px-6 py-8 flex-1">
-        <!-- HERO -->
-        <div
-            class="glass-card p-8 md:p-12 mb-10 text-center relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <div class="max-w-3xl mx-auto relative z-10">
-                <div
-                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs uppercase tracking-wider mb-4 border border-red-200 dark:border-red-900/50">
-                    🩸 Live Blood Emergency Board
+        <!-- TOP-MIDDLE: COMPLETE POST NEED OF BLOOD FORM (EMBEDDED FOR COMPLETE VIEW POINT) -->
+        <section id="postNeedBloodSection" class="max-w-3xl mx-auto mb-10 glass-card p-6 sm:p-8 md:p-10 rounded-3xl border-2 border-red-500/30 dark:border-red-500/30 bg-gradient-to-b from-white via-red-50/20 to-white dark:from-slate-900 dark:via-red-950/20 dark:to-slate-900 shadow-2xl relative overflow-hidden">
+            <!-- Background Decorative Glow -->
+            <div class="absolute -right-12 -top-12 w-48 h-48 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <!-- Header -->
+                <div class="flex items-center gap-3.5 mb-6 pb-4 border-b border-red-100 dark:border-red-900/40">
+                    <div class="bg-gradient-to-br from-red-600 to-rose-700 text-white p-3 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/25 shrink-0">
+                        <i data-lucide="bell-ring" class="w-6 h-6 animate-pulse"></i>
+                    </div>
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-extrabold text-[10px] uppercase tracking-wider mb-1 border border-red-200 dark:border-red-900">
+                            🚨 Real-Time Emergency Broadcast
+                        </div>
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight">Post Need of Blood</h1>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-0.5">
+                            Fill out patient blood requirement details below to broadcast a live emergency ticket across the site and notify voluntary donors.
+                        </p>
+                    </div>
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Post Need of Blood & Emergency Board</h1>
-                <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-6">
-                    Post emergency patient blood requirements to broadcast live alerts across the site to voluntary donors, or browse and manage active requirement tickets.
-                </p>
 
-                <!-- PROMINENT HIGH-VISIBILITY CALL TO ACTION BUTTONS -->
-                <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
-                    <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-red-500/25 flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer">
-                        <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                        <span>Post Need of Blood (Broadcast Live SOS)</span>
+                <!-- Complete Post Form -->
+                <form id="reqForm" class="space-y-4 sm:space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500"></i> Requester / Attendant Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="reqName" required placeholder="e.g. Ramesh (Patient Attendant)"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="phone" class="w-3.5 h-3.5 text-red-500"></i> Contact Phone (WhatsApp/Call) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="tel" id="reqPhone" required placeholder="e.g. 9876543210"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Group Needed <span class="text-red-500">*</span>
+                            </label>
+                            <select id="reqBg" required
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm font-bold outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                                <option value="O+">O+ (O Positive)</option>
+                                <option value="O-">O- (O Negative)</option>
+                                <option value="A+">A+ (A Positive)</option>
+                                <option value="A-">A- (A Negative)</option>
+                                <option value="B+">B+ (B Positive)</option>
+                                <option value="B-">B- (B Negative)</option>
+                                <option value="AB+">AB+ (AB Positive)</option>
+                                <option value="AB-">AB- (AB Negative)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-red-500"></i> Units Required <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" id="reqUnits" required min="1" max="10" placeholder="e.g. 2 Units" value="1"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="building-2" class="w-3.5 h-3.5 text-red-500"></i> Hospital Name & Area <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="reqHospital" required placeholder="e.g. Apollo Hospital, Jubilee Hills"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i> City <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="reqCity" required placeholder="e.g. Hyderabad"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="reqSubmitBtn"
+                        class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black py-4 px-6 rounded-2xl text-sm sm:text-base transition shadow-xl shadow-red-500/30 flex items-center justify-center gap-2 transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
+                        <i data-lucide="bell-ring" class="w-5 h-5"></i>
+                        <span>Broadcast Urgent Blood Need & Float Live SOS</span>
                     </button>
-                    <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
-                        <i data-lucide="user-plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                        <span>Register as Donor</span>
-                    </a>
-                    <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
-                        <i data-lucide="search" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                        <span>Find Donors Directory</span>
-                    </a>
-                </div>
 
-                <!-- TICKET SEARCH INPUT -->
-                <div class="relative max-w-xl mx-auto mb-5">
-                    <i data-lucide="search" class="w-5 h-5 absolute left-4 top-3.5 text-slate-400"></i>
-                    <input type="text" id="reqSearchInput" oninput="renderUrgentBloodTickets()"
-                        placeholder="Search urgent tickets by hospital, city, or requester..."
-                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-semibold py-3.5 pl-12 pr-4 rounded-2xl outline-none focus:border-red-500 shadow-sm text-sm">
-                </div>
+                    <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 gap-2">
+                        <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Guarded Emergency Network</span>
+                        <span>⭐ Delete option available to poster & Super Admin</span>
+                    </div>
+                </form>
+            </div>
+        </section>
 
-                <!-- BLOOD GROUP SELECTOR PILLS (FOR REQUIREMENTS) -->
-                <div class="flex flex-wrap items-center justify-center gap-2 mb-4">
-                    <button data-bg="ALL" onclick="filterTicketBloodGroup('ALL')"
-                        class="ticket-bg-pill bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold transition shadow-md shadow-red-500/20">ALL
-                        GROUPS</button>
-                    <button data-bg="A+" onclick="filterTicketBloodGroup('A+')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A+</button>
-                    <button data-bg="A-" onclick="filterTicketBloodGroup('A-')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A-</button>
-                    <button data-bg="B+" onclick="filterTicketBloodGroup('B+')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B+</button>
-                    <button data-bg="B-" onclick="filterTicketBloodGroup('B-')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B-</button>
-                    <button data-bg="O+" onclick="filterTicketBloodGroup('O+')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O+</button>
-                    <button data-bg="O-" onclick="filterTicketBloodGroup('O-')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O-</button>
-                    <button data-bg="AB+" onclick="filterTicketBloodGroup('AB+')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB+</button>
-                    <button data-bg="AB-" onclick="filterTicketBloodGroup('AB-')"
-                        class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB-</button>
-                </div>
+        <!-- QUICK DIRECTORY SHORTCUTS -->
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-10 max-w-2xl mx-auto">
+            <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>Register as Blood Donor</span>
+            </a>
+            <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span>Find Donors Directory</span>
+            </a>
+        </div>
 
-                <!-- ⏱️ SLEEK INSPIRATIONAL MOTTO -->
-                <div class="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-red-50/80 dark:bg-red-950/40 border border-red-200/70 dark:border-red-900/40 text-xs text-red-700 dark:text-red-300 font-medium">
-                    <span class="font-bold">⏱️ Every Second Counts:</span>
-                    <span class="italic font-serif">“Your few minutes today can become someone’s hope tomorrow — A single drop can create a thousand smiles.”</span>
-                </div>
+        <!-- SEARCH & BLOOD GROUP FILTER PILLS -->
+        <div class="max-w-3xl mx-auto mb-8 text-center">
+            <!-- TICKET SEARCH INPUT -->
+            <div class="relative max-w-xl mx-auto mb-4">
+                <i data-lucide="search" class="w-5 h-5 absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="reqSearchInput" oninput="renderUrgentBloodTickets()"
+                    placeholder="Search active tickets by hospital, city, or requester..."
+                    class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-semibold py-3.5 pl-12 pr-4 rounded-2xl outline-none focus:border-red-500 shadow-sm text-sm">
+            </div>
+
+            <!-- BLOOD GROUP SELECTOR PILLS -->
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <button data-bg="ALL" onclick="filterTicketBloodGroup('ALL')"
+                    class="ticket-bg-pill bg-red-600 text-white px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition shadow-md shadow-red-500/20">ALL GROUPS</button>
+                <button data-bg="A+" onclick="filterTicketBloodGroup('A+')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A+</button>
+                <button data-bg="A-" onclick="filterTicketBloodGroup('A-')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">A-</button>
+                <button data-bg="B+" onclick="filterTicketBloodGroup('B+')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B+</button>
+                <button data-bg="B-" onclick="filterTicketBloodGroup('B-')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">B-</button>
+                <button data-bg="O+" onclick="filterTicketBloodGroup('O+')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O+</button>
+                <button data-bg="O-" onclick="filterTicketBloodGroup('O-')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">O-</button>
+                <button data-bg="AB+" onclick="filterTicketBloodGroup('AB+')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB+</button>
+                <button data-bg="AB-" onclick="filterTicketBloodGroup('AB-')"
+                    class="ticket-bg-pill bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-extrabold hover:bg-red-600 hover:text-white transition">AB-</button>
             </div>
         </div>
 
@@ -352,106 +428,20 @@
         </div>
     </main>
 
-    <!-- POST URGENT REQUIREMENT MODAL -->
-    <div id="reqModal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-        <div
-            class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-slate-200 dark:border-slate-800 relative shadow-2xl">
-            <button onclick="closePostRequirementModal()"
-                class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
-
-            <h2 class="text-xl font-black mb-1 text-red-600 dark:text-red-400 flex items-center gap-2">
-                <i data-lucide="alert-triangle"></i> Post Urgent Blood Need
-            </h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Broadcast an emergency request ticket to all
-                registered donors</p>
-
-            <form id="reqForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Requester / Attendant Name</label>
-                    <input type="text" id="reqName" required placeholder="e.g. Ramesh (Patient Attendant)"
-                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Blood
-                            Group Needed</label>
-                        <select id="reqBg" required
-                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Units
-                            Required</label>
-                        <input type="number" id="reqUnits" required min="1" max="10" placeholder="2 Units"
-                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hospital
-                        Name & Area</label>
-                    <input type="text" id="reqHospital" required placeholder="e.g. Apollo Hospital, Jubilee Hills"
-                        class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">City</label>
-                        <input type="text" id="reqCity" required placeholder="Hyderabad"
-                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contact
-                            Phone</label>
-                        <input type="tel" id="reqPhone" required placeholder="9876543210"
-                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
-                    </div>
-                </div>
-
-                <button type="submit" id="reqSubmitBtn"
-                    class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-sm transition shadow-md shadow-red-500/20 flex items-center justify-center gap-2">
-                    <i data-lucide="bell-ring" class="w-4 h-4"></i> Broadcast Urgent Blood Need & Notify All
-                </button>
-            </form>
-        </div>
-    </div>
     <script>
         window.openPostRequirementModal = function() {
-            const modal = document.getElementById("reqModal");
-            if (modal) {
-                if (window.lockBodyScroll) window.lockBodyScroll();
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
+            const formSection = document.getElementById("postNeedBloodSection");
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => {
                     const firstField = document.getElementById("reqName") || document.getElementById("reqBg");
-                    if (firstField) firstField.focus({ preventScroll: true });
-                }, 80);
+                    if (firstField) firstField.focus();
+                }, 150);
             }
-            if (window.lucide) lucide.createIcons();
         };
         window.openReqModal = window.openPostRequirementModal;
         window.closePostRequirementModal = function() {
             if (window.unlockBodyScroll) window.unlockBodyScroll();
-            const modal = document.getElementById("reqModal");
-            if (modal) {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-            }
         };
         window.closeReqModal = window.closePostRequirementModal;
     </script>
@@ -1442,30 +1432,23 @@
         }, 1200);
 
         /* POST REQUIREMENT MODAL */
+        /* SCROLL TO POST NEED FORM */
         window.openPostRequirementModal = function () {
-            const modal = document.getElementById("reqModal");
-            if (modal) {
-                window.lockBodyScroll();
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
+            const formSection = document.getElementById("postNeedBloodSection");
+            if (formSection) {
+                formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => {
                     const firstField = document.getElementById("reqName") || document.getElementById("reqBg");
                     if (firstField) {
-                        firstField.focus({ preventScroll: true });
+                        firstField.focus();
                     }
-                }, 100);
+                }, 150);
             }
-            if (window.lucide) lucide.createIcons();
         };
         window.openReqModal = window.openPostRequirementModal;
 
         window.closePostRequirementModal = function () {
-            window.unlockBodyScroll();
-            const modal = document.getElementById("reqModal");
-            if (modal) {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-            }
+            if (window.unlockBodyScroll) window.unlockBodyScroll();
         };
         window.closeReqModal = window.closePostRequirementModal;
 
@@ -1506,13 +1489,15 @@
 
                 window.showLiveSOSNotification(reqPayload);
 
-                alert("🚨 Emergency Blood Requirement Broadcasted to All Users Successfully!\n\nOnce blood has been found/received, you can manually delete your post at any time from this board using the 'Delete My Post (Blood Found)' button.");
+                alert("🚨 Emergency Blood Requirement Broadcasted to All Users Successfully!\n\nOnce blood has been found/received, you can manually delete your post at any time from this board using the 'Delete Post (Blood Found)' button.");
                 document.getElementById("reqForm").reset();
-                closePostRequirementModal();
+                if (window.scrollToUrgentRequests) {
+                    window.scrollToUrgentRequests();
+                }
             } catch (err) {
                 alert("Error posting requirement: " + err.message);
             } finally {
-                btn.innerHTML = '<i data-lucide="bell-ring" class="w-4 h-4"></i> Broadcast Urgent Blood Need & Notify All';
+                btn.innerHTML = '<i data-lucide="bell-ring" class="w-5 h-5"></i> <span>Broadcast Urgent Blood Need & Float Live SOS</span>';
                 btn.disabled = false;
                 if (window.lucide) lucide.createIcons();
             }
