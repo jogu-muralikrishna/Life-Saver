@@ -1420,6 +1420,16 @@
             window.activeUrgentBloodTickets = currentData;
             renderUrgentBloodTickets();
             window.updateTopLiveSOSBanner();
+
+            // Auto-open ticket contact if navigated via banner URL parameter ?ticket=... or ?contact=...
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetTicket = urlParams.get('ticket') || urlParams.get('contact');
+            if (targetTicket && currentData[targetTicket] && !window.__autoTicketOpened) {
+                window.__autoTicketOpened = true;
+                setTimeout(() => {
+                    window.openPrivacyTicketByKey(targetTicket);
+                }, 350);
+            }
         }, (err) => {
             console.warn("Blood requests realtime notice:", err);
             try {
@@ -1517,7 +1527,7 @@
 
                 window.showLiveSOSNotification(reqPayload);
 
-                alert("🚨 Emergency Blood Requirement Broadcasted to All Users Successfully!\n\nOnce blood has been found/received, you can manually delete your post at any time from this board using the 'Delete Post (Blood Found)' button.");
+                alert("🩸 Blood request posted successfully!\n\nYour emergency request is now visible to available users across the site.\nOnce blood has been found/received, you can delete or fulfill your request at any time.");
                 document.getElementById("reqForm").reset();
                 if (window.scrollToUrgentRequests) {
                     window.scrollToUrgentRequests();

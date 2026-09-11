@@ -1756,7 +1756,7 @@
             // Load User Official Certificates (Blood & Organ)
             loadUserCertificates(user);
 
-            // Listen to active urgent blood requests
+            // Listen to User's Own Active Urgent Blood Requests
             onValue(ref(db, 'blood_requests'), (snapshot) => {
                 const grid = document.getElementById("myRequestsGrid");
                 if (!grid) return;
@@ -1764,43 +1764,90 @@
 
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    let keys = Object.keys(data).filter(k => {
+                    const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
+                    const userEmailLower = (user.email || '').toLowerCase().trim();
+
+                    // STRICT FILTER: Only tickets created by this specific user
+                    const myKeys = Object.keys(data).filter(k => {
                         const r = data[k];
-                        return (r.userId && r.userId === user.uid) || (r.userEmail && r.userEmail === user.email);
+                        if (!r) return false;
+                        const status = (r.status || 'Active').toLowerCase().trim();
+                        if (status === 'completed' || status === 'fulfilled' || status === 'deleted' || status === 'closed' || status === 'cancelled') {
+                            return false;
+                        }
+                        const matchesUid = r.userId && r.userId === user.uid;
+                        const matchesEmail = r.userEmail && r.userEmail.toLowerCase().trim() === userEmailLower;
+                        const matchesLocal = myPostedKeys.includes(k);
+                        return matchesUid || matchesEmail || matchesLocal;
                     });
 
-                    if (keys.length === 0) {
-                        keys = Object.keys(data);
+                    if (myKeys.length === 0) {
+                        grid.innerHTML = `
+                            <div class="col-span-full text-center py-6 px-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">You do not have any active emergency blood requests posted.</p>
+                                <a href="blood.html#postNeedBloodSection" class="inline-flex items-center gap-1.5 mt-3 text-xs font-black text-red-600 dark:text-red-400 hover:underline">
+                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need
+                                </a>
+                            </div>
+                        `;
+                        if (window.lucide) lucide.createIcons();
+                        return;
                     }
 
-                    keys.forEach(key => {
+                    myKeys.forEach(key => {
                         const r = data[key];
                         const card = document.createElement("div");
-                        card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3";
+                        card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm";
                         card.innerHTML = `
                             <div>
                                 <div class="flex items-center gap-2 mb-1">
-                                    <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded">
+                                    <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded shadow-sm">
                                         ${r.bloodGroup} Needed (${r.units || 1} Units)
                                     </span>
-                                    <span class="text-[10px] font-bold text-slate-500">${r.city}</span>
+                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">📍 ${r.city}</span>
+                                    <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-900">Active</span>
                                 </div>
-                                <h4 class="font-bold text-xs text-slate-900 dark:text-white">${r.hospital}</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400">Phone: <strong>${r.phone}</strong></p>
+                                <h4 class="font-bold text-xs text-slate-900 dark:text-white">🏥 ${r.hospital}</h4>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Attendant Phone: <strong class="font-mono text-slate-800 dark:text-slate-200">${r.phone || '-'}</strong></p>
                             </div>
-                            <button onclick="deleteMyBloodTicket('${key}', '${r.units || 1}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm shrink-0">
-                                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Received — Delete Request
-                            </button>
+                            <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                <button onclick="deleteMyBloodTicket('${key}', 'fulfilled')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Mark as Fulfilled & Remove">
+                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Mark as Fulfilled
+                                </button>
+                                <button onclick="deleteMyBloodTicket('${key}', 'delete')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Delete Request Post">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                                </button>
+                            </div>
                         `;
                         grid.appendChild(card);
                     });
                     if (window.lucide) lucide.createIcons();
                 } else {
-                    grid.innerHTML = `<p class="text-xs text-slate-400 py-3">No active urgent blood requests currently posted.</p>`;
+                    grid.innerHTML = `<div class="col-span-full text-center py-6 px-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-xs text-slate-500 dark:text-slate-400 font-medium">No active emergency blood requests currently posted.</p></div>`;
                 }
             });
             if (window.lucide) lucide.createIcons();
         }
+
+        // Delete / Close Blood Ticket by Owner
+        window.deleteMyBloodTicket = async function(key, actionType = 'delete') {
+            if (!key) return;
+            const confirmMsg = actionType === 'fulfilled'
+                ? "Confirm: Has blood been received/fulfilled for your requirement? Click OK to remove this post from the live alert board."
+                : "Confirm: Are you sure you want to delete your emergency blood post?";
+            
+            if (confirm(confirmMsg)) {
+                try {
+                    await remove(ref(db, `blood_requests/${key}`));
+                    const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
+                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    alert(actionType === 'fulfilled' ? "🎉 Request marked as fulfilled! Thank you for updating the community." : "Emergency blood request deleted successfully.");
+                } catch (err) {
+                    console.error("Error deleting blood request:", err);
+                    alert("Error removing request: " + err.message);
+                }
+            }
+        };
 
         function checkLeaderboardAutoOpen() {
             const p = new URLSearchParams(window.location.search);
@@ -5024,5 +5071,8 @@
             </a>
         </div>
     </div>
+
+    <!-- Real-Time Continuous Emergency Blood Alert System -->
+    <script type="module" src="emergency-alert.js"></script>
 </body>
 </html>
