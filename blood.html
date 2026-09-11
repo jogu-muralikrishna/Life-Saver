@@ -609,6 +609,35 @@
         </div>
     </div>
 
+    <!-- 🔐 POST BLOOD REQUIREMENT AUTHENTICATION PROMPT MODAL -->
+    <div id="postBloodAuthModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 hidden">
+        <div class="glass-card max-w-md w-full p-6 sm:p-7 rounded-3xl border border-red-200 dark:border-red-900/50 shadow-2xl relative bg-white dark:bg-slate-900 text-left">
+            <button onclick="closePostBloodAuthModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition cursor-pointer">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3.5 mb-4">
+                <div class="p-3 bg-red-100 dark:bg-red-950/80 text-red-600 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border border-red-200 dark:border-red-900">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Account Login Required</h3>
+                    <span class="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">To Post Emergency Blood Need</span>
+                </div>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-5 leading-relaxed">
+                Please sign in or create a free member account first. This links the blood request directly to your account so you can <strong>delete or close the post from your account</strong> once blood is received.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center gap-2.5">
+                <button onclick="redirectToAuthForBloodPost()" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-red-500/25 flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Sign In / Create Account
+                </button>
+                <button onclick="closePostBloodAuthModal()" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-4 rounded-xl text-xs transition cursor-pointer">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -628,22 +657,59 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // AUTH STATE GREETING
+        // AUTH STATE GREETING & FORM PRE-FILL
+        window.currentActiveAuthUser = null;
+        window.isUserLoggedIn = function() {
+            if (auth.currentUser && auth.currentUser.uid) return true;
+            try {
+                const localUser = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (localUser && localUser.uid) return true;
+            } catch(e) {}
+            return false;
+        };
+
+        window.openPostBloodAuthModal = function() {
+            if (window.lockBodyScroll) window.lockBodyScroll();
+            const modal = document.getElementById("postBloodAuthModal");
+            if (modal) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.closePostBloodAuthModal = function() {
+            if (window.unlockBodyScroll) window.unlockBodyScroll();
+            const modal = document.getElementById("postBloodAuthModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
+        };
+
+        window.redirectToAuthForBloodPost = function() {
+            sessionStorage.setItem('ls_auth_redirect', 'post-blood');
+            window.location.href = 'auth.html?redirect=post-blood';
+        };
+
         onAuthStateChanged(auth, async (user) => {
             const greetingEl = document.getElementById("userGreetingTop");
             const navSignOutBtn = document.getElementById("navSignOutBtn");
             const userAuthTopBar = document.getElementById("userAuthTopBar");
+            window.currentActiveAuthUser = user;
 
             if (user) {
                 let name = user.displayName;
-                if (!name) {
-                    try {
-                        const snap = await get(ref(db, `users/${user.uid}`));
-                        if (snap.exists() && snap.val().name) {
-                            name = snap.val().name;
-                        }
-                    } catch(e) {}
-                }
+                let phone = '';
+                try {
+                    const snap = await get(ref(db, `users/${user.uid}`));
+                    if (snap.exists()) {
+                        const val = snap.val();
+                        if (val.name) name = val.name;
+                        if (val.phone) phone = val.phone;
+                    }
+                } catch(e) {}
+
                 if (!name && user.email) {
                     name = user.email.split('@')[0];
                 }
@@ -656,17 +722,39 @@
                     navSignOutBtn.classList.remove('hidden');
                     navSignOutBtn.classList.add('flex');
                 }
+
+                // Pre-fill post form fields for seamless experience
+                const nameInput = document.getElementById("reqName");
+                const phoneInput = document.getElementById("reqPhone");
+                if (nameInput && !nameInput.value && name !== 'Member') {
+                    nameInput.value = name;
+                }
+                if (phoneInput && !phoneInput.value && phone) {
+                    phoneInput.value = phone;
+                }
             } else {
-                if (greetingEl) greetingEl.textContent = "Account";
-                if (navSignOutBtn) {
-                    navSignOutBtn.classList.add('hidden');
-                    navSignOutBtn.classList.remove('flex');
+                const savedLocalUser = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (savedLocalUser && savedLocalUser.uid) {
+                    window.currentActiveAuthUser = savedLocalUser;
+                    const name = savedLocalUser.displayName || 'Member';
+                    if (greetingEl) greetingEl.textContent = `Hello, ${name} 👋`;
+                    if (navSignOutBtn) {
+                        navSignOutBtn.classList.remove('hidden');
+                        navSignOutBtn.classList.add('flex');
+                    }
+                } else {
+                    if (greetingEl) greetingEl.textContent = "Account";
+                    if (navSignOutBtn) {
+                        navSignOutBtn.classList.add('hidden');
+                        navSignOutBtn.classList.remove('flex');
+                    }
                 }
             }
         });
 
         window.handleUserSignOut = function() {
             if (confirm("Are you sure you want to sign out from Life Saver?")) {
+                localStorage.removeItem('ls_logged_user');
                 signOut(auth).then(() => {
                     window.location.reload();
                 });
@@ -1470,8 +1558,12 @@
         }, 1200);
 
         /* POST REQUIREMENT MODAL */
-        /* SCROLL TO POST NEED FORM */
+        /* SCROLL TO POST NEED FORM (WITH AUTH GUARD) */
         window.openPostRequirementModal = function () {
+            if (!window.isUserLoggedIn()) {
+                window.openPostBloodAuthModal();
+                return;
+            }
             const formSection = document.getElementById("postNeedBloodSection");
             if (formSection) {
                 formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1492,21 +1584,27 @@
 
         document.getElementById("reqForm").addEventListener("submit", async (e) => {
             e.preventDefault();
+            
+            if (!window.isUserLoggedIn()) {
+                window.openPostBloodAuthModal();
+                return;
+            }
+
             const btn = document.getElementById("reqSubmitBtn");
-            btn.innerText = "Broadcasting Need & Notifying All...";
+            btn.innerText = "Broadcasting Need & Floating Live SOS...";
             btn.disabled = true;
 
             try {
-                const user = auth.currentUser;
+                const user = auth.currentUser || window.currentActiveAuthUser || JSON.parse(localStorage.getItem('ls_logged_user') || '{}');
                 const reqPayload = {
-                    requesterName: document.getElementById("reqName")?.value || "Patient Attendant",
+                    requesterName: document.getElementById("reqName")?.value || (user.displayName || "Patient Attendant"),
                     bloodGroup: document.getElementById("reqBg").value,
                     units: document.getElementById("reqUnits").value,
                     hospital: document.getElementById("reqHospital").value,
                     city: document.getElementById("reqCity").value,
                     phone: document.getElementById("reqPhone").value,
-                    userId: user ? user.uid : null,
-                    userEmail: user ? user.email : null,
+                    userId: user.uid || null,
+                    userEmail: user.email || null,
                     status: "Active",
                     timestamp: new Date().toISOString()
                 };
@@ -1527,7 +1625,7 @@
 
                 window.showLiveSOSNotification(reqPayload);
 
-                alert("🩸 Blood request posted successfully!\n\nYour emergency request is now visible to available users across the site.\nOnce blood has been found/received, you can delete or fulfill your request at any time.");
+                alert("🩸 Emergency Blood Request Posted Successfully!\n\nYour emergency request is now floating on top of the main website.\n\n👉 Once you get blood, you can delete this post at any time from your Member Account Dashboard or directly from this board.");
                 document.getElementById("reqForm").reset();
                 if (window.scrollToUrgentRequests) {
                     window.scrollToUrgentRequests();

@@ -1668,6 +1668,16 @@
         // Listen to Auth State for Personal Main Dashboard & Referral Impact
         async function initUserDashboard(user) {
             if (!user) return;
+
+            // Check if user came from "Post Need of Blood" link
+            const urlParamsObj = new URLSearchParams(window.location.search);
+            const redirectTarget = urlParamsObj.get('redirect') || sessionStorage.getItem('ls_auth_redirect');
+            if (redirectTarget === 'post-blood') {
+                sessionStorage.removeItem('ls_auth_redirect');
+                window.location.href = 'blood.html#postNeedBloodSection';
+                return;
+            }
+
             const authCard = document.getElementById("authCard");
             const dashboardContainer = document.getElementById("dashboardContainer");
             currentActiveUser = user;
