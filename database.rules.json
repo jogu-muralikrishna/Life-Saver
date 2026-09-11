@@ -18,8 +18,10 @@
     },
     "blood_requests": {
       ".read": true,
-      ".write": true,
-      ".indexOn": ["bloodGroup", "city", "status", "timestamp"]
+      ".indexOn": ["bloodGroup", "city", "status", "timestamp", "userId"],
+      "$requestId": {
+        ".write": "(!data.exists() && auth != null) || (data.exists() && auth != null && (data.child('userId').val() === auth.uid || data.child('userEmail').val() === auth.token.email || root.child('sub_admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'jogumuralikrishna55@gmail.com'))"
+      }
     },
     "partner_hospitals": {
       ".read": true,

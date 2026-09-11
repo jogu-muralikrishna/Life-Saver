@@ -285,16 +285,33 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                <i data-lucide="building-2" class="w-3.5 h-3.5 text-red-500"></i> Hospital Name & Area <span class="text-red-500">*</span>
+                                <i data-lucide="building-2" class="w-3.5 h-3.5 text-red-500"></i> Hospital Name <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" id="reqHospital" required placeholder="e.g. Apollo Hospital, Jubilee Hills"
+                            <input type="text" id="reqHospital" required placeholder="e.g. City Hospital"
                                 class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i> City <span class="text-red-500">*</span>
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500"></i> Hospital Address <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="reqHospitalAddress" required placeholder="e.g. Main Road, Hyderabad"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="navigation" class="w-3.5 h-3.5 text-red-500"></i> City <span class="text-red-500">*</span>
                             </label>
                             <input type="text" id="reqCity" required placeholder="e.g. Hyderabad"
+                                class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-red-500"></i> Emergency Details
+                            </label>
+                            <input type="text" id="reqDetails" placeholder="e.g. Surgery / Immediate need / ICU"
                                 class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 shadow-sm transition">
                         </div>
                     </div>
@@ -303,7 +320,7 @@
                     <button type="submit" id="reqSubmitBtn"
                         class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black py-4 px-6 rounded-2xl text-sm sm:text-base transition shadow-xl shadow-red-500/30 flex items-center justify-center gap-2 transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer">
                         <i data-lucide="bell-ring" class="w-5 h-5"></i>
-                        <span>Broadcast Urgent Blood Need & Float Live SOS</span>
+                        <span>POST BLOOD REQUEST</span>
                     </button>
 
                     <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1 gap-2">
@@ -434,6 +451,12 @@
 
     <script>
         window.openPostRequirementModal = function() {
+            if (typeof window.isUserLoggedIn === 'function' && !window.isUserLoggedIn()) {
+                if (typeof window.openPostBloodAuthModal === 'function') {
+                    window.openPostBloodAuthModal();
+                }
+                return;
+            }
             const formSection = document.getElementById("postNeedBloodSection");
             if (formSection) {
                 formSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -620,21 +643,24 @@
                     <i data-lucide="lock" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Account Login Required</h3>
-                    <span class="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">To Post Emergency Blood Need</span>
+                    <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Login required</h3>
+                    <span class="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">LifeSaver-Care Account</span>
                 </div>
             </div>
-            <p class="text-xs text-slate-600 dark:text-slate-300 mb-5 leading-relaxed">
-                Please sign in or create a free member account first. This links the blood request directly to your account so you can <strong>delete or close the post from your account</strong> once blood is received.
+            <p class="text-xs text-slate-600 dark:text-slate-300 mb-5 leading-relaxed font-medium">
+                Please login or create an account to post an urgent blood request.
             </p>
-            <div class="flex flex-col sm:flex-row items-center gap-2.5">
-                <button onclick="redirectToAuthForBloodPost()" class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black py-3 px-4 rounded-xl text-xs transition shadow-lg shadow-red-500/25 flex items-center justify-center gap-2 cursor-pointer">
-                    <i data-lucide="log-in" class="w-4 h-4"></i> Sign In / Create Account
+            <div class="grid grid-cols-2 gap-2.5 mb-3">
+                <button onclick="redirectToAuthForBloodPost('login')" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 px-4 rounded-xl text-xs transition shadow-md shadow-red-500/20 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Login
                 </button>
-                <button onclick="closePostBloodAuthModal()" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-4 rounded-xl text-xs transition cursor-pointer">
-                    Cancel
+                <button onclick="redirectToAuthForBloodPost('register')" class="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-black py-3 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
                 </button>
             </div>
+            <button onclick="closePostBloodAuthModal()" class="w-full text-center text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 py-1 transition cursor-pointer">
+                Cancel
+            </button>
         </div>
     </div>
 
@@ -687,9 +713,9 @@
             }
         };
 
-        window.redirectToAuthForBloodPost = function() {
+        window.redirectToAuthForBloodPost = function(mode = 'login') {
             sessionStorage.setItem('ls_auth_redirect', 'post-blood');
-            window.location.href = 'auth.html?redirect=post-blood';
+            window.location.href = `auth.html?mode=${encodeURIComponent(mode)}&redirect=post-blood`;
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -1591,21 +1617,35 @@
             }
 
             const btn = document.getElementById("reqSubmitBtn");
-            btn.innerText = "Broadcasting Need & Floating Live SOS...";
+            btn.innerText = "Posting Emergency Blood Request...";
             btn.disabled = true;
 
             try {
                 const user = auth.currentUser || window.currentActiveAuthUser || JSON.parse(localStorage.getItem('ls_logged_user') || '{}');
+                const reqHospitalName = document.getElementById("reqHospital").value.trim();
+                const reqHospitalAddr = (document.getElementById("reqHospitalAddress")?.value || reqHospitalName).trim();
+                const reqCityVal = document.getElementById("reqCity").value.trim();
+                const reqPhoneVal = document.getElementById("reqPhone").value.trim();
+                const reqDetailsVal = (document.getElementById("reqDetails")?.value || "").trim();
+                const reqNameVal = document.getElementById("reqName")?.value || (user.displayName || "Patient Attendant");
+                const reqBgVal = document.getElementById("reqBg").value;
+                const reqUnitsVal = parseInt(document.getElementById("reqUnits").value, 10) || 1;
+
                 const reqPayload = {
-                    requesterName: document.getElementById("reqName")?.value || (user.displayName || "Patient Attendant"),
-                    bloodGroup: document.getElementById("reqBg").value,
-                    units: document.getElementById("reqUnits").value,
-                    hospital: document.getElementById("reqHospital").value,
-                    city: document.getElementById("reqCity").value,
-                    phone: document.getElementById("reqPhone").value,
                     userId: user.uid || null,
                     userEmail: user.email || null,
-                    status: "Active",
+                    requesterName: reqNameVal,
+                    name: reqNameVal,
+                    bloodGroup: reqBgVal,
+                    units: reqUnitsVal,
+                    hospital: reqHospitalName,
+                    hospitalAddress: reqHospitalAddr,
+                    city: reqCityVal,
+                    contactNumber: reqPhoneVal,
+                    phone: reqPhoneVal,
+                    emergencyDetails: reqDetailsVal,
+                    status: "active",
+                    createdAt: new Date().toISOString(),
                     timestamp: new Date().toISOString()
                 };
 
@@ -1614,8 +1654,10 @@
                 // Save key in localStorage so the user can easily delete their post later
                 if (newReqRef.key) {
                     const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
-                    myReqs.push(newReqRef.key);
-                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    if (!myReqs.includes(newReqRef.key)) {
+                        myReqs.push(newReqRef.key);
+                        localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    }
                 }
 
                 // Request browser notifications if not asked yet
@@ -1623,17 +1665,16 @@
                     try { Notification.requestPermission(); } catch(e) {}
                 }
 
-                window.showLiveSOSNotification(reqPayload);
-
-                alert("🩸 Emergency Blood Request Posted Successfully!\n\nYour emergency request is now floating on top of the main website.\n\n👉 Once you get blood, you can delete this post at any time from your Member Account Dashboard or directly from this board.");
-                document.getElementById("reqForm").reset();
-                if (window.scrollToUrgentRequests) {
-                    window.scrollToUrgentRequests();
+                if (typeof window.showLiveSOSNotification === 'function') {
+                    window.showLiveSOSNotification(reqPayload);
                 }
+
+                alert("🩸 Emergency Blood Request Posted Successfully!\n\nYour emergency request is now active and floating at the top of the website in real time.\n\n👉 Once blood is received, you can delete this post at any time from your Member Account Dashboard.");
+                document.getElementById("reqForm").reset();
             } catch (err) {
                 alert("Error posting requirement: " + err.message);
             } finally {
-                btn.innerHTML = '<i data-lucide="bell-ring" class="w-5 h-5"></i> <span>Broadcast Urgent Blood Need & Float Live SOS</span>';
+                btn.innerHTML = '<i data-lucide="bell-ring" class="w-5 h-5"></i> <span>POST BLOOD REQUEST</span>';
                 btn.disabled = false;
                 if (window.lucide) lucide.createIcons();
             }
@@ -1669,24 +1710,25 @@
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('action') === 'request' || window.location.hash === '#request' || window.location.hash === '#reqModal') {
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            const ticketKey = urlParams.get('ticket');
+            if (ticketKey) {
+                setTimeout(() => {
+                    if (typeof window.openBloodMatchModal === 'function') {
+                        window.openBloodMatchModal(ticketKey);
+                    } else if (typeof window.openPrivacyTicketByKey === 'function') {
+                        window.openPrivacyTicketByKey(ticketKey);
+                    }
+                }, 400);
+            }
+
+            if (urlParams.get('action') === 'request' || urlParams.get('action') === 'post-blood' || window.location.hash === '#request' || window.location.hash === '#postNeedBloodSection') {
                 setTimeout(() => {
                     openPostRequirementModal();
-                }, 50);
-            } else {
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                document.documentElement.scrollTop = 0;
-                document.body.scrollTop = 0;
-            }
-        });
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (!urlParams.get('action') && (!window.location.hash || window.location.hash === '#')) {
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                }, 100);
             }
         });
     </script>
+    <script type="module" src="emergency-alert.js"></script>
 </body>
 
 </html>

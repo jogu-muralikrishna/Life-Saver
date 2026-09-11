@@ -79,6 +79,17 @@
             </div>
         </div>
 
+        <!-- POST BLOOD LOGIN REQUIRED BANNER -->
+        <div id="postBloodLoginNotice" class="hidden mb-5 p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-700 text-xs text-red-900 dark:text-red-200 flex items-center gap-3 shadow-sm">
+            <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-sm font-black text-sm">
+                🩸
+            </div>
+            <div>
+                <span class="font-black block text-red-800 dark:text-red-300">Login Required to Post Blood Request</span>
+                <span class="text-[11px] opacity-90">Please login or create an account to post an urgent blood request. You will be redirected right back to the form.</span>
+            </div>
+        </div>
+
         <!-- MODE TOGGLE TABS (EARLY INTERACTION SAFE) -->
         <script>
             window.currentAuthMode = 'login';
@@ -107,6 +118,21 @@
                     if (portalSub) portalSub.textContent = "Sign in or register your account to manage emergency requests, donor profile & referrals";
                 }
             };
+
+            // Early check for mode & post-blood redirect
+            try {
+                const initParams = new URLSearchParams(window.location.search);
+                const reqMode = initParams.get('mode');
+                if (reqMode === 'register') {
+                    window.addEventListener('DOMContentLoaded', () => window.setAuthMode('register'));
+                }
+                if (initParams.get('redirect') === 'post-blood') {
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const notice = document.getElementById('postBloodLoginNotice');
+                        if (notice) notice.classList.remove('hidden');
+                    });
+                }
+            } catch(e) {}
         </script>
         <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-6 border border-slate-200 dark:border-slate-800 text-xs font-bold">
             <button type="button" id="tabSignin" onclick="window.setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">
@@ -1806,26 +1832,43 @@
 
                     myKeys.forEach(key => {
                         const r = data[key];
+                        const bloodGroup = (r.bloodGroup || '').toUpperCase();
+                        const units = parseInt(r.units, 10) || 1;
+                        const hospital = r.hospital || 'Hospital';
+                        const locationStr = r.hospitalAddress ? `${r.hospitalAddress} (${r.city || ''})` : (r.city || 'Emergency');
+                        const contact = r.contactNumber || r.phone || '-';
+
                         const card = document.createElement("div");
-                        card.className = "p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm";
+                        card.className = "p-5 rounded-2xl bg-white dark:bg-slate-900 border-2 border-red-500/50 dark:border-red-500/50 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
                         card.innerHTML = `
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="bg-red-600 text-white text-xs font-black px-2 py-0.5 rounded shadow-sm">
-                                        ${r.bloodGroup} Needed (${r.units || 1} Units)
+                            <div class="space-y-1.5 text-xs">
+                                <span class="text-[10px] font-black uppercase tracking-wider text-red-600 dark:text-red-400 block">
+                                    MY ACTIVE BLOOD REQUEST
+                                </span>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="bg-red-600 text-white font-black text-xs px-2.5 py-1 rounded-xl shadow-sm">
+                                        🩸 ${bloodGroup} BLOOD
                                     </span>
-                                    <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">📍 ${r.city}</span>
-                                    <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.2 rounded-full border border-emerald-200 dark:border-emerald-900">Active</span>
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">
+                                        ${units} ${units === 1 ? 'Unit' : 'Units'} Required
+                                    </span>
+                                    <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-emerald-300 dark:border-emerald-800">
+                                        Status: ACTIVE
+                                    </span>
                                 </div>
-                                <h4 class="font-bold text-xs text-slate-900 dark:text-white">🏥 ${r.hospital}</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Attendant Phone: <strong class="font-mono text-slate-800 dark:text-slate-200">${r.phone || '-'}</strong></p>
+                                <h4 class="font-black text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                                    🏥 ${hospital}
+                                </h4>
+                                <p class="text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                                    📍 ${locationStr}
+                                </p>
+                                <p class="text-slate-500 dark:text-slate-400">
+                                    📞 Contact: <strong class="font-mono text-slate-800 dark:text-slate-200">${contact}</strong>
+                                </p>
                             </div>
                             <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                                <button onclick="deleteMyBloodTicket('${key}', 'fulfilled')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Mark as Fulfilled & Remove">
-                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Mark as Fulfilled
-                                </button>
-                                <button onclick="deleteMyBloodTicket('${key}', 'delete')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Delete Request Post">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+                                <button onclick="deleteMyBloodTicket('${key}')" class="bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2.5 px-4 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-red-500/20 cursor-pointer" title="Delete blood request because blood was received">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i> DELETE REQUEST
                                 </button>
                             </div>
                         `;
@@ -1840,24 +1883,23 @@
         }
 
         // Delete / Close Blood Ticket by Owner
-        window.deleteMyBloodTicket = async function(key, actionType = 'delete') {
+        window.deleteMyBloodTicket = async function(key) {
             if (!key) return;
-            const confirmMsg = actionType === 'fulfilled'
-                ? "Confirm: Has blood been received/fulfilled for your requirement? Click OK to remove this post from the live alert board."
-                : "Confirm: Are you sure you want to delete your emergency blood post?";
+            const confirmMsg = "Are you sure you want to remove this blood request?\n\nThis will remove the emergency alert from the website.";
             
             if (confirm(confirmMsg)) {
                 try {
                     await remove(ref(db, `blood_requests/${key}`));
                     const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
                     localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
-                    alert(actionType === 'fulfilled' ? "🎉 Request marked as fulfilled! Thank you for updating the community." : "Emergency blood request deleted successfully.");
+                    alert("Blood request removed successfully.\n\nThe emergency alert has been removed from the website.");
                 } catch (err) {
                     console.error("Error deleting blood request:", err);
                     alert("Error removing request: " + err.message);
                 }
             }
         };
+        window.deleteMyBloodTicketFromAccount = window.deleteMyBloodTicket;
 
         function checkLeaderboardAutoOpen() {
             const p = new URLSearchParams(window.location.search);
@@ -2041,103 +2083,6 @@
                 listEl.innerHTML = `<p class="text-xs text-red-400 py-4 text-center">Unable to load leaderboard. Please check network connection.</p>`;
             });
         }
-
-        // LOAD AND MANAGE USER'S POSTED BLOOD REQUESTS
-        function loadMyBloodRequests(user) {
-            const grid = document.getElementById("myRequestsGrid");
-            if (!grid) return;
-            if (!user) {
-                grid.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">Please sign in to view your posted blood requests.</div>`;
-                return;
-            }
-
-            const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
-            const userEmail = (user.email || '').toLowerCase();
-            const uid = user.uid || '';
-
-            onValue(ref(db, 'blood_requests'), (snapshot) => {
-                grid.innerHTML = "";
-                if (!snapshot.exists()) {
-                    grid.innerHTML = `
-                        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-2">You have no active emergency blood requests posted.</p>
-                            <a href="blood.html" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow-sm">
-                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need Now
-                            </a>
-                        </div>`;
-                    if (window.lucide) lucide.createIcons();
-                    return;
-                }
-
-                const allRequests = snapshot.val();
-                const myReqEntries = [];
-
-                Object.keys(allRequests).forEach(key => {
-                    const r = allRequests[key];
-                    const matchUid = uid && r.userId === uid;
-                    const matchEmail = userEmail && r.userEmail && r.userEmail.toLowerCase() === userEmail;
-                    const matchStoredKey = myPostedKeys.includes(key);
-
-                    if (matchUid || matchEmail || matchStoredKey) {
-                        myReqEntries.push({ key, ...r });
-                    }
-                });
-
-                if (myReqEntries.length === 0) {
-                    grid.innerHTML = `
-                        <div class="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center">
-                            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold mb-2">You have no active emergency blood requests posted.</p>
-                            <a href="blood.html" class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition shadow-sm">
-                                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Post Blood Need Now
-                            </a>
-                        </div>`;
-                } else {
-                    myReqEntries.forEach(item => {
-                        const card = document.createElement("div");
-                        card.className = "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3";
-                        card.innerHTML = `
-                            <div class="flex items-start gap-3">
-                                <span class="bg-red-600 text-white font-black text-sm px-2.5 py-1 rounded-xl shadow-sm shrink-0">
-                                    ${item.bloodGroup}
-                                </span>
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <h4 class="text-sm font-black text-slate-900 dark:text-white">${item.hospital}</h4>
-                                        <span class="text-[10px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold px-2 py-0.5 rounded-full border border-red-200 dark:border-red-900">
-                                            ${item.units || 1} Unit(s) Needed
-                                        </span>
-                                    </div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                                        📍 ${item.city || 'City'} • Attendant: <strong>${item.requesterName || item.name || 'Attendant'}</strong> (${item.phone})
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2 shrink-0">
-                                <button onclick="deleteMyBloodTicketFromAccount('${item.key}')" class="bg-red-600 hover:bg-red-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer" title="Delete post when blood is found">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Post (Blood Found)
-                                </button>
-                            </div>
-                        `;
-                        grid.appendChild(card);
-                    });
-                }
-                if (window.lucide) lucide.createIcons();
-            });
-        }
-
-        window.deleteMyBloodTicketFromAccount = async function(key) {
-            if (confirm("Confirm: Has blood been received/found for your emergency request? Click OK to permanently delete your post from the live board and top banner.")) {
-                try {
-                    await remove(ref(db, `blood_requests/${key}`));
-                    const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
-                    localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
-                    alert("Emergency blood request post has been deleted successfully! Thank you for saving lives.");
-                } catch (err) {
-                    alert("Error deleting request: " + err.message);
-                }
-            }
-        };
-        window.deleteMyBloodTicket = window.deleteMyBloodTicketFromAccount;
 
         // FORM SUBMIT HANDLER (DATABASE-BACKED AUTHENTICATION & ACCURATE VERIFICATION)
         const authFormEl = document.getElementById('authForm');
