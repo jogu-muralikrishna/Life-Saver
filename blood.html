@@ -217,26 +217,26 @@
             <div class="max-w-3xl mx-auto relative z-10">
                 <div
                     class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full neon-badge-red font-bold text-xs uppercase tracking-wider mb-4 border border-red-200 dark:border-red-900/50">
-                    🩸 Live Emergency Blood Requirement Hub
+                    🩸 Live Blood Emergency Board
                 </div>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Emergency Blood Requirement Board</h1>
+                <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Post Need of Blood & Emergency Board</h1>
                 <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base mb-6">
-                    Post emergency patient blood requirements to broadcast alerts to voluntary donors, or search and manage active requirement tickets.
+                    Post emergency patient blood requirements to broadcast live alerts across the site to voluntary donors, or browse and manage active requirement tickets.
                 </p>
 
                 <!-- PROMINENT HIGH-VISIBILITY CALL TO ACTION BUTTONS -->
                 <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
                     <button onclick="openPostRequirementModal()" class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white font-black px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-red-500/25 flex items-center gap-2 transform hover:scale-105 active:scale-95 cursor-pointer">
                         <i data-lucide="plus-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                        <span>Post Urgent Blood Need (Broadcast to All)</span>
+                        <span>Post Need of Blood (Broadcast Live SOS)</span>
                     </button>
-                    <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
-                        <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                        <span>Find Blood Donors Directory</span>
-                    </a>
                     <a href="register-donor.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-emerald-500/20 flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                         <span>Register as Donor</span>
+                    </a>
+                    <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
+                        <i data-lucide="search" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span>Find Donors Directory</span>
                     </a>
                 </div>
 
@@ -945,17 +945,28 @@
             renderUrgentBloodTickets();
         };
 
-        // CLOSE & DELETE TICKET WHEN BLOOD IS RECEIVED / FOUND
+        // CLOSE & DELETE TICKET WHEN BLOOD IS RECEIVED / FOUND (ONLY POSTER OR SUPER ADMIN)
         window.deleteMyBloodTicket = async function (key, isOwner = false) {
+            const isSuperAdmin = localStorage.getItem('adminRole') === 'SUPER_ADMIN' || 
+                                 sessionStorage.getItem('superAdminLoggedIn') === 'true' || 
+                                 sessionStorage.getItem('adminLoggedIn') === 'true';
+            
             const confirmMsg = isOwner
-                ? "Confirm: Has blood been received/found for your emergency request? Click OK to permanently delete your post from the live board."
-                : "Confirm: Has blood been found/received for this patient? Click OK to delete and remove this emergency ticket from the live board.";
+                ? "Confirm: Has blood been received/found for your emergency requirement? Click OK to permanently delete your post from the live board."
+                : (isSuperAdmin 
+                    ? "Super Admin Action: Permanently delete this urgent blood requirement ticket from the live board?" 
+                    : "Confirm: Delete this urgent blood post?");
             
             if (confirm(confirmMsg)) {
                 try {
                     await remove(ref(db, `blood_requests/${key}`));
                     const myReqs = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]').filter(k => k !== key);
                     localStorage.setItem('ls_my_blood_requests', JSON.stringify(myReqs));
+                    if (window.activeUrgentBloodTickets && window.activeUrgentBloodTickets[key]) {
+                        delete window.activeUrgentBloodTickets[key];
+                    }
+                    renderUrgentBloodTickets();
+                    if (window.updateTopLiveSOSBanner) window.updateTopLiveSOSBanner();
                     alert("Emergency blood requirement post has been successfully deleted! Thank you for saving lives.");
                 } catch (err) {
                     console.warn("Closing ticket error:", err);
@@ -993,7 +1004,7 @@
             }
 
             if (allKeys.length === 0) {
-                reqGrid.innerHTML = `<div class="col-span-full text-center py-8 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">No active emergency blood requirement tickets currently posted. You can post a new requirement using the 'Post Urgent Blood Need' button above.</p></div>`;
+                reqGrid.innerHTML = `<div class="col-span-full text-center py-8 p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800"><p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">No active emergency blood requirement tickets currently posted. You can post a new requirement using the 'Post Need of Blood' button above.</p></div>`;
                 return;
             }
 
@@ -1016,12 +1027,19 @@
 
             const myPostedKeys = JSON.parse(localStorage.getItem('ls_my_blood_requests') || '[]');
             const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+            const currentEmail = (auth.currentUser ? auth.currentUser.email : (window.currentActiveUserProfile?.email || '')).toLowerCase();
+            const isSuperAdmin = localStorage.getItem('adminRole') === 'SUPER_ADMIN' || 
+                                 sessionStorage.getItem('superAdminLoggedIn') === 'true' || 
+                                 sessionStorage.getItem('adminLoggedIn') === 'true';
 
             filteredKeys.forEach(key => {
                 const r = window.activeUrgentBloodTickets[key];
                 const compatibleGroups = BLOOD_COMPATIBILITY[r.bloodGroup] || [r.bloodGroup];
                 const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
-                const isMyPost = (currentUid && r.userId === currentUid) || myPostedKeys.includes(key);
+                const isMyPost = (currentUid && r.userId === currentUid) || 
+                                 (currentEmail && r.userEmail && r.userEmail.toLowerCase() === currentEmail) || 
+                                 myPostedKeys.includes(key);
+                const canDelete = isMyPost || isSuperAdmin;
 
                 const card = document.createElement("div");
                 card.className = `glass-card p-5 border ${isMyPost ? 'border-amber-400 dark:border-amber-600 bg-amber-50/40 dark:bg-amber-950/20 shadow-md ring-1 ring-amber-400/30' : 'border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20'} flex flex-col justify-between gap-3 hover:border-red-400 transition`;
@@ -1030,13 +1048,12 @@
                     ? `<span class="text-[10px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-black px-2 py-0.5 rounded-full border border-amber-300 dark:border-amber-700 flex items-center gap-1 shadow-sm">⭐ Your Post</span>` 
                     : '';
 
-                const deleteBtnHtml = isMyPost
-                    ? `<button onclick="deleteMyBloodTicket('${key}', true)" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md shadow-red-500/20 cursor-pointer" title="Manually delete your emergency post once blood is found">
-                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Post (Blood Found)
+                // Delete option for ONLY who posted or superadmin manually after finding blood
+                const deleteBtnHtml = canDelete
+                    ? `<button onclick="deleteMyBloodTicket('${key}', ${isMyPost})" class="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-md shadow-red-500/20 cursor-pointer" title="${isMyPost ? 'Delete your post once blood is found' : 'Super Admin: Delete post'}">
+                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> ${isMyPost ? 'Delete Post (Blood Found)' : 'Super Admin Delete'}
                        </button>`
-                    : `<button onclick="closeBloodTicket('${key}', false)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition flex items-center gap-1 shadow-sm cursor-pointer" title="Mark request as fulfilled and delete ticket">
-                         <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Blood Found • Remove
-                       </button>`;
+                    : '';
 
                 const requesterTitle = r.requesterName || r.name || 'Patient Attendant';
 
@@ -1272,8 +1289,8 @@
             const banner = document.getElementById("liveSOSAlertBanner");
             const bannerText = document.getElementById("liveSOSAlertText");
             if (banner && bannerText) {
-                const title = req.requesterName || req.name || 'Emergency Patient';
-                bannerText.textContent = `🚨 URGENT: ${req.bloodGroup} (${req.units || 1} Units) needed at ${req.hospital}, ${req.city} • Attendant: ${title} (${window.maskPhone(req.phone)})`;
+                const title = req.requesterName || req.name || 'Emergency Patient Attendant';
+                bannerText.innerHTML = `<strong>🚨 LIVE SOS: ${req.bloodGroup} Blood (${req.units || 1} Unit${(req.units || 1) == 1 ? '' : 's'}) Needed</strong> at <em>${req.hospital}, ${req.city}</em> • Attendant: ${title} (${window.maskPhone(req.phone)})`;
                 banner.classList.remove("hidden");
             }
 
@@ -1287,6 +1304,26 @@
                 } catch(e) {}
             }
             window.playEmergencyBeep();
+        };
+
+        window.updateTopLiveSOSBanner = function() {
+            const banner = document.getElementById("liveSOSAlertBanner");
+            const bannerText = document.getElementById("liveSOSAlertText");
+            if (!banner || !bannerText) return;
+
+            const allKeys = Object.keys(window.activeUrgentBloodTickets || {});
+            if (allKeys.length > 0) {
+                const latestKey = allKeys[allKeys.length - 1];
+                const req = window.activeUrgentBloodTickets[latestKey];
+                if (req) {
+                    const title = req.requesterName || req.name || 'Emergency Patient Attendant';
+                    bannerText.innerHTML = `<strong>🚨 URGENT: ${req.bloodGroup} Blood (${req.units || 1} Unit${(req.units || 1) == 1 ? '' : 's'}) Needed</strong> at <em>${req.hospital}, ${req.city}</em> • Attendant: ${title} (${window.maskPhone(req.phone)})`;
+                    banner.classList.remove("hidden");
+                }
+            } else {
+                banner.classList.add("hidden");
+            }
+            if (window.lucide) lucide.createIcons();
         };
 
         window.dismissLiveSOSAlert = function() {
@@ -1340,6 +1377,7 @@
             if (cachedRequests && typeof cachedRequests === 'object') {
                 window.activeUrgentBloodTickets = cachedRequests;
                 renderUrgentBloodTickets();
+                window.updateTopLiveSOSBanner();
             }
         } catch (e) {}
 
@@ -1363,12 +1401,14 @@
             knownBloodReqKeys = currentKeys;
             window.activeUrgentBloodTickets = currentData;
             renderUrgentBloodTickets();
+            window.updateTopLiveSOSBanner();
         }, (err) => {
             console.warn("Blood requests realtime notice:", err);
             try {
                 const cached = JSON.parse(localStorage.getItem('ls_requests_cache') || '{}');
                 window.activeUrgentBloodTickets = cached;
                 renderUrgentBloodTickets();
+                window.updateTopLiveSOSBanner();
             } catch(e) {}
         });
 
