@@ -66,6 +66,9 @@ function ensureStyles() {
     const style = document.createElement("style");
     style.id = "emergencyAlertStyles";
     style.textContent = `
+        html, body {
+            overflow-x: clip;
+        }
         @keyframes emergencyAlertSlideIn {
             from {
                 opacity: 0;
@@ -78,6 +81,10 @@ function ensureStyles() {
         }
         .emergency-alert-card-enter {
             animation: emergencyAlertSlideIn 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        #liveSOSAlertBanner {
+            position: sticky !important;
+            z-index: 39 !important;
         }
         #liveSOSCardsTrack::-webkit-scrollbar {
             height: 6px;
@@ -97,15 +104,30 @@ function ensureStyles() {
     document.head.appendChild(style);
 }
 
+// Dynamically calibrate banner top offset based on active navbar height
+function updateBannerNavOffset() {
+    const banner = document.getElementById("liveSOSAlertBanner");
+    if (!banner) return;
+    const nav = document.querySelector('nav') || document.querySelector('header');
+    if (nav) {
+        const navH = Math.round(nav.offsetHeight || 60);
+        banner.style.top = `${navH}px`;
+    } else {
+        banner.style.top = '0px';
+    }
+}
+
 // Injects or connects the top live emergency banner element
 function ensureEmergencyBanner() {
     ensureStyles();
     let banner = document.getElementById("liveSOSAlertBanner");
-    if (!banner) {
-        banner = document.createElement("aside");
-        banner.id = "liveSOSAlertBanner";
-        banner.setAttribute("aria-label", "Urgent Emergency Blood Alerts");
-        banner.className = "hidden sticky top-[54px] sm:top-[60px] z-30 w-full px-3 sm:px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 dark:from-red-950/95 dark:via-slate-900/95 dark:to-red-950/95 text-white shadow-xl border-b border-red-400/50 dark:border-red-900/60 backdrop-blur-md transition-all";
+    if (!banner || !banner.querySelector("#liveSOSCardsTrack")) {
+        if (!banner) {
+            banner = document.createElement("aside");
+            banner.id = "liveSOSAlertBanner";
+            banner.setAttribute("aria-label", "Urgent Emergency Blood Alerts");
+        }
+        banner.className = "hidden sticky z-30 w-full px-3 sm:px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 dark:from-red-950/95 dark:via-slate-900/95 dark:to-red-950/95 text-white shadow-xl border-b border-red-400/50 dark:border-red-900/60 backdrop-blur-md transition-all";
         banner.innerHTML = `
             <div class="max-w-7xl mx-auto flex flex-col gap-2">
                 <!-- Banner Top Row: Status Header & Quick Actions -->
@@ -145,8 +167,16 @@ function ensureEmergencyBanner() {
             } else {
                 nav.parentNode.appendChild(banner);
             }
-        } else {
+        } else if (!banner.parentNode) {
             document.body.insertBefore(banner, document.body.firstChild);
+        }
+
+        // Attach dynamic nav height listener
+        updateBannerNavOffset();
+        window.addEventListener('resize', updateBannerNavOffset);
+        window.addEventListener('scroll', updateBannerNavOffset, { passive: true });
+        if (window.ResizeObserver && nav) {
+            try { new ResizeObserver(updateBannerNavOffset).observe(nav); } catch(e) {}
         }
 
         // Attach auth check to "Post Blood Request" button on banner
@@ -165,6 +195,7 @@ function ensureEmergencyBanner() {
             });
         }
     }
+    updateBannerNavOffset();
     return banner;
 }
 
@@ -194,6 +225,7 @@ function renderEmergencyCards(activeList) {
     // If completely identical list, no need to tear down DOM
     if (isSameList) {
         banner.classList.remove("hidden");
+        updateBannerNavOffset();
         return;
     }
 
@@ -205,7 +237,7 @@ function renderEmergencyCards(activeList) {
     activeList.forEach(req => {
         const card = document.createElement("div");
         card.id = `sos-card-${req.key}`;
-        card.className = "emergency-alert-card-enter flex flex-col justify-between p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-red-500 shadow-md shrink-0 w-[290px] sm:w-[320px] md:w-[340px] text-xs transition";
+        card.className = "emergency-alert-card-enter flex flex-col justify-between p-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 border-red-500 shadow-md shrink-0 w-[290px] sm:w-[320px] md:w-[350px] text-xs transition";
         
         const attendant = req.requesterName || req.name || 'Patient Attendant';
         const bloodGroup = (req.bloodGroup || 'Blood').toUpperCase();
@@ -217,11 +249,11 @@ function renderEmergencyCards(activeList) {
         const timeAgo = formatTimeAgo(req.createdAt || req.timestamp);
 
         // Privacy System Adherence:
-        // If requester explicitly marked public -> show raw number
-        // Otherwise protect/mask phone number and guide through Privacy Shield contact mechanism
-        const isExplicitlyPublic = req.privacy === 'public' || req.phonePrivacy === 'public' || req.isPublic === true;
-        const phoneDisplay = isExplicitlyPublic && rawPhone 
-            ? `<strong class="font-mono text-red-600 dark:text-red-400 font-bold">${rawPhone}</strong>`
+        // By default on urgent blood requests, display direct clickable phone link
+        // If explicitly set to private, display protected guarded masking
+        const isExplicitlyPrivate = req.privacy === 'private' || req.phonePrivacy === 'private' || req.isPublic === false;
+        const phoneDisplay = !isExplicitlyPrivate && rawPhone 
+            ? `<a href="tel:${rawPhone}" class="font-mono text-red-600 dark:text-red-400 font-bold hover:underline" onclick="event.stopPropagation();">${rawPhone}</a>`
             : `<strong class="font-mono text-slate-700 dark:text-slate-300">${maskGuardedPhone(rawPhone)}</strong> <span class="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.2 rounded font-bold border border-emerald-200 dark:border-emerald-900">🛡️ Guarded</span>`;
 
         card.innerHTML = `

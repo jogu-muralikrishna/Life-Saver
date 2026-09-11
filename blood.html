@@ -144,26 +144,6 @@
         </div>
     </nav>
 
-    <!-- 🚨 REAL-TIME LIVE SOS TOP CONTINUOUS FLOATING BANNER (DISPLAYS ALL ACTIVE BLOOD NEEDS SIDE BY SIDE) -->
-    <div id="liveSOSAlertBanner" class="hidden sticky top-[54px] sm:top-[60px] z-30 px-3 sm:px-6 py-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-xl border-b border-red-500/50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-2 font-bold shrink-0">
-                <span class="bg-white text-red-600 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase shrink-0 shadow-sm animate-pulse flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-red-600 animate-ping inline-block"></span> 🚨 Live Urgent Blood Needs (<span id="liveSOSCount">0</span>)
-                </span>
-            </div>
-            <!-- SIDE BY SIDE ACTIVE BLOOD CARDS TRACK -->
-            <div id="liveSOSCardsTrack" class="flex items-center gap-2.5 overflow-x-auto py-1 scrollbar-thin flex-1 min-w-0">
-                <!-- Dynamically populated side-by-side cards -->
-            </div>
-            <div class="flex items-center gap-2 shrink-0 self-end md:self-center">
-                <button onclick="scrollToUrgentRequests()" class="bg-white text-red-700 hover:bg-red-50 font-black px-3 py-1.5 rounded-xl text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer">
-                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> All Tickets
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- MOBILE NAVIGATION DRAWER -->
     <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="toggleMobileNav(event)">
         <div class="mobile-nav-content" onclick="event.stopPropagation()">
@@ -831,7 +811,6 @@
                 locEl.innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5"></i> ${loc}`;
             }
 
-            const isDonor = contact.type === 'donor';
             const isPublic = contact.isPublic !== false && (contact.phoneVisibility === 'public' || contact.isPublic === true || (!contact.phoneVisibility && contact.accountType !== 'private'));
             const phoneEl = document.getElementById("privacyPhoneDisplay");
             const lblReveal = document.getElementById("lblRevealPhone");
@@ -1415,47 +1394,7 @@
         };
 
         window.updateTopLiveSOSBanner = function() {
-            const banner = document.getElementById("liveSOSAlertBanner");
-            const track = document.getElementById("liveSOSCardsTrack");
-            const countEl = document.getElementById("liveSOSCount");
-            if (!banner || !track) return;
-
-            const allKeys = Object.keys(window.activeUrgentBloodTickets || {});
-            if (allKeys.length > 0) {
-                if (countEl) countEl.textContent = allKeys.length;
-                track.innerHTML = "";
-                
-                allKeys.forEach(key => {
-                    const req = window.activeUrgentBloodTickets[key];
-                    if (!req) return;
-                    const card = document.createElement("div");
-                    card.className = "inline-flex items-center gap-2 bg-black/30 hover:bg-black/45 border border-white/30 px-3 py-1.5 rounded-xl text-xs shrink-0 transition cursor-pointer backdrop-blur-sm shadow-sm";
-                    card.onclick = () => {
-                        if (window.openBloodMatchModal) {
-                            window.openBloodMatchModal(key);
-                        } else if (window.scrollToUrgentRequests) {
-                            window.scrollToUrgentRequests();
-                        }
-                    };
-                    const attendant = req.requesterName || req.name || 'Attendant';
-                    card.innerHTML = `
-                        <span class="bg-white text-red-600 font-black text-[11px] px-2 py-0.5 rounded-lg shadow-sm shrink-0">
-                            ${req.bloodGroup} (${req.units || 1}U)
-                        </span>
-                        <span class="font-bold text-white truncate max-w-[150px] sm:max-w-[220px]" title="${req.hospital}, ${req.city}">
-                            🏥 ${req.hospital} (${req.city})
-                        </span>
-                        <span class="text-white/90 text-[11px] shrink-0 font-medium">
-                            📞 ${attendant}: <strong class="font-mono text-white">${window.maskPhone(req.phone)}</strong>
-                        </span>
-                    `;
-                    track.appendChild(card);
-                });
-                banner.classList.remove("hidden");
-            } else {
-                banner.classList.add("hidden");
-            }
-            if (window.lucide) lucide.createIcons();
+            // Managed seamlessly in real time by emergency-alert.js across all pages
         };
 
         window.dismissLiveSOSAlert = function() {
@@ -1643,6 +1582,9 @@
                     city: reqCityVal,
                     contactNumber: reqPhoneVal,
                     phone: reqPhoneVal,
+                    isPublic: true,
+                    privacy: "public",
+                    phonePrivacy: "public",
                     emergencyDetails: reqDetailsVal,
                     status: "active",
                     createdAt: new Date().toISOString(),
