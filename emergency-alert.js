@@ -125,17 +125,17 @@ function renderEmergencyCards(activeList) {
         const masked = maskGuardedPhone(req.phone);
 
         card.innerHTML = `
-            <span class="bg-white text-red-600 font-black text-[11px] px-2 py-0.5 rounded-lg shadow-sm shrink-0">
-                ${req.bloodGroup} (${units}U)
+            <span class="bg-white text-red-600 font-black text-[11px] px-2 py-0.5 rounded-lg shadow-sm shrink-0 flex items-center gap-1">
+                <span>🩸</span> <span>${req.bloodGroup}</span> <span class="font-bold text-slate-700">(${units}U)</span>
             </span>
-            <span class="font-bold text-white truncate max-w-[150px] sm:max-w-[220px]" title="${hospital}, ${city}">
-                🏥 ${hospital} (${city})
+            <span class="font-bold text-white truncate max-w-[160px] sm:max-w-[240px]" title="${hospital}, ${city}">
+                🏥 ${hospital} • ${city}
             </span>
-            <span class="text-white/90 text-[11px] shrink-0 font-medium hidden sm:inline">
+            <span class="text-white/90 text-[11px] shrink-0 font-medium hidden md:inline">
                 📞 ${attendant}: <strong class="font-mono text-white">${masked}</strong>
             </span>
-            <span class="bg-white/20 hover:bg-white/30 text-white text-[10px] font-black px-2 py-0.5 rounded-lg transition shrink-0 flex items-center gap-1">
-                <i data-lucide="phone" class="w-3 h-3"></i> Contact
+            <span class="bg-white text-red-700 hover:bg-red-50 font-black text-[10px] px-2.5 py-1 rounded-lg transition shadow-sm shrink-0 flex items-center gap-1">
+                <i data-lucide="heart-handshake" class="w-3 h-3 text-red-600"></i> HELP / CONTACT
             </span>
         `;
         track.appendChild(card);
