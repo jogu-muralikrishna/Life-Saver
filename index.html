@@ -295,6 +295,19 @@
     <!-- HERO SECTION WITH LIVING HEALTHCARE NETWORK MOTION BACKGROUND -->
     <header id="heroSection" class="px-4 sm:px-6 lg:px-8 pt-8 pb-10 max-w-7xl mx-auto relative overflow-hidden">
         
+        <!-- DARK MODE ONLY: BEATING HEART BACKGROUND IMAGE -->
+        <div id="heroHeartBg" class="absolute inset-0 pointer-events-none select-none hidden dark:block" style="z-index:0;">
+            <img src="hero-heart.png" alt="" aria-hidden="true"
+                 id="heroHeartImg"
+                 style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                        width:100%; height:100%; object-fit:cover; object-position:center;
+                        opacity:0.75; filter:saturate(1.3) contrast(1.1);
+                        animation: heartbeatBg 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;"
+            />
+            <!-- Dark overlay to keep text readable -->
+            <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(5,5,5,0.72) 0%, rgba(5,5,5,0.45) 40%, rgba(5,5,5,0.72) 100%);"></div>
+        </div>
+
         <!-- LIVING DIGITAL HEALTHCARE NETWORK CANVAS -->
         <canvas id="heroMotionCanvas"></canvas>
 
