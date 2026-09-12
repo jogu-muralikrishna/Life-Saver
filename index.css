@@ -1051,4 +1051,72 @@ html.dark .skeleton-box {
   }
 }
 
+/* ==========================================================================
+   LIFESAVER TOP-MIDDLE FLOATING MESSAGE & ALERT SYSTEM
+   ========================================================================== */
+@keyframes topMsgSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes topMsgSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+}
+
+.top-msg-enter {
+  animation: topMsgSlideIn 320ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.top-msg-exit {
+  animation: topMsgSlideOut 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+#lifeSaverTopMsgOverlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9999999 !important;
+  pointer-events: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 1rem 0.75rem !important;
+}
+
+@media (min-width: 640px) {
+  #lifeSaverTopMsgOverlay {
+    padding-top: 1.5rem !important;
+  }
+}
+
+.top-msg-card {
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-width: 32rem !important;
+  margin: 0 auto !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+
 

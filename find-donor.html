@@ -692,11 +692,14 @@
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
                 feedback.textContent = "✅ Contact request sent securely! The member will review and accept it from their dashboard.";
                 feedback.classList.remove('hidden');
+                if (typeof window.showLifeSaverMsg === 'function') {
+                    window.showLifeSaverMsg("✅ Contact request sent securely! The member will review and accept it from their dashboard.", "success", "Contact Request Sent");
+                }
                 setTimeout(() => {
                     closeRequestToContactModal();
                     feedback.classList.add('hidden');
                     document.getElementById("contactRequestForm").reset();
-                }, 2500);
+                }, 1500);
             } catch (err) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                 feedback.textContent = "Error sending contact request: " + err.message;
@@ -769,11 +772,14 @@
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
                 feedback.textContent = "✅ Message delivered! The member will see it in their dashboard inbox.";
                 feedback.classList.remove('hidden');
+                if (typeof window.showLifeSaverMsg === 'function') {
+                    window.showLifeSaverMsg("✅ Message delivered! The member will see it in their dashboard inbox.", "success", "Message Sent");
+                }
                 setTimeout(() => {
                     closeDirectMessageDonorModal();
                     feedback.classList.add('hidden');
                     document.getElementById("directMessageDonorForm").reset();
-                }, 2000);
+                }, 1500);
             } catch (err) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                 feedback.textContent = "Error sending message: " + err.message;
@@ -1066,8 +1072,8 @@
     </div>
 
     <!-- SEND CONTACT REQUEST MODAL (FOR PRIVATE DONORS) -->
-    <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
+    <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 overflow-y-auto hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeRequestToContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -1118,8 +1124,8 @@
     </div>
 
     <!-- DIRECT MESSAGE MODAL (FOR PUBLIC MEMBERS) -->
-    <div id="directMessageDonorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
+    <div id="directMessageDonorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 overflow-y-auto hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeDirectMessageDonorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>

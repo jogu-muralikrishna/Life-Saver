@@ -369,11 +369,17 @@
                     feedback.className = "text-xs p-3.5 rounded-2xl font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
                     feedback.innerHTML = `✅ <strong>Thank you, ${name}!</strong> Your message has been sent to our 24/7 Operations Team. Ticket ID: <code>${payload.messageId}</code>`;
                     feedback.classList.remove("hidden");
+                    if (typeof window.showLifeSaverMsg === 'function') {
+                        window.showLifeSaverMsg(`✅ Thank you, ${name}!\n\nYour message has been sent to our 24/7 Operations Team.\nTicket ID: ${payload.messageId}`, "success", "Message Sent");
+                    }
                     form.reset();
                 } catch (err) {
                     feedback.className = "text-xs p-3.5 rounded-2xl font-bold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                     feedback.textContent = "Notice: Message recorded locally. Error syncing to cloud: " + err.message;
                     feedback.classList.remove("hidden");
+                    if (typeof window.showLifeSaverMsg === 'function') {
+                        window.showLifeSaverMsg("Notice: Message recorded locally. Error syncing: " + err.message, "warning", "Submission Notice");
+                    }
                 } finally {
                     btn.disabled = false;
                     btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> Send Message to Operations Team`;

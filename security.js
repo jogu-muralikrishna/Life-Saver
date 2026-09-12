@@ -585,6 +585,251 @@ document.addEventListener('DOMContentLoaded', function () {
     applySiteLanguage(savedLang);
 });
 
+/* ==========================================================================
+   LIFESAVER TOP-MIDDLE FLOATING MESSAGE & ALERT SYSTEM
+   Universal notification handler: Appears at top-middle of the page,
+   fully visible, accessible, non-intrusive, zero scroll disruption.
+   ========================================================================== */
+(function() {
+    let activeDismissTimeout = null;
+    let autoDismissRemaining = 0;
+    let autoDismissStart = 0;
+
+    function ensureMessageContainer() {
+        let overlay = document.getElementById("lifeSaverTopMsgOverlay");
+        if (!overlay) {
+            overlay = document.createElement("aside");
+            overlay.id = "lifeSaverTopMsgOverlay";
+            overlay.setAttribute("aria-live", "polite");
+            overlay.setAttribute("role", "alert");
+            if (document.body) {
+                document.body.appendChild(overlay);
+            } else {
+                document.addEventListener("DOMContentLoaded", () => {
+                    if (!document.getElementById("lifeSaverTopMsgOverlay")) {
+                        document.body.appendChild(overlay);
+                    }
+                });
+            }
+        }
+        return overlay;
+    }
+
+    function detectMessageType(msgStr, explicitType) {
+        if (explicitType && explicitType !== 'auto') return explicitType;
+        const lower = String(msgStr || '').toLowerCase();
+        if (lower.includes('🩸') || lower.includes('blood') || lower.includes('emergency') || lower.includes('error') || lower.includes('urgent') || lower.includes('fail') || lower.includes('blocked') || lower.includes('delete') || lower.includes('closed') || (lower.includes('warning') && lower.includes('alcohol'))) {
+            return 'emergency';
+        }
+        if (lower.includes('✅') || lower.includes('🎉') || lower.includes('success') || lower.includes('copied') || lower.includes('saved') || lower.includes('verified') || lower.includes('thank')) {
+            return 'success';
+        }
+        if (lower.includes('⚠️') || lower.includes('caution') || lower.includes('notice') || lower.includes('guard') || lower.includes('private') || lower.includes('confirm')) {
+            return 'warning';
+        }
+        return 'info';
+    }
+
+    window.showLifeSaverMsg = function(message, type = 'auto', title = null, duration = 7000) {
+        if (!message) return;
+        const overlay = ensureMessageContainer();
+        if (!overlay) return;
+
+        if (activeDismissTimeout) {
+            clearTimeout(activeDismissTimeout);
+            activeDismissTimeout = null;
+        }
+
+        const resolvedType = detectMessageType(message, type);
+
+        // Theme config
+        let theme = {
+            border: 'border-red-500/90 dark:border-red-500/90',
+            badgeBg: 'bg-red-100 dark:bg-red-950/80 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900',
+            iconBg: 'from-red-600 to-rose-700 shadow-red-500/30',
+            iconEmoji: '🩸',
+            btnBg: 'bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-800 text-white shadow-red-500/25',
+            progressColor: 'bg-red-500',
+            defaultTitle: 'Emergency Notice'
+        };
+
+        if (resolvedType === 'success') {
+            theme = {
+                border: 'border-emerald-500/90 dark:border-emerald-500/90',
+                badgeBg: 'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900',
+                iconBg: 'from-emerald-600 to-teal-700 shadow-emerald-500/30',
+                iconEmoji: '✅',
+                btnBg: 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-emerald-500/25',
+                progressColor: 'bg-emerald-500',
+                defaultTitle: 'Success Confirmation'
+            };
+        } else if (resolvedType === 'warning') {
+            theme = {
+                border: 'border-amber-500/90 dark:border-amber-500/90',
+                badgeBg: 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-900',
+                iconBg: 'from-amber-500 to-amber-600 shadow-amber-500/30',
+                iconEmoji: '⚠️',
+                btnBg: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black shadow-amber-500/25',
+                progressColor: 'bg-amber-500',
+                defaultTitle: 'Important Notice'
+            };
+        } else if (resolvedType === 'info') {
+            theme = {
+                border: 'border-blue-500/90 dark:border-blue-500/90',
+                badgeBg: 'bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900',
+                iconBg: 'from-blue-600 to-indigo-700 shadow-blue-500/30',
+                iconEmoji: 'ℹ️',
+                btnBg: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-blue-500/25',
+                progressColor: 'bg-blue-500',
+                defaultTitle: 'LifeSaver Notice'
+            };
+        }
+
+        const displayTitle = title || theme.defaultTitle;
+
+        // Clean any existing card
+        overlay.innerHTML = '';
+
+        const card = document.createElement("div");
+        card.id = "lifeSaverTopMsgCard";
+        card.className = `top-msg-card top-msg-enter bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-2 ${theme.border} p-4 sm:p-5 rounded-2xl shadow-2xl relative transition-all max-w-lg w-full`;
+
+        card.innerHTML = `
+            <!-- Top Header & Close -->
+            <div class="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${theme.badgeBg}">
+                        <span>${theme.iconEmoji}</span>
+                        <span>${displayTitle}</span>
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">Live</span>
+                </div>
+                <button type="button" id="btnTopMsgClose" class="text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold p-1 rounded-lg text-sm transition cursor-pointer" title="Close Notification" aria-label="Close notification">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Body Content -->
+            <div class="flex items-start gap-3 my-1">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br ${theme.iconBg} text-white flex items-center justify-center text-lg shrink-0 shadow-md">
+                    ${theme.iconEmoji}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 whitespace-pre-line leading-relaxed break-words" id="topMsgContentText"></p>
+                </div>
+            </div>
+
+            <!-- Action Row -->
+            <div class="mt-3.5 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                <span class="text-[10px] text-slate-400 font-medium">Tap OK or press Enter to dismiss</span>
+                <button type="button" id="btnTopMsgOk" class="px-4 py-1.5 rounded-xl font-black text-xs transition shadow-md ${theme.btnBg} cursor-pointer flex items-center gap-1">
+                    <span>Got It</span>
+                </button>
+            </div>
+
+            <!-- Auto-Dismiss Progress Bar -->
+            ${duration > 0 ? `
+            <div class="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800 overflow-hidden rounded-b-2xl">
+                <div id="topMsgProgressBar" class="h-full ${theme.progressColor} transition-all" style="width: 100%; transition: width ${duration}ms linear;"></div>
+            </div>
+            ` : ''}
+        `;
+
+        // Safe text assignment to avoid injection while preserving line breaks
+        const textEl = card.querySelector("#topMsgContentText");
+        if (textEl) {
+            textEl.textContent = message;
+        }
+
+        overlay.appendChild(card);
+
+        // Auto-dismiss handler with pause/resume on hover
+        let isDismissed = false;
+        const dismiss = () => {
+            if (isDismissed) return;
+            isDismissed = true;
+            if (activeDismissTimeout) {
+                clearTimeout(activeDismissTimeout);
+                activeDismissTimeout = null;
+            }
+            card.classList.remove("top-msg-enter");
+            card.classList.add("top-msg-exit");
+            setTimeout(() => {
+                if (card.parentNode === overlay) {
+                    overlay.removeChild(card);
+                }
+            }, 240);
+        };
+
+        const closeBtn = card.querySelector("#btnTopMsgClose");
+        if (closeBtn) closeBtn.onclick = dismiss;
+
+        const okBtn = card.querySelector("#btnTopMsgOk");
+        if (okBtn) okBtn.onclick = dismiss;
+
+        if (duration > 0) {
+            autoDismissRemaining = duration;
+            autoDismissStart = Date.now();
+            activeDismissTimeout = setTimeout(dismiss, duration);
+
+            // Trigger smooth CSS progress bar animation
+            requestAnimationFrame(() => {
+                const bar = card.querySelector("#topMsgProgressBar");
+                if (bar) bar.style.width = "0%";
+            });
+
+            // Pause on hover
+            card.addEventListener("mouseenter", () => {
+                if (activeDismissTimeout) {
+                    clearTimeout(activeDismissTimeout);
+                    activeDismissTimeout = null;
+                    autoDismissRemaining -= (Date.now() - autoDismissStart);
+                    const bar = card.querySelector("#topMsgProgressBar");
+                    if (bar) {
+                        const computedWidth = window.getComputedStyle(bar).width;
+                        bar.style.transition = 'none';
+                        bar.style.width = computedWidth;
+                    }
+                }
+            });
+
+            // Resume on mouse leave
+            card.addEventListener("mouseleave", () => {
+                if (!isDismissed && autoDismissRemaining > 0) {
+                    autoDismissStart = Date.now();
+                    const bar = card.querySelector("#topMsgProgressBar");
+                    if (bar) {
+                        bar.style.transition = `width ${autoDismissRemaining}ms linear`;
+                        bar.style.width = '0%';
+                    }
+                    activeDismissTimeout = setTimeout(dismiss, autoDismissRemaining);
+                }
+            });
+        }
+
+        // Global keyboard listener for Enter/Escape
+        const keyHandler = (e) => {
+            if (e.key === "Escape" || e.key === "Enter") {
+                window.removeEventListener("keydown", keyHandler);
+                dismiss();
+            }
+        };
+        window.addEventListener("keydown", keyHandler, { once: true });
+    };
+
+    window.showLifeSaverMessage = window.showLifeSaverMsg;
+
+    // Seamless native alert replacement across LifeSaver
+    if (typeof window !== 'undefined') {
+        window.__nativeAlert = window.__nativeAlert || window.alert;
+        window.alert = function(msg) {
+            if (msg === undefined || msg === null) msg = "";
+            window.showLifeSaverMsg(String(msg), 'auto');
+        };
+    }
+})();
+
+
 
 
 

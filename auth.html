@@ -1073,8 +1073,8 @@
     </div>
 
     <!-- REPLY / SEND DIRECT MESSAGE MODAL -->
-    <div id="replyMessageModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative animate-slide-up text-slate-900 dark:text-white">
+    <div id="replyMessageModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 overflow-y-auto hidden">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeReplyMessageModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -3524,11 +3524,14 @@
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
                 feedback.textContent = "✅ Message sent successfully!";
                 feedback.classList.remove('hidden');
+                if (typeof window.showLifeSaverMsg === 'function') {
+                    window.showLifeSaverMsg("✅ Message sent successfully!\n\nYour message was delivered securely.", "success", "Message Sent");
+                }
                 setTimeout(() => {
                     closeReplyMessageModal();
                     feedback.classList.add('hidden');
                     document.getElementById("replyMessageForm").reset();
-                }, 2000);
+                }, 1500);
             } catch (err) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                 feedback.textContent = "Error sending message: " + err.message;
