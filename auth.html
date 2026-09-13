@@ -595,7 +595,7 @@
 
                             <!-- Dynamic Blood Group -->
                             <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
-                                O+
+                                A+
                             </div>
 
                             <!-- Dynamic QR Code -->
@@ -696,7 +696,7 @@
 
                             <!-- Dynamic Blood Group -->
                             <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
-                                O+
+                                A+
                             </div>
 
                             <!-- Dynamic QR Code -->
@@ -1215,7 +1215,7 @@
 
                 <!-- Blood Group -->
                 <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashBloodCertBg">
-                    O+
+                    A+
                 </div>
 
                 <!-- QR Code -->
@@ -1271,7 +1271,7 @@
 
                 <!-- Blood Group -->
                 <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashOrganCertBg">
-                    O+
+                    A+
                 </div>
 
                 <!-- QR Code -->
@@ -2829,6 +2829,20 @@
                 updatedAt: new Date().toISOString()
             };
 
+            // Also keep sub-profile nodes in users/{uid} fully aligned
+            if (current.bloodDonor) {
+                userProfileUpdates['bloodDonor/name'] = newName;
+                userProfileUpdates['bloodDonor/bloodGroup'] = newBg;
+                userProfileUpdates['bloodDonor/city'] = newCity;
+                userProfileUpdates['bloodDonor/phone'] = newPhone;
+            }
+            if (current.organDonor) {
+                userProfileUpdates['organDonor/name'] = newName;
+                userProfileUpdates['organDonor/bloodGroup'] = newBg;
+                userProfileUpdates['organDonor/city'] = newCity;
+                userProfileUpdates['organDonor/phone'] = newPhone;
+            }
+
             try {
                 await update(ref(db, `users/${currentActiveUser.uid}`), userProfileUpdates);
 
@@ -2859,12 +2873,27 @@
                     }
                 }
 
+                // Update local storage caches
+                try {
+                    const localBD = JSON.parse(localStorage.getItem('bloodDonorData') || '{}');
+                    localBD.name = newName;
+                    localBD.bloodGroup = newBg;
+                    localStorage.setItem('bloodDonorData', JSON.stringify(localBD));
+
+                    const localOD = JSON.parse(localStorage.getItem('organDonorData') || '{}');
+                    localOD.name = newName;
+                    localOD.bloodGroup = newBg;
+                    localStorage.setItem('organDonorData', JSON.stringify(localOD));
+                } catch(e) {}
+
                 window.currentActiveUserProfile = {
                     ...current,
                     name: newName,
                     bloodGroup: newBg,
                     city: newCity,
-                    phone: newPhone
+                    phone: newPhone,
+                    bloodDonor: current.bloodDonor ? { ...current.bloodDonor, name: newName, bloodGroup: newBg } : undefined,
+                    organDonor: current.organDonor ? { ...current.organDonor, name: newName, bloodGroup: newBg } : undefined
                 };
 
                 renderCurrentProfileToUI(window.currentActiveUserProfile);
@@ -3354,8 +3383,11 @@
                         actionsHtml = `
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Accepted</span>
-                                <button onclick="openReplyMessageModal('${escapeHtml(req.senderUid)}', '${escapeHtml(req.senderName || 'Member')}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
-                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Reply
+                                <a href="message.html?to=${encodeURIComponent(req.senderUid || '')}&name=${encodeURIComponent(req.senderName || 'Member')}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat
+                                </a>
+                                <button onclick="openReplyMessageModal('${escapeHtml(req.senderUid)}', '${escapeHtml(req.senderName || 'Member')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
+                                    <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
                                 </button>
                             </div>
                         `;
@@ -3425,9 +3457,12 @@
                                 ${escapeHtml(msg.message || '')}
                             </p>
                         </div>
-                        <div class="shrink-0">
-                            <button onclick="openReplyMessageModal('${escapeHtml(msg.senderUid)}', '${escapeHtml(msg.senderName || 'Member')}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
-                                <i data-lucide="send" class="w-3.5 h-3.5"></i> Reply
+                        <div class="flex items-center gap-2 shrink-0">
+                            <a href="message.html?to=${encodeURIComponent(msg.senderUid || '')}&name=${encodeURIComponent(msg.senderName || 'Member')}&bg=${encodeURIComponent(msg.receiverBloodGroup || '')}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat on LifeSaver
+                            </a>
+                            <button onclick="openReplyMessageModal('${escapeHtml(msg.senderUid)}', '${escapeHtml(msg.senderName || 'Member')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3.5 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
                             </button>
                         </div>
                     `;
@@ -4255,12 +4290,33 @@
                     }
                 }
 
-                if (bloodDonor && bloodDonor.name && bloodDonor.bloodGroup) {
-                    const donorName = bloodDonor.name;
-                    const bloodGroup = formatSingleBloodGroup(bloodDonor.bloodGroup);
+                const profileBg = userProfile?.bloodGroup || userProfile?.blood_group || userProfile?.bg;
+                const profileName = userProfile?.name || userProfile?.fullName || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
+
+                // If user has a registered profile with blood group or is marked as donor, ensure certificate is enabled
+                if (!bloodDonor && (profileBg || userProfile?.isBloodDonor)) {
+                    bloodDonor = {
+                        name: profileName,
+                        bloodGroup: profileBg || 'A+',
+                        credentialID: fallbackCertIdBD,
+                        donationCount: 1
+                    };
+                }
+
+                if (bloodDonor && bloodDonor.name) {
+                    const donorName = profileName || bloodDonor.name;
+                    const bloodGroup = formatSingleBloodGroup(profileBg || bloodDonor.bloodGroup || 'A+');
                     const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
                     const donationCount = parseInt(bloodDonor.donationCount !== undefined ? bloodDonor.donationCount : (bloodDonor.timesDonated || 0), 10);
                     const tier = getMilestoneTier(donationCount);
+
+                    // Sync back to Firebase if older record had outdated bloodGroup
+                    if (bloodDonor.key && bloodDonor.bloodGroup !== bloodGroup) {
+                        update(ref(db, `donors/${bloodDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
+                    }
+                    if (userProfile && (!userProfile.bloodDonor || userProfile.bloodDonor.bloodGroup !== bloodGroup)) {
+                        update(ref(db, `users/${user.uid}/bloodDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                    }
 
                     window.userBloodDonorData = {
                         ...bloodDonor,
@@ -4381,10 +4437,21 @@
                     }
                 }
 
+                const profileBg = userProfile?.bloodGroup || userProfile?.blood_group || userProfile?.bg;
+                const profileName = userProfile?.name || userProfile?.fullName || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
+
                 if (organDonor && organDonor.name) {
-                    const donorName = organDonor.name;
-                    const bloodGroup = formatSingleBloodGroup(organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || (userProfile && userProfile.bloodGroup) || 'O+');
+                    const donorName = profileName || organDonor.name;
+                    const bloodGroup = formatSingleBloodGroup(profileBg || organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || 'A+');
                     const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || fallbackCertIdOD;
+
+                    // Sync back to Firebase if older record had outdated bloodGroup
+                    if (organDonor.key && organDonor.bloodGroup !== bloodGroup) {
+                        update(ref(db, `organ_donors/${organDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
+                    }
+                    if (userProfile && (!userProfile.organDonor || userProfile.organDonor.bloodGroup !== bloodGroup)) {
+                        update(ref(db, `users/${user.uid}/organDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                    }
 
                     window.userOrganDonorData = {
                         ...organDonor,
@@ -4461,9 +4528,10 @@
         // Blood Certificate Actions
         window.openDashboardBloodCertModal = function() {
             window.lockBodyScroll();
+            const profile = window.currentActiveUserProfile || {};
             const donor = window.userBloodDonorData || {};
-            const name = donor.name || 'Member';
-            const bg = formatSingleBloodGroup(donor.bloodGroup || 'O+');
+            const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
+            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || donor.bloodGroup || 'A+');
             const certId = donor.certId || `LSC-BD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashBloodCertName');
@@ -4505,8 +4573,9 @@
         };
 
         window.downloadBloodCertImage = async function() {
-            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || document.getElementById('dashBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || 'Voluntary Donor';
-            const bg = formatSingleBloodGroup(document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+');
+            const profile = window.currentActiveUserProfile || {};
+            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || document.getElementById('dashBloodCertName')?.textContent?.trim() || profile.name || window.userBloodDonorData?.name || 'Voluntary Donor';
+            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'A+');
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || document.getElementById('dashBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482';
             const qrImg = document.getElementById('dashPanelBloodCertQR') || document.getElementById('dashBloodCertQR');
 
@@ -4586,9 +4655,10 @@
         };
 
         window.shareBloodCertWhatsApp = function() {
+            const profile = window.currentActiveUserProfile || {};
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
-            const bg = formatSingleBloodGroup(document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'O+');
+            const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || profile.name || window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
+            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'A+');
             const verifyUrl = getCertificateVerifyUrl(certId);
             const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nBlood Group: *${bg}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
@@ -4610,7 +4680,7 @@
             const profile = window.currentActiveUserProfile || {};
             const donor = window.userOrganDonorData || {};
             const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
-            const bg = formatSingleBloodGroup((donor.bloodGroup && donor.bloodGroup !== 'Not Recorded' && donor.bloodGroup !== 'Not Set') ? donor.bloodGroup : (profile.bloodGroup || 'O+'));
+            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || donor.bloodGroup || 'A+');
             const certId = donor.certId || `LSC-OD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashOrganCertName');
@@ -4665,8 +4735,9 @@
         };
 
         window.downloadOrganCertImage = async function() {
-            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || document.getElementById('dashOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || 'Voluntary Pledger';
-            const bg = formatSingleBloodGroup(document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+');
+            const profile = window.currentActiveUserProfile || {};
+            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || document.getElementById('dashOrganCertName')?.textContent?.trim() || profile.name || window.userOrganDonorData?.name || 'Voluntary Pledger';
+            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'A+');
             const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || document.getElementById('dashOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482';
             const qrImg = document.getElementById('dashPanelOrganCertQR') || document.getElementById('dashOrganCertQR');
 

@@ -377,6 +377,13 @@
                             <strong>Medical Declaration:</strong> I declare that the lifestyle habits and medical history stated above are truthful and complete.
                         </span>
                     </label>
+
+                    <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40">
+                        <input type="checkbox" id="allowContact" class="mt-0.5 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                        <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                            <strong>Community Contact Visibility:</strong> Allow community users and coordinators to view my phone number and email for emergency inquiries. (If unchecked, only your name and pledged organs will be visible; your phone and email remain strictly private 🔒).
+                        </span>
+                    </label>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
@@ -810,6 +817,8 @@
             const phone = document.getElementById('phone').value.trim();
 
             const currentUser = auth.currentUser;
+            const allowContactChecked = document.getElementById('allowContact') ? document.getElementById('allowContact').checked : false;
+
             const pledgeData = {
                 uid: currentUser ? currentUser.uid : null,
                 userEmail: currentUser ? currentUser.email : email,
@@ -821,6 +830,7 @@
                 city: city,
                 phone: phone,
                 email: email,
+                allowContact: allowContactChecked,
                 alcoholHabit: alcohol,
                 smokingHabit: smoking,
                 medicalConditions: medical,
@@ -867,7 +877,9 @@
                                 pledgeDate: pledgeData.pledgeDate,
                                 clearanceRating: rating,
                                 city: city,
-                                phone: phone
+                                phone: phone,
+                                email: email,
+                                allowContact: allowContactChecked
                             }
                         });
                     } catch(userErr) {
@@ -1017,6 +1029,12 @@
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
+        // Helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
         // Load organ donors
         onValue(ref(db, 'organ_donors'), (snapshot) => {
             const listEl = document.getElementById("pledgeList");
@@ -1026,24 +1044,50 @@
                 const pledges = Object.values(snapshot.val());
                 pledges.forEach(p => {
                     const card = document.createElement("div");
-                    card.className = "glass-card p-5 flex flex-col justify-between hover:border-purple-500 transition";
+                    card.className = "glass-card p-5 flex flex-col justify-between hover:border-purple-500 transition space-y-3";
+                    
+                    const allowsContact = (p.allowContact === true || p.allowContact === 'true');
+                    const donorName = p.name || 'Anonymous Donor';
+                    const bloodGroup = p.bloodGroup || 'A+';
+                    const city = p.city || 'Statewide';
+
+                    const contactSection = allowsContact ? `
+                        <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="text-xs space-y-0.5 text-slate-600 dark:text-slate-300">
+                                ${p.phone ? `<div class="flex items-center gap-1">📞 <a href="tel:${escapeHtml(p.phone)}" class="font-bold hover:text-purple-600 text-slate-900 dark:text-white">${escapeHtml(p.phone)}</a></div>` : ''}
+                                ${p.email ? `<div class="flex items-center gap-1 font-mono text-[11px]">✉️ <a href="mailto:${escapeHtml(p.email)}" class="hover:text-purple-600 text-slate-600 dark:text-slate-400">${escapeHtml(p.email)}</a></div>` : ''}
+                            </div>
+                            <a href="message.html?to=${encodeURIComponent(p.uid || '')}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(bloodGroup)}&city=${encodeURIComponent(city)}&role=donor" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-1.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Message on LifeSaver
+                            </a>
+                        </div>
+                    ` : `
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
+                            <span class="inline-flex items-center gap-1.5 italic text-[11px]">
+                                <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-500"></i> Contact details kept private by donor
+                            </span>
+                            <span class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold px-2 py-0.5 rounded-full">Name Only</span>
+                        </div>
+                    `;
+
                     card.innerHTML = `
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                                    🎁 ${p.organsPledged || 'All Organs'}
+                                    🎁 ${escapeHtml(p.organsPledged || 'All Organs')}
                                 </span>
                                 <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-                                    ${p.clearanceRating || '🟢 Prime Candidate'}
+                                    ${escapeHtml(p.clearanceRating || '🟢 Prime Candidate')}
                                 </span>
                             </div>
-                            <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">${p.name || 'Anonymous'}</h3>
-                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">${p.city || 'Hyderabad'} • Age ${p.age || '25'}</p>
-                            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-xs space-y-1">
-                                <div class="text-slate-600 dark:text-slate-300"><strong>Alcohol:</strong> ${p.alcoholHabit || 'Never'}</div>
-                                <div class="text-slate-600 dark:text-slate-300"><strong>Smoking:</strong> ${p.smokingHabit || 'Non-Smoker'}</div>
+                            <h3 class="font-black text-slate-900 dark:text-white text-base mb-0.5">${escapeHtml(donorName)}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-2.5">📍 ${escapeHtml(city)} • Age ${escapeHtml(p.age || '25')}${p.bloodGroup ? ' • ' + escapeHtml(p.bloodGroup) : ''}</p>
+                            <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 text-xs space-y-1">
+                                <div class="text-slate-600 dark:text-slate-300"><strong>Alcohol:</strong> ${escapeHtml(p.alcoholHabit || 'Never')}</div>
+                                <div class="text-slate-600 dark:text-slate-300"><strong>Smoking:</strong> ${escapeHtml(p.smokingHabit || 'Non-Smoker')}</div>
                             </div>
                         </div>
+                        ${contactSection}
                     `;
                     listEl.appendChild(card);
                 });

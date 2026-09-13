@@ -606,6 +606,24 @@
 
             <!-- 9. ADMIN ACTIVITY AUDIT LOGS TABLE (PART 18 & 19) -->
             <div id="tableAdminActivityContainer" class="overflow-x-auto hidden">
+                <div class="p-4 bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="p-2 rounded-xl bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-400 font-black text-xs">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h4 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <span>Admin Activity Audit Trail</span>
+                                <span id="adminActivityLogsBadge" class="text-[10px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold px-2 py-0.5 rounded-full">0 Records</span>
+                            </h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400">Complete historical record of administrator actions and system modifications</p>
+                        </div>
+                    </div>
+                    <button type="button" id="btnDeleteAllAdminActivity" onclick="deleteAllAdminActivity()" class="bg-red-600 hover:bg-red-700 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-md shadow-red-500/20 transition cursor-pointer active:scale-95">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        <span>Delete All Admin Activity</span>
+                    </button>
+                </div>
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
@@ -1183,7 +1201,20 @@
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition border-b border-slate-100 dark:border-slate-800";
                 const rawDobDisplay = item.dob ? `${item.dob} (${item.age || '-'} yrs)` : (item.age ? `${item.age} yrs` : '-');
-                const emailSubLine = isSubAdmin ? '' : `<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}<br/></span>`;
+                
+                // Organ donor names are visible to all users and sub admins:
+                // Contact details (phone & email): visible to sub admins ONLY if item.allowContact is true!
+                const allowsContact = (item.allowContact === true || item.allowContact === 'true');
+                let contactSubLine = '';
+                if (isSubAdmin) {
+                    if (allowsContact) {
+                        contactSubLine = `<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}<br/>${item.phone ? '📞 ' + item.phone + '<br/>' : ''}</span>`;
+                    } else {
+                        contactSubLine = `<span class="text-[11px] text-slate-400 dark:text-slate-500 italic font-mono">🔒 Private (Donor opted out)<br/></span>`;
+                    }
+                } else {
+                    contactSubLine = `<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">✉️ ${item.email || '-'}<br/>${item.phone ? '📞 ' + item.phone + '<br/>' : ''}</span>`;
+                }
 
                 const actionsCell = isSubAdmin
                     ? ''
@@ -1193,7 +1224,7 @@
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">
                         ${item.name || 'Anonymous'}<br/>
-                        ${emailSubLine}<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city || '-'}</span>
+                        ${contactSubLine}<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city || '-'}</span>
                     </td>
                     <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${rawDobDisplay}</td>
                     <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-900/50">${item.organsPledged || 'All'}</span></td>
@@ -2113,7 +2144,10 @@
                 return;
             }
 
-            const keys = Object.keys(adminAuditLogsData);
+            const keys = Object.keys(adminAuditLogsData || {});
+
+            const countBadge = document.getElementById("adminActivityLogsBadge");
+            if (countBadge) countBadge.textContent = `${keys.length} Records`;
 
             if (keys.length === 0) {
                 body.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">No admin activity recorded yet. Honest empty state active.</td></tr>`;
@@ -2142,6 +2176,34 @@
             });
             if (window.lucide) lucide.createIcons();
         }
+
+        // DELETE ALL ADMIN ACTIVITY AT ONCE
+        window.deleteAllAdminActivity = async function() {
+            if (adminRole === 'SUB_ADMIN') {
+                alert("Permission Denied: Sub-Admins cannot clear admin audit logs.");
+                return;
+            }
+
+            const count = Object.keys(adminAuditLogsData || {}).length;
+            if (count === 0) {
+                alert("There are no admin activity records to delete.");
+                return;
+            }
+
+            const confirmed = confirm(`⚠️ Are you sure you want to delete ALL ${count} admin activity logs at once?\n\nThis will clear the entire audit trail immediately.`);
+            if (!confirmed) return;
+
+            try {
+                await remove(ref(db, 'admin_audit_logs'));
+                adminAuditLogsData = {};
+                renderAdminActivityTable();
+                updateStats();
+                alert("✅ All admin activity logs have been successfully deleted at once.");
+            } catch (err) {
+                console.error("Failed to delete all admin activity logs:", err);
+                alert("Error deleting admin activity logs: " + err.message);
+            }
+        };
 
         // DONOR CONTACT PREFERENCE ADMIN OVERRIDE (PART 11-16)
         let activeDonorPrivacyKey = null;

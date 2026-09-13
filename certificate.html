@@ -167,7 +167,7 @@
 
         // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
         function formatSingleBloodGroup(rawBg) {
-            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            if (!rawBg || typeof rawBg !== 'string') return 'A+';
             const clean = rawBg.trim();
             const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
             if (match) {
@@ -177,7 +177,7 @@
             if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
                 return singleWord;
             }
-            return 'O+';
+            return 'A+';
         }
 
         // STRICT PAGE TOP INITIALIZATION
@@ -264,7 +264,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'O+'),
+                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'A+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -317,13 +317,66 @@
                     }
                 }
 
+                // Check users table in Firebase (for authoritative profile bloodGroup sync)
+                try {
+                    const usersSnap = await get(ref(db, 'users'));
+                    if (usersSnap.exists()) {
+                        const users = usersSnap.val();
+                        Object.keys(users).forEach(uKey => {
+                            const u = users[uKey];
+                            const bd = u.bloodDonor || {};
+                            const od = u.organDonor || {};
+                            const isOd = cleanIdLower.includes('od') || cleanIdLower.includes('organ');
+                            const userMatches = (
+                                uKey.toLowerCase() === cleanIdLower ||
+                                (u.uid && u.uid.toLowerCase() === cleanIdLower) ||
+                                (bd.credentialID && bd.credentialID.toLowerCase() === cleanIdLower) ||
+                                (od.credentialID && od.credentialID.toLowerCase() === cleanIdLower) ||
+                                (foundRecord && (
+                                    (foundRecord.uid && (foundRecord.uid === uKey || foundRecord.uid === u.uid)) ||
+                                    (foundRecord.email && u.email && foundRecord.email.toLowerCase() === u.email.toLowerCase()) ||
+                                    (foundRecord.name && u.name && foundRecord.name.toLowerCase() === u.name.toLowerCase())
+                                ))
+                            );
+                            if (userMatches) {
+                                const userBg = u.bloodGroup || u.blood_group || u.bg;
+                                if (userBg) {
+                                    if (!foundRecord) {
+                                        if (isOd) {
+                                            foundRecord = {
+                                                ...od,
+                                                name: u.name || u.fullName || od.name,
+                                                bloodGroup: userBg,
+                                                credentialID: od.credentialID || cleanId
+                                            };
+                                            certType = 'organ';
+                                        } else {
+                                            foundRecord = {
+                                                ...bd,
+                                                name: u.name || u.fullName || bd.name,
+                                                bloodGroup: userBg,
+                                                credentialID: bd.credentialID || cleanId
+                                            };
+                                            certType = 'blood';
+                                        }
+                                    } else {
+                                        foundRecord.bloodGroup = userBg;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } catch (uErr) {
+                    console.warn("User profile lookup notice:", uErr);
+                }
+
                 // Clean fallback if valid format but not in DB yet
                 if (!foundRecord) {
                     if (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) {
                         foundRecord = {
                             name: urlName || "Voluntary Organ Pledger",
                             organsPledged: urlOrgans || "All Vital Organs & Tissues",
-                            bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
+                            bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
                             credentialID: cleanId,
                             pledgeDate: new Date().toISOString().split('T')[0]
                         };
@@ -331,7 +384,7 @@
                     } else {
                         foundRecord = {
                             name: urlName || "Voluntary Blood Donor",
-                            bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
+                            bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
                             credentialID: cleanId,
                             registeredDate: new Date().toISOString().split('T')[0]
                         };
@@ -342,7 +395,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'O+'),
+                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'A+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -358,7 +411,7 @@
                     // Fallback render with target ID
                     activeCertData = {
                         name: urlName || "Voluntary Hero Donor",
-                        bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
+                        bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
                         certType: (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) ? 'organ' : 'blood',
                         certId: cleanId
                     };
@@ -373,7 +426,7 @@
         function renderCertificate(data) {
             const wrapper = document.getElementById("certificateDisplayWrapper");
             const isBlood = data.certType === 'blood';
-            const singleBg = formatSingleBloodGroup(data.bloodGroup || urlBg || 'O+');
+            const singleBg = formatSingleBloodGroup(data.bloodGroup || urlBg || 'A+');
             const verifyUrl = getCertificateVerifyUrl(data.certId, singleBg, data.name);
 
             if (isBlood) {
@@ -434,7 +487,7 @@
             if (!activeCertData) return;
             const isBlood = activeCertData.certType === 'blood';
             const name = activeCertData.name || (isBlood ? 'Blood Donor' : 'Organ Pledger');
-            const bg = formatSingleBloodGroup(activeCertData.bloodGroup || 'O+');
+            const bg = formatSingleBloodGroup(activeCertData.bloodGroup || 'A+');
             const certId = activeCertData.certId || 'LSC-2026-00482';
 
             const canvas = document.createElement('canvas');
@@ -520,7 +573,7 @@
             const title = isBlood ? 'LifeSaver-Care Blood Donation Certificate' : 'LifeSaver-Care Organ Donation Pledge Credential';
             const msg = `${icon} *${title}*\n\n` +
                 `Recipient: *${activeCertData.name || 'Hero Donor'}*\n` +
-                `Blood Group: *${activeCertData.bloodGroup || 'O+'}*\n` +
+                `Blood Group: *${activeCertData.bloodGroup || 'A+'}*\n` +
                 `Certificate ID: *${activeCertData.certId}*\n\n` +
                 `Verify official certificate online:\n${verifyUrl}\n\n` +
                 `Together We Save Lives! ❤️`;

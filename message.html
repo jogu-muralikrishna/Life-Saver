@@ -248,8 +248,58 @@
             </div>
         </div>
 
+        <!-- SECTION: REAL-TIME TWO-WAY INTERACTIVE CONVERSATION THREAD (USER A & USER B) -->
+        <div id="activeChatThreadContainer" class="glass-card p-5 sm:p-6 rounded-3xl border-2 border-blue-500/30 bg-white/95 dark:bg-slate-900/95 shadow-xl mb-6 relative">
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shrink-0 shadow-md shadow-blue-500/20">
+                        <i data-lucide="messages-square" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <span>Live Chat with</span> <span id="chatPartnerNameDisplay" class="text-blue-600 dark:text-blue-400">Recipient</span>
+                            </h3>
+                            <span class="inline-flex items-center gap-1 text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Two-Way Active
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Real-time healthcare messaging. User A & User B can view replies and continue chatting continuously.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleComposerFormCollapse()" id="btnToggleComposer" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+                        <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                        <span id="lblToggleComposer">Show Full Medical Form</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CHAT BUBBLES SCROLL BOX -->
+            <div id="chatMessagesBox" class="my-4 max-h-[380px] min-h-[160px] overflow-y-auto space-y-3 p-3 sm:p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 flex flex-col scroll-smooth">
+                <div id="chatLoadingNotice" class="text-center py-6 text-xs text-slate-400">
+                    Loading conversation thread...
+                </div>
+            </div>
+
+            <!-- QUICK CHAT INPUT BAR (REAL-TIME CONTINUATION) -->
+            <form id="quickChatForm" onsubmit="handleQuickChatSubmit(event)" class="relative flex items-center gap-2 pt-2">
+                <div class="relative flex-1">
+                    <input type="text" id="quickChatInput" required placeholder="Type a reply to continue chat..." class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-4 pr-10 py-3 rounded-2xl text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium transition">
+                </div>
+                <button type="submit" id="btnQuickChatSend" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-4 sm:px-5 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/25 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Send</span>
+                </button>
+            </form>
+            <div id="quickChatFeedback" class="hidden text-[11px] font-bold mt-1.5 text-emerald-600 dark:text-emerald-400"></div>
+        </div>
+
         <!-- 1-CLICK RAPID MEDICAL MESSAGE TEMPLATES -->
-        <div class="mb-6">
+        <div id="medicalTemplatesSection" class="mb-6">
             <div class="flex items-center justify-between mb-2">
                 <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Quick 1-Click Message Templates
@@ -283,8 +333,8 @@
             </div>
         </div>
 
-        <!-- MAIN MESSAGE COMPOSER FORM -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl relative mb-8">
+        <!-- MAIN MESSAGE COMPOSER FORM (COLLAPSIBLE) -->
+        <div id="formalComposerCard" class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl relative mb-8">
             <form id="lifeSaverMessageForm" onsubmit="handleMessageSubmit(event)" class="space-y-4 sm:space-y-5">
 
                 <!-- HIDDEN RECEIVER FIELDS -->
@@ -513,7 +563,244 @@
             if (bodyEl) bodyEl.focus();
         };
 
-        // SUBMIT MESSAGE TO FIREBASE REALTIME DATABASE
+        // XSS Helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Global Messages Cache
+        window.allMessagesMap = {};
+
+        // FORMAL COMPOSER TOGGLE
+        window.toggleComposerFormCollapse = function() {
+            const formCard = document.getElementById("formalComposerCard");
+            const tempSection = document.getElementById("medicalTemplatesSection");
+            const lbl = document.getElementById("lblToggleComposer");
+            if (!formCard) return;
+
+            const isHidden = formCard.classList.contains('hidden');
+            if (isHidden) {
+                formCard.classList.remove('hidden');
+                if (tempSection) tempSection.classList.remove('hidden');
+                if (lbl) lbl.textContent = "Hide Formal Form";
+                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                formCard.classList.add('hidden');
+                if (tempSection) tempSection.classList.add('hidden');
+                if (lbl) lbl.textContent = "Show Full Medical Form";
+            }
+        };
+
+        // RENDER ACTIVE TWO-WAY CONVERSATION THREAD (USER A & USER B)
+        window.renderTwoWayChatThread = function() {
+            const chatBox = document.getElementById("chatMessagesBox");
+            const partnerDisplay = document.getElementById("chatPartnerNameDisplay");
+            if (!chatBox) return;
+
+            const myUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
+                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('ls_user_chat_uid', newId);
+                return newId;
+            })());
+            const myEmail = window.activeAuthUser?.email || '';
+
+            const otherUid = document.getElementById("receiverUid")?.value?.trim() || '';
+            const otherName = document.getElementById("receiverName")?.value?.trim() || 'Recipient';
+
+            if (partnerDisplay) {
+                partnerDisplay.textContent = otherName;
+            }
+
+            const messagesObj = window.allMessagesMap || {};
+            const allMsgs = Object.keys(messagesObj).map(k => ({ ...messagesObj[k], _key: k }));
+
+            // Filter for bidirectional conversation between User A and User B
+            const conversation = allMsgs.filter(m => {
+                const sUid = m.senderUid || '';
+                const rUid = m.receiverUid || '';
+                const sMail = (m.senderEmail || '').toLowerCase();
+                const rMail = (m.receiverEmail || '').toLowerCase();
+
+                // Case 1: Exact UID match in either direction
+                const uidMatch = (otherUid && ((sUid === myUid && rUid === otherUid) || (sUid === otherUid && rUid === myUid)));
+
+                // Case 2: Email matching
+                const emailMatch = (myEmail && otherUid && ((sMail === myEmail.toLowerCase() && rUid === otherUid) || (sUid === otherUid && rMail === myEmail.toLowerCase())));
+
+                // Case 3: Match by participant name when generic guest dispatch
+                const nameMatch = (otherName && otherName !== 'Recipient' && otherName !== 'Voluntary Donor' && (
+                    (sUid === myUid && m.receiverName === otherName) ||
+                    (m.senderName === otherName && (rUid === myUid || rUid === 'COMMUNITY-DISPATCH'))
+                ));
+
+                return uidMatch || emailMatch || nameMatch;
+            });
+
+            // Sort chronologically ascending
+            conversation.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+            if (conversation.length === 0) {
+                chatBox.innerHTML = `
+                    <div class="my-auto text-center py-8 px-4 space-y-2">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto text-xl font-black">
+                            💬
+                        </div>
+                        <h4 class="font-black text-slate-800 dark:text-slate-200 text-sm">No Messages Yet with ${escapeHtml(otherName)}</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                            Start the conversation now using the quick-chat box below or choose a 1-click template. Both of you will see replies in real-time.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            chatBox.innerHTML = "";
+            conversation.forEach(m => {
+                const isMyMessage = (m.senderUid === myUid) || (myEmail && m.senderEmail && m.senderEmail.toLowerCase() === myEmail.toLowerCase());
+                const dateStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+                const fullDate = m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
+
+                const wrapper = document.createElement("div");
+                wrapper.className = isMyMessage ? "flex flex-col items-end max-w-[85%] sm:max-w-[78%] ml-auto space-y-1 animate-fade-in" : "flex flex-col items-start max-w-[85%] sm:max-w-[78%] mr-auto space-y-1 animate-fade-in";
+
+                const headerInfo = isMyMessage ? `
+                    <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pr-1">
+                        <span class="font-black text-blue-600 dark:text-blue-400">You</span>
+                        <span>•</span>
+                        <span>${dateStr} ${fullDate}</span>
+                    </div>
+                ` : `
+                    <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pl-1">
+                        <span class="font-black text-slate-700 dark:text-slate-300">${escapeHtml(m.senderName || otherName)}</span>
+                        <span>•</span>
+                        <span>${dateStr} ${fullDate}</span>
+                    </div>
+                `;
+
+                const bubbleClass = isMyMessage
+                    ? "p-3 sm:p-3.5 rounded-2xl rounded-tr-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white text-xs sm:text-sm shadow-md shadow-blue-500/15 leading-relaxed break-words"
+                    : "p-3 sm:p-3.5 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 text-xs sm:text-sm shadow-sm leading-relaxed break-words";
+
+                const subjectSnippet = (m.subject && !m.subject.startsWith('Chat with') && !m.subject.startsWith('Re: Quick'))
+                    ? `<div class="font-bold text-[11px] ${isMyMessage ? 'text-blue-100 border-blue-400/30' : 'text-blue-600 dark:text-blue-400 border-slate-200 dark:border-slate-700'} border-b pb-0.5 mb-1">${escapeHtml(m.subject)}</div>`
+                    : '';
+
+                wrapper.innerHTML = `
+                    ${headerInfo}
+                    <div class="${bubbleClass}">
+                        ${subjectSnippet}
+                        <div class="whitespace-pre-wrap">${escapeHtml(m.message || '')}</div>
+                    </div>
+                `;
+                chatBox.appendChild(wrapper);
+            });
+
+            // Auto-scroll to latest message
+            setTimeout(() => {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 50);
+        };
+
+        // QUICK-CHAT TWO-WAY MESSAGE SUBMISSION
+        window.handleQuickChatSubmit = async function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const input = document.getElementById("quickChatInput");
+            const btn = document.getElementById("btnQuickChatSend");
+            const feedback = document.getElementById("quickChatFeedback");
+            const text = input ? input.value.trim() : '';
+
+            if (!text) return;
+
+            const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
+            const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Voluntary Donor';
+            const receiverBloodGroup = document.getElementById("receiverBloodGroup")?.value?.trim() || '';
+            const receiverCity = document.getElementById("receiverCity")?.value?.trim() || '';
+            const receiverHospital = document.getElementById("receiverHospital")?.value?.trim() || '';
+
+            const senderName = document.getElementById("senderName")?.value?.trim() || (window.activeAuthUser?.displayName || 'Member');
+            const senderEmail = document.getElementById("senderContact")?.value?.trim() || (window.activeAuthUser?.email || '');
+
+            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
+                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('ls_user_chat_uid', newId);
+                return newId;
+            })());
+            const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
+
+            const payload = {
+                messageId: messageId,
+                senderUid: senderUid,
+                senderName: senderName,
+                senderEmail: senderEmail,
+                receiverUid: receiverUid || 'COMMUNITY-DISPATCH',
+                receiverName: receiverName,
+                receiverBloodGroup: receiverBloodGroup,
+                receiverCity: receiverCity,
+                receiverHospital: receiverHospital,
+                subject: `Chat with ${receiverName}`,
+                message: text,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString(),
+                read: false,
+                sourcePage: 'message.html'
+            };
+
+            if (btn) btn.disabled = true;
+            try {
+                await push(ref(db, 'messages'), payload);
+                if (input) input.value = '';
+                if (feedback) {
+                    feedback.textContent = `✓ Delivered to ${receiverName}`;
+                    feedback.classList.remove('hidden');
+                    setTimeout(() => feedback.classList.add('hidden'), 3000);
+                }
+            } catch (err) {
+                console.error("Error sending quick chat:", err);
+                if (feedback) {
+                    feedback.textContent = "Error: " + err.message;
+                    feedback.className = "text-[11px] font-bold mt-1.5 text-red-600 dark:text-red-400";
+                    feedback.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+                if (input) input.focus();
+            }
+        };
+
+        // 1-CLICK OPEN CONVERSATION THREAD FROM INBOX OR DIRECTORY
+        window.openConversationThread = function(uid, name, bg, city, hosp) {
+            updateRecipientDisplay({
+                uid: uid,
+                name: name,
+                bloodGroup: bg || '🩸',
+                city: city || '',
+                hospital: hosp || '',
+                role: hosp ? 'requester' : 'donor'
+            });
+
+            window.renderTwoWayChatThread();
+
+            const threadContainer = document.getElementById("activeChatThreadContainer");
+            if (threadContainer) {
+                threadContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            const input = document.getElementById("quickChatInput");
+            if (input) {
+                setTimeout(() => input.focus(), 300);
+            }
+        };
+
+        // SUBMIT DETAILED FORMAL MESSAGE TO FIREBASE REALTIME DATABASE
         window.dispatchMessagePayload = async function(e) {
             if (e) {
                 e.preventDefault();
@@ -537,7 +824,11 @@
             const subject = document.getElementById("messageSubject")?.value?.trim() || 'LifeSaver Care Inquiry';
             const message = document.getElementById("messageBody")?.value?.trim() || '';
 
-            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
+                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('ls_user_chat_uid', newId);
+                return newId;
+            })());
             const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
 
             const payload = {
@@ -653,6 +944,9 @@
                 }
                 window.updateCharCount();
             }
+
+            // Trigger re-render of two-way chat thread for new recipient
+            window.renderTwoWayChatThread();
         }
 
         // Set initial recipient from URL params
@@ -701,9 +995,6 @@
                     senderContactInput.value = user.email || user.phoneNumber || '';
                 }
                 if (authStatus) authStatus.textContent = '✓ Verified Account';
-
-                // Load User Inbox
-                listenToUserInbox(user);
             } else {
                 if (greetingEl) greetingEl.textContent = 'Account';
                 if (navSignOutBtn) {
@@ -712,6 +1003,10 @@
                 }
                 if (authStatus) authStatus.textContent = 'Guest Sender';
             }
+
+            // Re-render conversation thread and inbox
+            window.renderTwoWayChatThread();
+            renderInboxMessages(user);
         });
 
         // User Sign Out
@@ -724,79 +1019,76 @@
             }
         };
 
-        // Listen to User's Inbox Messages
-        function listenToUserInbox(user) {
+        // REAL-TIME MESSAGES LISTENER (GLOBAL BIDIRECTIONAL SYNC)
+        onValue(ref(db, 'messages'), (snap) => {
+            if (snap.exists()) {
+                window.allMessagesMap = snap.val();
+            } else {
+                window.allMessagesMap = {};
+            }
+            window.renderTwoWayChatThread();
+            renderInboxMessages(window.activeAuthUser);
+        });
+
+        // Render User Inbox Messages
+        function renderInboxMessages(user) {
             const inboxList = document.getElementById("userInboxList");
             const inboxBadge = document.getElementById("userInboxBadge");
             if (!inboxList) return;
 
-            onValue(ref(db, 'messages'), (snap) => {
-                if (!snap.exists()) {
-                    inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No messages in your inbox yet.</div>`;
-                    if (inboxBadge) inboxBadge.textContent = "0";
-                    return;
+            const myUid = user ? user.uid : (localStorage.getItem('ls_user_chat_uid') || '');
+            const myEmail = user ? (user.email || '').toLowerCase() : '';
+
+            const allMsgs = Object.keys(window.allMessagesMap || {}).map(k => ({ ...window.allMessagesMap[k], key: k }));
+
+            let myMessages = [];
+            allMsgs.forEach(m => {
+                const isRecipient = (myUid && m.receiverUid === myUid) || (myEmail && m.receiverEmail && m.receiverEmail.toLowerCase() === myEmail);
+                const isSender = (myUid && m.senderUid === myUid) || (myEmail && m.senderEmail && m.senderEmail.toLowerCase() === myEmail);
+                if (isRecipient || isSender) {
+                    myMessages.push(m);
                 }
-
-                const data = snap.val();
-                let myMessages = [];
-                Object.keys(data).forEach(key => {
-                    const m = data[key];
-                    if (m.receiverUid === user.uid || (m.receiverEmail && m.receiverEmail === user.email) || m.senderUid === user.uid) {
-                        myMessages.push({ ...m, key });
-                    }
-                });
-
-                myMessages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                if (inboxBadge) inboxBadge.textContent = myMessages.length;
-
-                if (myMessages.length === 0) {
-                    inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
-                    return;
-                }
-
-                inboxList.innerHTML = "";
-                myMessages.slice(0, 5).forEach(msg => {
-                    const isReceived = msg.receiverUid === user.uid || (msg.receiverEmail && msg.receiverEmail === user.email);
-                    const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recently';
-
-                    const item = document.createElement("div");
-                    item.className = "p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs";
-                    item.innerHTML = `
-                        <div class="space-y-1 min-w-0">
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isReceived ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400'}">
-                                    ${isReceived ? '📥 Received from ' + (msg.senderName || 'Member') : '📤 Sent to ' + (msg.receiverName || 'Recipient')}
-                                </span>
-                                <span class="text-[10px] text-slate-400">${dateStr}</span>
-                            </div>
-                            <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${msg.subject || 'No Subject'}</div>
-                            <p class="text-slate-600 dark:text-slate-400 line-clamp-1 italic">${msg.message || ''}</p>
-                        </div>
-                        <div class="shrink-0">
-                            <button type="button" onclick="selectQuickReply('${msg.senderUid || ''}', '${msg.senderName || 'Member'}', '${msg.subject || ''}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition">
-                                <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
-                            </button>
-                        </div>
-                    `;
-                    inboxList.appendChild(item);
-                });
-                if (window.lucide) lucide.createIcons();
             });
+
+            myMessages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            if (inboxBadge) inboxBadge.textContent = myMessages.length;
+
+            if (myMessages.length === 0) {
+                inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
+                return;
+            }
+
+            inboxList.innerHTML = "";
+            myMessages.slice(0, 8).forEach(msg => {
+                const isReceived = (myUid && msg.receiverUid === myUid) || (myEmail && msg.receiverEmail && msg.receiverEmail.toLowerCase() === myEmail);
+                const otherPartyUid = isReceived ? (msg.senderUid || '') : (msg.receiverUid || '');
+                const otherPartyName = isReceived ? (msg.senderName || 'Member') : (msg.receiverName || 'Recipient');
+                const otherPartyBg = msg.receiverBloodGroup || '🩸';
+                const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
+                const item = document.createElement("div");
+                item.className = "p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-blue-300 dark:hover:border-blue-800 transition";
+                item.innerHTML = `
+                    <div class="space-y-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isReceived ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400'}">
+                                ${isReceived ? '📥 From ' + escapeHtml(msg.senderName || 'Member') : '📤 To ' + escapeHtml(msg.receiverName || 'Recipient')}
+                            </span>
+                            <span class="text-[10px] text-slate-400">${dateStr}</span>
+                        </div>
+                        <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(msg.subject || 'No Subject')}</div>
+                        <p class="text-slate-600 dark:text-slate-400 line-clamp-1 italic">${escapeHtml(msg.message || '')}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" onclick="openConversationThread('${escapeHtml(otherPartyUid)}', '${escapeHtml(otherPartyName)}', '${escapeHtml(otherPartyBg)}', '${escapeHtml(msg.receiverCity || '')}', '${escapeHtml(msg.receiverHospital || '')}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
+                        </button>
+                    </div>
+                `;
+                inboxList.appendChild(item);
+            });
+            if (window.lucide) lucide.createIcons();
         }
-
-        window.selectQuickReply = function(uid, name, subject) {
-            updateRecipientDisplay({
-                uid: uid,
-                name: name,
-                bloodGroup: 'Member',
-                city: 'Direct Reply',
-                role: 'donor'
-            });
-            document.getElementById("messageSubject").value = subject.startsWith('Re:') ? subject : `Re: ${subject}`;
-            document.getElementById("messageBody").value = '';
-            document.getElementById("messageBody").focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
 
         window.resetMessageComposer = function() {
             const successCard = document.getElementById("successCard");
