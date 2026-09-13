@@ -120,6 +120,9 @@
                             <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
                                 <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500 shrink-0"></i> <span>Organ Registry</span>
                             </a>
+                            <a href="message.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Message Center</span>
+                            </a>
                             <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
                                 <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Emergency Guide</span>
                             </a>
@@ -538,9 +541,9 @@
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
                             </a>
                         </div>
-                        <button onclick="openDirectMessageToDonor('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                        <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
-                        </button>
+                        </a>
                     </div>
                 `;
             }
@@ -584,7 +587,12 @@
                 }
             }
 
-            // Always provide the In-Platform Contact Request button for Private Accounts
+            // In-Platform Contact & Messaging for Private Accounts
+            const messageLinkHtml = `
+                <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                    <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
+                </a>
+            `;
             const requestButtonHtml = `
                 <button onclick="openRequestToContactModal('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition">
                     <i data-lucide="shield" class="w-3.5 h-3.5"></i> 🔒 Send Contact Request
@@ -605,6 +613,7 @@
                         <div class="grid grid-cols-${actionButtons.length > 1 ? '2' : '1'} gap-2">
                             ${actionButtons.join('')}
                         </div>
+                        ${messageLinkHtml}
                         ${requestButtonHtml}
                     </div>
                 `;
@@ -621,6 +630,7 @@
                             🔒 Private
                         </span>
                     </div>
+                    ${messageLinkHtml}
                     ${requestButtonHtml}
                 </div>
             `;
@@ -711,21 +721,10 @@
             }
         };
 
-        // Direct Message to Donor Modal
-        window.openDirectMessageToDonor = function(donorUid, donorName) {
-            window.lockBodyScroll();
-            document.getElementById("directMsgReceiverUid").value = donorUid || '';
-            document.getElementById("directMsgDonorName").textContent = donorName || 'Voluntary Donor';
-            if (window.currentUserAuth) {
-                document.getElementById("directMsgSenderName").value = window.currentUserAuth.displayName || '';
-                document.getElementById("directMsgSenderEmail").value = window.currentUserAuth.email || '';
-            }
-            const modal = document.getElementById("directMessageDonorModal");
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-            if (window.lucide) lucide.createIcons();
+        // Direct Message to Donor Handler (Forward to dedicated message.html)
+        window.openDirectMessageToDonor = function(donorUid, donorName, bloodGroup, city) {
+            const url = `message.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&bg=${encodeURIComponent(bloodGroup || '')}&city=${encodeURIComponent(city || '')}&role=donor`;
+            window.location.href = url;
         };
 
         window.closeDirectMessageDonorModal = function() {

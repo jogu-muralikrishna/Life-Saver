@@ -232,10 +232,27 @@
                     <h2 class="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-3 pb-1 border-b border-purple-100 dark:border-purple-900/50">
                         1. Personal Details
                     </h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
                             <input type="text" id="name" required placeholder="John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                                <span>Blood Group</span>
+                                <span class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Vital for match</span>
+                            </label>
+                            <select id="bloodGroup" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-purple-500 font-bold">
+                                <option value="" disabled selected>Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Age</label>
@@ -244,7 +261,7 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
                                 <span>Date of Birth</span>
-                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Manual Entry (DD/MM/YYYY)</span>
+                                <span class="text-[10px] text-slate-400 dark:text-slate-500 font-normal">Manual Entry</span>
                             </label>
                             <div class="relative">
                                 <input type="text" id="dob_input" required placeholder="DD/MM/YYYY (e.g. 15/08/1995)" inputmode="numeric" maxlength="10" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-purple-500 font-mono tracking-wide pr-10">
@@ -604,6 +621,11 @@
                     const cityInput = document.getElementById("city");
                     if (cityInput && !cityInput.value) cityInput.value = userSnapVal.city;
                 }
+                const userBg = (userSnapVal && (userSnapVal.bloodGroup || (userSnapVal.bloodDonor && userSnapVal.bloodDonor.bloodGroup))) || null;
+                if (userBg) {
+                    const bgInput = document.getElementById("bloodGroup");
+                    if (bgInput && !bgInput.value) bgInput.value = userBg;
+                }
             } else {
                 if (authBanner) {
                     authBanner.classList.remove("hidden");
@@ -774,6 +796,8 @@
             btn.disabled = true;
 
             const name = document.getElementById('name').value.trim();
+            const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
+            const singleBg = formatSingleBloodGroup(rawBg);
             const city = document.getElementById('city').value.trim();
             const organs = document.getElementById('organsPledged').value;
             const alcohol = document.getElementById('alcoholHabit').value;
@@ -790,6 +814,7 @@
                 uid: currentUser ? currentUser.uid : null,
                 userEmail: currentUser ? currentUser.email : email,
                 name: name,
+                bloodGroup: singleBg,
                 age: document.getElementById('age').value,
                 dob: document.getElementById('dob').value,
                 organsPledged: organs,
@@ -836,6 +861,7 @@
                         await update(ref(db, `users/${currentUser.uid}`), {
                             organDonor: {
                                 name: name,
+                                bloodGroup: singleBg,
                                 organsPledged: organs,
                                 credentialID: credentialID,
                                 pledgeDate: pledgeData.pledgeDate,
@@ -852,6 +878,7 @@
                 // Cache to localStorage for instant offline dashboard access
                 localStorage.setItem('organDonorData', JSON.stringify({
                     name: name,
+                    bloodGroup: singleBg,
                     organsPledged: organs,
                     credentialID: credentialID,
                     pledgeDate: pledgeData.pledgeDate
@@ -866,11 +893,12 @@
             }
 
             const todayDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            document.getElementById("passName").textContent = name;
-            document.getElementById("passCity").textContent = city;
-            document.getElementById("passOrgans").textContent = organs;
-            document.getElementById("passClearance").textContent = rating;
-            document.getElementById("passID").textContent = credentialID;
+            if (document.getElementById("passName")) document.getElementById("passName").textContent = name;
+            if (document.getElementById("passBg")) document.getElementById("passBg").textContent = singleBg;
+            if (document.getElementById("passOrgans")) document.getElementById("passOrgans").textContent = organs;
+            if (document.getElementById("passID")) document.getElementById("passID").textContent = credentialID;
+            if (document.getElementById("passCity")) document.getElementById("passCity").textContent = city;
+            if (document.getElementById("passClearance")) document.getElementById("passClearance").textContent = rating;
             if (document.getElementById("passIDFooter")) document.getElementById("passIDFooter").textContent = credentialID;
             if (document.getElementById("passDateDisplay")) document.getElementById("passDateDisplay").textContent = todayDate;
             if (document.getElementById("passDateFooter")) document.getElementById("passDateFooter").textContent = "Date: " + todayDate;
@@ -885,18 +913,23 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://life-saver-care.vercel.app/';
+                return 'https://life-saver-cyan.vercel.app/';
             }
 
-            function getCertificateVerifyUrl(id) {
+            function getCertificateVerifyUrl(id, bg, donorName) {
                 const cleanId = (id || '').toString().trim();
                 const base = getAppBaseUrl();
-                return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+                let url = `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+                if (bg) url += `&bg=${encodeURIComponent(bg)}`;
+                if (donorName) url += `&name=${encodeURIComponent(donorName)}`;
+                return url;
             }
 
-            const verifyUrl = getCertificateVerifyUrl(credentialID);
-            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-            document.getElementById("passQR").src = qrUrl;
+            const verifyUrl = getCertificateVerifyUrl(credentialID, singleBg, name);
+            const passQrEl = document.getElementById("passQR");
+            if (passQrEl) {
+                passQrEl.src = 'scanner-qr.png';
+            }
 
             document.getElementById("passModal").classList.remove("hidden");
             document.getElementById("passModal").classList.add("flex");
@@ -908,20 +941,47 @@
             btn.disabled = false;
         });
 
+        function formatSingleBloodGroup(rawBg) {
+            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            const clean = rawBg.trim();
+            const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
+            if (match) {
+                return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
+            }
+            const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
+            if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
+                return singleWord;
+            }
+            return 'O+';
+        }
+
         window.previewOrganCertificate = function() {
             const credentialID = "LSC-OD-2026-" + Math.floor(10000 + Math.random() * 90000);
-            document.getElementById("passName").textContent = "Your Name";
-            document.getElementById("passOrgans").textContent = "🎁 All Organs & Tissues";
-            document.getElementById("passID").textContent = credentialID;
-            
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
-            const verifyUrl = `${base}/certificate.html?id=${credentialID}`;
-            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-            document.getElementById("passQR").src = qrUrl;
+            const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
+            const singleBg = formatSingleBloodGroup(rawBg);
+            const enteredName = document.getElementById('name')?.value?.trim() || 'Your Name';
+            const enteredOrgans = document.getElementById('organsPledged')?.value || 'All Organs & Tissues';
+
+            const passNameEl = document.getElementById("passName");
+            if (passNameEl) passNameEl.textContent = enteredName;
+            const passBgEl = document.getElementById("passBg");
+            if (passBgEl) passBgEl.textContent = singleBg;
+            const passOrgansEl = document.getElementById("passOrgans");
+            if (passOrgansEl) passOrgansEl.textContent = '🎁 ' + enteredOrgans;
+            const passIdEl = document.getElementById("passID");
+            if (passIdEl) passIdEl.textContent = credentialID;
+
+            const passQrEl = document.getElementById("passQR");
+            if (passQrEl) {
+                passQrEl.src = 'scanner-qr.png';
+            }
 
             window.lockBodyScroll();
-            document.getElementById("passModal").classList.remove("hidden");
-            document.getElementById("passModal").classList.add("flex");
+            const modal = document.getElementById("passModal");
+            if (modal) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
             if (window.lucide) lucide.createIcons();
         };
 
@@ -933,8 +993,10 @@
 
         window.copyOrganCredentialID = function() {
             const id = document.getElementById("passID").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
-            const verifyUrl = `${base}/certificate.html?id=${id}`;
+            const bg = document.getElementById("passBg").textContent;
+            const name = document.getElementById("passName").textContent;
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             navigator.clipboard.writeText(verifyUrl).then(() => {
                 alert("Organ Certificate Verification Link copied: " + verifyUrl);
             });
@@ -942,9 +1004,13 @@
 
         window.shareOrganWhatsApp = function() {
             const id = document.getElementById("passID").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-care.vercel.app';
-            const verifyUrl = `${base}/certificate.html?id=${id}`;
+            const bg = document.getElementById("passBg").textContent;
+            const name = document.getElementById("passName").textContent;
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             const msg = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\n` +
+                `Pledger: *${name}*\n` +
+                `Blood Group: *${bg}*\n` +
                 `Certificate ID: *${id}*\n\n` +
                 `View & verify official certificate online:\n${verifyUrl}\n\n` +
                 `Together We Save Lives! 🌟`;

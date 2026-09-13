@@ -123,6 +123,9 @@
                             <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
                                 <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-purple-500 shrink-0"></i> <span>Organ Registry</span>
                             </a>
+                            <a href="message.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Message Center</span>
+                            </a>
                             <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
                                 <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Emergency Guide</span>
                             </a>
@@ -320,6 +323,10 @@
             <a href="find-donor.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-blue-500/20 flex items-center gap-2">
                 <i data-lucide="search" class="w-4 h-4"></i>
                 <span>Find Donors Directory</span>
+            </a>
+            <a href="message.html" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-3 rounded-2xl text-xs sm:text-sm transition shadow-md shadow-indigo-500/20 flex items-center gap-2">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                <span>Message on LifeSaver-Care</span>
             </a>
         </div>
 
@@ -601,12 +608,15 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <button id="btnPrivacyDirectCall" onclick="handlePrivacyDirectCall()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm">
-                    <i data-lucide="phone" class="w-4 h-4"></i> Call Directly
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button id="btnPrivacyDirectCall" onclick="handlePrivacyDirectCall()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm">
+                    <i data-lucide="phone" class="w-4 h-4"></i> Call
                 </button>
-                <button id="btnPrivacySendWhatsApp" onclick="handlePrivacySendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/20">
-                    <i data-lucide="message-square" class="w-4 h-4"></i> Send Respectful WhatsApp
+                <button id="btnPrivacySendWhatsApp" onclick="handlePrivacySendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-emerald-600/20">
+                    <i data-lucide="message-square" class="w-4 h-4"></i> WhatsApp
+                </button>
+                <button id="btnPrivacyMessageHub" onclick="handlePrivacyOpenMessageHub()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-blue-500/20">
+                    <i data-lucide="mail" class="w-4 h-4"></i> Message
                 </button>
             </div>
         </div>
@@ -967,6 +977,13 @@
             window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}`, '_blank');
         };
 
+        window.handlePrivacyOpenMessageHub = function() {
+            if (!window.currentPrivacyContact) return;
+            const c = window.currentPrivacyContact;
+            const url = `message.html?to=${encodeURIComponent(c.userId || c.uid || '')}&name=${encodeURIComponent(c.name || '')}&bg=${encodeURIComponent(c.bloodGroup || '')}&city=${encodeURIComponent(c.city || '')}&hospital=${encodeURIComponent(c.hospital || '')}&role=${encodeURIComponent(c.type || 'donor')}`;
+            window.location.href = url;
+        };
+
         window.openPrivacyDonorByIndex = function(idx) {
             const donor = window.currentRenderedDonors[idx];
             if (donor) {
@@ -1185,6 +1202,9 @@
                             <button onclick="openPrivacyTicketByKey('${key}')" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call Attendant
                             </button>
+                            <a href="message.html?to=${encodeURIComponent(r.userId || '')}&name=${encodeURIComponent(requesterTitle)}&hospital=${encodeURIComponent(r.hospital || '')}&city=${encodeURIComponent(r.city || '')}&bg=${encodeURIComponent(r.bloodGroup || '')}&role=requester&subject=${encodeURIComponent('Urgent ' + r.bloodGroup + ' Blood Requirement at ' + r.hospital)}" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-sm transition flex items-center gap-1 cursor-pointer" title="Direct message attendant on LifeSaver-Care">
+                                <i data-lucide="mail" class="w-3.5 h-3.5"></i> Message
+                            </a>
                             ${deleteBtnHtml}
                         </div>
                     </div>
@@ -1287,12 +1307,18 @@
                                 <a href="https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
                                     <i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp
                                 </a>
+                                <a href="message.html?to=${encodeURIComponent(donor.uid || donor.userId || '')}&name=${encodeURIComponent(donor.name || 'Donor')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&hospital=${encodeURIComponent(ticket.hospital || '')}&role=donor" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="mail" class="w-3 h-3"></i> Message
+                                </a>
                             `;
                         } else {
                             phoneLine = `<p class="text-[10px] text-purple-600 dark:text-purple-400 font-mono font-bold flex items-center gap-1">
                                 <i data-lucide="lock" class="w-3 h-3"></i> Private Number <span class="text-[9px] bg-purple-50 dark:bg-purple-950 px-1 rounded">🔒 Private</span>
                             </p>`;
                             actionButtons = `
+                                <a href="message.html?to=${encodeURIComponent(donor.uid || donor.userId || '')}&name=${encodeURIComponent(donor.name || 'Donor')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&hospital=${encodeURIComponent(ticket.hospital || '')}&role=donor" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
+                                    <i data-lucide="mail" class="w-3 h-3"></i> Message
+                                </a>
                                 <a href="find-donor.html" class="bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition shadow-sm">
                                     <i data-lucide="shield" class="w-3 h-3"></i> Request
                                 </a>

@@ -558,7 +558,7 @@
                                 <span id="certID" class="font-mono text-[11px] font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg inline-block border border-slate-300">LSC-BD-2026-00482</span>
                             </div>
                             <div class="bg-white p-1 rounded-xl border border-slate-300 shadow-sm shrink-0">
-                                <img id="certQR" src="" alt="QR Verification" class="w-11 h-11 object-contain" />
+                                <img id="certQR" src="scanner-qr.png" alt="QR Verification" class="w-11 h-11 object-contain" />
                             </div>
                         </div>
 
@@ -1063,37 +1063,25 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://life-saver-care.vercel.app/';
+                return 'https://life-saver-cyan.vercel.app/';
             }
 
-            function getCertificateVerifyUrl(id) {
+            function getCertificateVerifyUrl(id, bloodGrp, donorName) {
                 const cleanId = (id || '').toString().trim();
                 const base = getAppBaseUrl();
-                return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+                let url = `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+                if (bloodGrp) url += `&bg=${encodeURIComponent(bloodGrp)}`;
+                if (donorName) url += `&name=${encodeURIComponent(donorName)}`;
+                return url;
             }
-
-            function formatSingleBloodGroup(rawBg) {
-                if (!rawBg || typeof rawBg !== 'string') return 'O+';
-                const clean = rawBg.trim();
-                const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
-                if (match) {
-                    return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
-                }
-                const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
-                if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
-                    return singleWord;
-                }
-                return 'O+';
-            }
-
-            const verifyUrl = getCertificateVerifyUrl(credentialID);
-            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
 
             const singleBg = formatSingleBloodGroup(bg);
+            const verifyUrl = getCertificateVerifyUrl(credentialID, singleBg, name);
+
             document.getElementById("certName").textContent = name;
             document.getElementById("certBg").textContent = singleBg;
             document.getElementById("certID").textContent = credentialID;
-            document.getElementById("certQR").src = qrUrl;
+            document.getElementById("certQR").src = 'scanner-qr.png';
 
             window.currentBloodCertData = {
                 name: name,
@@ -1111,22 +1099,42 @@
             btn.disabled = false;
         });
 
+        function formatSingleBloodGroup(rawBg) {
+            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            const clean = rawBg.trim();
+            const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
+            if (match) {
+                return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
+            }
+            const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
+            if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
+                return singleWord;
+            }
+            return 'O+';
+        }
+
         window.previewCertificate = function() {
             const credentialID = "LSR-2026-00125";
-            const todayDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            document.getElementById("certName").textContent = "Your Name";
-            document.getElementById("certBg").textContent = "O+";
-            document.getElementById("certCity").textContent = "Hyderabad, TS";
-            document.getElementById("certID").textContent = credentialID;
-            if (document.getElementById("certIDFooter")) document.getElementById("certIDFooter").textContent = credentialID;
-            if (document.getElementById("certDateDisplay")) document.getElementById("certDateDisplay").textContent = todayDate;
-            if (document.getElementById("certDateFooter")) document.getElementById("certDateFooter").textContent = "Date: " + todayDate;
-            const verifyUrl = getCertificateVerifyUrl(credentialID);
-            document.getElementById("certQR").src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+            const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
+            const singleBg = formatSingleBloodGroup(rawBg);
+            const enteredName = document.getElementById('name')?.value?.trim() || 'Your Name';
+
+            const certNameEl = document.getElementById("certName");
+            if (certNameEl) certNameEl.textContent = enteredName;
+            const certBgEl = document.getElementById("certBg");
+            if (certBgEl) certBgEl.textContent = singleBg;
+            const certIdEl = document.getElementById("certID");
+            if (certIdEl) certIdEl.textContent = credentialID;
+
+            const certQrEl = document.getElementById("certQR");
+            if (certQrEl) certQrEl.src = 'scanner-qr.png';
 
             window.lockBodyScroll();
-            document.getElementById("certModal").classList.remove("hidden");
-            document.getElementById("certModal").classList.add("flex");
+            const modal = document.getElementById("certModal");
+            if (modal) {
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+            }
             if (window.lucide) lucide.createIcons();
         };
 
@@ -1145,9 +1153,17 @@
 
         window.shareCertWhatsApp = function() {
             const name = document.getElementById("certName").textContent;
+            const bg = document.getElementById("certBg").textContent;
             const id = document.getElementById("certID").textContent;
-            const msg = `🏆 I just officially registered as a Voluntary Blood Donor Hero on LifeSaver! (Credential ID: ${id}). Join me in saving lives near us: ${window.location.origin}/index.html`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
+            const msg = `🏆 *Official Voluntary Blood Donor Certificate*\n\n` +
+                `Hero Donor: *${name}*\n` +
+                `Blood Group: *${bg}*\n` +
+                `Credential ID: *${id}*\n\n` +
+                `Verify official certificate online:\n${verifyUrl}\n\n` +
+                `Join me in saving lives near us! ❤️`;
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
         };
     </script>
     <script>

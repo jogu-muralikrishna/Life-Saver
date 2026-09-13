@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message on LifeSaver-Care - Direct Healthcare Communication</title>
+    <meta name="description" content="Send direct, secure, and respectful messages to registered voluntary blood donors, patient attendants, and emergency healthcare responders on LifeSaver.">
+    <link rel="canonical" href="https://life-saver-care.vercel.app/message.html">
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        window.updateCharCount = function() {
+            const bodyEl = document.getElementById("messageBody");
+            const counter = document.getElementById("charCounter");
+            if (bodyEl && counter) {
+                counter.textContent = `${bodyEl.value.length} / 800 chars`;
+            }
+        };
+        window.handleMessageSubmit = function(e) {
+            if (e) e.preventDefault();
+            if (typeof window.dispatchMessagePayload === 'function') {
+                return window.dispatchMessagePayload(e);
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+
+<body class="min-h-screen pb-20 flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+
+            <!-- BRAND LOGO -->
+            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="droplet" class="w-5 h-5"></i>
+                </div>
+                <span>Life <span class="text-emerald-500">Saver</span></span>
+            </a>
+
+            <!-- GREETING / DYNAMIC USER NAME -->
+            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                <span id="userGreetingTop" class="truncate">Account</span>
+            </a>
+
+            <!-- QUICK TOOLS + CONTROLS -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+
+                <!-- TOOL 1: AI TRIAGE -->
+                <a href="index.html?action=triage" class="hidden md:flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-blue-200/80 dark:border-blue-900/60 transition shadow-sm shrink-0" title="AI Medical Triage Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5"></i>
+                    <span>AI Triage</span>
+                </a>
+
+                <!-- TOOL 2: FIND DONORS -->
+                <a href="find-donor.html" class="flex items-center gap-1.5 bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-xl text-xs font-extrabold border border-red-200/80 dark:border-red-900/60 transition shadow-sm shrink-0">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                    <span>Find Donors</span>
+                </a>
+
+                <!-- THEME TOGGLE -->
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition shrink-0" aria-label="Toggle dark mode">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <!-- TOOLS DROPDOWN MENU -->
+                <div class="relative">
+                    <button onclick="toggleNavToolsDropdown(event)" class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition">
+                        <i data-lucide="grid" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Tools</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 opacity-60"></i>
+                    </button>
+                    <div id="navToolsDropdown" class="nav-dropdown-content">
+                        <a href="find-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-blue-500"></i> <span>Find Donors</span>
+                        </a>
+                        <a href="blood.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> <span>Urgent Blood Board</span>
+                        </a>
+                        <a href="register-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5 text-emerald-500"></i> <span>Register Donor</span>
+                        </a>
+                        <a href="hospitals.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="building-2" class="w-3.5 h-3.5 text-purple-500"></i> <span>Hospitals</span>
+                        </a>
+                        <a href="ambulance.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-500"></i> <span>Ambulance</span>
+                        </a>
+                        <a href="organ-donor.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="heart-handshake" class="w-3.5 h-3.5 text-blue-500"></i> <span>Organ Registry</span>
+                        </a>
+                        <a href="auth.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                            <i data-lucide="mail" class="w-3.5 h-3.5 text-rose-500"></i> <span>My Messages Inbox</span>
+                        </a>
+                        <button id="navSignOutBtn" onclick="handleUserSignOut()" class="w-full hidden items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition text-left mt-0.5">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i> <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MOBILE MENU TOGGLE -->
+                <button onclick="toggleMobileNav(event)" class="sm:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+                    <i data-lucide="menu" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div id="mobileNavDrawer" class="mobile-nav-drawer hidden">
+        <div class="p-4 space-y-3">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <span class="font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <i data-lucide="message-square" class="w-4 h-4 text-blue-500"></i> LifeSaver-Care Messaging
+                </span>
+                <button onclick="toggleMobileNav(event)" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
+            </div>
+            <div class="space-y-1">
+                <a href="find-donor.html" class="block p-2.5 rounded-xl font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-red-500"></i> Find Donors Directory</a>
+                <a href="blood.html" class="block p-2.5 rounded-xl font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"><i data-lucide="droplet" class="w-4 h-4 text-red-600"></i> Urgent Blood Board</a>
+                <a href="auth.html" class="block p-2.5 rounded-xl font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-blue-500"></i> Member Messages Inbox</a>
+                <a href="index.html" class="block p-2.5 rounded-xl font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2"><i data-lucide="home" class="w-4 h-4 text-slate-500"></i> Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER: FULL VISIBILITY AT TOP -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full">
+
+        <!-- BREADCRUMB & BACK ACTION -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <a id="btnBackLink" href="find-donor.html" class="inline-flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 bg-white dark:bg-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm transition group">
+                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                <span id="lblBackLink">Back to Donors Directory</span>
+            </a>
+
+            <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full font-bold border border-emerald-200 dark:border-emerald-900/60">
+                    <i data-lucide="shield-check" class="w-3 h-3"></i> Guarded Medical Outreach
+                </span>
+                <span class="hidden sm:inline">• Direct Member Delivery</span>
+            </div>
+        </div>
+
+        <!-- PAGE HEADER BANNER -->
+        <div class="text-center sm:text-left mb-6 sm:mb-8 glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-blue-500/10 via-red-500/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shadow-blue-500/20 shrink-0">
+                    <i data-lucide="mail-check" class="w-7 h-7"></i>
+                </div>
+                <div class="space-y-1 text-center sm:text-left flex-1">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">Message on LifeSaver-Care</h1>
+                        <span class="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-0.5 rounded-full font-extrabold border border-blue-200 dark:border-blue-900 uppercase">Live Inbox Network</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
+                        Direct, verified, and spam-free communication. Messages are delivered straight to the member’s LifeSaver inbox with optional notification dispatch.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: ACTIVE RECIPIENT DISPLAY / SWITCHER -->
+        <div id="recipientSummaryCard" class="glass-card p-5 sm:p-6 rounded-3xl border-2 border-blue-500/40 dark:border-blue-500/30 bg-white/80 dark:bg-slate-900/80 mb-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+                    <!-- Avatar / Blood Group Pill -->
+                    <div id="recBgPill" class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-red-500/20 shrink-0">
+                        O+
+                    </div>
+
+                    <!-- Details -->
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-[10px] uppercase tracking-wider font-extrabold text-blue-600 dark:text-blue-400">Recipient</span>
+                            <span id="recRoleBadge" class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-900">
+                                🟢 Voluntary Blood Donor
+                            </span>
+                        </div>
+                        <h2 id="recName" class="text-lg font-black text-slate-900 dark:text-white truncate">Voluntary Donor</h2>
+                        <p id="recLocation" class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span id="recLocationText">Location</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Change Recipient / Browse Directory Button -->
+                <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="toggleRecipientDirectoryDrawer()" id="btnToggleDirectory" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-blue-500"></i>
+                        <span>Change / Message Someone Else</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCHABLE RECIPIENT DIRECTORY (COLLAPSIBLE: FOR "MSG EVERYONE" / DIRECTORY PICKER) -->
+        <div id="recipientDirectoryDrawer" class="hidden glass-card p-5 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mb-6 space-y-4 animate-in fade-in duration-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-4 h-4 text-blue-500"></i> Select Recipient from Community Directory
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Choose any registered voluntary donor or emergency requester to send a message</p>
+                </div>
+                <button type="button" onclick="toggleRecipientDirectoryDrawer()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg">✕</button>
+            </div>
+
+            <!-- Tabs: Donors vs Urgent Requests -->
+            <div class="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+                <button type="button" onclick="switchDirectoryTab('donors')" id="tabBtnDonors" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition">
+                    Voluntary Donors (<span id="countDonors">0</span>)
+                </button>
+                <button type="button" onclick="switchDirectoryTab('requests')" id="tabBtnRequests" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
+                    Urgent Blood Tickets (<span id="countRequests">0</span>)
+                </button>
+            </div>
+
+            <!-- Search Filter Inside Picker -->
+            <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+                <input type="text" id="directorySearchInput" oninput="filterDirectoryList()" placeholder="Search by name, city, hospital, or blood group (e.g. O+, Hyderabad)..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-blue-500 font-medium">
+            </div>
+
+            <!-- Directory Scroll List -->
+            <div id="directoryItemsList" class="max-h-60 overflow-y-auto space-y-2 pr-1 divide-y divide-slate-100 dark:divide-slate-800">
+                <div class="p-4 text-center text-xs text-slate-400">Loading directory contacts...</div>
+            </div>
+        </div>
+
+        <!-- 1-CLICK RAPID MEDICAL MESSAGE TEMPLATES -->
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Quick 1-Click Message Templates
+                </label>
+                <span class="text-[10px] text-slate-400">Click to fill automatically</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="applyMessageTemplate('urgent')" class="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-red-500 dark:hover:border-red-500 hover:bg-red-50/50 dark:hover:bg-red-950/20 text-left transition group shadow-sm">
+                    <div class="text-base mb-1">🩸</div>
+                    <div class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition">Urgent Need</div>
+                    <div class="text-[10px] text-slate-400 truncate">Immediate blood request</div>
+                </button>
+
+                <button type="button" onclick="applyMessageTemplate('platelets')" class="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 text-left transition group shadow-sm">
+                    <div class="text-base mb-1">🧪</div>
+                    <div class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition">SDP / Platelets</div>
+                    <div class="text-[10px] text-slate-400 truncate">Dengue / Cancer care</div>
+                </button>
+
+                <button type="button" onclick="applyMessageTemplate('availability')" class="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 text-left transition group shadow-sm">
+                    <div class="text-base mb-1">🤝</div>
+                    <div class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 transition">Check Availability</div>
+                    <div class="text-[10px] text-slate-400 truncate">Voluntary donation check</div>
+                </button>
+
+                <button type="button" onclick="applyMessageTemplate('courtesy')" class="p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 text-left transition group shadow-sm">
+                    <div class="text-base mb-1">💬</div>
+                    <div class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition">General Inquiry</div>
+                    <div class="text-[10px] text-slate-400 truncate">LifeSaver Care inquiry</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN MESSAGE COMPOSER FORM -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl relative mb-8">
+            <form id="lifeSaverMessageForm" onsubmit="handleMessageSubmit(event)" class="space-y-4 sm:space-y-5">
+
+                <!-- HIDDEN RECEIVER FIELDS -->
+                <input type="hidden" id="receiverUid">
+                <input type="hidden" id="receiverName">
+                <input type="hidden" id="receiverBloodGroup">
+                <input type="hidden" id="receiverCity">
+                <input type="hidden" id="receiverHospital">
+
+                <!-- SENDER INFORMATION -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                            <span>Your Full Name *</span>
+                            <span id="senderAuthStatus" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold"></span>
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="senderName" required placeholder="e.g. Rajesh Kumar" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                            Your Email / Contact Number *
+                        </label>
+                        <div class="relative">
+                            <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+                            <input type="text" id="senderContact" required placeholder="e.g. rajesh@gmail.com or 9876543210" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBJECT LINE -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span>Message Subject *</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Clear & Medical-Focused</span>
+                    </label>
+                    <div class="relative">
+                        <i data-lucide="bookmark" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
+                        <input type="text" id="messageSubject" required placeholder="e.g. Urgent O+ Blood Donation Inquiry / Availability" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-bold transition">
+                    </div>
+                </div>
+
+                <!-- MESSAGE BODY -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Detailed Message *
+                        </label>
+                        <span id="charCounter" class="text-[10px] text-slate-400 font-mono">0 / 800 chars</span>
+                    </div>
+                    <textarea id="messageBody" rows="5" required oninput="updateCharCount()" placeholder="Write your respectful message here. Please include patient hospital location, required units, and contact details if immediate assistance is needed..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 font-medium leading-relaxed transition"></textarea>
+                </div>
+
+                <!-- RESPECTFUL PROTOCOL ACKNOWLEDGEMENT -->
+                <div class="p-3 sm:p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+                    <label class="flex items-start gap-2.5 cursor-pointer select-none text-xs text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" id="chkCourtesyAgree" checked required class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 h-4 w-4 shrink-0">
+                        <span class="leading-relaxed">
+                            I acknowledge that this communication is for a <strong>genuine medical purpose</strong> or blood/organ donation requirement. I agree to communicate respectfully in accordance with the LifeSaver-Care Community Safety Code.
+                        </span>
+                    </label>
+                </div>
+
+                <!-- FEEDBACK NOTICE BANNER -->
+                <div id="submitFeedback" class="hidden text-xs p-4 rounded-2xl font-bold transition-all"></div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                    <a id="btnCancelMessage" href="find-donor.html" class="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition text-center">
+                        Cancel & Return
+                    </a>
+                    <button type="submit" id="btnSubmitMessage" class="w-full sm:flex-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black py-3 sm:py-3.5 px-6 rounded-2xl text-xs sm:text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transform active:scale-[0.99] cursor-pointer">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span id="btnSubmitText">Send Message via LifeSaver-Care</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- SUCCESS CONFIRMATION MODAL OVERLAY (IN-PAGE REPLACEMENT) -->
+            <div id="successCard" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-4 z-20">
+                <div class="w-16 h-16 rounded-3xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-3xl shadow-xl shadow-emerald-500/20 border border-emerald-300 dark:border-emerald-800 animate-bounce">
+                    ✓
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Message Delivered Successfully!</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md">
+                        Your message has been dispatched to <strong id="successRecName" class="text-blue-600 dark:text-blue-400">Recipient</strong> via LifeSaver-Care. They will see it directly in their member dashboard inbox.
+                    </p>
+                </div>
+
+                <div class="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
+                    Tracking Ref: <span id="successMsgId" class="font-bold text-slate-900 dark:text-white">MSG-000000</span>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-2 w-full max-w-sm">
+                    <button type="button" onclick="resetMessageComposer()" class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition">
+                        Send Another Message
+                    </button>
+                    <a id="successReturnBtn" href="find-donor.html" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20">
+                        Back to Donors
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONVERSATION HISTORY & INBOX (LIVE PREVIEW FOR LOGGED-IN USERS) -->
+        <div id="userInboxSection" class="glass-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="inbox" class="w-4 h-4 text-blue-500"></i>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white">Your LifeSaver Messages Inbox</h3>
+                    <span id="userInboxBadge" class="text-[10px] font-extrabold bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <a href="auth.html" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    Open Full Dashboard <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+            </div>
+
+            <div id="userInboxList" class="space-y-2">
+                <div class="p-6 text-center text-xs text-slate-400">
+                    Sign in to view real-time replies and sent messages.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-xs text-slate-500 dark:text-slate-400 py-6 border-t border-slate-200 dark:border-slate-800/80 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 space-y-1">
+            <p>LifeSaver-Care • Guarded Emergency Healthcare Communication Network</p>
+            <p class="text-[11px] opacity-75">All communications are governed by patient privacy and respectful voluntary donation guidelines.</p>
+        </div>
+    </footer>
+
+    <!-- FIREBASE & APPLICATION LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Global State
+        window.activeAuthUser = null;
+        window.allCommunityDonors = [];
+        window.allBloodRequests = [];
+        window.activeDirectoryTab = 'donors';
+
+        // Parse Query Parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        let paramTo = urlParams.get('to') || urlParams.get('uid') || '';
+        let paramName = urlParams.get('name') || urlParams.get('recipient') || '';
+        let paramBg = urlParams.get('bg') || urlParams.get('bloodGroup') || '';
+        let paramCity = urlParams.get('city') || '';
+        let paramHospital = urlParams.get('hospital') || '';
+        let paramSubject = urlParams.get('subject') || '';
+        let paramRole = urlParams.get('role') || (paramHospital ? 'requester' : 'donor');
+        let paramRef = urlParams.get('ref') || '';
+
+        // Back Link Intelligence
+        const backLinkEl = document.getElementById("btnBackLink");
+        const backLabelEl = document.getElementById("lblBackLink");
+        const cancelLinkEl = document.getElementById("btnCancelMessage");
+        const successReturnEl = document.getElementById("successReturnBtn");
+
+        if (document.referrer && document.referrer.includes('blood.html')) {
+            if (backLinkEl) backLinkEl.href = 'blood.html';
+            if (backLabelEl) backLabelEl.textContent = 'Back to Blood Board';
+            if (cancelLinkEl) cancelLinkEl.href = 'blood.html';
+            if (successReturnEl) {
+                successReturnEl.href = 'blood.html';
+                successReturnEl.textContent = 'Back to Blood Board';
+            }
+        }
+
+        // Char Counter
+        window.updateCharCount = function() {
+            const bodyEl = document.getElementById("messageBody");
+            const counter = document.getElementById("charCounter");
+            if (bodyEl && counter) {
+                counter.textContent = `${bodyEl.value.length} / 800 chars`;
+            }
+        };
+
+        // 1-Click Message Templates
+        window.applyMessageTemplate = function(type) {
+            const name = document.getElementById("receiverName")?.value || 'Donor';
+            const bg = document.getElementById("receiverBloodGroup")?.value || 'blood';
+            const city = document.getElementById("receiverCity")?.value || 'your area';
+            const hosp = document.getElementById("receiverHospital")?.value || 'the hospital';
+
+            const subEl = document.getElementById("messageSubject");
+            const bodyEl = document.getElementById("messageBody");
+
+            if (type === 'urgent') {
+                if (subEl) subEl.value = `🚨 URGENT: ${bg} Blood Needed Immediately at ${hosp}`;
+                if (bodyEl) bodyEl.value = `Hello ${name}, this is an urgent emergency medical requirement for ${bg} blood at ${hosp}${city ? ', ' + city : ''}. A patient is in critical need of blood units. If you are available to donate or know another donor who is, please contact us immediately. Thank you!`;
+            } else if (type === 'platelets') {
+                if (subEl) subEl.value = `Emergency Platelets / SDP Requirement for ${bg} Blood`;
+                if (bodyEl) bodyEl.value = `Hello ${name}, we have an emergency need for Single Donor Platelets (SDP) / blood units for a patient undergoing immediate treatment in ${city}. Your voluntary assistance would save a precious life. Please reply if you are eligible and available.`;
+            } else if (type === 'availability') {
+                if (subEl) subEl.value = `Checking Voluntary Blood Donation Availability (${bg})`;
+                if (bodyEl) bodyEl.value = `Hello ${name}, I am reaching out through the LifeSaver Voluntary Blood Network to check if you are currently available for donation in ${city}. Please let us know your availability. Thank you for your noble spirit!`;
+            } else if (type === 'courtesy') {
+                if (subEl) subEl.value = `LifeSaver Care Medical Outreach (${name})`;
+                if (bodyEl) bodyEl.value = `Hello ${name}, reaching out to you through LifeSaver-Care. We would like to connect with you regarding blood donation coordination and healthcare support in ${city}. Looking forward to hearing from you.`;
+            }
+
+            window.updateCharCount();
+            if (bodyEl) bodyEl.focus();
+        };
+
+        // SUBMIT MESSAGE TO FIREBASE REALTIME DATABASE
+        window.dispatchMessagePayload = async function(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const btn = document.getElementById("btnSubmitMessage");
+            const btnText = document.getElementById("btnSubmitText");
+            const feedback = document.getElementById("submitFeedback");
+
+            if (btn) btn.disabled = true;
+            if (btnText) btnText.textContent = "Delivering Message...";
+
+            const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
+            const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Voluntary Donor';
+            const receiverBloodGroup = document.getElementById("receiverBloodGroup")?.value?.trim() || '';
+            const receiverCity = document.getElementById("receiverCity")?.value?.trim() || '';
+            const receiverHospital = document.getElementById("receiverHospital")?.value?.trim() || '';
+
+            const senderName = document.getElementById("senderName")?.value?.trim() || 'Member';
+            const senderContact = document.getElementById("senderContact")?.value?.trim() || '';
+            const subject = document.getElementById("messageSubject")?.value?.trim() || 'LifeSaver Care Inquiry';
+            const message = document.getElementById("messageBody")?.value?.trim() || '';
+
+            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+            const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
+
+            const payload = {
+                messageId: messageId,
+                senderUid: senderUid,
+                senderName: senderName,
+                senderEmail: senderContact,
+                receiverUid: receiverUid || 'COMMUNITY-DISPATCH',
+                receiverName: receiverName,
+                receiverBloodGroup: receiverBloodGroup,
+                receiverCity: receiverCity,
+                receiverHospital: receiverHospital,
+                subject: subject,
+                message: message,
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString(),
+                read: false,
+                sourcePage: 'message.html'
+            };
+
+            try {
+                await push(ref(db, 'messages'), payload);
+
+                // Show success card overlay
+                const successRecName = document.getElementById("successRecName");
+                if (successRecName) successRecName.textContent = receiverName;
+                const successMsgId = document.getElementById("successMsgId");
+                if (successMsgId) successMsgId.textContent = messageId;
+                const successCard = document.getElementById("successCard");
+                if (successCard) {
+                    successCard.classList.remove('hidden');
+                }
+
+                if (window.showLifeSaverMsg) {
+                    window.showLifeSaverMsg(`✅ Message sent to ${receiverName}!`, "success", "Message Delivered");
+                }
+            } catch (err) {
+                console.error("Sending message error:", err);
+                if (feedback) {
+                    feedback.className = "text-xs p-4 rounded-2xl font-bold bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                    feedback.textContent = "Error delivering message: " + err.message;
+                    feedback.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.textContent = "Send Message via LifeSaver-Care";
+            }
+            return false;
+        };
+        window.handleMessageSubmit = window.dispatchMessagePayload;
+
+        // Attach listener to form directly
+        const msgForm = document.getElementById("lifeSaverMessageForm");
+        if (msgForm) {
+            msgForm.addEventListener("submit", window.dispatchMessagePayload);
+        }
+
+        // Initialize Recipient Display
+        function updateRecipientDisplay(data) {
+            const rUid = document.getElementById("receiverUid");
+            if (rUid) rUid.value = data.uid || '';
+            const rName = document.getElementById("receiverName");
+            if (rName) rName.value = data.name || 'Voluntary Donor';
+            const rBg = document.getElementById("receiverBloodGroup");
+            if (rBg) rBg.value = data.bloodGroup || '';
+            const rCity = document.getElementById("receiverCity");
+            if (rCity) rCity.value = data.city || '';
+            const rHosp = document.getElementById("receiverHospital");
+            if (rHosp) rHosp.value = data.hospital || '';
+
+            const bgPill = document.getElementById("recBgPill");
+            if (bgPill) bgPill.textContent = data.bloodGroup || '🩸';
+
+            const nameEl = document.getElementById("recName");
+            if (nameEl) nameEl.textContent = data.name || 'Voluntary Donor';
+
+            const locEl = document.getElementById("recLocationText");
+            if (locEl) {
+                const locStr = data.hospital ? `${data.hospital}, ${data.city || 'Emergency Area'}` : (data.city || 'LifeSaver Registry');
+                locEl.textContent = locStr;
+            }
+
+            const roleBadge = document.getElementById("recRoleBadge");
+            if (roleBadge) {
+                if (data.role === 'requester' || data.hospital) {
+                    roleBadge.textContent = '🚨 Patient Attendant / Hospital Ticket';
+                    roleBadge.className = 'text-[10px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 px-2 py-0.5 rounded-full font-bold border border-red-200 dark:border-red-900';
+                } else {
+                    roleBadge.textContent = '🟢 Voluntary Blood Donor';
+                    roleBadge.className = 'text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-900';
+                }
+            }
+
+            // Default pre-filled subject if not custom
+            const subjectField = document.getElementById("messageSubject");
+            if (subjectField && !subjectField.value) {
+                if (paramSubject) {
+                    subjectField.value = paramSubject;
+                } else if (data.role === 'requester' || data.hospital) {
+                    subjectField.value = `Re: Urgent Blood Need (${data.bloodGroup || 'Blood'} - ${data.hospital || 'Hospital'})`;
+                } else {
+                    subjectField.value = `Inquiry regarding ${data.bloodGroup || ''} Blood Donation via LifeSaver`;
+                }
+            }
+
+            // Polite pre-filled default message body if empty
+            const bodyField = document.getElementById("messageBody");
+            if (bodyField && !bodyField.value.trim()) {
+                if (data.role === 'requester' || data.hospital) {
+                    bodyField.value = `Hello, I saw your urgent requirement on LifeSaver for ${data.bloodGroup || 'blood'} blood at ${data.hospital || 'the hospital'}${data.city ? ', ' + data.city : ''}. I am reaching out to see if you still need donors and how we can support you.`;
+                } else {
+                    bodyField.value = `Hello ${data.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent requirement for ${data.bloodGroup || 'blood'} blood${data.city ? ' in ' + data.city : ''}. If you or someone you know might be available to donate, please let us know. Thank you for your noble voluntary support!`;
+                }
+                window.updateCharCount();
+            }
+        }
+
+        // Set initial recipient from URL params
+        updateRecipientDisplay({
+            uid: paramTo,
+            name: paramName || 'LifeSaver Voluntary Donor',
+            bloodGroup: paramBg || 'O+',
+            city: paramCity || 'Active Area',
+            hospital: paramHospital || '',
+            role: paramRole
+        });
+
+        // Auth State Greeting & Auto-Fill
+        onAuthStateChanged(auth, async (user) => {
+            window.activeAuthUser = user;
+            const greetingEl = document.getElementById("userGreetingTop");
+            const navSignOutBtn = document.getElementById("navSignOutBtn");
+            const senderNameInput = document.getElementById("senderName");
+            const senderContactInput = document.getElementById("senderContact");
+            const authStatus = document.getElementById("senderAuthStatus");
+
+            if (user) {
+                let displayName = user.displayName;
+                try {
+                    const snap = await get(ref(db, `users/${user.uid}`));
+                    if (snap.exists() && snap.val().name) {
+                        displayName = snap.val().name;
+                    }
+                } catch (e) {}
+
+                if (!displayName && user.email) {
+                    displayName = user.email.split('@')[0];
+                }
+                displayName = (displayName || 'Member').trim();
+
+                if (greetingEl) greetingEl.textContent = displayName;
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.remove('hidden');
+                    navSignOutBtn.classList.add('flex');
+                }
+
+                if (senderNameInput && !senderNameInput.value) {
+                    senderNameInput.value = displayName;
+                }
+                if (senderContactInput && !senderContactInput.value) {
+                    senderContactInput.value = user.email || user.phoneNumber || '';
+                }
+                if (authStatus) authStatus.textContent = '✓ Verified Account';
+
+                // Load User Inbox
+                listenToUserInbox(user);
+            } else {
+                if (greetingEl) greetingEl.textContent = 'Account';
+                if (navSignOutBtn) {
+                    navSignOutBtn.classList.add('hidden');
+                    navSignOutBtn.classList.remove('flex');
+                }
+                if (authStatus) authStatus.textContent = 'Guest Sender';
+            }
+        });
+
+        // User Sign Out
+        window.handleUserSignOut = function() {
+            if (confirm("Are you sure you want to sign out from Life Saver?")) {
+                localStorage.removeItem('ls_logged_user');
+                signOut(auth).then(() => {
+                    window.location.reload();
+                });
+            }
+        };
+
+        // Listen to User's Inbox Messages
+        function listenToUserInbox(user) {
+            const inboxList = document.getElementById("userInboxList");
+            const inboxBadge = document.getElementById("userInboxBadge");
+            if (!inboxList) return;
+
+            onValue(ref(db, 'messages'), (snap) => {
+                if (!snap.exists()) {
+                    inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No messages in your inbox yet.</div>`;
+                    if (inboxBadge) inboxBadge.textContent = "0";
+                    return;
+                }
+
+                const data = snap.val();
+                let myMessages = [];
+                Object.keys(data).forEach(key => {
+                    const m = data[key];
+                    if (m.receiverUid === user.uid || (m.receiverEmail && m.receiverEmail === user.email) || m.senderUid === user.uid) {
+                        myMessages.push({ ...m, key });
+                    }
+                });
+
+                myMessages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                if (inboxBadge) inboxBadge.textContent = myMessages.length;
+
+                if (myMessages.length === 0) {
+                    inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
+                    return;
+                }
+
+                inboxList.innerHTML = "";
+                myMessages.slice(0, 5).forEach(msg => {
+                    const isReceived = msg.receiverUid === user.uid || (msg.receiverEmail && msg.receiverEmail === user.email);
+                    const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
+                    const item = document.createElement("div");
+                    item.className = "p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs";
+                    item.innerHTML = `
+                        <div class="space-y-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isReceived ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400'}">
+                                    ${isReceived ? '📥 Received from ' + (msg.senderName || 'Member') : '📤 Sent to ' + (msg.receiverName || 'Recipient')}
+                                </span>
+                                <span class="text-[10px] text-slate-400">${dateStr}</span>
+                            </div>
+                            <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${msg.subject || 'No Subject'}</div>
+                            <p class="text-slate-600 dark:text-slate-400 line-clamp-1 italic">${msg.message || ''}</p>
+                        </div>
+                        <div class="shrink-0">
+                            <button type="button" onclick="selectQuickReply('${msg.senderUid || ''}', '${msg.senderName || 'Member'}', '${msg.subject || ''}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs flex items-center gap-1 transition">
+                                <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
+                            </button>
+                        </div>
+                    `;
+                    inboxList.appendChild(item);
+                });
+                if (window.lucide) lucide.createIcons();
+            });
+        }
+
+        window.selectQuickReply = function(uid, name, subject) {
+            updateRecipientDisplay({
+                uid: uid,
+                name: name,
+                bloodGroup: 'Member',
+                city: 'Direct Reply',
+                role: 'donor'
+            });
+            document.getElementById("messageSubject").value = subject.startsWith('Re:') ? subject : `Re: ${subject}`;
+            document.getElementById("messageBody").value = '';
+            document.getElementById("messageBody").focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.resetMessageComposer = function() {
+            const successCard = document.getElementById("successCard");
+            if (successCard) successCard.classList.add('hidden');
+            document.getElementById("lifeSaverMessageForm")?.reset();
+            window.updateCharCount();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // RECIPIENT DIRECTORY (FETCH DONORS & BLOOD REQUESTS)
+        const donorsRef = ref(db, 'donors');
+        onValue(donorsRef, (snap) => {
+            if (snap.exists()) {
+                window.allCommunityDonors = Object.values(snap.val());
+            } else {
+                window.allCommunityDonors = [];
+            }
+            const countEl = document.getElementById("countDonors");
+            if (countEl) countEl.textContent = window.allCommunityDonors.length;
+            renderDirectoryList();
+        });
+
+        const bloodReqsRef = ref(db, 'blood_requests');
+        onValue(bloodReqsRef, (snap) => {
+            if (snap.exists()) {
+                const reqs = snap.val();
+                window.allBloodRequests = Object.keys(reqs).map(k => ({ ...reqs[k], key: k }));
+            } else {
+                window.allBloodRequests = [];
+            }
+            const countEl = document.getElementById("countRequests");
+            if (countEl) countEl.textContent = window.allBloodRequests.length;
+            renderDirectoryList();
+        });
+
+        window.toggleRecipientDirectoryDrawer = function() {
+            const drawer = document.getElementById("recipientDirectoryDrawer");
+            if (drawer) {
+                drawer.classList.toggle('hidden');
+                if (!drawer.classList.contains('hidden')) {
+                    drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    renderDirectoryList();
+                }
+            }
+        };
+
+        window.switchDirectoryTab = function(tab) {
+            window.activeDirectoryTab = tab;
+            const btnDonors = document.getElementById("tabBtnDonors");
+            const btnReqs = document.getElementById("tabBtnRequests");
+            if (tab === 'donors') {
+                btnDonors.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition";
+                btnReqs.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+            } else {
+                btnReqs.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition";
+                btnDonors.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition";
+            }
+            renderDirectoryList();
+        };
+
+        window.filterDirectoryList = function() {
+            renderDirectoryList();
+        };
+
+        function renderDirectoryList() {
+            const container = document.getElementById("directoryItemsList");
+            if (!container) return;
+            const query = (document.getElementById("directorySearchInput")?.value || "").trim().toLowerCase();
+
+            container.innerHTML = "";
+
+            if (window.activeDirectoryTab === 'donors') {
+                const filtered = (window.allCommunityDonors || []).filter(d => {
+                    const matchQ = !query ||
+                        (d.name || '').toLowerCase().includes(query) ||
+                        (d.city || '').toLowerCase().includes(query) ||
+                        (d.bloodGroup || '').toLowerCase().includes(query);
+                    return matchQ;
+                });
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No voluntary donors match "${query}".</div>`;
+                    return;
+                }
+
+                filtered.slice(0, 20).forEach(donor => {
+                    const donorUid = donor.uid || donor.userId || donor.key || '';
+                    const item = document.createElement("div");
+                    item.className = "p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center justify-between gap-3 transition cursor-pointer";
+                    item.onclick = () => {
+                        updateRecipientDisplay({
+                            uid: donorUid,
+                            name: donor.name || 'Voluntary Donor',
+                            bloodGroup: donor.bloodGroup || 'O+',
+                            city: donor.city || 'Statewide',
+                            role: 'donor'
+                        });
+                        toggleRecipientDirectoryDrawer();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-8 h-8 rounded-lg bg-red-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                                ${donor.bloodGroup || 'O+'}
+                            </span>
+                            <div class="truncate">
+                                <div class="font-bold text-slate-900 dark:text-white text-xs truncate">${donor.name || 'Voluntary Donor'}</div>
+                                <div class="text-[10px] text-slate-400 flex items-center gap-1">📍 ${donor.city || 'Available'} • 🟢 Verified Donor</div>
+                            </div>
+                        </div>
+                        <button type="button" class="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-lg text-xs font-bold shrink-0 border border-blue-200 dark:border-blue-900">
+                            Select
+                        </button>
+                    `;
+                    container.appendChild(item);
+                });
+            } else {
+                const filtered = (window.allBloodRequests || []).filter(r => {
+                    const matchQ = !query ||
+                        (r.hospital || '').toLowerCase().includes(query) ||
+                        (r.city || '').toLowerCase().includes(query) ||
+                        (r.bloodGroup || '').toLowerCase().includes(query) ||
+                        (r.requesterName || r.name || '').toLowerCase().includes(query);
+                    return matchQ;
+                });
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400">No blood request tickets match "${query}".</div>`;
+                    return;
+                }
+
+                filtered.slice(0, 20).forEach(req => {
+                    const item = document.createElement("div");
+                    item.className = "p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center justify-between gap-3 transition cursor-pointer";
+                    item.onclick = () => {
+                        updateRecipientDisplay({
+                            uid: req.userId || '',
+                            name: req.requesterName || req.name || `Attendant (${req.hospital})`,
+                            bloodGroup: req.bloodGroup || 'Blood',
+                            city: req.city || '',
+                            hospital: req.hospital || '',
+                            role: 'requester'
+                        });
+                        toggleRecipientDirectoryDrawer();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    };
+
+                    item.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="w-8 h-8 rounded-lg bg-red-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                                ${req.bloodGroup || 'SOS'}
+                            </span>
+                            <div class="truncate">
+                                <div class="font-bold text-slate-900 dark:text-white text-xs truncate">${req.hospital || 'Hospital'}</div>
+                                <div class="text-[10px] text-slate-400 flex items-center gap-1">📍 ${req.city || 'Emergency'} • 🚨 Urgent Ticket (${req.units || 1} Units)</div>
+                            </div>
+                        </div>
+                        <button type="button" class="bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 px-3 py-1 rounded-lg text-xs font-bold shrink-0 border border-red-200 dark:border-red-900">
+                            Select
+                        </button>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+    </script>
+
+    <!-- REAL-TIME CONTINUOUS EMERGENCY BLOOD ALERT SYSTEM -->
+    <script type="module" src="emergency-alert.js"></script>
+
+    <!-- GLOBAL SCRIPTS -->
+    <script>
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        function toggleNavToolsDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById("navToolsDropdown");
+            if (dropdown) dropdown.classList.toggle("open");
+        }
+
+        function toggleMobileNav(event) {
+            event.stopPropagation();
+            const drawer = document.getElementById("mobileNavDrawer");
+            if (drawer) drawer.classList.toggle("hidden");
+        }
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById("navToolsDropdown");
+            if (dropdown && dropdown.classList.contains("open") && !e.target.closest('#navToolsDropdown')) {
+                dropdown.classList.remove("open");
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

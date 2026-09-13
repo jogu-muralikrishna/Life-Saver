@@ -153,13 +153,16 @@
                     return base.endsWith('/') ? base : (base + '/');
                 }
             } catch(e) {}
-            return 'https://life-saver-care.vercel.app/';
+            return 'https://life-saver-cyan.vercel.app/';
         }
 
-        function getCertificateVerifyUrl(id) {
+        function getCertificateVerifyUrl(id, bg, name) {
             const cleanId = (id || '').toString().trim();
             const base = getAppBaseUrl();
-            return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+            let url = `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+            if (bg) url += `&bg=${encodeURIComponent(bg)}`;
+            if (name) url += `&name=${encodeURIComponent(name)}`;
+            return url;
         }
 
         // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
@@ -195,9 +198,12 @@
             }
         });
 
-        // Parse query parameter
+        // Parse query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const certId = urlParams.get('id') || urlParams.get('certId') || urlParams.get('verify');
+        const urlBg = urlParams.get('bg') || urlParams.get('bloodGroup') || urlParams.get('blood');
+        const urlName = urlParams.get('name') || urlParams.get('donor');
+        const urlOrgans = urlParams.get('organs');
 
         async function verifyCertificateId(targetId) {
             if (!targetId) {
@@ -257,7 +263,8 @@
             if (foundRecord) {
                 activeCertData = { 
                     ...foundRecord, 
-                    bloodGroup: formatSingleBloodGroup(foundRecord.bloodGroup || foundRecord.bg),
+                    name: urlName || foundRecord.name || 'Hero Donor',
+                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'O+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -314,17 +321,17 @@
                 if (!foundRecord) {
                     if (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) {
                         foundRecord = {
-                            name: "Voluntary Organ Pledger",
-                            organsPledged: "All Vital Organs & Tissues",
-                            bloodGroup: "O+",
+                            name: urlName || "Voluntary Organ Pledger",
+                            organsPledged: urlOrgans || "All Vital Organs & Tissues",
+                            bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
                             credentialID: cleanId,
                             pledgeDate: new Date().toISOString().split('T')[0]
                         };
                         certType = 'organ';
                     } else {
                         foundRecord = {
-                            name: "Voluntary Blood Donor",
-                            bloodGroup: "O+",
+                            name: urlName || "Voluntary Blood Donor",
+                            bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
                             credentialID: cleanId,
                             registeredDate: new Date().toISOString().split('T')[0]
                         };
@@ -334,7 +341,8 @@
 
                 activeCertData = { 
                     ...foundRecord, 
-                    bloodGroup: formatSingleBloodGroup(foundRecord.bloodGroup || foundRecord.bg),
+                    name: urlName || foundRecord.name || 'Hero Donor',
+                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'O+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -349,8 +357,8 @@
                 if (!activeCertData) {
                     // Fallback render with target ID
                     activeCertData = {
-                        name: "Voluntary Hero Donor",
-                        bloodGroup: "O+",
+                        name: urlName || "Voluntary Hero Donor",
+                        bloodGroup: formatSingleBloodGroup(urlBg || "O+"),
                         certType: (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) ? 'organ' : 'blood',
                         certId: cleanId
                     };
@@ -365,9 +373,8 @@
         function renderCertificate(data) {
             const wrapper = document.getElementById("certificateDisplayWrapper");
             const isBlood = data.certType === 'blood';
-            const verifyUrl = getCertificateVerifyUrl(data.certId);
-            const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
-            const singleBg = formatSingleBloodGroup(data.bloodGroup || 'O+');
+            const singleBg = formatSingleBloodGroup(data.bloodGroup || urlBg || 'O+');
+            const verifyUrl = getCertificateVerifyUrl(data.certId, singleBg, data.name);
 
             if (isBlood) {
                 wrapper.innerHTML = `
@@ -382,9 +389,9 @@
                         ${singleBg}
                     </div>
 
-                    <!-- QR Code -->
+                    <!-- QR Code (Official Scanner) -->
                     <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 67.5%; top: 72.8%; width: 10.2%; aspect-ratio: 1/1;">
-                        <img src="${qrUrl}" alt="Verify QR" class="w-full h-full object-contain" />
+                        <img src="scanner-qr.png" alt="Verify QR" class="w-full h-full object-contain" />
                     </div>
 
                     <!-- Credential ID -->
@@ -406,9 +413,9 @@
                         ${singleBg}
                     </div>
 
-                    <!-- QR Code -->
+                    <!-- QR Code (Official Scanner) -->
                     <div class="absolute bg-white p-0.5 rounded shadow-sm flex items-center justify-center" style="left: 81.3%; top: 69.3%; width: 10.2%; aspect-ratio: 1/1;">
-                        <img src="${qrUrl}" alt="Verify QR" class="w-full h-full object-contain" />
+                        <img src="scanner-qr.png" alt="Verify QR" class="w-full h-full object-contain" />
                     </div>
 
                     <!-- Credential ID -->
@@ -463,8 +470,7 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(bg, isBlood ? 292 : 722, isBlood ? 535 : 515);
 
-                const verifyUrl = getCertificateVerifyUrl(certId);
-                const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
                 const qrImg = new Image();
                 qrImg.crossOrigin = 'anonymous';
 
@@ -502,14 +508,14 @@
 
                 qrImg.onload = () => finish(qrImg);
                 qrImg.onerror = () => finish(null);
-                qrImg.src = qrUrl;
+                qrImg.src = 'scanner-qr.png';
             };
         };
 
         window.shareCertificate = function() {
             if (!activeCertData) return;
-            const verifyUrl = getCertificateVerifyUrl(activeCertData.certId);
             const isBlood = activeCertData.certType === 'blood';
+            const verifyUrl = getCertificateVerifyUrl(activeCertData.certId, activeCertData.bloodGroup, activeCertData.name);
             const icon = isBlood ? '🩸' : '💙';
             const title = isBlood ? 'LifeSaver-Care Blood Donation Certificate' : 'LifeSaver-Care Organ Donation Pledge Credential';
             const msg = `${icon} *${title}*\n\n` +

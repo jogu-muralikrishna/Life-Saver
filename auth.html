@@ -4169,13 +4169,16 @@
                     return base.endsWith('/') ? base : (base + '/');
                 }
             } catch(e) {}
-            return 'https://life-saver-care.vercel.app/';
+            return 'https://life-saver-cyan.vercel.app/';
         }
 
-        function getCertificateVerifyUrl(id) {
+        function getCertificateVerifyUrl(id, bg, name) {
             const cleanId = (id || '').toString().trim();
             const base = getAppBaseUrl();
-            return `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+            let url = `${base}certificate.html?id=${encodeURIComponent(cleanId)}`;
+            if (bg) url += `&bg=${encodeURIComponent(bg)}`;
+            if (name) url += `&name=${encodeURIComponent(name)}`;
+            return url;
         }
 
         // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
@@ -4312,14 +4315,13 @@
                         pPillEl.style.borderColor = tier.pillBorderColor;
                     }
 
-                    const verifyUrl = getCertificateVerifyUrl(certId);
+                    const verifyUrl = getCertificateVerifyUrl(certId, bloodGroup, donorName);
                     window.userBloodDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
                     const qrEl = document.getElementById('dashBloodCertQR');
-                    if (qrEl) qrEl.src = qrUrl;
+                    if (qrEl) qrEl.src = 'scanner-qr.png';
                     const pQrEl = document.getElementById('dashPanelBloodCertQR');
-                    if (pQrEl) pQrEl.src = qrUrl;
+                    if (pQrEl) pQrEl.src = 'scanner-qr.png';
 
                     if (bloodActive) bloodActive.classList.remove('hidden');
                     if (bloodUnreg) bloodUnreg.classList.add('hidden');
@@ -4426,14 +4428,13 @@
                         });
                     }
 
-                    const verifyUrl = getCertificateVerifyUrl(certId);
+                    const verifyUrl = getCertificateVerifyUrl(certId, bloodGroup, donorName);
                     window.userOrganDonorData.verifyUrl = verifyUrl;
-                    const qrUrl = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
                     
                     const qrEl = document.getElementById('dashOrganCertQR');
-                    if (qrEl) qrEl.src = qrUrl;
+                    if (qrEl) qrEl.src = 'scanner-qr.png';
                     const pQrEl = document.getElementById('dashPanelOrganCertQR');
-                    if (pQrEl) pQrEl.src = qrUrl;
+                    if (pQrEl) pQrEl.src = 'scanner-qr.png';
 
                     if (organActive) organActive.classList.remove('hidden');
                     if (organUnpledged) organUnpledged.classList.add('hidden');
@@ -4474,8 +4475,7 @@
 
             const qrEl = document.getElementById('dashBloodCertQR');
             if (qrEl) {
-                const verifyUrl = getCertificateVerifyUrl(certId);
-                qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                qrEl.src = 'scanner-qr.png';
             }
 
             const modal = document.getElementById('dashBloodCertModal');
@@ -4640,8 +4640,7 @@
 
             const qrEl = document.getElementById('dashOrganCertQR');
             if (qrEl) {
-                const verifyUrl = getCertificateVerifyUrl(certId);
-                qrEl.src = window.generateQRCodeDataURL ? window.generateQRCodeDataURL(verifyUrl, 250) : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(verifyUrl)}`;
+                qrEl.src = 'scanner-qr.png';
             }
 
             const modal = document.getElementById('dashOrganCertModal');
