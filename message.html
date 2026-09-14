@@ -41,6 +41,9 @@
 
 <body class="min-h-screen pb-20 flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-200">
 
+    <!-- REAL-TIME IN-APP LIVE CHAT NOTIFICATION TOAST -->
+    <div id="liveChatToastNotification" class="fixed top-4 right-4 sm:right-6 z-50 transform translate-y-[-150%] opacity-0 transition-all duration-300 pointer-events-none max-w-sm w-full"></div>
+
     <!-- NAVBAR -->
     <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
@@ -271,18 +274,36 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button type="button" onclick="toggleComposerFormCollapse()" id="btnToggleComposer" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700">
+                    <button type="button" id="btnChatNotifToggle" onclick="requestChatNotificationsPermission()" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer" title="Enable Live Sound & System Notifications">
+                        <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-500"></i>
+                        <span id="lblChatNotif" class="hidden sm:inline">Notifications</span>
+                    </button>
+                    <button type="button" onclick="toggleComposerFormCollapse()" id="btnToggleComposer" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer">
                         <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
                         <span id="lblToggleComposer">Show Full Medical Form</span>
                     </button>
                 </div>
             </div>
 
-            <!-- CHAT BUBBLES SCROLL BOX -->
-            <div id="chatMessagesBox" class="my-4 max-h-[380px] min-h-[160px] overflow-y-auto space-y-3 p-3 sm:p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 flex flex-col scroll-smooth">
+            <!-- CHAT BUBBLES SCROLL BOX (EXPANDED TO FULL COMFORTABLE VIEWPORT HEIGHT) -->
+            <div id="chatMessagesBox" class="my-4 min-h-[380px] sm:min-h-[460px] max-h-[62vh] h-[460px] overflow-y-auto space-y-3 p-3 sm:p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800/80 flex flex-col scroll-smooth">
                 <div id="chatLoadingNotice" class="text-center py-6 text-xs text-slate-400">
                     Loading conversation thread...
                 </div>
+            </div>
+
+            <!-- CHAT EDIT BAR (SHOWN WHEN USER EDITS A SENT MESSAGE) -->
+            <div id="chatEditBar" class="hidden items-center justify-between bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 p-2.5 px-3.5 rounded-2xl mb-2 text-xs transition">
+                <div class="flex items-center gap-2 truncate">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                    <div class="truncate">
+                        <span class="font-bold text-amber-800 dark:text-amber-300">Editing Message:</span>
+                        <span id="chatEditSnippet" class="italic text-slate-600 dark:text-slate-300 truncate"></span>
+                    </div>
+                </div>
+                <button type="button" onclick="cancelEditChatMessage()" class="text-xs font-bold text-slate-500 hover:text-red-600 dark:hover:text-red-400 px-2 py-1 rounded-lg transition shrink-0 cursor-pointer">
+                    Cancel
+                </button>
             </div>
 
             <!-- QUICK CHAT INPUT BAR (REAL-TIME CONTINUATION) -->
@@ -298,8 +319,8 @@
             <div id="quickChatFeedback" class="hidden text-[11px] font-bold mt-1.5 text-emerald-600 dark:text-emerald-400"></div>
         </div>
 
-        <!-- 1-CLICK RAPID MEDICAL MESSAGE TEMPLATES -->
-        <div id="medicalTemplatesSection" class="mb-6">
+        <!-- 1-CLICK RAPID MEDICAL MESSAGE TEMPLATES (COLLAPSED BY DEFAULT FOR CLEAN CHAT INTERFACE) -->
+        <div id="medicalTemplatesSection" class="mb-6 hidden">
             <div class="flex items-center justify-between mb-2">
                 <label class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i> Quick 1-Click Message Templates
@@ -333,8 +354,8 @@
             </div>
         </div>
 
-        <!-- MAIN MESSAGE COMPOSER FORM (COLLAPSIBLE) -->
-        <div id="formalComposerCard" class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl relative mb-8">
+        <!-- MAIN MESSAGE COMPOSER FORM (COLLAPSED BY DEFAULT) -->
+        <div id="formalComposerCard" class="glass-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl relative mb-8 hidden">
             <form id="lifeSaverMessageForm" onsubmit="handleMessageSubmit(event)" class="space-y-4 sm:space-y-5">
 
                 <!-- HIDDEN RECEIVER FIELDS -->
@@ -579,6 +600,166 @@
         // Global Messages Cache
         window.allMessagesMap = {};
 
+        // Web Audio Synthesized Chime for Incoming Messages (Zero External Assets, 100% Reliable)
+        function playChatNotificationChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(659.25, now); // E5
+                osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(523.25, now); // C5
+                osc2.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15); // C6
+
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.38);
+                osc2.stop(now + 0.38);
+            } catch (e) {
+                console.warn("Audio chime notice:", e);
+            }
+        }
+
+        // Notification Permission Handler
+        window.requestChatNotificationsPermission = function() {
+            if (!('Notification' in window)) {
+                alert("Desktop & mobile browser notifications are not supported in this browser.");
+                return;
+            }
+            Notification.requestPermission().then(perm => {
+                updateNotificationButtonUI(perm);
+                if (perm === 'granted') {
+                    playChatNotificationChime();
+                    if (typeof window.showLifeSaverMsg === 'function') {
+                        window.showLifeSaverMsg("🔔 Notifications active! You will receive live alerts for incoming messages.", "success", "Notifications Enabled");
+                    }
+                }
+            });
+        };
+
+        function updateNotificationButtonUI(perm) {
+            const btn = document.getElementById("btnChatNotifToggle");
+            const lbl = document.getElementById("lblChatNotif");
+            if (!btn || !lbl) return;
+            const currentPerm = perm || (('Notification' in window) ? Notification.permission : 'default');
+            if (currentPerm === 'granted') {
+                btn.className = "text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl transition flex items-center gap-1.5 border border-emerald-200 dark:border-emerald-900 cursor-pointer";
+                lbl.textContent = "Notifications On";
+                btn.title = "Incoming chat notifications are enabled";
+            } else {
+                btn.className = "text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 transition flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer";
+                lbl.textContent = "Notifications";
+                btn.title = "Click to enable sound & system notifications";
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // In-App Toast Alert for Incoming Messages
+        window.showChatToastNotification = function(title, body, senderData) {
+            const toast = document.getElementById("liveChatToastNotification");
+            if (!toast) return;
+
+            toast.innerHTML = `
+                <div class="pointer-events-auto bg-slate-900/95 dark:bg-slate-800/95 text-white p-4 rounded-2xl shadow-2xl border border-blue-500/40 backdrop-blur-md flex items-start gap-3 transition transform duration-300">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-1 mb-0.5">
+                            <span class="text-xs font-black text-blue-400 truncate">${escapeHtml(title)}</span>
+                            <span class="text-[10px] text-slate-400">Just now</span>
+                        </div>
+                        <p class="text-xs text-slate-200 line-clamp-2 leading-snug break-words">${escapeHtml(body)}</p>
+                        <button type="button" onclick="openConversationThread('${escapeHtml(senderData.uid || '')}', '${escapeHtml(senderData.name || 'Member')}', '${escapeHtml(senderData.bg || '')}', '${escapeHtml(senderData.city || '')}', '${escapeHtml(senderData.hospital || '')}', '${escapeHtml(senderData.email || '')}'); dismissChatToast();" class="mt-2 text-[11px] font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer">
+                            Reply in chat →
+                        </button>
+                    </div>
+                    <button type="button" onclick="dismissChatToast()" class="text-slate-400 hover:text-white text-xs font-bold p-1 cursor-pointer">✕</button>
+                </div>
+            `;
+            if (window.lucide) lucide.createIcons();
+
+            toast.classList.remove('translate-y-[-150%]', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            if (window.toastTimer) clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => dismissChatToast(), 6000);
+        };
+
+        window.dismissChatToast = function() {
+            const toast = document.getElementById("liveChatToastNotification");
+            if (!toast) return;
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-150%]', 'opacity-0', 'pointer-events-none');
+        };
+
+        // Real-Time Message Editing State
+        window.editingMessageKey = null;
+
+        window.startEditChatMessage = function(key) {
+            const msg = (window.allMessagesMap || {})[key];
+            if (!msg) return;
+
+            window.editingMessageKey = key;
+            const input = document.getElementById("quickChatInput");
+            const editBar = document.getElementById("chatEditBar");
+            const editSnippet = document.getElementById("chatEditSnippet");
+            const btnSend = document.getElementById("btnQuickChatSend");
+
+            if (input) {
+                input.value = msg.message || '';
+                input.focus();
+            }
+            if (editSnippet) {
+                editSnippet.textContent = ` "${(msg.message || '').slice(0, 40)}..."`;
+            }
+            if (editBar) {
+                editBar.classList.remove('hidden');
+                editBar.classList.add('flex');
+            }
+            if (btnSend) {
+                btnSend.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> <span class="hidden sm:inline">Save</span>`;
+                btnSend.classList.remove('from-blue-600', 'to-indigo-600');
+                btnSend.classList.add('from-amber-600', 'to-orange-600');
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.cancelEditChatMessage = function() {
+            window.editingMessageKey = null;
+            const input = document.getElementById("quickChatInput");
+            const editBar = document.getElementById("chatEditBar");
+            const btnSend = document.getElementById("btnQuickChatSend");
+
+            if (input) input.value = '';
+            if (editBar) {
+                editBar.classList.add('hidden');
+                editBar.classList.remove('flex');
+            }
+            if (btnSend) {
+                btnSend.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> <span class="hidden sm:inline">Send</span>`;
+                btnSend.classList.remove('from-amber-600', 'to-orange-600');
+                btnSend.classList.add('from-blue-600', 'to-indigo-600');
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
         // FORMAL COMPOSER TOGGLE
         window.toggleComposerFormCollapse = function() {
             const formCard = document.getElementById("formalComposerCard");
@@ -763,8 +944,14 @@
                 const wrapper = document.createElement("div");
                 wrapper.className = isMyMessage ? "flex flex-col items-end max-w-[85%] sm:max-w-[78%] ml-auto space-y-1 animate-fade-in" : "flex flex-col items-start max-w-[85%] sm:max-w-[78%] mr-auto space-y-1 animate-fade-in";
 
+                const editedBadge = m.edited ? `<span class="italic text-[9px] text-blue-200 dark:text-blue-300 font-medium">(edited)</span><span>•</span>` : '';
                 const headerInfo = isMyMessage ? `
                     <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pr-1">
+                        <button type="button" onclick="startEditChatMessage('${escapeHtml(m._key)}')" class="hover:text-blue-500 font-bold transition flex items-center gap-0.5 text-[10px] text-slate-500 dark:text-slate-400 hover:underline cursor-pointer" title="Edit this message">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                        </button>
+                        <span>•</span>
+                        ${editedBadge}
                         <span class="font-black text-blue-600 dark:text-blue-400">You</span>
                         <span>•</span>
                         <span>${dateStr} ${fullDate}</span>
@@ -773,6 +960,7 @@
                     <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pl-1">
                         <span class="font-black text-slate-700 dark:text-slate-300">${escapeHtml(m.senderName || otherName || 'Member')}</span>
                         <span>•</span>
+                        ${m.edited ? `<span class="italic text-[9px] text-slate-400 font-medium">(edited)</span><span>•</span>` : ''}
                         <span>${dateStr} ${fullDate}</span>
                     </div>
                 `;
@@ -795,6 +983,8 @@
                 chatBox.appendChild(wrapper);
             });
 
+            if (window.lucide) lucide.createIcons();
+
             // Auto-scroll to latest message
             setTimeout(() => {
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -813,6 +1003,36 @@
             const text = input ? input.value.trim() : '';
 
             if (!text) return;
+
+            // Handle editing existing message
+            if (window.editingMessageKey) {
+                const keyToEdit = window.editingMessageKey;
+                if (btn) btn.disabled = true;
+                try {
+                    await update(ref(db, `messages/${keyToEdit}`), {
+                        message: text,
+                        edited: true,
+                        editedAt: Date.now()
+                    });
+                    cancelEditChatMessage();
+                    if (feedback) {
+                        feedback.textContent = "✓ Message edited successfully";
+                        feedback.className = "text-[11px] font-bold mt-1.5 text-emerald-600 dark:text-emerald-400";
+                        feedback.classList.remove('hidden');
+                        setTimeout(() => feedback.classList.add('hidden'), 3000);
+                    }
+                } catch (editErr) {
+                    console.error("Error editing message:", editErr);
+                    if (feedback) {
+                        feedback.textContent = "Error updating message: " + editErr.message;
+                        feedback.className = "text-[11px] font-bold mt-1.5 text-red-600 dark:text-red-400";
+                        feedback.classList.remove('hidden');
+                    }
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+                return;
+            }
 
             const myUser = getCurrentUserIdentity();
             const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
@@ -1135,16 +1355,68 @@
             }
         };
 
-        // REAL-TIME MESSAGES LISTENER (GLOBAL BIDIRECTIONAL SYNC)
+        // REAL-TIME MESSAGES LISTENER (GLOBAL BIDIRECTIONAL SYNC + LIVE NOTIFICATIONS)
+        let isInitialChatSnapshot = true;
+        let knownMessageKeysSet = new Set();
+
         onValue(ref(db, 'messages'), (snap) => {
-            if (snap.exists()) {
-                window.allMessagesMap = snap.val();
-            } else {
-                window.allMessagesMap = {};
+            const raw = snap.exists() ? snap.val() : {};
+            window.allMessagesMap = raw;
+
+            const myUser = getCurrentUserIdentity();
+            const myUid = (myUser.uid || '').trim();
+            const myEmail = (myUser.email || '').trim().toLowerCase();
+
+            // Detect newly arrived incoming messages after initial load
+            if (!isInitialChatSnapshot) {
+                Object.keys(raw).forEach(k => {
+                    if (!knownMessageKeysSet.has(k)) {
+                        const m = raw[k];
+                        const sUid = (m.senderUid || '').trim();
+                        const rUid = (m.receiverUid || '').trim();
+                        const sMail = (m.senderEmail || '').trim().toLowerCase();
+                        const rMail = (m.receiverEmail || '').trim().toLowerCase();
+
+                        const isReceivedByMe = (myUid && rUid === myUid) || (myEmail && rMail === myEmail);
+                        const isSentByMe = (myUid && sUid === myUid) || (myEmail && sMail === myEmail);
+
+                        if (isReceivedByMe && !isSentByMe) {
+                            playChatNotificationChime();
+                            showChatToastNotification(
+                                `New message from ${m.senderName || 'Member'}`,
+                                m.message || 'Sent you a new chat message.',
+                                {
+                                    uid: m.senderUid,
+                                    name: m.senderName,
+                                    email: m.senderEmail,
+                                    bg: m.senderBloodGroup || m.receiverBloodGroup,
+                                    city: m.receiverCity,
+                                    hospital: m.receiverHospital
+                                }
+                            );
+
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                try {
+                                    new Notification(`LifeSaver Chat: ${m.senderName || 'Member'}`, {
+                                        body: m.message || 'New live chat message received.',
+                                        icon: 'icon.png'
+                                    });
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                });
             }
+
+            knownMessageKeysSet = new Set(Object.keys(raw));
+            isInitialChatSnapshot = false;
+
             window.renderTwoWayChatThread();
             renderInboxMessages(window.activeAuthUser);
         });
+
+        // Initialize Notification Button State
+        updateNotificationButtonUI();
 
         // Render User Inbox Messages
         function renderInboxMessages(user) {

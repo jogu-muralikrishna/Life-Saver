@@ -165,6 +165,14 @@
             return url;
         }
 
+        // Validation utility to discard 'Not Recorded', 'Not Set', or invalid strings
+        function isValidBloodGroup(bg) {
+            if (!bg || typeof bg !== 'string') return false;
+            const clean = bg.trim().toUpperCase();
+            if (['NOT RECORDED', 'NOT SET', 'UNKNOWN', 'NULL', 'UNDEFINED', 'NONE', ''].includes(clean)) return false;
+            return /^(A|B|AB|O)[\+\-]$/.test(clean) || /\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i.test(clean);
+        }
+
         // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
         function formatSingleBloodGroup(rawBg) {
             if (!rawBg || typeof rawBg !== 'string') return 'A+';
@@ -176,6 +184,16 @@
             const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
             if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
                 return singleWord;
+            }
+            return 'A+';
+        }
+
+        // Prioritize actual registered donor blood group over defaults or unrecorded profile fields
+        function resolveBestBloodGroup(...candidates) {
+            for (const c of candidates) {
+                if (isValidBloodGroup(c)) {
+                    return formatSingleBloodGroup(c);
+                }
             }
             return 'A+';
         }
@@ -264,7 +282,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'A+'),
+                    bloodGroup: resolveBestBloodGroup(foundRecord.bloodGroup, foundRecord.bg, urlBg, 'A+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -340,7 +358,7 @@
                             );
                             if (userMatches) {
                                 const userBg = u.bloodGroup || u.blood_group || u.bg;
-                                if (userBg) {
+                                if (isValidBloodGroup(userBg)) {
                                     if (!foundRecord) {
                                         if (isOd) {
                                             foundRecord = {
@@ -359,7 +377,7 @@
                                             };
                                             certType = 'blood';
                                         }
-                                    } else {
+                                    } else if (!isValidBloodGroup(foundRecord.bloodGroup)) {
                                         foundRecord.bloodGroup = userBg;
                                     }
                                 }
@@ -376,7 +394,7 @@
                         foundRecord = {
                             name: urlName || "Voluntary Organ Pledger",
                             organsPledged: urlOrgans || "All Vital Organs & Tissues",
-                            bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
+                            bloodGroup: resolveBestBloodGroup(urlBg, "A+"),
                             credentialID: cleanId,
                             pledgeDate: new Date().toISOString().split('T')[0]
                         };
@@ -384,7 +402,7 @@
                     } else {
                         foundRecord = {
                             name: urlName || "Voluntary Blood Donor",
-                            bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
+                            bloodGroup: resolveBestBloodGroup(urlBg, "A+"),
                             credentialID: cleanId,
                             registeredDate: new Date().toISOString().split('T')[0]
                         };
@@ -395,7 +413,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: formatSingleBloodGroup(urlBg || foundRecord.bloodGroup || foundRecord.bg || 'A+'),
+                    bloodGroup: resolveBestBloodGroup(foundRecord.bloodGroup, foundRecord.bg, urlBg, 'A+'),
                     certType, 
                     certId: cleanId 
                 };

@@ -1401,6 +1401,73 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // Validation utility to discard 'Not Recorded', 'Not Set', or invalid strings
+        function isValidBloodGroup(bg) {
+            if (!bg || typeof bg !== 'string') return false;
+            const clean = bg.trim().toUpperCase();
+            if (['NOT RECORDED', 'NOT SET', 'UNKNOWN', 'NULL', 'UNDEFINED', 'NONE', ''].includes(clean)) return false;
+            return /^(A|B|AB|O)[\+\-]$/.test(clean) || /\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i.test(clean);
+        }
+
+        // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
+        function formatSingleBloodGroup(rawBg) {
+            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            const clean = rawBg.trim();
+            const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
+            if (match) {
+                return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
+            }
+            const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
+            if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
+                return singleWord;
+            }
+            return 'O+';
+        }
+
+        // Prioritize actual registered donor blood group over defaults or unrecorded profile fields
+        function resolveBestBloodGroup(...candidates) {
+            for (const c of candidates) {
+                if (isValidBloodGroup(c)) {
+                    return formatSingleBloodGroup(c);
+                }
+            }
+            return 'O+';
+        }
+
+        // Web Audio Synthesized Chime for Incoming Messages
+        function playChatNotificationChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(659.25, now);
+                osc1.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(523.25, now);
+                osc2.frequency.exponentialRampToValueAtTime(1046.50, now + 0.15);
+
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 0.38);
+                osc2.stop(now + 0.38);
+            } catch (e) {}
+        }
+
         let currentActiveUser = null;
         window.currentUserReferralCode = null;
         let targetResetUserKey = null;
@@ -2497,19 +2564,21 @@
 
                 // Consolidate Profile Data Scraped from Blood/Organ Donor and User Account
                 const verifiedName = userData.name || userData.fullName || (bloodDonor && bloodDonor.name) || (organDonor && organDonor.name) || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
-                const verifiedBg = userData.bloodGroup || userData.blood_group || (bloodDonor && bloodDonor.bloodGroup) || (organDonor && organDonor.bloodGroup) || 'Not Recorded';
+                const rawDonorBg = (bloodDonor && bloodDonor.bloodGroup) || (organDonor && organDonor.bloodGroup);
+                const verifiedBg = resolveBestBloodGroup(rawDonorBg, userData.bloodGroup, userData.blood_group);
+                const displayVerifiedBg = isValidBloodGroup(verifiedBg) ? verifiedBg : (isValidBloodGroup(userData.bloodGroup) ? formatSingleBloodGroup(userData.bloodGroup) : 'Not Recorded');
                 const verifiedCity = userData.city || userData.location || (bloodDonor && bloodDonor.city) || (organDonor && organDonor.city) || 'Not Specified';
                 const verifiedPhone = userData.phone || (bloodDonor && bloodDonor.phone) || (organDonor && organDonor.phone) || '';
                 const verifiedAccountType = userData.accountType || (bloodDonor && bloodDonor.phoneVisibility === 'private' ? 'private' : 'public');
 
-                // If user record didn't have blood group or city yet, sync scraped donor data to users/{uid}
-                if (bloodDonor && (!userData.bloodGroup || !userData.city || !userData.name)) {
+                // If user record didn't have valid blood group or city yet, sync scraped donor data to users/{uid}
+                if (bloodDonor && (!isValidBloodGroup(userData.bloodGroup) || !userData.city || !userData.name)) {
                     try {
                         await update(ref(db, `users/${user.uid}`), {
                             name: verifiedName,
                             fullName: verifiedName,
-                            bloodGroup: verifiedBg,
-                            blood_group: verifiedBg,
+                            bloodGroup: displayVerifiedBg,
+                            blood_group: displayVerifiedBg,
                             city: verifiedCity,
                             location: verifiedCity,
                             phone: verifiedPhone,
@@ -2524,7 +2593,7 @@
                 // Check for User's Pending Profile Data (Optimistic Normal Display)
                 const pending = userData.pendingProfile || {};
                 const displayName = pending.name || verifiedName;
-                const displayBg = pending.bloodGroup || verifiedBg;
+                const displayBg = isValidBloodGroup(pending.bloodGroup) ? formatSingleBloodGroup(pending.bloodGroup) : displayVerifiedBg;
                 const displayCity = (pending.city !== undefined && pending.city !== '') ? pending.city : verifiedCity;
                 const displayPhone = (pending.phone !== undefined && pending.phone !== '') ? pending.phone : verifiedPhone;
                 const displayAccountType = pending.accountType || verifiedAccountType;
@@ -3415,7 +3484,10 @@
                 if (window.lucide) lucide.createIcons();
             });
 
-            // 2. Listen to Direct Messages & Live Chats (Two-Way for User A and User B)
+            // 2. Listen to Direct Messages & Live Chats (Two-Way for User A and User B + Live Audio Alerts)
+            let isInitialDashboardInboxLoad = true;
+            let previousDashboardMessageKeys = new Set();
+
             onValue(ref(db, 'messages'), snap => {
                 if (!snap.exists()) {
                     messageList.innerHTML = `<div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
@@ -3426,6 +3498,31 @@
                 const data = snap.val();
                 const myUid = (user.uid || '').trim();
                 const myEmail = (user.email || '').trim().toLowerCase();
+
+                // Detect new incoming message for current user on dashboard
+                if (!isInitialDashboardInboxLoad) {
+                    Object.keys(data).forEach(k => {
+                        if (!previousDashboardMessageKeys.has(k)) {
+                            const m = data[k];
+                            const sUid = (m.senderUid || '').trim();
+                            const rUid = (m.receiverUid || '').trim();
+                            const sMail = (m.senderEmail || '').trim().toLowerCase();
+                            const rMail = (m.receiverEmail || '').trim().toLowerCase();
+
+                            const isReceivedByMe = (myUid && rUid === myUid) || (myEmail && rMail === myEmail) || (linkedDonorKeys.includes(rUid));
+                            const isSentByMe = (myUid && sUid === myUid) || (myEmail && sMail === myEmail) || (linkedDonorKeys.includes(sUid));
+
+                            if (isReceivedByMe && !isSentByMe) {
+                                playChatNotificationChime();
+                                if (typeof window.showLifeSaverMsg === 'function') {
+                                    window.showLifeSaverMsg(`💬 New live chat from ${m.senderName || 'Member'}:\n"${(m.message || '').slice(0, 50)}..."`, "info", "New Message Received");
+                                }
+                            }
+                        }
+                    });
+                }
+                previousDashboardMessageKeys = new Set(Object.keys(data));
+                isInitialDashboardInboxLoad = false;
 
                 let myMessages = [];
                 Object.keys(data).forEach(k => {
@@ -4332,10 +4429,10 @@
                 const profileName = userProfile?.name || userProfile?.fullName || user.displayName || (user.email ? user.email.split('@')[0] : 'Member');
 
                 // If user has a registered profile with blood group or is marked as donor, ensure certificate is enabled
-                if (!bloodDonor && (profileBg || userProfile?.isBloodDonor)) {
+                if (!bloodDonor && (isValidBloodGroup(profileBg) || userProfile?.isBloodDonor)) {
                     bloodDonor = {
                         name: profileName,
-                        bloodGroup: profileBg || 'A+',
+                        bloodGroup: isValidBloodGroup(profileBg) ? formatSingleBloodGroup(profileBg) : 'O+',
                         credentialID: fallbackCertIdBD,
                         donationCount: 1
                     };
@@ -4343,17 +4440,19 @@
 
                 if (bloodDonor && bloodDonor.name) {
                     const donorName = profileName || bloodDonor.name;
-                    const bloodGroup = formatSingleBloodGroup(profileBg || bloodDonor.bloodGroup || 'A+');
+                    const bloodGroup = resolveBestBloodGroup(bloodDonor.bloodGroup, profileBg);
                     const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
                     const donationCount = parseInt(bloodDonor.donationCount !== undefined ? bloodDonor.donationCount : (bloodDonor.timesDonated || 0), 10);
                     const tier = getMilestoneTier(donationCount);
 
-                    // Sync back to Firebase if older record had outdated bloodGroup
-                    if (bloodDonor.key && bloodDonor.bloodGroup !== bloodGroup) {
-                        update(ref(db, `donors/${bloodDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
-                    }
-                    if (userProfile && (!userProfile.bloodDonor || userProfile.bloodDonor.bloodGroup !== bloodGroup)) {
-                        update(ref(db, `users/${user.uid}/bloodDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                    // Sync back to Firebase if older record had outdated bloodGroup (only with validated blood groups)
+                    if (isValidBloodGroup(bloodGroup)) {
+                        if (bloodDonor.key && bloodDonor.bloodGroup !== bloodGroup) {
+                            update(ref(db, `donors/${bloodDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
+                        }
+                        if (userProfile && (!userProfile.bloodDonor || userProfile.bloodDonor.bloodGroup !== bloodGroup)) {
+                            update(ref(db, `users/${user.uid}/bloodDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                        }
                     }
 
                     window.userBloodDonorData = {
@@ -4480,15 +4579,17 @@
 
                 if (organDonor && organDonor.name) {
                     const donorName = profileName || organDonor.name;
-                    const bloodGroup = formatSingleBloodGroup(profileBg || organDonor.bloodGroup || (userBloodDonorData && userBloodDonorData.bloodGroup) || 'A+');
+                    const bloodGroup = resolveBestBloodGroup(organDonor.bloodGroup, window.userBloodDonorData?.bloodGroup, profileBg);
                     const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || fallbackCertIdOD;
 
-                    // Sync back to Firebase if older record had outdated bloodGroup
-                    if (organDonor.key && organDonor.bloodGroup !== bloodGroup) {
-                        update(ref(db, `organ_donors/${organDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
-                    }
-                    if (userProfile && (!userProfile.organDonor || userProfile.organDonor.bloodGroup !== bloodGroup)) {
-                        update(ref(db, `users/${user.uid}/organDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                    // Sync back to Firebase if older record had outdated bloodGroup (only with validated blood groups)
+                    if (isValidBloodGroup(bloodGroup)) {
+                        if (organDonor.key && organDonor.bloodGroup !== bloodGroup) {
+                            update(ref(db, `organ_donors/${organDonor.key}`), { bloodGroup: bloodGroup, name: donorName }).catch(() => {});
+                        }
+                        if (userProfile && (!userProfile.organDonor || userProfile.organDonor.bloodGroup !== bloodGroup)) {
+                            update(ref(db, `users/${user.uid}/organDonor`), { bloodGroup: bloodGroup, name: donorName, credentialID: certId }).catch(() => {});
+                        }
                     }
 
                     window.userOrganDonorData = {
@@ -4569,7 +4670,7 @@
             const profile = window.currentActiveUserProfile || {};
             const donor = window.userBloodDonorData || {};
             const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
-            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || donor.bloodGroup || 'A+');
+            const bg = resolveBestBloodGroup(donor.bloodGroup, profile.bloodGroup, profile.blood_group);
             const certId = donor.certId || `LSC-BD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashBloodCertName');
@@ -4613,7 +4714,7 @@
         window.downloadBloodCertImage = async function() {
             const profile = window.currentActiveUserProfile || {};
             const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || document.getElementById('dashBloodCertName')?.textContent?.trim() || profile.name || window.userBloodDonorData?.name || 'Voluntary Donor';
-            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || document.getElementById('dashBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'A+');
+            const bg = resolveBestBloodGroup(window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelBloodCertBg')?.textContent?.trim(), document.getElementById('dashBloodCertBg')?.textContent?.trim(), profile.bloodGroup, profile.blood_group);
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || document.getElementById('dashBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || 'LSC-BD-2026-00482';
             const qrImg = document.getElementById('dashPanelBloodCertQR') || document.getElementById('dashBloodCertQR');
 
@@ -4696,15 +4797,17 @@
             const profile = window.currentActiveUserProfile || {};
             const certId = document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
             const name = document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || profile.name || window.userBloodDonorData?.name || document.getElementById('dashBloodCertName')?.textContent?.trim() || 'Member';
-            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || 'A+');
-            const verifyUrl = getCertificateVerifyUrl(certId);
+            const bg = resolveBestBloodGroup(window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelBloodCertBg')?.textContent?.trim(), document.getElementById('dashBloodCertBg')?.textContent?.trim(), profile.bloodGroup, profile.blood_group);
+            const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
             const text = `🩸 *LifeSaver-Care Blood Donation Certificate*\n\nRecipient: *${name}*\nBlood Group: *${bg}*\nCertificate ID: *${certId}*\n\nVerify official certificate online:\n${verifyUrl}\n\nJoin LifeSaver-Care and save lives together! ❤️`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         };
 
         window.copyBloodCertUrl = function() {
             const certId = window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482';
-            const verifyUrl = getCertificateVerifyUrl(certId);
+            const bg = resolveBestBloodGroup(window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelBloodCertBg')?.textContent?.trim(), window.currentActiveUserProfile?.bloodGroup);
+            const name = window.userBloodDonorData?.name || window.currentActiveUserProfile?.name || '';
+            const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
             navigator.clipboard?.writeText(verifyUrl).then(() => {
                 alert("✅ Certificate verification URL copied to clipboard!\n\n" + verifyUrl);
             }).catch(() => {
@@ -4718,7 +4821,7 @@
             const profile = window.currentActiveUserProfile || {};
             const donor = window.userOrganDonorData || {};
             const name = donor.name || profile.name || currentActiveUser?.displayName || (currentActiveUser?.email ? currentActiveUser.email.split('@')[0] : 'Member');
-            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || donor.bloodGroup || 'A+');
+            const bg = resolveBestBloodGroup(donor.bloodGroup, window.userBloodDonorData?.bloodGroup, profile.bloodGroup, profile.blood_group);
             const certId = donor.certId || `LSC-OD-2026-${(currentActiveUser?.uid || '00482').slice(-5).toUpperCase()}`;
 
             const nameEl = document.getElementById('dashOrganCertName');
@@ -4775,7 +4878,7 @@
         window.downloadOrganCertImage = async function() {
             const profile = window.currentActiveUserProfile || {};
             const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || document.getElementById('dashOrganCertName')?.textContent?.trim() || profile.name || window.userOrganDonorData?.name || 'Voluntary Pledger';
-            const bg = formatSingleBloodGroup(profile.bloodGroup || profile.blood_group || document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || document.getElementById('dashOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'A+');
+            const bg = resolveBestBloodGroup(window.userOrganDonorData?.bloodGroup, window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelOrganCertBg')?.textContent?.trim(), profile.bloodGroup, profile.blood_group);
             const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || document.getElementById('dashOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || 'LSC-OD-2026-00482';
             const qrImg = document.getElementById('dashPanelOrganCertQR') || document.getElementById('dashOrganCertQR');
 
@@ -4854,17 +4957,20 @@
         };
 
         window.shareOrganCertWhatsApp = function() {
+            const profile = window.currentActiveUserProfile || {};
             const certId = document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || 'Member';
-            const bg = formatSingleBloodGroup(document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || 'O+');
-            const verifyUrl = getCertificateVerifyUrl(certId);
+            const name = document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || document.getElementById('dashOrganCertName')?.textContent?.trim() || profile.name || 'Member';
+            const bg = resolveBestBloodGroup(window.userOrganDonorData?.bloodGroup, window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelOrganCertBg')?.textContent?.trim(), profile.bloodGroup, profile.blood_group);
+            const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
             const text = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\nPledged by: *${name}*\nBlood Group: *${bg}*\nCertificate ID: *${certId}*\n\nVerify official pledge certificate online:\n${verifyUrl}\n\nGive someone a second chance at life! 🌟`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         };
 
         window.copyOrganCertUrl = function() {
             const certId = window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482';
-            const verifyUrl = getCertificateVerifyUrl(certId);
+            const bg = resolveBestBloodGroup(window.userOrganDonorData?.bloodGroup, window.userBloodDonorData?.bloodGroup, document.getElementById('dashPanelOrganCertBg')?.textContent?.trim(), window.currentActiveUserProfile?.bloodGroup);
+            const name = window.userOrganDonorData?.name || window.currentActiveUserProfile?.name || '';
+            const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
             navigator.clipboard?.writeText(verifyUrl).then(() => {
                 alert("✅ Pledge Certificate verification URL copied to clipboard!\n\n" + verifyUrl);
             }).catch(() => {

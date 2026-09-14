@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifesaver-pwa-v7';
+const CACHE_NAME = 'lifesaver-pwa-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   './emergency.html',
   './blood.html',
   './message.html',
+  './contact.html',
   './organ.html',
   './find-donor.html',
   './register-donor.html',
