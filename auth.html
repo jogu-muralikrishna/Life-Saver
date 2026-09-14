@@ -1089,6 +1089,7 @@
 
             <form id="replyMessageForm" onsubmit="submitReplyMessage(event)" class="space-y-4">
                 <input type="hidden" id="replyReceiverUid">
+                <input type="hidden" id="replyReceiverEmail">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">To (Member)</label>
                     <input type="text" id="replyReceiverName" readonly class="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 p-2.5 rounded-xl text-xs font-bold outline-none cursor-not-allowed">
@@ -3383,10 +3384,10 @@
                         actionsHtml = `
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Accepted</span>
-                                <a href="message.html?to=${encodeURIComponent(req.senderUid || '')}&name=${encodeURIComponent(req.senderName || 'Member')}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
-                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat
+                                <a href="message.html?to=${encodeURIComponent(req.senderUid || '')}&name=${encodeURIComponent(req.senderName || 'Member')}&email=${encodeURIComponent(req.senderEmail || '')}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                                 </a>
-                                <button onclick="openReplyMessageModal('${escapeHtml(req.senderUid)}', '${escapeHtml(req.senderName || 'Member')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <button onclick="openReplyMessageModal('${escapeHtml(req.senderUid)}', '${escapeHtml(req.senderName || 'Member')}', '${escapeHtml(req.senderEmail || '')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
                                     <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
                                 </button>
                             </div>
@@ -3414,19 +3415,30 @@
                 if (window.lucide) lucide.createIcons();
             });
 
-            // 2. Listen to Direct Messages where current user is recipient
+            // 2. Listen to Direct Messages & Live Chats (Two-Way for User A and User B)
             onValue(ref(db, 'messages'), snap => {
                 if (!snap.exists()) {
-                    messageList.innerHTML = `<div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No direct messages in your inbox.</div>`;
+                    messageList.innerHTML = `<div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
                     if (messageBadge) messageBadge.textContent = "0";
                     return;
                 }
 
                 const data = snap.val();
+                const myUid = (user.uid || '').trim();
+                const myEmail = (user.email || '').trim().toLowerCase();
+
                 let myMessages = [];
                 Object.keys(data).forEach(k => {
                     const m = data[k];
-                    if (m.receiverUid === user.uid || (m.receiverEmail && m.receiverEmail === user.email)) {
+                    const sUid = (m.senderUid || '').trim();
+                    const rUid = (m.receiverUid || '').trim();
+                    const sMail = (m.senderEmail || '').trim().toLowerCase();
+                    const rMail = (m.receiverEmail || '').trim().toLowerCase();
+
+                    const isRecipient = (myUid && rUid === myUid) || (myEmail && rMail === myEmail) || (linkedDonorKeys.includes(rUid));
+                    const isSender = (myUid && sUid === myUid) || (myEmail && sMail === myEmail) || (linkedDonorKeys.includes(sUid));
+
+                    if (isRecipient || isSender) {
                         myMessages.push({ ...m, key: k });
                     }
                 });
@@ -3435,35 +3447,55 @@
                 if (messageBadge) messageBadge.textContent = myMessages.length;
 
                 if (myMessages.length === 0) {
-                    messageList.innerHTML = `<div class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No direct messages in your inbox.</div>`;
+                    messageList.innerHTML = `<div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400">No direct messages or live chats yet. You can start a conversation from the Find Donors directory or Blood Board.</div>`;
                     return;
                 }
 
                 messageList.innerHTML = "";
                 myMessages.forEach(msg => {
+                    const sUid = (msg.senderUid || '').trim();
+                    const sMail = (msg.senderEmail || '').trim().toLowerCase();
+                    const isReceived = (sUid !== myUid) && (!myEmail || sMail !== myEmail);
+
+                    const otherPartyUid = isReceived ? (msg.senderUid || '') : (msg.receiverUid || '');
+                    const otherPartyName = isReceived ? (msg.senderName || 'Member') : (msg.receiverName || 'Recipient');
+                    const otherPartyEmail = isReceived ? (msg.senderEmail || '') : (msg.receiverEmail || '');
+                    const otherPartyBg = isReceived ? (msg.senderBloodGroup || msg.receiverBloodGroup || '') : (msg.receiverBloodGroup || '');
+                    const otherPartyCity = msg.receiverCity || '';
+                    const otherPartyHospital = msg.receiverHospital || '';
+
                     const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently';
+
+                    const directionBadge = isReceived
+                        ? `<span class="inline-flex items-center gap-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase"><i data-lucide="arrow-down-left" class="w-3 h-3"></i> From ${escapeHtml(otherPartyName)}</span>`
+                        : `<span class="inline-flex items-center gap-1 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase"><i data-lucide="arrow-up-right" class="w-3 h-3"></i> To ${escapeHtml(otherPartyName)}</span>`;
+
+                    const continueChatUrl = `message.html?to=${encodeURIComponent(otherPartyUid)}&name=${encodeURIComponent(otherPartyName)}&email=${encodeURIComponent(otherPartyEmail)}&bg=${encodeURIComponent(otherPartyBg)}&city=${encodeURIComponent(otherPartyCity)}&hospital=${encodeURIComponent(otherPartyHospital)}`;
+
+                    const replyBtnHtml = isReceived
+                        ? `<button onclick="openReplyMessageModal('${escapeHtml(otherPartyUid)}', '${escapeHtml(otherPartyName)}', '${escapeHtml(otherPartyEmail)}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700 cursor-pointer" title="Quick reply from dashboard">
+                               <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
+                           </button>`
+                        : '';
+
                     const card = document.createElement("div");
-                    card.className = "p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3";
+                    card.className = "p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-blue-300 dark:hover:border-blue-700";
                     card.innerHTML = `
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-2">
-                                <h4 class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
-                                    <i data-lucide="mail" class="w-3.5 h-3.5 text-pink-500"></i> From: ${escapeHtml(msg.senderName || 'Member')}
-                                </h4>
-                                <span class="text-[10px] text-slate-400">${dateStr}</span>
+                        <div class="space-y-1.5 min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                ${directionBadge}
+                                <span class="text-[10px] text-slate-400 font-medium">${dateStr}</span>
                             </div>
-                            <div class="text-xs font-bold text-slate-800 dark:text-slate-200">${escapeHtml(msg.subject || 'No Subject')}</div>
-                            <p class="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 leading-relaxed">
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(msg.subject || 'Live Healthcare Chat')}</div>
+                            <p class="text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 leading-relaxed break-words">
                                 ${escapeHtml(msg.message || '')}
                             </p>
                         </div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <a href="message.html?to=${encodeURIComponent(msg.senderUid || '')}&name=${encodeURIComponent(msg.senderName || 'Member')}&bg=${encodeURIComponent(msg.receiverBloodGroup || '')}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
-                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Chat on LifeSaver
+                        <div class="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                            <a href="${continueChatUrl}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-4 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer" title="Open live two-way chat">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                             </a>
-                            <button onclick="openReplyMessageModal('${escapeHtml(msg.senderUid)}', '${escapeHtml(msg.senderName || 'Member')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3.5 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
-                                <i data-lucide="reply" class="w-3.5 h-3.5"></i> Reply
-                            </button>
+                            ${replyBtnHtml}
                         </div>
                     `;
                     messageList.appendChild(card);
@@ -3497,7 +3529,7 @@
             }
         };
 
-        window.openReplyMessageModal = function(receiverUid, receiverName) {
+        window.openReplyMessageModal = function(receiverUid, receiverName, receiverEmail) {
             window.lockBodyScroll();
             setTimeout(() => {
                 const msgBody = document.getElementById('replyMessageBody');
@@ -3507,6 +3539,9 @@
             }, 100);
             document.getElementById("replyReceiverUid").value = receiverUid || '';
             document.getElementById("replyReceiverName").value = receiverName || 'Member';
+            if (document.getElementById("replyReceiverEmail")) {
+                document.getElementById("replyReceiverEmail").value = receiverEmail || '';
+            }
             document.getElementById("replySubject").value = 'Re: Blood Donation / LifeSaver Care Inquiry';
             document.getElementById("replyMessageBody").value = '';
             const modal = document.getElementById("replyMessageModal");
@@ -3536,6 +3571,7 @@
 
             const receiverUid = document.getElementById("replyReceiverUid").value;
             const receiverName = document.getElementById("replyReceiverName").value;
+            const receiverEmail = document.getElementById("replyReceiverEmail")?.value || '';
             const subject = document.getElementById("replySubject").value.trim();
             const message = document.getElementById("replyMessageBody").value.trim();
 
@@ -3547,11 +3583,13 @@
                 senderEmail: currentActiveUser.email,
                 receiverUid: receiverUid,
                 receiverName: receiverName,
+                receiverEmail: receiverEmail,
                 subject: subject,
                 message: message,
                 timestamp: Date.now(),
                 createdAt: new Date().toISOString(),
-                read: false
+                read: false,
+                sourcePage: 'auth.html'
             };
 
             try {

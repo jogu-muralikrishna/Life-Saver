@@ -541,7 +541,7 @@
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
                             </a>
                         </div>
-                        <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                        <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
                         </a>
                     </div>
@@ -589,7 +589,7 @@
 
             // In-Platform Contact & Messaging for Private Accounts
             const messageLinkHtml = `
-                <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                     <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
                 </a>
             `;
@@ -722,8 +722,8 @@
         };
 
         // Direct Message to Donor Handler (Forward to dedicated message.html)
-        window.openDirectMessageToDonor = function(donorUid, donorName, bloodGroup, city) {
-            const url = `message.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&bg=${encodeURIComponent(bloodGroup || '')}&city=${encodeURIComponent(city || '')}&role=donor`;
+        window.openDirectMessageToDonor = function(donorUid, donorName, bloodGroup, city, email) {
+            const url = `message.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&email=${encodeURIComponent(email || '')}&bg=${encodeURIComponent(bloodGroup || '')}&city=${encodeURIComponent(city || '')}&role=donor`;
             window.location.href = url;
         };
 
@@ -853,7 +853,12 @@
         const donorsRef = ref(db, 'donors');
         onValue(donorsRef, (snapshot) => {
             if (snapshot.exists()) {
-                donorsList = Object.values(snapshot.val());
+                const val = snapshot.val();
+                donorsList = Object.keys(val).map(k => ({
+                    ...val[k],
+                    key: k,
+                    uid: val[k].uid || val[k].userId || k
+                }));
                 try { localStorage.setItem('ls_donors_cache', JSON.stringify(donorsList)); } catch(e) {}
             } else {
                 donorsList = [];

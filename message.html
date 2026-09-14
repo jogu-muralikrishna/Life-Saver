@@ -340,6 +340,7 @@
                 <!-- HIDDEN RECEIVER FIELDS -->
                 <input type="hidden" id="receiverUid">
                 <input type="hidden" id="receiverName">
+                <input type="hidden" id="receiverEmail">
                 <input type="hidden" id="receiverBloodGroup">
                 <input type="hidden" id="receiverCity">
                 <input type="hidden" id="receiverHospital">
@@ -503,6 +504,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         let paramTo = urlParams.get('to') || urlParams.get('uid') || '';
         let paramName = urlParams.get('name') || urlParams.get('recipient') || '';
+        let paramEmail = urlParams.get('email') || '';
         let paramBg = urlParams.get('bg') || urlParams.get('bloodGroup') || '';
         let paramCity = urlParams.get('city') || '';
         let paramHospital = urlParams.get('hospital') || '';
@@ -597,46 +599,136 @@
             }
         };
 
+        // Helper to resolve current user identity reliably across auth states
+        function getCurrentUserIdentity() {
+            if (window.activeAuthUser && window.activeAuthUser.uid) {
+                return {
+                    uid: window.activeAuthUser.uid,
+                    email: (window.activeAuthUser.email || '').toLowerCase(),
+                    name: window.activeUserProfile?.name || window.activeAuthUser.displayName || 'Member'
+                };
+            }
+            if (auth.currentUser && auth.currentUser.uid) {
+                return {
+                    uid: auth.currentUser.uid,
+                    email: (auth.currentUser.email || '').toLowerCase(),
+                    name: auth.currentUser.displayName || 'Member'
+                };
+            }
+            try {
+                const saved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (saved && (saved.uid || saved.id)) {
+                    return {
+                        uid: saved.uid || saved.id,
+                        email: (saved.email || '').toLowerCase(),
+                        name: saved.displayName || saved.name || 'Member'
+                    };
+                }
+            } catch(e) {}
+
+            let guestId = localStorage.getItem('ls_user_chat_uid');
+            if (!guestId) {
+                guestId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('ls_user_chat_uid', guestId);
+            }
+            return {
+                uid: guestId,
+                email: '',
+                name: 'Guest Sender'
+            };
+        }
+
         // RENDER ACTIVE TWO-WAY CONVERSATION THREAD (USER A & USER B)
         window.renderTwoWayChatThread = function() {
             const chatBox = document.getElementById("chatMessagesBox");
             const partnerDisplay = document.getElementById("chatPartnerNameDisplay");
             if (!chatBox) return;
 
-            const myUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
-                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
-                localStorage.setItem('ls_user_chat_uid', newId);
-                return newId;
-            })());
-            const myEmail = window.activeAuthUser?.email || '';
+            const myUser = getCurrentUserIdentity();
+            const myUid = (myUser.uid || '').trim();
+            const myEmail = (myUser.email || '').trim().toLowerCase();
 
-            const otherUid = document.getElementById("receiverUid")?.value?.trim() || '';
-            const otherName = document.getElementById("receiverName")?.value?.trim() || 'Recipient';
+            const otherUid = (document.getElementById("receiverUid")?.value || '').trim();
+            const otherName = (document.getElementById("receiverName")?.value || '').trim();
+            const otherEmail = (document.getElementById("receiverEmail")?.value || '').trim().toLowerCase();
 
             if (partnerDisplay) {
-                partnerDisplay.textContent = otherName;
+                partnerDisplay.textContent = otherName || 'Recipient';
             }
 
             const messagesObj = window.allMessagesMap || {};
             const allMsgs = Object.keys(messagesObj).map(k => ({ ...messagesObj[k], _key: k }));
 
+            // Auto-load latest conversation if no specific recipient selected yet
+            if (!otherUid && allMsgs.length > 0) {
+                const myRelatedMsgs = allMsgs.filter(m => {
+                    const sUid = (m.senderUid || '').trim();
+                    const rUid = (m.receiverUid || '').trim();
+                    const sMail = (m.senderEmail || '').trim().toLowerCase();
+                    const rMail = (m.receiverEmail || '').trim().toLowerCase();
+                    return (myUid && (sUid === myUid || rUid === myUid)) ||
+                           (myEmail && (sMail === myEmail || rMail === myEmail));
+                }).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                if (myRelatedMsgs.length > 0) {
+                    const latest = myRelatedMsgs[0];
+                    const sUid = (latest.senderUid || '').trim();
+                    const sMail = (latest.senderEmail || '').trim().toLowerCase();
+                    const isReceived = (sUid !== myUid) && (!myEmail || sMail !== myEmail);
+
+                    const partnerUid = isReceived ? latest.senderUid : latest.receiverUid;
+                    const partnerName = isReceived ? latest.senderName : latest.receiverName;
+                    const partnerEmail = isReceived ? latest.senderEmail : latest.receiverEmail;
+                    const partnerBg = isReceived ? (latest.senderBloodGroup || latest.receiverBloodGroup || '🩸') : (latest.receiverBloodGroup || '🩸');
+                    const partnerCity = latest.receiverCity || '';
+                    const partnerHosp = latest.receiverHospital || '';
+
+                    if (partnerUid && partnerUid !== 'COMMUNITY-DISPATCH') {
+                        updateRecipientDisplay({
+                            uid: partnerUid,
+                            name: partnerName || 'Member',
+                            email: partnerEmail || '',
+                            bloodGroup: partnerBg || '🩸',
+                            city: partnerCity || '',
+                            hospital: partnerHosp || '',
+                            role: partnerHosp ? 'requester' : 'donor'
+                        });
+                        return;
+                    }
+                }
+            }
+
+            const oUid = otherUid;
+            const oMail = otherEmail;
+            const oName = otherName.toLowerCase();
+
             // Filter for bidirectional conversation between User A and User B
             const conversation = allMsgs.filter(m => {
-                const sUid = m.senderUid || '';
-                const rUid = m.receiverUid || '';
-                const sMail = (m.senderEmail || '').toLowerCase();
-                const rMail = (m.receiverEmail || '').toLowerCase();
+                const sUid = (m.senderUid || '').trim();
+                const rUid = (m.receiverUid || '').trim();
+                const sMail = (m.senderEmail || '').trim().toLowerCase();
+                const rMail = (m.receiverEmail || '').trim().toLowerCase();
+                const sName = (m.senderName || '').trim().toLowerCase();
+                const rName = (m.receiverName || '').trim().toLowerCase();
 
-                // Case 1: Exact UID match in either direction
-                const uidMatch = (otherUid && ((sUid === myUid && rUid === otherUid) || (sUid === otherUid && rUid === myUid)));
+                // 1. Direct UID matching in either direction
+                const uidMatch = (oUid && oUid !== 'COMMUNITY-DISPATCH' && (
+                    (sUid === myUid && rUid === oUid) ||
+                    (sUid === oUid && rUid === myUid)
+                ));
 
-                // Case 2: Email matching
-                const emailMatch = (myEmail && otherUid && ((sMail === myEmail.toLowerCase() && rUid === otherUid) || (sUid === otherUid && rMail === myEmail.toLowerCase())));
+                // 2. Email matching in either direction
+                const emailMatch = (
+                    (myEmail && oMail && ((sMail === myEmail && rMail === oMail) || (sMail === oMail && rMail === myEmail))) ||
+                    (myEmail && oUid && ((sMail === myEmail && rUid === oUid) || (sUid === oUid && rMail === myEmail))) ||
+                    (oMail && myUid && ((sUid === myUid && rMail === oMail) || (sMail === oMail && rUid === myUid)))
+                );
 
-                // Case 3: Match by participant name when generic guest dispatch
-                const nameMatch = (otherName && otherName !== 'Recipient' && otherName !== 'Voluntary Donor' && (
-                    (sUid === myUid && m.receiverName === otherName) ||
-                    (m.senderName === otherName && (rUid === myUid || rUid === 'COMMUNITY-DISPATCH'))
+                // 3. Name fallback when generic dispatch
+                const isGeneric = !oName || oName === 'recipient' || oName === 'voluntary donor' || oName === 'donor';
+                const nameMatch = (!isGeneric && (
+                    (sUid === myUid && rName === oName) ||
+                    (sName === oName && (rUid === myUid || (myEmail && rMail === myEmail) || rUid === 'COMMUNITY-DISPATCH' || !rUid))
                 ));
 
                 return uidMatch || emailMatch || nameMatch;
@@ -651,9 +743,9 @@
                         <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto text-xl font-black">
                             💬
                         </div>
-                        <h4 class="font-black text-slate-800 dark:text-slate-200 text-sm">No Messages Yet with ${escapeHtml(otherName)}</h4>
+                        <h4 class="font-black text-slate-800 dark:text-slate-200 text-sm">Live Chat with ${escapeHtml(otherName || 'Member')}</h4>
                         <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                            Start the conversation now using the quick-chat box below or choose a 1-click template. Both of you will see replies in real-time.
+                            Send a message below to chat in real time. Both you and ${escapeHtml(otherName || 'the recipient')} will see replies live and in your dashboard.
                         </p>
                     </div>
                 `;
@@ -662,7 +754,9 @@
 
             chatBox.innerHTML = "";
             conversation.forEach(m => {
-                const isMyMessage = (m.senderUid === myUid) || (myEmail && m.senderEmail && m.senderEmail.toLowerCase() === myEmail.toLowerCase());
+                const sUid = (m.senderUid || '').trim();
+                const sMail = (m.senderEmail || '').trim().toLowerCase();
+                const isMyMessage = (myUid && sUid === myUid) || (myEmail && sMail === myEmail);
                 const dateStr = m.timestamp ? new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
                 const fullDate = m.timestamp ? new Date(m.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '';
 
@@ -677,7 +771,7 @@
                     </div>
                 ` : `
                     <div class="flex items-center gap-1.5 text-[10px] text-slate-400 pl-1">
-                        <span class="font-black text-slate-700 dark:text-slate-300">${escapeHtml(m.senderName || otherName)}</span>
+                        <span class="font-black text-slate-700 dark:text-slate-300">${escapeHtml(m.senderName || otherName || 'Member')}</span>
                         <span>•</span>
                         <span>${dateStr} ${fullDate}</span>
                     </div>
@@ -720,20 +814,17 @@
 
             if (!text) return;
 
+            const myUser = getCurrentUserIdentity();
             const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
-            const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Voluntary Donor';
+            const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Member';
+            const receiverEmail = document.getElementById("receiverEmail")?.value?.trim() || '';
             const receiverBloodGroup = document.getElementById("receiverBloodGroup")?.value?.trim() || '';
             const receiverCity = document.getElementById("receiverCity")?.value?.trim() || '';
             const receiverHospital = document.getElementById("receiverHospital")?.value?.trim() || '';
 
-            const senderName = document.getElementById("senderName")?.value?.trim() || (window.activeAuthUser?.displayName || 'Member');
-            const senderEmail = document.getElementById("senderContact")?.value?.trim() || (window.activeAuthUser?.email || '');
-
-            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
-                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
-                localStorage.setItem('ls_user_chat_uid', newId);
-                return newId;
-            })());
+            const senderName = document.getElementById("senderName")?.value?.trim() || myUser.name;
+            const senderEmail = document.getElementById("senderContact")?.value?.trim() || myUser.email;
+            const senderUid = myUser.uid;
             const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
 
             const payload = {
@@ -743,6 +834,7 @@
                 senderEmail: senderEmail,
                 receiverUid: receiverUid || 'COMMUNITY-DISPATCH',
                 receiverName: receiverName,
+                receiverEmail: receiverEmail,
                 receiverBloodGroup: receiverBloodGroup,
                 receiverCity: receiverCity,
                 receiverHospital: receiverHospital,
@@ -760,6 +852,7 @@
                 if (input) input.value = '';
                 if (feedback) {
                     feedback.textContent = `✓ Delivered to ${receiverName}`;
+                    feedback.className = "text-[11px] font-bold mt-1.5 text-emerald-600 dark:text-emerald-400";
                     feedback.classList.remove('hidden');
                     setTimeout(() => feedback.classList.add('hidden'), 3000);
                 }
@@ -777,10 +870,11 @@
         };
 
         // 1-CLICK OPEN CONVERSATION THREAD FROM INBOX OR DIRECTORY
-        window.openConversationThread = function(uid, name, bg, city, hosp) {
+        window.openConversationThread = function(uid, name, bg, city, hosp, email) {
             updateRecipientDisplay({
                 uid: uid,
                 name: name,
+                email: email || '',
                 bloodGroup: bg || '🩸',
                 city: city || '',
                 hospital: hosp || '',
@@ -813,22 +907,20 @@
             if (btn) btn.disabled = true;
             if (btnText) btnText.textContent = "Delivering Message...";
 
+            const myUser = getCurrentUserIdentity();
             const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
             const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Voluntary Donor';
+            const receiverEmail = document.getElementById("receiverEmail")?.value?.trim() || '';
             const receiverBloodGroup = document.getElementById("receiverBloodGroup")?.value?.trim() || '';
             const receiverCity = document.getElementById("receiverCity")?.value?.trim() || '';
             const receiverHospital = document.getElementById("receiverHospital")?.value?.trim() || '';
 
-            const senderName = document.getElementById("senderName")?.value?.trim() || 'Member';
-            const senderContact = document.getElementById("senderContact")?.value?.trim() || '';
+            const senderName = document.getElementById("senderName")?.value?.trim() || myUser.name;
+            const senderContact = document.getElementById("senderContact")?.value?.trim() || myUser.email;
             const subject = document.getElementById("messageSubject")?.value?.trim() || 'LifeSaver Care Inquiry';
             const message = document.getElementById("messageBody")?.value?.trim() || '';
 
-            const senderUid = window.activeAuthUser ? window.activeAuthUser.uid : (localStorage.getItem('ls_user_chat_uid') || (function() {
-                const newId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
-                localStorage.setItem('ls_user_chat_uid', newId);
-                return newId;
-            })());
+            const senderUid = myUser.uid;
             const messageId = "MSG-" + Math.floor(100000 + Math.random() * 900000);
 
             const payload = {
@@ -838,6 +930,7 @@
                 senderEmail: senderContact,
                 receiverUid: receiverUid || 'COMMUNITY-DISPATCH',
                 receiverName: receiverName,
+                receiverEmail: receiverEmail,
                 receiverBloodGroup: receiverBloodGroup,
                 receiverCity: receiverCity,
                 receiverHospital: receiverHospital,
@@ -892,6 +985,8 @@
             if (rUid) rUid.value = data.uid || '';
             const rName = document.getElementById("receiverName");
             if (rName) rName.value = data.name || 'Voluntary Donor';
+            const rEmail = document.getElementById("receiverEmail");
+            if (rEmail) rEmail.value = data.email || '';
             const rBg = document.getElementById("receiverBloodGroup");
             if (rBg) rBg.value = data.bloodGroup || '';
             const rCity = document.getElementById("receiverCity");
@@ -904,6 +999,11 @@
 
             const nameEl = document.getElementById("recName");
             if (nameEl) nameEl.textContent = data.name || 'Voluntary Donor';
+
+            const partnerDisplay = document.getElementById("chatPartnerNameDisplay");
+            if (partnerDisplay) {
+                partnerDisplay.textContent = data.name || 'Recipient';
+            }
 
             const locEl = document.getElementById("recLocationText");
             if (locEl) {
@@ -921,6 +1021,20 @@
                     roleBadge.className = 'text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-200 dark:border-emerald-900';
                 }
             }
+
+            // Sync URL parameters without reload if possible
+            try {
+                if (data.uid || data.name) {
+                    const newUrl = new URL(window.location.href);
+                    if (data.uid) newUrl.searchParams.set('to', data.uid);
+                    if (data.name) newUrl.searchParams.set('name', data.name);
+                    if (data.email) newUrl.searchParams.set('email', data.email);
+                    if (data.bloodGroup) newUrl.searchParams.set('bg', data.bloodGroup);
+                    if (data.city) newUrl.searchParams.set('city', data.city);
+                    if (data.hospital) newUrl.searchParams.set('hospital', data.hospital);
+                    window.history.replaceState({}, '', newUrl.toString());
+                }
+            } catch (e) {}
 
             // Default pre-filled subject if not custom
             const subjectField = document.getElementById("messageSubject");
@@ -952,7 +1066,8 @@
         // Set initial recipient from URL params
         updateRecipientDisplay({
             uid: paramTo,
-            name: paramName || 'LifeSaver Voluntary Donor',
+            name: paramName || (paramTo ? 'Member' : 'LifeSaver Voluntary Donor'),
+            email: paramEmail,
             bloodGroup: paramBg || 'O+',
             city: paramCity || 'Active Area',
             hospital: paramHospital || '',
@@ -972,8 +1087,9 @@
                 let displayName = user.displayName;
                 try {
                     const snap = await get(ref(db, `users/${user.uid}`));
-                    if (snap.exists() && snap.val().name) {
-                        displayName = snap.val().name;
+                    if (snap.exists() && snap.val()) {
+                        window.activeUserProfile = snap.val();
+                        if (snap.val().name) displayName = snap.val().name;
                     }
                 } catch (e) {}
 
@@ -1036,15 +1152,21 @@
             const inboxBadge = document.getElementById("userInboxBadge");
             if (!inboxList) return;
 
-            const myUid = user ? user.uid : (localStorage.getItem('ls_user_chat_uid') || '');
-            const myEmail = user ? (user.email || '').toLowerCase() : '';
+            const myUser = getCurrentUserIdentity();
+            const myUid = myUser.uid;
+            const myEmail = myUser.email.toLowerCase();
 
             const allMsgs = Object.keys(window.allMessagesMap || {}).map(k => ({ ...window.allMessagesMap[k], key: k }));
 
             let myMessages = [];
             allMsgs.forEach(m => {
-                const isRecipient = (myUid && m.receiverUid === myUid) || (myEmail && m.receiverEmail && m.receiverEmail.toLowerCase() === myEmail);
-                const isSender = (myUid && m.senderUid === myUid) || (myEmail && m.senderEmail && m.senderEmail.toLowerCase() === myEmail);
+                const sUid = (m.senderUid || '').trim();
+                const rUid = (m.receiverUid || '').trim();
+                const sMail = (m.senderEmail || '').trim().toLowerCase();
+                const rMail = (m.receiverEmail || '').trim().toLowerCase();
+
+                const isRecipient = (myUid && rUid === myUid) || (myEmail && rMail === myEmail);
+                const isSender = (myUid && sUid === myUid) || (myEmail && sMail === myEmail);
                 if (isRecipient || isSender) {
                     myMessages.push(m);
                 }
@@ -1059,11 +1181,15 @@
             }
 
             inboxList.innerHTML = "";
-            myMessages.slice(0, 8).forEach(msg => {
-                const isReceived = (myUid && msg.receiverUid === myUid) || (myEmail && msg.receiverEmail && msg.receiverEmail.toLowerCase() === myEmail);
+            myMessages.slice(0, 10).forEach(msg => {
+                const sUid = (msg.senderUid || '').trim();
+                const sMail = (msg.senderEmail || '').trim().toLowerCase();
+                const isReceived = (sUid !== myUid) && (!myEmail || sMail !== myEmail);
+
                 const otherPartyUid = isReceived ? (msg.senderUid || '') : (msg.receiverUid || '');
                 const otherPartyName = isReceived ? (msg.senderName || 'Member') : (msg.receiverName || 'Recipient');
-                const otherPartyBg = msg.receiverBloodGroup || '🩸';
+                const otherPartyEmail = isReceived ? (msg.senderEmail || '') : (msg.receiverEmail || '');
+                const otherPartyBg = isReceived ? (msg.senderBloodGroup || msg.receiverBloodGroup || '🩸') : (msg.receiverBloodGroup || '🩸');
                 const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recently';
 
                 const item = document.createElement("div");
@@ -1076,11 +1202,11 @@
                             </span>
                             <span class="text-[10px] text-slate-400">${dateStr}</span>
                         </div>
-                        <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(msg.subject || 'No Subject')}</div>
+                        <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(msg.subject || 'Live Healthcare Chat')}</div>
                         <p class="text-slate-600 dark:text-slate-400 line-clamp-1 italic">${escapeHtml(msg.message || '')}</p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" onclick="openConversationThread('${escapeHtml(otherPartyUid)}', '${escapeHtml(otherPartyName)}', '${escapeHtml(otherPartyBg)}', '${escapeHtml(msg.receiverCity || '')}', '${escapeHtml(msg.receiverHospital || '')}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm">
+                        <button type="button" onclick="openConversationThread('${escapeHtml(otherPartyUid)}', '${escapeHtml(otherPartyName)}', '${escapeHtml(otherPartyBg)}', '${escapeHtml(msg.receiverCity || '')}', '${escapeHtml(msg.receiverHospital || '')}', '${escapeHtml(otherPartyEmail)}')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer">
                             <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                         </button>
                     </div>

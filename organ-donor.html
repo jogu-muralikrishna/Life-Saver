@@ -1041,7 +1041,8 @@
             listEl.innerHTML = "";
 
             if (snapshot.exists()) {
-                const pledges = Object.values(snapshot.val());
+                const data = snapshot.val();
+                const pledges = Object.entries(data).map(([k, v]) => ({ key: k, uid: v.uid || v.userId || k, ...v }));
                 pledges.forEach(p => {
                     const card = document.createElement("div");
                     card.className = "glass-card p-5 flex flex-col justify-between hover:border-purple-500 transition space-y-3";
@@ -1057,7 +1058,7 @@
                                 ${p.phone ? `<div class="flex items-center gap-1">📞 <a href="tel:${escapeHtml(p.phone)}" class="font-bold hover:text-purple-600 text-slate-900 dark:text-white">${escapeHtml(p.phone)}</a></div>` : ''}
                                 ${p.email ? `<div class="flex items-center gap-1 font-mono text-[11px]">✉️ <a href="mailto:${escapeHtml(p.email)}" class="hover:text-purple-600 text-slate-600 dark:text-slate-400">${escapeHtml(p.email)}</a></div>` : ''}
                             </div>
-                            <a href="message.html?to=${encodeURIComponent(p.uid || '')}&name=${encodeURIComponent(donorName)}&bg=${encodeURIComponent(bloodGroup)}&city=${encodeURIComponent(city)}&role=donor" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-1.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
+                            <a href="message.html?to=${encodeURIComponent(p.uid || p.userId || p.key || '')}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(p.email || p.userEmail || '')}&bg=${encodeURIComponent(bloodGroup)}&city=${encodeURIComponent(city)}&role=donor" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-1.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Message on LifeSaver
                             </a>
                         </div>
