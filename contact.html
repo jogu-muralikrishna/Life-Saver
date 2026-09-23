@@ -69,6 +69,9 @@
                     <div id="navToolsDropdown" class="nav-dropdown-content">
                         <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
                             <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
+                            <button onclick="toggleSOS(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-left">
+                                <i data-lucide="phone-call" class="w-3.5 h-3.5 text-red-500 animate-pulse"></i> Emergency SOS 108
+                            </button>
                             <a href="index.html?action=triage" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg">
                                 <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant
                             </a>

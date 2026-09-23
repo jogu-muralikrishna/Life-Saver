@@ -296,6 +296,41 @@ document.addEventListener('click', function (e) {
     }
 });
 
+// Universal Emergency SOS Handler Fallback
+function toggleSOS() {
+    const modal = document.getElementById("sosModal");
+    if (modal) {
+        const isHidden = modal.classList.contains("hidden");
+        if (isHidden) {
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
+        } else {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+        }
+    } else {
+        window.location.href = "index.html?action=sos";
+    }
+}
+window.toggleSOS = toggleSOS;
+
+// Global HTML Escaping Helper for safe and robust text rendering
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
+
 /**
  * LIFE SAVER FULL-SITE MULTI-LANGUAGE TRANSLATION DICTIONARY & ENGINE
  * Supported Languages: EN (English), TE (Telugu), HI (Hindi)

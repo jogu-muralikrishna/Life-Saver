@@ -360,9 +360,9 @@
                         <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
                     </button>
                     
-                    <a href="emergency.html" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-3 rounded-xl font-bold text-sm flex items-center gap-1.5 transition">
-                        <i data-lucide="phone-call" class="w-4 h-4 text-red-500"></i> SOS 108
-                    </a>
+                    <button type="button" onclick="toggleSOS()" class="bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/80 px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition hover:scale-[1.02] shadow-sm cursor-pointer" title="Emergency SOS 108 Alert">
+                        <i data-lucide="phone-call" class="w-4 h-4 text-red-500 animate-pulse"></i> <span>SOS 108</span>
+                    </button>
                 </div>
             </div>
 
@@ -601,13 +601,13 @@
     </div>
 
     <!-- AI DOCTOR & MEDICAL REPORT ASSISTANT MODAL -->
-    <div id="triageModal" onclick="if(event.target === this) closeTriageModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden overflow-y-auto pt-3 pb-10 sm:pt-6 sm:pb-16 px-3 sm:px-4">
-        <div id="triageCard" class="w-full max-w-2xl mx-auto bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col my-0">
+    <div id="triageModal" onclick="if(event.target === this) closeTriageModal()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-2 sm:p-4 overflow-hidden">
+        <div id="triageCard" class="w-full max-w-2xl h-[92vh] sm:h-[86vh] max-h-[820px] bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative flex flex-col overflow-hidden my-auto">
             <!-- CLOSE BUTTON -->
             <button onclick="closeTriageModal()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white font-bold text-lg z-10 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">✕</button>
 
             <!-- MODAL HEADER -->
-            <div class="flex items-center gap-3 mb-3.5 pb-3.5 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-100 dark:border-slate-800 shrink-0">
                 <div class="bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 sm:p-3 rounded-2xl border border-blue-100 dark:border-blue-900/50 shrink-0">
                     <i data-lucide="bot" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                 </div>
@@ -642,9 +642,9 @@
             </div>
 
             <!-- TAB 1: DOCTOR CHAT & CONSULTATION -->
-            <div id="aiTabDoctor" class="flex-1 flex flex-col overflow-hidden min-h-[320px]">
+            <div id="aiTabDoctor" class="flex-1 min-h-0 flex flex-col overflow-hidden">
                 <!-- VOICE & CONTROLS HEADER BAR -->
-                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-2xl mb-3 border border-slate-200 dark:border-slate-800 text-xs">
+                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2 sm:p-2.5 rounded-2xl mb-2 border border-slate-200 dark:border-slate-800 text-xs shrink-0">
                     <span class="text-slate-600 dark:text-slate-400 font-semibold flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online AI Consultation
                     </span>
@@ -662,7 +662,7 @@
                 </div>
 
                 <!-- QUICK SYMPTOM CHIPS -->
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar text-xs">
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1.5 mb-2 no-scrollbar text-xs shrink-0">
                     <span class="text-[11px] font-bold text-slate-400 shrink-0">Quick Symptoms:</span>
                     <button onclick="sendQuickSymptom('I have a severe headache')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🤕 Headache</button>
                     <button onclick="sendQuickSymptom('I have stomach pain')" class="bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white px-2.5 py-1 rounded-xl shrink-0 font-medium transition">🤢 Stomach Pain</button>
@@ -671,7 +671,7 @@
                 </div>
 
                 <!-- CHAT MESSAGES WINDOW WITH DRAG & DROP ZONE -->
-                <div id="aiChatBox" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropImage(event)" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs relative transition">
+                <div id="aiChatBox" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropImage(event)" class="flex-1 min-h-0 overflow-y-auto space-y-3 p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs relative transition scroll-smooth">
                     <div id="dragDropOverlay" class="hidden absolute inset-0 bg-blue-600/90 text-white backdrop-blur-sm z-20 rounded-2xl flex flex-col items-center justify-center pointer-events-none p-4 text-center">
                         <i data-lucide="image-plus" class="w-10 h-10 mb-2 animate-bounce"></i>
                         <p class="font-black text-sm">Drop Medical Report Picture Here</p>
@@ -688,7 +688,7 @@
                 </div>
 
                 <!-- ATTACHED IMAGE PREVIEW BAR -->
-                <div id="imagePreviewWrap" class="hidden flex items-center justify-between bg-blue-50 dark:bg-blue-950/40 p-2.5 rounded-2xl mt-2 border border-blue-200 dark:border-blue-900/50 text-xs">
+                <div id="imagePreviewWrap" class="hidden flex items-center justify-between bg-blue-50 dark:bg-blue-950/40 p-2 rounded-2xl mt-1.5 border border-blue-200 dark:border-blue-900/50 text-xs shrink-0">
                     <div class="flex items-center gap-2">
                         <img id="imagePreviewImg" class="w-10 h-10 object-cover rounded-xl border border-blue-300 dark:border-blue-700" src="" alt="Report Preview"/>
                         <div>
@@ -702,7 +702,7 @@
                 </div>
 
                 <!-- CHAT INPUT FORM -->
-                <form id="aiDoctorForm" onsubmit="handleAIDoctorSubmit(event)" class="mt-2 flex items-center gap-2">
+                <form id="aiDoctorForm" onsubmit="handleAIDoctorSubmit(event)" class="mt-2.5 flex items-center gap-2 shrink-0">
                     <label for="reportImageInput" class="bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-slate-700 dark:text-slate-300 p-3 rounded-xl cursor-pointer transition shrink-0 border border-slate-200 dark:border-slate-700" title="Upload/Attach Medical Report Picture (JPG, PNG)">
                         <i data-lucide="image-plus" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
                         <input type="file" id="reportImageInput" accept="image/*" onchange="handleImageSelect(event)" class="hidden">
@@ -715,7 +715,7 @@
             </div>
 
             <!-- TAB 2: MEDICAL REPORT ANALYZER -->
-            <div id="aiTabReport" class="hidden flex-1 flex-col overflow-y-auto space-y-4">
+            <div id="aiTabReport" class="hidden flex-1 min-h-0 flex-col overflow-y-auto space-y-4 pr-1">
                 <!-- TOP UTILITY TOOLBAR (PRIVACY MODE & REPORT COMPARISON) -->
                 <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/80 p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs">
                     <div class="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-300">
@@ -788,7 +788,7 @@
             </div>
 
             <!-- TAB 3: RAPID 2-STEP EMERGENCY TRIAGE -->
-            <div id="aiTabTriage" class="hidden flex-1 flex flex-col justify-between">
+            <div id="aiTabTriage" class="hidden flex-1 min-h-0 flex flex-col justify-between overflow-y-auto pr-1">
                 <div id="triageStep1" class="space-y-4 py-4">
                     <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">1. Is the patient conscious and breathing normally?</p>
                     <div class="grid grid-cols-2 gap-3">
@@ -823,13 +823,16 @@
                             Close Assistant
                         </button>
                     </div>
+                    <button type="button" onclick="switchAITab('doctor')" class="w-full bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 font-bold py-2.5 rounded-xl text-xs border border-blue-200 dark:border-blue-900/50 flex items-center justify-center gap-1.5 transition">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Have questions? Chat with AI Doctor
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- EMERGENCY SOS MODAL -->
-    <div id="sosModal" class="fixed inset-0 bg-red-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+    <div id="sosModal" onclick="if(event.target === this) toggleSOS()" class="fixed inset-0 bg-red-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
         <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-red-300 dark:border-red-900/50 shadow-2xl relative text-center">
             <button onclick="toggleSOS()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
 
@@ -1573,12 +1576,15 @@
                     document.body.style.overflow = 'hidden';
                 }
                 modal.classList.remove("hidden");
-                modal.scrollTop = 0;
+                modal.classList.add("flex");
                 switchAITab(defaultTab || 'triage');
                 setTimeout(() => {
                     if (defaultTab === 'doctor') {
                         const queryInput = document.getElementById("aiDoctorInput") || document.getElementById("aiQueryInput");
                         if (queryInput) queryInput.focus({ preventScroll: true });
+                    }
+                    if (typeof scrollChatToBottom === 'function') {
+                        scrollChatToBottom(false);
                     }
                 }, 150);
             }
@@ -1726,6 +1732,32 @@
         }
 
         /* DOCTOR CHAT SYSTEM WITH MULTI-TURN MEMORY & OCR VISION */
+        function scrollChatToBottom(smooth = true) {
+            const chatBox = document.getElementById("aiChatBox");
+            if (!chatBox) return;
+            try {
+                if (smooth) {
+                    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+                } else {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }
+            } catch (err) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+        window.scrollChatToBottom = scrollChatToBottom;
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        window.escapeHtml = escapeHtml;
+
         function sendQuickSymptom(text) {
             document.getElementById("aiDoctorInput").value = text;
             handleAIDoctorSubmit();
@@ -1752,12 +1784,12 @@
                 userContent += `
                     <div class="mb-1.5 rounded-xl overflow-hidden border border-blue-300 dark:border-blue-700 max-w-[220px]">
                         <img src="${currentImgUrl}" alt="Medical Report" class="w-full h-auto max-h-36 object-cover"/>
-                        <span class="block bg-blue-700 text-[10px] px-2 py-0.5 font-bold truncate">📄 ${currentImgName}</span>
+                        <span class="block bg-blue-700 text-[10px] px-2 py-0.5 font-bold truncate">📄 ${escapeHtml(currentImgName)}</span>
                     </div>
                 `;
             }
             if (query) {
-                userContent += `<div>${query}</div>`;
+                userContent += `<div class="break-words leading-relaxed">${escapeHtml(query)}</div>`;
             } else {
                 userContent += `<div class="italic">Attached medical report image for OCR analysis and doctor evaluation.</div>`;
             }
@@ -1771,10 +1803,25 @@
             
             input.value = "";
             removeAttachedImage();
-            chatBox.scrollTop = chatBox.scrollHeight;
+            scrollChatToBottom(true);
+
+            // Typing indicator for real-time responsiveness
+            const typingIndicator = document.createElement("div");
+            typingIndicator.id = "aiDoctorTypingIndicator";
+            typingIndicator.className = "flex items-center gap-2 bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs text-slate-500 shadow-sm animate-pulse";
+            typingIndicator.innerHTML = `
+                <div class="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-[10px]">🩺</div>
+                <span class="font-semibold text-slate-600 dark:text-slate-300">AI Doctor is analyzing your query...</span>
+            `;
+            chatBox.appendChild(typingIndicator);
+            scrollChatToBottom(true);
 
             // Generate AI Response with Vision OCR & Clinical Triage Memory
             setTimeout(() => {
+                if (typingIndicator && typingIndicator.parentNode) {
+                    typingIndicator.remove();
+                }
+
                 let responseHtml = "";
                 if (hasImage) {
                     responseHtml = parseMedicalReportImage(currentImgUrl, query, currentImgName);
@@ -1791,8 +1838,12 @@
                     </div>
                 `;
                 chatBox.appendChild(aiMsg);
-                chatBox.scrollTop = chatBox.scrollHeight;
                 if (window.lucide) lucide.createIcons();
+                scrollChatToBottom(true);
+                if (typeof aiMsg.scrollIntoView === 'function') {
+                    aiMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                setTimeout(() => scrollChatToBottom(true), 120);
 
                 // Speak response text
                 speakText(aiMsg.innerText);
@@ -1829,15 +1880,15 @@
             if (userQuery) {
                 doubtAnswer = `
                     <div class="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 mb-2 font-medium text-xs">
-                        💬 <strong>Answering Your Question in Simple Words (<i>"${userQuery}"</i>):</strong><br/>
-                        Based on your report picture (<strong>${imageName || 'Medical_Report.jpg'}</strong>), your parameters indicate mild immune activation. Your doubts align with mild viral tiredness. Ensure proper rest, fluid intake, and follow-up.
+                        💬 <strong>Answering Your Question in Simple Words (<i>"${escapeHtml(userQuery)}"</i>):</strong><br/>
+                        Based on your report picture (<strong>${escapeHtml(imageName || 'Medical_Report.jpg')}</strong>), your parameters indicate mild immune activation. Your doubts align with mild viral tiredness. Ensure proper rest, fluid intake, and follow-up.
                     </div>
                 `;
             }
 
             return `
                 <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">📷 AI Doctor Report Scan — Easy Breakdown:</strong>
-                <p class="mb-2 text-xs">I have scanned your uploaded report picture (<strong>${imageName || 'Medical_Report.jpg'}</strong>):</p>
+                <p class="mb-2 text-xs">I have scanned your uploaded report picture (<strong>${escapeHtml(imageName || 'Medical_Report.jpg')}</strong>):</p>
                 ${doubtAnswer}
                 <div class="space-y-2 mb-3">
                     ${simpleBreakdown.map(b => `<div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-900 dark:text-amber-200 text-xs font-medium">${b}</div>`).join('')}
@@ -1942,7 +1993,7 @@
 
                 return `
                     <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Personalized Treatment Plan:</strong>
-                    <p class="mb-2">Thank you for answering my clinical questions. Based on your details (<i>"${q}"</i>):</p>
+                    <p class="mb-2">Thank you for answering my clinical questions. Based on your details (<i>"${escapeHtml(q)}"</i>):</p>
                     
                     <div class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 mb-3">
                         📋 <strong>Primary Doctor Diagnosis:</strong><br/>
@@ -1975,7 +2026,7 @@
                 if (isRightLower) {
                     return `
                         <strong class="text-red-600 dark:text-red-400 text-sm block mb-1">🚨 URGENT CLINICAL NOTICE — Possible Appendicitis Warning:</strong>
-                        <p class="mb-2">You indicated pain in the lower right abdomen (<i>"${q}"</i>).</p>
+                        <p class="mb-2">You indicated pain in the lower right abdomen (<i>"${escapeHtml(q)}"</i>).</p>
                         <div class="p-3 rounded-2xl bg-red-600 text-white font-bold mb-2">
                             ⚠️ Doctor High Priority Warning:<br/>
                             Pain localized in the lower right abdomen with nausea or fever can indicate Acute Appendicitis, which requires immediate medical evaluation.
@@ -1988,7 +2039,7 @@
 
                 return `
                     <strong class="text-emerald-600 dark:text-emerald-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Gastric Care Plan:</strong>
-                    <p class="mb-2">Based on your response (<i>"${q}"</i>), your symptoms point toward <strong>Acute Gastritis / Indigestion / Acid Reflux</strong>.</p>
+                    <p class="mb-2">Based on your response (<i>"${escapeHtml(q)}"</i>), your symptoms point toward <strong>Acute Gastritis / Indigestion / Acid Reflux</strong>.</p>
                     
                     <div class="mb-3 space-y-1 font-medium">
                         💡 <strong>Doctor Precautions & Treatment Steps:</strong><br/>
@@ -2008,7 +2059,7 @@
                 consultationState.stage = 'evaluating';
                 return `
                     <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Diagnosis & Fever Care Plan:</strong>
-                    <p class="mb-2">Thank you for updating me on your fever details (<i>"${q}"</i>).</p>
+                    <p class="mb-2">Thank you for updating me on your fever details (<i>"${escapeHtml(q)}"</i>).</p>
 
                     <div class="mb-3 space-y-1 font-medium">
                         💡 <strong>Doctor Precautions & Home Care:</strong><br/>
@@ -2026,7 +2077,7 @@
             // DEFAULT CONVERSATIONAL CONTINUATION FOR ANY OTHER QUESTION OR FOLLOW-UP
             return `
                 <strong class="text-blue-600 dark:text-blue-400 text-sm block mb-1">👨‍⚕️ Doctor Follow-up Response:</strong>
-                <p class="mb-2">Thank you for your update: <i>"${q}"</i>.</p>
+                <p class="mb-2">Thank you for your update: <i>"${escapeHtml(q)}"</i>.</p>
                 <div class="bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 mb-2 font-medium">
                     🩺 <strong>Doctor Clinical Guidance:</strong><br/>
                     • Continue following the recommended precautions (hydration, rest, avoiding screen strain).<br/>
@@ -2518,14 +2569,24 @@
 
         function toggleSOS() {
             const modal = document.getElementById("sosModal");
+            if (!modal) {
+                window.location.href = "index.html?action=sos";
+                return;
+            }
             if (modal.classList.contains("hidden")) {
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
+                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    lucide.createIcons();
+                }
             } else {
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
+                if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
             }
         }
+        window.toggleSOS = toggleSOS;
 
         function goTo(page) { window.location.href = page; }
         function hideBanner() {
