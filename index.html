@@ -116,36 +116,44 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
             
             <!-- BRAND LOGO -->
-            <a href="index.html" class="flex items-center gap-2 text-red-600 font-black text-lg sm:text-xl md:text-2xl tracking-tight shrink-0">
-                <div class="bg-red-600 text-white p-1.5 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
-                    <i data-lucide="heart-pulse" class="w-5 h-5"></i>
+            <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
+                <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                    <i data-lucide="heart-pulse" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
-                <span>Life <span class="text-emerald-500">Saver</span></span>
+                <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
             </a>
 
-            <!-- GREETING / DYNAMIC USER NAME -->
-            <a href="auth.html" id="userAuthTopBar" class="flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[160px] sm:max-w-[220px]" title="Member Profile">
-                <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
-                <span id="userGreetingTop" class="truncate">Account</span>
-            </a>
-
-            <!-- 3 DIRECTLY VISIBLE QUICK TOOLS + CONTROLS -->
-            <div class="flex items-center gap-1.5 sm:gap-2">
-                
-                <!-- TOOL 1: AI TRIAGE (VISIBLE ON TABLET & DESKTOP) -->
-                <button onclick="openTriageModal()" class="hidden sm:inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-600 dark:text-blue-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-blue-200/80 dark:border-blue-900/50 transition shadow-sm shrink-0" title="AI Medical Assistant">
-                    <i data-lucide="bot" class="w-3.5 h-3.5 shrink-0"></i>
-                    <span>AI Triage</span>
+            <!-- TOP-MIDDLE EMERGENCY SOS & AI TRIAGE ACTION CENTER -->
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0">
+                <!-- 🚨 EMERGENCY SOS BUTTON -->
+                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-red-600/30 hover:shadow-red-600/50 border border-red-500/90 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse"></i>
+                    <span class="tracking-wide">SOS <span class="hidden xs:inline sm:inline">108</span></span>
                 </button>
 
-                <!-- TOOL 2: CONTACT (VISIBLE ON TABLET & DESKTOP) -->
-                <a href="contact.html" class="hidden sm:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
+                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON -->
+                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span>AI Triage</span>
+                </button>
+            </div>
+
+            <!-- RIGHT CONTROLS & NAVIGATION -->
+            <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+                <!-- USER / ACCOUNT BADGE (VISIBLE ON TABLET & DESKTOP) -->
+                <a href="auth.html" id="userAuthTopBar" class="hidden md:flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[140px] lg:max-w-[200px]" title="Member Profile">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
+                    <span id="userGreetingTop" class="truncate">Account</span>
+                </a>
+
+                <!-- CONTACT (VISIBLE ON DESKTOP) -->
+                <a href="contact.html" class="hidden lg:inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-emerald-200/80 dark:border-emerald-900/50 transition shadow-sm shrink-0" title="Emergency Contact">
                     <i data-lucide="mail" class="w-3.5 h-3.5 shrink-0"></i>
                     <span>Contact</span>
                 </a>
 
-                <!-- TOOL 3: INSTALL APP (VISIBLE ON DESKTOP) -->
-                <button id="pwaInstallBtn" onclick="installPWA()" class="hidden md:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
+                <!-- INSTALL APP (DESKTOP) -->
+                <button id="pwaInstallBtn" onclick="installPWA()" class="hidden xl:inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-950/50 hover:bg-purple-100 dark:hover:bg-purple-900/60 text-purple-600 dark:text-purple-400 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold border border-purple-200/80 dark:border-purple-900/50 transition shadow-sm shrink-0" title="Install Web App">
                     <i data-lucide="smartphone" class="w-3.5 h-3.5 shrink-0"></i>
                     <span>Install App</span>
                 </button>

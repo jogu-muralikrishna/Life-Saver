@@ -319,6 +319,30 @@ function toggleSOS() {
 }
 window.toggleSOS = toggleSOS;
 
+// Universal AI Triage Modal Opener Fallback
+function openTriageModal(defaultTab) {
+    const modal = document.getElementById("triageModal");
+    if (modal && typeof window.switchAITab === 'function') {
+        if (typeof window.lockBodyScroll === 'function') {
+            window.lockBodyScroll();
+        } else {
+            document.body.style.overflow = 'hidden';
+        }
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        window.switchAITab(defaultTab || 'triage');
+        if (typeof window.scrollChatToBottom === 'function') {
+            setTimeout(function() { window.scrollChatToBottom(false); }, 150);
+        }
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+            window.lucide.createIcons();
+        }
+    } else {
+        window.location.href = "index.html?action=triage";
+    }
+}
+window.openTriageModal = openTriageModal;
+
 // Global HTML Escaping Helper for safe and robust text rendering
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
