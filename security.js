@@ -519,27 +519,10 @@ window.toggleSOS = toggleSOS;
 window.ensureSOSModal = ensureSOSModal;
 
 
-// Universal AI Triage Modal Opener Fallback
+// Universal AI Triage Direct Page Opener (Opens dedicated AI Triage page directly)
 function openTriageModal(defaultTab) {
-    const modal = document.getElementById("triageModal");
-    if (modal && typeof window.switchAITab === 'function') {
-        if (typeof window.lockBodyScroll === 'function') {
-            window.lockBodyScroll();
-        } else {
-            document.body.style.overflow = 'hidden';
-        }
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-        window.switchAITab(defaultTab || 'triage');
-        if (typeof window.scrollChatToBottom === 'function') {
-            setTimeout(function() { window.scrollChatToBottom(false); }, 150);
-        }
-        if (window.lucide && typeof window.lucide.createIcons === 'function') {
-            window.lucide.createIcons();
-        }
-    } else {
-        window.location.href = "index.html?action=triage";
-    }
+    const targetUrl = defaultTab ? `ai-triage.html?tab=${encodeURIComponent(defaultTab)}` : "ai-triage.html";
+    window.location.href = targetUrl;
 }
 window.openTriageModal = openTriageModal;
 

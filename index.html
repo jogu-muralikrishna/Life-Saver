@@ -2826,10 +2826,8 @@
                 window.location.href = 'contact.html';
                 return;
             } else if (action === 'triage' || window.location.hash === '#triage' || window.location.hash === '#triageModal') {
-                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                setTimeout(() => {
-                    openTriageModal('triage');
-                }, 50);
+                window.location.href = 'ai-triage.html';
+                return;
             } else if (action === 'leaderboard' || window.location.hash === '#leaderboard') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 setTimeout(() => {

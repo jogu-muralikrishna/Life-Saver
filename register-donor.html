@@ -445,6 +445,78 @@
                             </div>
                         </div>
                     </div>
+                <!-- STATUTORY GOVERNMENT LEGAL PERMISSIONS & REGULATORY COMPLIANCE -->
+                <div class="border-t-2 border-red-500/30 dark:border-red-500/20 pt-5 mt-5 space-y-4">
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-950/40 dark:to-rose-950/30 border border-red-200 dark:border-red-900/60">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="p-1 rounded-lg bg-red-600 text-white"><i data-lucide="scale" class="w-4 h-4"></i></span>
+                            <h3 class="text-xs font-black text-red-700 dark:text-red-400 uppercase tracking-wider">Statutory Government Permissions & Legal Compliance</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                            In compliance with the <strong>National Blood Transfusion Council (NBTC)</strong>, <strong>National AIDS Control Organisation (NACO)</strong>, and <strong>The Drugs and Cosmetics Act, 1940 (Rules 1945)</strong>, Ministry of Health and Family Welfare, Government of India.
+                        </p>
+                    </div>
+
+                    <!-- GOVERNMENT PHOTO ID RECORDING -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <span>Government Photo ID Type</span>
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <select id="govIdType" required class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500">
+                                <option value="">Select ID Type</option>
+                                <option value="Aadhaar Card" selected>Aadhaar Card (UIDAI)</option>
+                                <option value="Voter ID Card">Voter ID Card (EPIC)</option>
+                                <option value="Driving License">Driving License</option>
+                                <option value="PAN Card">PAN Card</option>
+                                <option value="Passport">Passport</option>
+                                <option value="Govt Employee ID">Government / PSU Photo ID</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                                <span>Govt ID Number (Last 4 Digits)</span>
+                                <span class="text-[10px] text-slate-400">Privacy Protected</span>
+                            </label>
+                            <input type="text" id="govIdNumber" required placeholder="e.g. 8492 or ID number" maxlength="20" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-red-500 font-mono">
+                        </div>
+                    </div>
+
+                    <!-- MANDATORY STATUTORY CHECKBOXES -->
+                    <div class="space-y-3 bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+                        <!-- 1. AGE & HEALTH -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govAgeConsent" required class="mt-1 rounded bg-white border-slate-300 text-red-600 focus:ring-red-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Statutory Age & Health Declaration:</strong> I solemnly declare under penalty of law that I am between 18 and 65 years of age, weigh at least 45 kg, have normal vitals, and have not donated blood within the past 90 days (males) / 120 days (females).
+                            </span>
+                        </label>
+
+                        <!-- 2. VOLUNTARY NON-REMUNERATED & ANTI-COMMERCIALIZATION -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govVoluntaryConsent" required class="mt-1 rounded bg-white border-slate-300 text-red-600 focus:ring-red-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Voluntary & Non-Remunerated Legal Consent:</strong> I grant statutory legal permission to register as an unpaid, voluntary blood donor. I affirm that blood donation is a humanitarian act and I understand that demanding or receiving any monetary payment for blood is strictly illegal and punishable under the Drugs and Cosmetics Act.
+                            </span>
+                        </label>
+
+                        <!-- 3. INFECTIOUS DISEASE CLEARANCE -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govDiseaseConsent" required class="mt-1 rounded bg-white border-slate-300 text-red-600 focus:ring-red-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Medical & Blood-Borne Disease Disclosure:</strong> I certify that I have never tested positive for, nor have any symptoms or active treatment for HIV/AIDS, Hepatitis B or C, Syphilis, Malaria (past 3 months), or other infectious transmissible conditions.
+                            </span>
+                        </label>
+
+                        <!-- 4. GOVT ID VERIFICATION & EMERGENCY CONTACT -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govVerificationConsent" required class="mt-1 rounded bg-white border-slate-300 text-red-600 focus:ring-red-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Government Permission & Verification Authorization:</strong> I authorize verified blood centers, NACO-accredited blood banks, and hospital emergency networks to verify my Government Photo ID prior to transfusion and to reach me via verified channels for emergency patient requirements.
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
@@ -937,6 +1009,25 @@
                 return;
             }
 
+            // STATUTORY GOVERNMENT LEGAL PERMISSIONS VALIDATION
+            const govAgeConsent = document.getElementById('govAgeConsent')?.checked;
+            const govVoluntaryConsent = document.getElementById('govVoluntaryConsent')?.checked;
+            const govDiseaseConsent = document.getElementById('govDiseaseConsent')?.checked;
+            const govVerificationConsent = document.getElementById('govVerificationConsent')?.checked;
+
+            if (!govAgeConsent || !govVoluntaryConsent || !govDiseaseConsent || !govVerificationConsent) {
+                alert("Statutory Compliance Notice: You must agree to all mandatory Government Legal Declarations & NBTC permissions before registering.");
+                return;
+            }
+
+            const govIdType = document.getElementById('govIdType')?.value || 'Aadhaar Card';
+            const govIdNumber = (document.getElementById('govIdNumber')?.value || '').trim();
+            if (!govIdType || !govIdNumber) {
+                alert("Please provide your Government Photo ID Type and ID number for statutory regulatory records.");
+                document.getElementById('govIdType')?.focus();
+                return;
+            }
+
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Generating Certificate...";
             btn.disabled = true;
@@ -997,6 +1088,15 @@
                 hasBadHabits: hasHabits,
                 alcoholLast24h: alcohol24h,
                 smokingLast2h: document.getElementById('smokingLast2h').value,
+                govLegalPermissions: {
+                    statutoryAgeHealthDeclared: true,
+                    voluntaryNonRemuneratedConsent: true,
+                    diseaseFreeDeclaration: true,
+                    govIdVerificationConsent: true,
+                    govIdType: govIdType,
+                    govIdNumberMasked: govIdNumber.length > 4 ? ('...' + govIdNumber.slice(-4)) : govIdNumber,
+                    declarationDate: new Date().toISOString()
+                },
                 credentialID: credentialID,
                 status: "Available",
                 registeredDate: new Date().toISOString().split('T')[0],

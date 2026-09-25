@@ -369,28 +369,93 @@
                     </div>
                 </div>
 
-                <!-- SECTION 4: FORMALITIES -->
-                <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-                    <label class="flex items-start gap-3 cursor-pointer">
-                        <input type="checkbox" id="familyConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500">
-                        <span class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <strong>Family Formalities:</strong> I confirm that I have informed my immediate family (next of kin) about my legal pledge to donate organs.
-                        </span>
-                    </label>
+                <!-- SECTION 4: STATUTORY GOVERNMENT LEGAL PERMISSIONS & NOTTO DECLARATION -->
+                <div class="border-t-2 border-purple-500/30 dark:border-purple-500/20 pt-5 mt-5 space-y-4">
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/40 dark:to-indigo-950/30 border border-purple-200 dark:border-purple-900/60">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="p-1 rounded-lg bg-purple-600 text-white"><i data-lucide="scale" class="w-4 h-4"></i></span>
+                            <h3 class="text-xs font-black text-purple-700 dark:text-purple-400 uppercase tracking-wider">Statutory Legal Government Permissions (THOTA 1994 & NOTTO Form 7/8)</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Official organ donation pledge executed under <strong>Section 3 of the Transplantation of Human Organs and Tissues Act (THOTA), 1994</strong> and <strong>National Organ & Tissue Transplant Organisation (NOTTO)</strong>, Ministry of Health and Family Welfare, Government of India.
+                        </p>
+                    </div>
 
-                    <label class="flex items-start gap-3 cursor-pointer">
-                        <input type="checkbox" id="declarationConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500">
-                        <span class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                            <strong>Medical Declaration:</strong> I declare that the lifestyle habits and medical history stated above are truthful and complete.
-                        </span>
-                    </label>
+                    <!-- GOVERNMENT PHOTO ID RECORDING -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                <span>Government Photo ID Type</span>
+                                <span class="text-purple-500">*</span>
+                            </label>
+                            <select id="govIdType" required class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500">
+                                <option value="">Select ID Type</option>
+                                <option value="Aadhaar Card" selected>Aadhaar Card (UIDAI)</option>
+                                <option value="Voter ID Card">Voter ID Card (EPIC)</option>
+                                <option value="Driving License">Driving License</option>
+                                <option value="Passport">Passport</option>
+                                <option value="PAN Card">PAN Card</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                                <span>Govt ID Number (Last 4 Digits)</span>
+                                <span class="text-[10px] text-slate-400">Strictly Confidential</span>
+                            </label>
+                            <input type="text" id="govIdNumber" required placeholder="e.g. 5621 or full ID" maxlength="20" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-mono">
+                        </div>
+                    </div>
 
-                    <label class="flex items-start gap-3 cursor-pointer p-3 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40">
-                        <input type="checkbox" id="allowContact" class="mt-0.5 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
-                        <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                            <strong>Community Contact Visibility:</strong> Allow community users and coordinators to view my phone number and email for emergency inquiries. (If unchecked, only your name and pledged organs will be visible; your phone and email remain strictly private 🔒).
-                        </span>
-                    </label>
+                    <!-- MANDATORY STATUTORY CHECKBOXES -->
+                    <div class="space-y-3 bg-slate-50/70 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+                        <!-- 1. THOTA 1994 STATUTORY CONSENT -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="thotaConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>THOTA 1994 Legal Pledge (Form 7/8):</strong> I hereby give my free, voluntary, and statutory legal consent under Section 3 of the Transplantation of Human Organs and Tissues Act (THOTA), 1994 to pledge my selected organs and tissues for therapeutic transplantation to save lives in the event of brain-stem or cardiac death.
+                            </span>
+                        </label>
+
+                        <!-- 2. NEXT OF KIN AUTHORIZATION -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="familyConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Next-of-Kin Family Formalities & Authorization:</strong> I solemnly confirm that I have informed my immediate family / next of kin about my decision to donate organs, and I authorize them and attending medical practitioners to honor and fulfill this legal consent in accordance with NOTTO guidelines.
+                            </span>
+                        </label>
+
+                        <!-- 3. ANTI-COMMERCIALIZATION PROHIBITION -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govAntiCommercialConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Statutory Prohibition of Commercial Dealings:</strong> I declare that this pledge is made without any commercial or monetary consideration. I understand that the sale, purchase, or brokering of human organs is a non-bailable criminal offense punishable by up to 10 years imprisonment and heavy fines under Section 19 of THOTA.
+                            </span>
+                        </label>
+
+                        <!-- 4. NOTTO REGISTRY & GOVT ID VERIFICATION -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="govNottoConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>NOTTO Registry & Govt ID Verification Consent:</strong> I authorize NOTTO, ROTTO, SOTTO, and registered government transplant authorities to maintain my pledge in the National Organ Donor Registry and verify my Government Photo ID upon hospital admission.
+                            </span>
+                        </label>
+
+                        <!-- 5. MEDICAL HISTORY DECLARATION -->
+                        <label class="flex items-start gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="declarationConsent" required class="mt-1 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-slate-700 dark:text-slate-200 leading-relaxed text-[11px]">
+                                <strong>Medical Declaration:</strong> I declare that the lifestyle habits and medical history stated above are truthful and complete to the best of my knowledge.
+                            </span>
+                        </label>
+
+                        <!-- COMMUNITY VISIBILITY -->
+                        <label class="flex items-start gap-2.5 cursor-pointer p-2.5 rounded-xl bg-purple-50/50 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40">
+                            <input type="checkbox" id="allowContact" class="mt-0.5 rounded bg-white border-slate-300 text-purple-600 focus:ring-purple-500 h-4 w-4 shrink-0">
+                            <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed text-[11px]">
+                                <strong>Community Contact Visibility:</strong> Allow registered coordinators to view my contact info for emergency verification. (If unchecked, only your name and pledged organs will be visible; phone and email remain strictly private 🔒).
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
@@ -805,6 +870,26 @@
                 return;
             }
 
+            // STATUTORY GOVERNMENT LEGAL PERMISSIONS & THOTA 1994 VALIDATION
+            const thotaConsent = document.getElementById('thotaConsent')?.checked;
+            const familyConsent = document.getElementById('familyConsent')?.checked;
+            const govAntiCommercialConsent = document.getElementById('govAntiCommercialConsent')?.checked;
+            const govNottoConsent = document.getElementById('govNottoConsent')?.checked;
+            const declarationConsent = document.getElementById('declarationConsent')?.checked;
+
+            if (!thotaConsent || !familyConsent || !govAntiCommercialConsent || !govNottoConsent || !declarationConsent) {
+                alert("Statutory Compliance Notice: You must agree to all mandatory Government Legal Declarations under THOTA 1994 & NOTTO regulations before submitting an organ pledge.");
+                return;
+            }
+
+            const govIdType = document.getElementById('govIdType')?.value || 'Aadhaar Card';
+            const govIdNumber = (document.getElementById('govIdNumber')?.value || '').trim();
+            if (!govIdType || !govIdNumber) {
+                alert("Please select your Government Photo ID Type and enter your ID number for official NOTTO regulatory verification.");
+                document.getElementById('govIdType')?.focus();
+                return;
+            }
+
             const btn = document.getElementById('submitBtn');
             btn.innerText = "Generating Pass...";
             btn.disabled = true;
@@ -842,8 +927,21 @@
                 smokingHabit: smoking,
                 medicalConditions: medical,
                 surgeryInfection: document.getElementById('surgeryInfection').value,
-                familyConsent: document.getElementById('familyConsent').checked,
-                declarationConsent: document.getElementById('declarationConsent').checked,
+                familyConsent: familyConsent,
+                declarationConsent: declarationConsent,
+                thotaConsent: thotaConsent,
+                govAntiCommercialConsent: govAntiCommercialConsent,
+                govNottoConsent: govNottoConsent,
+                legalGovPermissions: {
+                    thotaStatutoryConsent: true,
+                    nextOfKinAuthorized: true,
+                    antiCommercialDeclaration: true,
+                    nottoRegistryConsent: true,
+                    truthfulDeclaration: true,
+                    govIdType: govIdType,
+                    govIdNumberMasked: govIdNumber.length > 4 ? ('...' + govIdNumber.slice(-4)) : govIdNumber,
+                    declarationDate: new Date().toISOString()
+                },
                 clearanceRating: rating,
                 credentialID: credentialID,
                 pledgeDate: new Date().toISOString().split('T')[0],
