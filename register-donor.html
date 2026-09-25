@@ -284,9 +284,25 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
-                    <input type="email" id="email" required placeholder="donor@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+                        <input type="email" id="email" required placeholder="donor@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500"></i> WhatsApp ID</span>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">WhatsApp ID (Not Number)</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="whatsappId" placeholder="WhatsApp ID (e.g. rahul_donors or wa.me/id)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-emerald-500 pr-10">
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500 pointer-events-none">
+                                <i data-lucide="message-square" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Enter your WhatsApp ID handle instead of phone number.</p>
+                    </div>
                 </div>
 
                 <!-- DONOR PHONE PRIVACY & CONTACT PREFERENCES (PARTS 1-8, 13) -->
@@ -309,7 +325,7 @@
                             <input type="radio" name="phoneVisibility" value="public" checked onchange="handlePhoneVisibilityChange()" class="accent-red-600">
                             <div>
                                 <span class="block text-xs font-bold text-slate-900 dark:text-white">Public (Default)</span>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Show Call & WhatsApp</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400">Show Call & WhatsApp ID</span>
                             </div>
                         </label>
                         <label id="labelPhonePrivate" class="cursor-pointer border border-slate-200 dark:border-slate-800 rounded-xl p-3 flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
@@ -332,15 +348,15 @@
 
                         <!-- CONTACT CHANNELS -->
                         <div class="space-y-2.5">
-                            <!-- WHATSAPP OPTION -->
+                            <!-- WHATSAPP OPTION (ASKS FOR WHATSAPP ID NOT NUMBER) -->
                             <div class="space-y-1.5">
                                 <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-300">
                                     <input type="checkbox" id="contactWhatsApp" onchange="handleContactMethodChange('whatsapp')" class="accent-emerald-600 rounded">
-                                    <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500"></i> WhatsApp</span>
+                                    <span class="flex items-center gap-1.5"><i data-lucide="message-square" class="w-3.5 h-3.5 text-emerald-500"></i> WhatsApp ID</span>
                                 </label>
                                 <div id="fieldWhatsApp" class="hidden pl-5">
-                                    <input type="tel" id="publicWhatsAppNumber" placeholder="Public WhatsApp Phone (e.g. 9876543210)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-emerald-500">
-                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">WhatsApp links require a phone number. Only provide a number you explicitly want public.</span>
+                                    <input type="text" id="publicWhatsAppId" placeholder="WhatsApp ID (e.g. rahul_donors or wa.me/id)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-emerald-500">
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 block">Enter your WhatsApp ID or handle (not phone number) for emergency donor communication.</span>
                                 </div>
                             </div>
 
@@ -480,18 +496,49 @@
                     <button type="submit" id="submitBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3.5 rounded-xl text-xs transition shadow-md shadow-red-500/20">
                         Complete Registration & Get Certificate
                     </button>
-                    <button type="button" onclick="previewCertificate()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-black py-3.5 rounded-xl text-xs transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5">
-                        <i data-lucide="award" class="w-4 h-4"></i> Instant Certificate Preview
+                    <button type="button" id="btnInstantPreview" onclick="previewInstantCertificate()" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-black py-3.5 rounded-xl text-xs transition shadow-md shadow-amber-500/20 flex items-center justify-center gap-2">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Instant Preview
                     </button>
                 </div>
             </form>
         </div>
-    <!-- OFFICIAL CERTIFICATE MODAL (EXACT HIGH-FIDELITY MATCH TO IMAGE 1) -->
+    <!-- OFFICIAL CERTIFICATE & INSTANT PREVIEW MODAL -->
     <div id="certModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="glass-card w-full max-w-4xl p-4 sm:p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
-            <button onclick="closeCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition z-10">
+            <button onclick="closeCertModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition z-10" title="Close Preview">
                 <i data-lucide="x" class="w-6 h-6"></i>
             </button>
+
+            <!-- INSTANT LIVE PREVIEW BANNER -->
+            <div id="previewBanner" class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-950/40 dark:via-orange-950/40 dark:to-amber-950/40 border border-amber-300 dark:border-amber-700/60 rounded-2xl p-3 mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="flex h-2.5 w-2.5 relative shrink-0">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                    </span>
+                    <div>
+                        <div class="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                            ⚡ Instant Live Registration Preview
+                        </div>
+                        <div class="text-[11px] text-amber-800/80 dark:text-amber-400/90 font-medium">
+                            Live preview with your entered name, blood group, city and WhatsApp ID!
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden sm:flex items-center gap-1.5 bg-amber-200/60 dark:bg-amber-900/60 px-2.5 py-1 rounded-full text-[10px] font-black text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+                    <span>Live Preview</span>
+                </div>
+            </div>
+
+            <!-- PREVIEW TAB SWITCHER -->
+            <div class="flex items-center justify-center gap-2 mb-3">
+                <button type="button" id="tabBtnCert" onclick="switchPreviewTab('cert')" class="bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+                    <i data-lucide="award" class="w-4 h-4"></i> Official Certificate Preview
+                </button>
+                <button type="button" id="tabBtnCard" onclick="switchPreviewTab('card')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i> Digital Donor ID Card
+                </button>
+            </div>
 
             <!-- CERTIFICATE CANVAS RENDER -->
             <div id="certPrintArea" class="printable-certificate bg-[#fdfdfd] text-slate-900 rounded-3xl p-5 sm:p-8 border-4 border-[#d4af37] shadow-lg relative overflow-hidden font-serif select-none" style="background: radial-gradient(circle at center, #ffffff 60%, #fffbf2 100%);">
@@ -533,6 +580,14 @@
                         
                         <!-- DONOR NAME (CURSIVE) -->
                         <div id="certName" class="font-script text-3xl sm:text-5xl text-red-950 font-bold my-1 py-0.5">Rahul Kumar</div>
+
+                        <!-- LIVE METADATA IN CERTIFICATE (CITY, DATE, WHATSAPP ID) -->
+                        <div class="flex flex-wrap items-center justify-center gap-2 text-[11px] font-bold text-slate-600 my-1 font-sans">
+                            <span id="certCityWrap" class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i> <span id="certCity">Hyderabad</span></span>
+                            <span>•</span>
+                            <span id="certDateWrap" class="flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-red-500"></i> <span id="certDate">25 Sep 2026</span></span>
+                            <span id="certWhatsAppWrap" class="flex items-center gap-1"><span class="text-slate-300">•</span> <i data-lucide="message-square" class="w-3 h-3 text-emerald-500"></i> <span id="certWhatsApp">WhatsApp ID: @donor</span></span>
+                        </div>
                         
                         <!-- GOLD ACCENT DIVIDER -->
                         <div class="flex items-center justify-center gap-2 text-[#d4af37] my-0.5">
@@ -603,6 +658,56 @@
                 </div>
             </div>
 
+            <!-- DIGITAL DONOR PASS CARD PREVIEW -->
+            <div id="previewCardArea" class="hidden max-w-md mx-auto bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 text-white rounded-3xl p-6 border-2 border-red-500/40 shadow-2xl relative overflow-hidden font-sans my-2">
+                <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+                    <i data-lucide="droplet" class="w-48 h-48 text-red-500 fill-red-500"></i>
+                </div>
+                <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center shadow-md">
+                            <i data-lucide="heart" class="w-5 h-5 fill-white text-white"></i>
+                        </div>
+                        <div>
+                            <span class="font-black text-sm tracking-tight text-white block">LifeSaver-Care</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest text-red-400">VOLUNTARY DONOR PASS</span>
+                        </div>
+                    </div>
+                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Active Verified
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 my-2">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">DONOR NAME</span>
+                        <span id="previewCardName" class="text-xl font-black text-white block">Rahul Kumar</span>
+                        <div class="flex items-center gap-3 mt-2 text-xs text-slate-300">
+                            <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-400"></i> <span id="previewCardCity">Hyderabad</span></span>
+                        </div>
+                        <div class="mt-2 text-xs text-emerald-400 flex items-center gap-1 font-mono">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> <span id="previewCardWa">WhatsApp ID: @donor</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 to-rose-700 flex flex-col items-center justify-center shadow-lg border border-red-400/40">
+                            <span class="text-[9px] uppercase font-bold text-red-100">BLOOD</span>
+                            <span id="previewCardBg" class="text-2xl font-black text-white leading-none">O+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between border-t border-white/10 pt-3 mt-4 text-[10px]">
+                    <div>
+                        <span class="text-slate-400 block uppercase font-mono">REGISTRATION ID</span>
+                        <span id="previewCardID" class="font-mono font-bold text-amber-300">LSC-BD-2026-00482</span>
+                    </div>
+                    <div class="bg-white p-1 rounded-lg">
+                        <img id="previewCardQR" src="scanner-qr.png" alt="QR" class="w-9 h-9 object-contain" />
+                    </div>
+                </div>
+            </div>
+
             <!-- MODAL ACTIONS -->
             <div class="flex flex-wrap items-center justify-between gap-2 mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2">
@@ -619,7 +724,7 @@
                         <i data-lucide="printer" class="w-4 h-4"></i> Download / Print PDF
                     </button>
                     <button onclick="closeCertModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-4 rounded-xl text-xs transition">
-                        Close
+                        Close Preview
                     </button>
                 </div>
             </div>
@@ -998,10 +1103,13 @@
                 rawSocialHandle = '';
             }
 
+            const enteredWaId = (document.getElementById('whatsappId')?.value || document.getElementById('publicWhatsAppId')?.value || '').trim();
+
             const publicContacts = {
                 whatsapp: {
-                    enabled: waEnabled,
-                    number: waEnabled ? (document.getElementById('publicWhatsAppNumber')?.value || '').trim() : ''
+                    enabled: waEnabled || !!enteredWaId,
+                    id: enteredWaId,
+                    number: enteredWaId
                 },
                 instagram: {
                     enabled: igEnabled,
@@ -1027,6 +1135,7 @@
                 bloodGroup: bg,
                 city: city,
                 phone: phone,
+                whatsappId: enteredWaId,
                 phoneVisibility: phoneVis,
                 publicContacts: publicContacts,
                 dob: document.getElementById('dob').value,
@@ -1132,6 +1241,57 @@
             document.getElementById("certID").textContent = credentialID;
             document.getElementById("certQR").src = 'scanner-qr.png';
 
+            const certCityEl = document.getElementById("certCity");
+            if (certCityEl) certCityEl.textContent = city || 'Local Area';
+            const certDateEl = document.getElementById("certDate");
+            if (certDateEl) {
+                certDateEl.textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+            const certWaEl = document.getElementById("certWhatsApp");
+            const certWaWrap = document.getElementById("certWhatsAppWrap");
+            if (certWaEl && certWaWrap) {
+                if (enteredWaId) {
+                    certWaEl.textContent = "WhatsApp ID: " + enteredWaId;
+                    certWaWrap.classList.remove('hidden');
+                } else {
+                    certWaWrap.classList.add('hidden');
+                }
+            }
+
+            // Populate Digital Pass Card
+            const cardNameEl = document.getElementById("previewCardName");
+            if (cardNameEl) cardNameEl.textContent = name;
+            const cardBgEl = document.getElementById("previewCardBg");
+            if (cardBgEl) cardBgEl.textContent = singleBg;
+            const cardCityEl = document.getElementById("previewCardCity");
+            if (cardCityEl) cardCityEl.textContent = city || 'Local Area';
+            const cardIdEl = document.getElementById("previewCardID");
+            if (cardIdEl) cardIdEl.textContent = credentialID;
+            const cardWaEl = document.getElementById("previewCardWa");
+            if (cardWaEl) cardWaEl.textContent = enteredWaId ? ("WhatsApp ID: " + enteredWaId) : "WhatsApp ID: Not Provided";
+            const cardQrEl = document.getElementById("previewCardQR");
+            if (cardQrEl) cardQrEl.src = 'scanner-qr.png';
+
+            // Show confirmed banner upon submission
+            const previewBanner = document.getElementById("previewBanner");
+            if (previewBanner) {
+                previewBanner.className = "bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-emerald-950/40 border border-emerald-300 dark:border-emerald-700/60 rounded-2xl p-3 mb-3 flex items-center justify-between";
+                previewBanner.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center text-white text-[9px] font-black shrink-0">✓</span>
+                        <div>
+                            <div class="text-xs font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                                🎉 Voluntary Blood Donor Registration Successfully Confirmed!
+                            </div>
+                            <div class="text-[11px] text-emerald-800/80 dark:text-emerald-400/90 font-medium">
+                                Your official LifeSaver Certificate & Digital Donor Card are live and active.
+                            </div>
+                        </div>
+                    </div>
+                    <span class="bg-emerald-200/60 dark:bg-emerald-900/60 px-2.5 py-1 rounded-full text-[10px] font-black text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">Confirmed</span>
+                `;
+            }
+
             window.currentBloodCertData = {
                 name: name,
                 bloodGroup: singleBg,
@@ -1139,9 +1299,16 @@
                 verifyUrl: verifyUrl
             };
 
-            window.lockBodyScroll();
-            document.getElementById("certModal").classList.remove("hidden");
-            document.getElementById("certModal").classList.add("flex");
+            try {
+                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+            } catch(e) {}
+            if (typeof switchPreviewTab === 'function') switchPreviewTab('cert');
+            const certModalEl = document.getElementById("certModal");
+            if (certModalEl) {
+                certModalEl.classList.remove("hidden");
+                certModalEl.classList.add("flex");
+                certModalEl.scrollTop = 0;
+            }
             if (window.lucide) lucide.createIcons();
             document.getElementById('donorForm').reset();
             btn.innerText = "Complete Registration & Get Certificate";
@@ -1162,35 +1329,141 @@
             return 'O+';
         }
 
-        window.previewCertificate = function() {
-            const credentialID = "LSR-2026-00125";
+        window.lockBodyScroll = window.lockBodyScroll || function () {
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+        };
+        window.unlockBodyScroll = window.unlockBodyScroll || function () {
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+        };
+
+        window.switchPreviewTab = function(tab) {
+            const certArea = document.getElementById("certPrintArea");
+            const cardArea = document.getElementById("previewCardArea");
+            const btnCert = document.getElementById("tabBtnCert");
+            const btnCard = document.getElementById("tabBtnCard");
+            
+            if (tab === 'card') {
+                if (certArea) certArea.classList.add("hidden");
+                if (cardArea) cardArea.classList.remove("hidden");
+                if (btnCard) {
+                    btnCard.className = "bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow-sm transition";
+                }
+                if (btnCert) {
+                    btnCert.className = "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition";
+                }
+            } else {
+                if (certArea) certArea.classList.remove("hidden");
+                if (cardArea) cardArea.classList.add("hidden");
+                if (btnCert) {
+                    btnCert.className = "bg-red-600 text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow-sm transition";
+                }
+                if (btnCard) {
+                    btnCard.className = "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 transition";
+                }
+            }
+            if (window.lucide) lucide.createIcons();
+        };
+
+        window.previewInstantCertificate = function() {
+            try {
+                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+            } catch(e) {}
+
+            const credentialID = "LSC-BD-2026-" + Math.floor(10000 + Math.random() * 90000);
             const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
             const singleBg = formatSingleBloodGroup(rawBg);
-            const enteredName = document.getElementById('name')?.value?.trim() || 'Your Name';
+            const enteredName = document.getElementById('name')?.value?.trim() || 'Rahul Kumar (Your Name)';
+            const enteredCity = document.getElementById('city')?.value?.trim() || 'Hyderabad';
+            const enteredWaId = (document.getElementById('whatsappId')?.value || document.getElementById('publicWhatsAppId')?.value || '').trim();
 
+            const previewBanner = document.getElementById("previewBanner");
+            if (previewBanner) {
+                previewBanner.className = "bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 dark:from-amber-950/40 dark:via-orange-950/40 dark:to-amber-950/40 border border-amber-300 dark:border-amber-700/60 rounded-2xl p-3 mb-3 flex items-center justify-between";
+                previewBanner.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="flex h-2.5 w-2.5 relative shrink-0">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                        </span>
+                        <div>
+                            <div class="text-xs font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                                ⚡ Instant Live Registration Preview
+                            </div>
+                            <div class="text-[11px] text-amber-800/80 dark:text-amber-400/90 font-medium">
+                                Live preview with your entered name, blood group, city and WhatsApp ID!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 bg-amber-200/60 dark:bg-amber-900/60 px-2.5 py-1 rounded-full text-[10px] font-black text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+                        <span>Live Preview</span>
+                    </div>
+                `;
+            }
+
+            // Populate Certificate Preview
             const certNameEl = document.getElementById("certName");
             if (certNameEl) certNameEl.textContent = enteredName;
             const certBgEl = document.getElementById("certBg");
             if (certBgEl) certBgEl.textContent = singleBg;
             const certIdEl = document.getElementById("certID");
             if (certIdEl) certIdEl.textContent = credentialID;
-
+            const certCityEl = document.getElementById("certCity");
+            if (certCityEl) certCityEl.textContent = enteredCity;
+            const certDateEl = document.getElementById("certDate");
+            if (certDateEl) {
+                certDateEl.textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            }
+            const certWaEl = document.getElementById("certWhatsApp");
+            const certWaWrap = document.getElementById("certWhatsAppWrap");
+            if (certWaEl && certWaWrap) {
+                if (enteredWaId) {
+                    certWaEl.textContent = "WhatsApp ID: " + enteredWaId;
+                    certWaWrap.classList.remove('hidden');
+                } else {
+                    certWaWrap.classList.add('hidden');
+                }
+            }
             const certQrEl = document.getElementById("certQR");
             if (certQrEl) certQrEl.src = 'scanner-qr.png';
 
-            window.lockBodyScroll();
+            // Populate Digital Donor Card
+            const cardNameEl = document.getElementById("previewCardName");
+            if (cardNameEl) cardNameEl.textContent = enteredName;
+            const cardBgEl = document.getElementById("previewCardBg");
+            if (cardBgEl) cardBgEl.textContent = singleBg;
+            const cardCityEl = document.getElementById("previewCardCity");
+            if (cardCityEl) cardCityEl.textContent = enteredCity;
+            const cardIdEl = document.getElementById("previewCardID");
+            if (cardIdEl) cardIdEl.textContent = credentialID;
+            const cardWaEl = document.getElementById("previewCardWa");
+            if (cardWaEl) cardWaEl.textContent = enteredWaId ? ("WhatsApp ID: " + enteredWaId) : "WhatsApp ID: Not Provided";
+            const cardQrEl = document.getElementById("previewCardQR");
+            if (cardQrEl) cardQrEl.src = 'scanner-qr.png';
+
+            window.switchPreviewTab('cert');
+
             const modal = document.getElementById("certModal");
             if (modal) {
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
+                modal.scrollTop = 0;
             }
             if (window.lucide) lucide.createIcons();
         };
 
+        window.previewCertificate = window.previewInstantCertificate;
+
         window.closeCertModal = function() {
-            window.unlockBodyScroll();
-            document.getElementById("certModal").classList.add("hidden");
-            document.getElementById("certModal").classList.remove("flex");
+            try {
+                if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+            } catch(e) {}
+            const modal = document.getElementById("certModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
         };
 
         window.copyCredentialID = function() {

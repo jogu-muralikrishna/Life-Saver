@@ -1025,19 +1025,36 @@
                 passQrEl.src = 'scanner-qr.png';
             }
 
-            window.lockBodyScroll();
+            window.lockBodyScroll = window.lockBodyScroll || function () {
+                document.body.style.overflow = 'hidden';
+                document.documentElement.style.overflow = 'hidden';
+            };
+            window.unlockBodyScroll = window.unlockBodyScroll || function () {
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            };
+
+            try {
+                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+            } catch(e) {}
             const modal = document.getElementById("passModal");
             if (modal) {
                 modal.classList.remove("hidden");
                 modal.classList.add("flex");
+                modal.scrollTop = 0;
             }
             if (window.lucide) lucide.createIcons();
         };
 
         window.closePassModal = function() {
-            window.unlockBodyScroll();
-            document.getElementById("passModal").classList.add("hidden");
-            document.getElementById("passModal").classList.remove("flex");
+            try {
+                if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+            } catch(e) {}
+            const modal = document.getElementById("passModal");
+            if (modal) {
+                modal.classList.add("hidden");
+                modal.classList.remove("flex");
+            }
         };
 
         window.copyOrganCredentialID = function() {

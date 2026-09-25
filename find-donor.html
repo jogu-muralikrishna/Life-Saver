@@ -529,7 +529,14 @@
                 const cleanPhone = donor.phone.replace(/\D/g, '');
                 const displayPhone = cleanPhone.length === 10 ? `+91 ${cleanPhone.replace(/(\d{5})(\d{5})/, '$1 $2')}` : donor.phone;
                 const respectfulMsg = `Hello ${donor.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent medical requirement for ${donor.bloodGroup || 'blood'} blood in ${donor.city || 'your area'}. If you are available to donate, please let us know. Thank you!`;
-                const targetPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                
+                const rawWa = (donor.whatsappId || contacts.whatsapp?.id || contacts.whatsapp?.number || cleanPhone).trim();
+                const cleanDigits = rawWa.replace(/\D/g, '');
+                const targetWa = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
+                const waUrl = cleanDigits.length >= 7
+                    ? `https://wa.me/${targetWa}?text=${encodeURIComponent(respectfulMsg)}`
+                    : (rawWa.startsWith('http') ? rawWa : `https://wa.me/${encodeURIComponent(rawWa.replace(/^@/, ''))}?text=${encodeURIComponent(respectfulMsg)}`);
+
                 return `
                     <div class="space-y-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                         <div class="flex items-center justify-between mb-1">
@@ -540,11 +547,12 @@
                                 🟢 Public
                             </span>
                         </div>
+                        ${donor.whatsappId ? `<div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1"><i data-lucide="message-square" class="w-3 h-3"></i> WhatsApp ID: ${donor.whatsappId}</div>` : ''}
                         <div class="grid grid-cols-2 gap-2">
                             <a href="tel:${cleanPhone}" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition">
                                 <i data-lucide="phone" class="w-3.5 h-3.5"></i> Call
                             </a>
-                            <a href="https://wa.me/${targetPhone}?text=${encodeURIComponent(respectfulMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                            <a href="${waUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
                             </a>
                         </div>
@@ -558,13 +566,17 @@
             // Private Account / Private Phone cases:
             const actionButtons = [];
 
-            // WhatsApp with explicit custom number
-            if (contacts.whatsapp?.enabled && contacts.whatsapp?.number) {
-                const cleanWa = contacts.whatsapp.number.replace(/\D/g, '');
-                const targetWa = cleanWa.length === 10 ? `91${cleanWa}` : cleanWa;
+            // WhatsApp with explicit custom number or WhatsApp ID
+            const rawWaPrivate = (donor.whatsappId || contacts.whatsapp?.id || contacts.whatsapp?.number || '').trim();
+            if ((contacts.whatsapp?.enabled || donor.whatsappId) && rawWaPrivate) {
+                const cleanDigits = rawWaPrivate.replace(/\D/g, '');
+                const targetWa = cleanDigits.length === 10 ? `91${cleanDigits}` : cleanDigits;
                 const respectfulMsg = `Hello ${donor.name || 'Donor'}, I am reaching out through LifeSaver regarding an urgent medical requirement for ${donor.bloodGroup || 'blood'} blood in ${donor.city || 'your area'}.`;
+                const waUrl = cleanDigits.length >= 7 
+                    ? `https://wa.me/${targetWa}?text=${encodeURIComponent(respectfulMsg)}`
+                    : (rawWaPrivate.startsWith('http') ? rawWaPrivate : `https://wa.me/${encodeURIComponent(rawWaPrivate.replace(/^@/, ''))}?text=${encodeURIComponent(respectfulMsg)}`);
                 actionButtons.push(`
-                    <a href="https://wa.me/${targetWa}?text=${encodeURIComponent(respectfulMsg)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
+                    <a href="${waUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition shadow-sm shadow-emerald-600/20">
                         <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
                     </a>
                 `);
