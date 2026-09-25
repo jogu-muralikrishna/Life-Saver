@@ -842,10 +842,10 @@
     </div>
 
     <!-- EMERGENCY SOS MODAL (TOP-MIDDLE POSITIONED, COMPLETE ALL-EMERGENCY SUITE) -->
-    <div id="sosModal" onclick="if(event.target === this) toggleSOS()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-start justify-center p-3 sm:p-6 overflow-y-auto pt-4 sm:pt-8" data-sos-full="true">
-        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-5 sm:p-7 border-2 border-red-500 dark:border-red-600 shadow-2xl relative my-2 sm:my-6 animate-fade-in">
+    <div id="sosModal" onclick="if(event.target === this) closeSOS()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-start justify-center p-3 sm:p-6 overflow-y-auto pt-4 sm:pt-8" data-sos-full="true">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-5 sm:p-7 border-2 border-red-500 dark:border-red-600 shadow-2xl relative my-2 sm:my-6 animate-fade-in" onclick="event.stopPropagation()">
             <!-- Close Button -->
-            <button type="button" onclick="toggleSOS()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition font-black text-base z-10" title="Close SOS Dialog">✕</button>
+            <button type="button" onclick="closeSOS()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition font-black text-base z-10 cursor-pointer" title="Close SOS Dialog">✕</button>
 
             <!-- Header Alert Banner -->
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-red-100 dark:border-red-950">
@@ -976,7 +976,7 @@
                 </div>
 
                 <!-- Close / Cancel Alert Button -->
-                <button type="button" onclick="toggleSOS()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2.5 rounded-xl text-xs transition mt-1">
+                <button type="button" onclick="closeSOS()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2.5 rounded-xl text-xs transition mt-1 cursor-pointer">
                     Close Emergency SOS
                 </button>
             </div>
@@ -2691,28 +2691,46 @@
             }
         }
 
-        function toggleSOS() {
-            if (typeof window.ensureSOSModal === 'function') {
-                window.ensureSOSModal();
-            }
+        function openSOS() {
             const modal = document.getElementById("sosModal");
             if (!modal) {
+                if (typeof window.ensureSOSModal === 'function') {
+                    window.ensureSOSModal();
+                }
+            }
+            const targetModal = document.getElementById("sosModal");
+            if (!targetModal) {
                 window.location.href = "index.html?action=sos";
                 return;
             }
-            if (modal.classList.contains("hidden")) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-                if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    lucide.createIcons();
-                }
-            } else {
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-                if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+            targetModal.classList.remove("hidden");
+            targetModal.classList.add("flex");
+            if (typeof window.lockBodyScroll === 'function') window.lockBodyScroll();
+            else document.body.style.overflow = 'hidden';
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                lucide.createIcons();
             }
         }
+
+        function closeSOS() {
+            const modal = document.getElementById("sosModal");
+            if (!modal) return;
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
+            else document.body.style.overflow = '';
+        }
+
+        function toggleSOS() {
+            const modal = document.getElementById("sosModal");
+            if (!modal || modal.classList.contains("hidden")) {
+                openSOS();
+            } else {
+                closeSOS();
+            }
+        }
+        window.openSOS = openSOS;
+        window.closeSOS = closeSOS;
         window.toggleSOS = toggleSOS;
 
         function goTo(page) { window.location.href = page; }
