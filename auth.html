@@ -31,11 +31,52 @@
     <script src="qrcode.min.js"></script>
     <script src="security.js" defer></script>
 </head>
-<body class="min-h-screen flex flex-col justify-between py-6 px-4 sm:px-6 bg-slate-900 text-white transition-colors duration-300 antialiased">
+<body class="min-h-screen flex flex-col justify-between pb-10 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 antialiased">
+
+    <!-- TOPBAR NAVIGATION WITH TOP-MIDDLE SOS & AI TRIAGE -->
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3 w-full border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 relative">
+            
+            <!-- BRAND LOGO -->
+            <div class="flex-1 flex items-center justify-start shrink-0">
+                <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl tracking-tight shrink-0">
+                    <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                        <i data-lucide="heart-pulse" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <span class="tracking-tight text-slate-900 dark:text-white">Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+            </div>
+
+            <!-- TOP-MIDDLE EMERGENCY SOS & AI TRIAGE ACTION CENTER -->
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 mx-auto">
+                <!-- 🚨 EMERGENCY SOS BUTTON -->
+                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse"></i>
+                    <span class="tracking-wider uppercase font-black">SOS 108</span>
+                </button>
+
+                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON -->
+                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span>AI Triage</span>
+                </button>
+            </div>
+
+            <!-- RIGHT CONTROLS -->
+            <div class="flex-1 flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
+                <a href="index.html" class="hidden sm:inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    <i data-lucide="home" class="w-3.5 h-3.5"></i> Home
+                </a>
+                <button id="themeToggleBtnTop" onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
+                    <i data-lucide="moon" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
 
     <!-- AUTHENTICATION FORM CARD -->
     <div id="authCard" class="glass-card w-full max-w-md mx-auto my-auto sm:my-8 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl bg-white dark:bg-slate-900 relative animate-fade-in">
-        <div class="absolute top-5 right-5">
+        <div class="absolute top-5 right-5 sm:hidden">
             <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Toggle Light/Dark Theme">
                 <i data-lucide="moon" class="w-4 h-4"></i>
             </button>
@@ -4351,20 +4392,6 @@
             return url;
         }
 
-        // Sanitizer to ensure ONLY ONE clean blood group is displayed (no comma lists or extra words)
-        function formatSingleBloodGroup(rawBg) {
-            if (!rawBg || typeof rawBg !== 'string') return 'O+';
-            const clean = rawBg.trim();
-            const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
-            if (match) {
-                return match[0].toUpperCase().replace(/\s*VE|\s*POSITIVE/i, '+').replace(/\s*NEGATIVE/i, '-').replace(/\s+/g, '');
-            }
-            const singleWord = clean.split(/[,/|;\s]+/)[0].toUpperCase();
-            if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
-                return singleWord;
-            }
-            return 'O+';
-        }
 
         async function loadUserCertificates(user) {
             if (!user) return;

@@ -113,33 +113,35 @@
 
     <!-- NAVBAR (HELLO GREETING, 3 DIRECT QUICK TOOLS, THEME TOGGLE & THREE-DOT MENU) -->
     <nav id="mainNavbar" class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3 transition-all duration-300">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 relative">
             
             <!-- BRAND LOGO -->
-            <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
-                <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
-                    <i data-lucide="heart-pulse" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                </div>
-                <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
-            </a>
+            <div class="flex-1 flex items-center justify-start shrink-0">
+                <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
+                    <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                        <i data-lucide="heart-pulse" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+            </div>
 
             <!-- TOP-MIDDLE EMERGENCY SOS & AI TRIAGE ACTION CENTER -->
-            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0">
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 mx-auto">
                 <!-- 🚨 EMERGENCY SOS BUTTON -->
-                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-red-600/30 hover:shadow-red-600/50 border border-red-500/90 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
+                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
                     <i data-lucide="phone-call" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse"></i>
-                    <span class="tracking-wide">SOS <span class="hidden xs:inline sm:inline">108</span></span>
+                    <span class="tracking-wider uppercase font-black">SOS 108</span>
                 </button>
 
                 <!-- 🩺 AI TRIAGE ASSISTANT BUTTON -->
-                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
+                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
                     <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>AI Triage</span>
                 </button>
             </div>
 
             <!-- RIGHT CONTROLS & NAVIGATION -->
-            <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div class="flex-1 flex items-center justify-end gap-1 sm:gap-2 shrink-0">
                 <!-- USER / ACCOUNT BADGE (VISIBLE ON TABLET & DESKTOP) -->
                 <a href="auth.html" id="userAuthTopBar" class="hidden md:flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[140px] lg:max-w-[200px]" title="Member Profile">
                     <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
@@ -839,27 +841,143 @@
         </div>
     </div>
 
-    <!-- EMERGENCY SOS MODAL -->
-    <div id="sosModal" onclick="if(event.target === this) toggleSOS()" class="fixed inset-0 bg-red-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-md rounded-3xl p-8 border border-red-300 dark:border-red-900/50 shadow-2xl relative text-center">
-            <button onclick="toggleSOS()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 font-bold">✕</button>
+    <!-- EMERGENCY SOS MODAL (TOP-MIDDLE POSITIONED, COMPLETE ALL-EMERGENCY SUITE) -->
+    <div id="sosModal" onclick="if(event.target === this) toggleSOS()" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-start justify-center p-3 sm:p-6 overflow-y-auto pt-4 sm:pt-8" data-sos-full="true">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-full max-w-lg rounded-3xl p-5 sm:p-7 border-2 border-red-500 dark:border-red-600 shadow-2xl relative my-2 sm:my-6 animate-fade-in">
+            <!-- Close Button -->
+            <button type="button" onclick="toggleSOS()" class="absolute top-4 right-4 sm:top-5 sm:right-5 text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition font-black text-base z-10" title="Close SOS Dialog">✕</button>
 
-            <div class="w-16 h-16 bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-200 dark:border-red-900/50 animate-pulse">
-                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            <!-- Header Alert Banner -->
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-red-100 dark:border-red-950">
+                <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-red-600/30 animate-pulse">
+                    <i data-lucide="phone-call" class="w-6 h-6"></i>
+                </div>
+                <div class="text-left">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-lg sm:text-xl font-black text-red-600 dark:text-red-400 tracking-tight">EMERGENCY SOS DISPATCH</h2>
+                        <span class="bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-red-200 dark:border-red-800 animate-pulse">Live 24/7</span>
+                    </div>
+                    <p class="text-xs text-slate-600 dark:text-slate-400">Direct one-tap connection to all emergency helplines & ambulance dispatch</p>
+                </div>
             </div>
 
-            <h2 class="text-2xl font-black text-red-600 dark:text-red-400 mb-2">EMERGENCY SOS ALERT</h2>
-            <p class="text-xs text-slate-600 dark:text-slate-400 mb-6">Immediate medical dispatcher connection</p>
+            <!-- ALL EMERGENCY SOS BUTTONS -->
+            <div class="space-y-2.5">
+                <!-- 1. PRIMARY AMBULANCE (108) -->
+                <a href="tel:108" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-black py-3.5 px-4 rounded-2xl flex items-center justify-between text-sm sm:text-base transition shadow-lg shadow-red-600/30 border border-red-500 group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="phone-call" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black leading-tight">DIAL 108 — FREE AMBULANCE</div>
+                            <div class="text-[11px] font-medium text-red-100">National Medical & Disaster Response</div>
+                        </div>
+                    </div>
+                    <div class="bg-white text-red-600 px-3 py-1 rounded-xl font-black text-xs shrink-0 group-hover:scale-105 transition">CALL 108</div>
+                </a>
 
-            <div class="space-y-3">
-                <a href="tel:108" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-2 text-base transition shadow-lg shadow-red-500/20">
-                    <i data-lucide="phone-call" class="w-5 h-5"></i> DIAL 108 AMBULANCE
+                <!-- 2. NATIONAL ALL-IN-ONE EMERGENCY (112) -->
+                <a href="tel:112" class="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black py-3 px-4 rounded-2xl flex items-center justify-between text-xs sm:text-sm transition border border-slate-700 shadow-md group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-700 flex items-center justify-center shrink-0">
+                            <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-black leading-tight">DIAL 112 — NATIONAL HELPLINE</div>
+                            <div class="text-[11px] font-medium text-slate-300">Unified Police, Fire & Medical Control</div>
+                        </div>
+                    </div>
+                    <div class="bg-amber-500 text-slate-950 px-3 py-1 rounded-xl font-black text-xs shrink-0 group-hover:scale-105 transition">CALL 112</div>
                 </a>
-                <a href="tel:112" class="w-full bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 text-sm transition">
-                    <i data-lucide="shield-alert" class="w-4 h-4"></i> Dial 112 National Emergency
-                </a>
-                <button onclick="toggleSOS()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-2xl text-xs">
-                    Cancel Alert
+
+                <!-- 2-COLUMN SECONDARY EMERGENCY BUTTONS: 102 & 100 -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- 102 Mother & Child / Pregnancy Ambulance -->
+                    <a href="tel:102" class="bg-pink-50 dark:bg-pink-950/40 hover:bg-pink-100 dark:hover:bg-pink-900/50 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="baby" class="w-4 h-4 text-pink-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">102 Mother & Child</div>
+                            <div class="text-[10px] opacity-80">Free Pregnancy Van</div>
+                        </div>
+                    </a>
+
+                    <!-- 100 Police Control Room -->
+                    <a href="tel:100" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">100 Police Control</div>
+                            <div class="text-[10px] opacity-80">Immediate Safety</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 2-COLUMN TERTIARY EMERGENCY BUTTONS: 101 Fire & 1091 Women Helpline -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- 101 Fire & Rescue -->
+                    <a href="tel:101" class="bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="flame" class="w-4 h-4 text-amber-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">101 Fire & Rescue</div>
+                            <div class="text-[10px] opacity-80">Disaster Dispatch</div>
+                        </div>
+                    </a>
+
+                    <!-- 1091 Women Helpline -->
+                    <a href="tel:1091" class="bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="heart-handshake" class="w-4 h-4 text-purple-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">1091 Women Safety</div>
+                            <div class="text-[10px] opacity-80">24/7 Helpline</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 2-COLUMN SERVICES: 104 Medical Advice & 1098 Childline -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- 104 Health Advice & Blood Info -->
+                    <a href="tel:104" class="bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="stethoscope" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">104 Health Advice</div>
+                            <div class="text-[10px] opacity-80">Free Medical & Blood Info</div>
+                        </div>
+                    </a>
+
+                    <!-- 1098 Child Helpline -->
+                    <a href="tel:1098" class="bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/50 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="smile" class="w-4 h-4 text-orange-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">1098 Child Helpline</div>
+                            <div class="text-[10px] opacity-80">Child Emergency 24/7</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 2-COLUMN DIRECT LINKS: Hospitals & Blood Donors -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- Find Nearby Hospitals Link -->
+                    <a href="hospitals.html" class="bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="building-2" class="w-4 h-4 text-cyan-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">Find Hospitals</div>
+                            <div class="text-[10px] opacity-80">Nearby ICUs & Beds</div>
+                        </div>
+                    </a>
+
+                    <!-- Find Blood Donors Link -->
+                    <a href="blood.html" class="bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/80 p-2.5 rounded-xl flex items-center gap-2 text-xs font-bold transition">
+                        <i data-lucide="droplet" class="w-4 h-4 text-rose-500 shrink-0"></i>
+                        <div class="text-left truncate">
+                            <div class="font-black">Find Blood Donors</div>
+                            <div class="text-[10px] opacity-80">Urgent Blood Units</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Close / Cancel Alert Button -->
+                <button type="button" onclick="toggleSOS()" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold py-2.5 rounded-xl text-xs transition mt-1">
+                    Close Emergency SOS
                 </button>
             </div>
         </div>
@@ -1847,11 +1965,9 @@
                 `;
                 chatBox.appendChild(aiMsg);
                 if (window.lucide) lucide.createIcons();
-                scrollChatToBottom(true);
-                if (typeof aiMsg.scrollIntoView === 'function') {
-                    aiMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-                setTimeout(() => scrollChatToBottom(true), 120);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                setTimeout(() => scrollChatToBottom(true), 60);
+                setTimeout(() => scrollChatToBottom(false), 250);
 
                 // Speak response text
                 speakText(aiMsg.innerText);
@@ -2576,6 +2692,9 @@
         }
 
         function toggleSOS() {
+            if (typeof window.ensureSOSModal === 'function') {
+                window.ensureSOSModal();
+            }
             const modal = document.getElementById("sosModal");
             if (!modal) {
                 window.location.href = "index.html?action=sos";

@@ -46,33 +46,35 @@
 
     <!-- NAVBAR -->
     <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 relative">
 
             <!-- BRAND LOGO -->
-            <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
-                <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
-                    <i data-lucide="droplet" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                </div>
-                <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
-            </a>
+            <div class="flex-1 flex items-center justify-start shrink-0">
+                <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
+                    <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                        <i data-lucide="droplet" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+            </div>
 
             <!-- TOP-MIDDLE EMERGENCY SOS & AI TRIAGE ACTION CENTER -->
-            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0">
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 mx-auto">
                 <!-- 🚨 EMERGENCY SOS BUTTON -->
-                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-red-600/30 hover:shadow-red-600/50 border border-red-500/90 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
+                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
                     <i data-lucide="phone-call" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse"></i>
-                    <span class="tracking-wide">SOS <span class="hidden xs:inline sm:inline">108</span></span>
+                    <span class="tracking-wider uppercase font-black">SOS 108</span>
                 </button>
 
                 <!-- 🩺 AI TRIAGE ASSISTANT BUTTON -->
-                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
+                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
                     <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>AI Triage</span>
                 </button>
             </div>
 
             <!-- RIGHT CONTROLS & NAVIGATION -->
-            <div class="flex items-center gap-1 sm:gap-2 shrink-0">
+            <div class="flex-1 flex items-center justify-end gap-1 sm:gap-2 shrink-0">
                 <!-- USER / ACCOUNT BADGE (VISIBLE ON TABLET & DESKTOP) -->
                 <a href="auth.html" id="userAuthTopBar" class="hidden md:flex items-center gap-1.5 bg-slate-100/80 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black border border-slate-200/80 dark:border-slate-700/80 transition shadow-sm shrink-0 truncate max-w-[140px] lg:max-w-[200px]" title="Member Profile">
                     <i data-lucide="user" class="w-3.5 h-3.5 text-red-500 shrink-0"></i>
