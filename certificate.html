@@ -102,7 +102,7 @@
         <div id="certificateContainer" class="hidden space-y-6">
             
             <!-- VERIFIED BANNER -->
-            <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+            <div id="certStatusBanner" class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
                         <i data-lucide="check-check" class="w-6 h-6"></i>
@@ -254,6 +254,60 @@
 
             const cleanId = targetId.trim();
             const cleanIdLower = cleanId.toLowerCase();
+
+            // Instant Preview Bypass for zero-latency preview in new page
+            const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'true' || cleanIdLower.includes('preview');
+            if (isPreview) {
+                const isOrgan = cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN') || !!urlOrgans;
+                activeCertData = {
+                    name: urlName || (isOrgan ? "Voluntary Organ Pledger" : "Voluntary Blood Donor"),
+                    bloodGroup: resolveBestBloodGroup(urlBg, "A+"),
+                    credentialID: cleanId,
+                    certId: cleanId,
+                    certType: isOrgan ? 'organ' : 'blood',
+                    organsPledged: urlOrgans || "All Vital Organs & Tissues",
+                    registeredDate: new Date().toISOString().split('T')[0],
+                    pledgeDate: new Date().toISOString().split('T')[0],
+                    isPreview: true
+                };
+                renderCertificate(activeCertData);
+                document.getElementById("loadingState").classList.add("hidden");
+                document.getElementById("lookupContainer").classList.add("hidden");
+                document.getElementById("certificateContainer").classList.remove("hidden");
+
+                const bannerEl = document.getElementById("certStatusBanner");
+                if (bannerEl) {
+                    bannerEl.className = "p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm";
+                    bannerEl.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0">
+                                <i data-lucide="eye" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-black flex items-center gap-1.5">
+                                    <span>⚡ OFFICIAL INSTANT PREVIEW</span>
+                                    <span class="text-[10px] bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 font-extrabold px-2 py-0.5 rounded-full uppercase">Instant Preview Mode</span>
+                                </div>
+                                <p class="text-xs text-amber-700 dark:text-amber-300">Live preview of your official ${isOrgan ? 'Organ Donation' : 'Blood Donor'} Certificate before final registry submission.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="downloadCertificateImage()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm" title="Save high-res PNG image directly">
+                                <i data-lucide="download" class="w-4 h-4"></i> Save Image (PNG)
+                            </button>
+                            <button onclick="printCertificate()" class="bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Print / PDF
+                            </button>
+                            <button onclick="shareCertificate()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+                                <i data-lucide="share-2" class="w-4 h-4"></i> Share
+                            </button>
+                        </div>
+                    `;
+                }
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
 
             // 1. Instant check from local caches for 0ms render
             let foundRecord = null;

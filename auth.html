@@ -3802,7 +3802,7 @@
                 const waCb = document.getElementById('dashContactWhatsApp');
                 const waInput = document.getElementById('dashPublicWhatsAppNumber');
                 if (waCb) waCb.checked = !!(contacts.whatsapp && contacts.whatsapp.enabled);
-                if (waInput) waInput.value = (contacts.whatsapp && contacts.whatsapp.number) ? contacts.whatsapp.number : '';
+                if (waInput) waInput.value = (contacts.whatsapp && (contacts.whatsapp.id || contacts.whatsapp.number)) ? (contacts.whatsapp.id || contacts.whatsapp.number) : '';
 
                 // Instagram
                 const igCb = document.getElementById('dashContactInstagram');
@@ -3937,7 +3937,7 @@
             }
 
             const publicContacts = {
-                whatsapp: { enabled: waChecked && waNum.length > 0, number: waNum },
+                whatsapp: { enabled: waChecked && waNum.length > 0, id: waNum, number: waNum },
                 instagram: { enabled: igChecked && igUser.length > 0, username: igUser },
                 email: { enabled: emChecked && emAddr.length > 0, address: emAddr },
                 otherSocial: { enabled: osChecked && osHandle.length > 0, platform: osPlat, handleOrUrl: osHandle },
