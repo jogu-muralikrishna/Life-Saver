@@ -503,10 +503,10 @@
                 </button>
             </div>
 
-            <!-- Compatible Donors Header -->
+            <!-- Matched Donors Header -->
             <div class="flex items-center justify-between mb-2">
                 <h4 class="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-                    <i data-lucide="users" class="w-3.5 h-3.5 text-red-500"></i> Compatible Donors in Registry (<span id="matchedDonorsCount">0</span>)
+                    <i data-lucide="users" class="w-3.5 h-3.5 text-red-500"></i> Matched Donors for Required Blood Group (<span id="matchedDonorsCount">0</span>)
                 </h4>
                 <span id="matchedCityNote" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400"></span>
             </div>
@@ -1087,16 +1087,16 @@
         };
         window.closeBloodTicket = window.deleteMyBloodTicket;
 
-        // BLOOD COMPATIBILITY MATRIX
+        // STRICT EXACT BLOOD GROUP MATCHING (ONLY SHOWS THE EXACT BLOOD GROUP MENTIONED)
         const BLOOD_COMPATIBILITY = {
             'O-': ['O-'],
-            'O+': ['O-', 'O+'],
-            'A-': ['O-', 'A-'],
-            'A+': ['O-', 'O+', 'A-', 'A+'],
-            'B-': ['O-', 'B-'],
-            'B+': ['O-', 'O+', 'B-', 'B+'],
-            'AB-': ['O-', 'A-', 'B-', 'AB-'],
-            'AB+': ['O-', 'O+', 'A-', 'A+', 'B-', 'B+', 'AB-', 'AB+']
+            'O+': ['O+'],
+            'A-': ['A-'],
+            'A+': ['A+'],
+            'B-': ['B-'],
+            'B+': ['B+'],
+            'AB-': ['AB-'],
+            'AB+': ['AB+']
         };
 
         window.activeUrgentBloodTickets = {};
@@ -1145,8 +1145,8 @@
 
             filteredKeys.forEach(key => {
                 const r = window.activeUrgentBloodTickets[key];
-                const compatibleGroups = BLOOD_COMPATIBILITY[r.bloodGroup] || [r.bloodGroup];
-                const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
+                const reqBg = (r.bloodGroup || '').toUpperCase().trim();
+                const matchingDonors = allDonors.filter(d => (d.bloodGroup || '').toUpperCase().trim() === reqBg);
                 const isMyPost = (currentUid && r.userId === currentUid) || 
                                  (currentEmail && r.userEmail && r.userEmail.toLowerCase() === currentEmail) || 
                                  myPostedKeys.includes(key);
@@ -1230,8 +1230,8 @@
             }
             window.currentActiveMatchTicket = ticket;
 
-            const compatibleGroups = BLOOD_COMPATIBILITY[ticket.bloodGroup] || [ticket.bloodGroup];
-            const matchingDonors = allDonors.filter(d => compatibleGroups.includes((d.bloodGroup || '').toUpperCase()));
+            const reqBg = (ticket.bloodGroup || '').toUpperCase().trim();
+            const matchingDonors = allDonors.filter(d => (d.bloodGroup || '').toUpperCase().trim() === reqBg);
 
             matchingDonors.sort((a, b) => {
                 const aCityMatch = (a.city || '').toLowerCase().trim() === (ticket.city || '').toLowerCase().trim();
@@ -1265,7 +1265,7 @@
                         <div><strong>📞 Attendant Phone:</strong> <button onclick="openPrivacyTicketByKey('${ticketKey}')" class="text-red-600 font-mono font-bold hover:underline inline-flex items-center gap-1">${window.maskPhone(ticket.phone)} <span class="text-[10px] bg-red-100 dark:bg-red-950 px-1.5 py-0.2 rounded font-sans font-normal border border-red-200 dark:border-red-900">🛡️ Guarded • Contact</span></button></div>
                     </div>
                     <div class="mt-2 pt-2 border-t border-red-200/60 dark:border-red-900/40 text-[11px] text-slate-600 dark:text-slate-400">
-                        🩸 Compatible Donor Groups for ${ticket.bloodGroup}: <strong class="text-red-600 dark:text-red-400">${compatibleGroups.join(', ')}</strong>
+                        🩸 Required Blood Group: <strong class="text-red-600 dark:text-red-400">${ticket.bloodGroup}</strong>
                     </div>
                 `;
             }
@@ -1284,7 +1284,7 @@
                 if (matchingDonors.length === 0) {
                     listEl.innerHTML = `
                         <div class="p-6 text-center text-slate-500">
-                            <p class="text-xs font-bold">No registered donors currently match ${compatibleGroups.join(', ')}.</p>
+                            <p class="text-xs font-bold">No registered donors currently match ${ticket.bloodGroup}.</p>
                             <p class="text-[11px] mt-1 text-slate-400">Click 1-Click WhatsApp Broadcast above to dispatch this requirement to community groups.</p>
                         </div>
                     `;
@@ -1375,13 +1375,12 @@
         window.broadcastTicketWhatsApp = function() {
             if (!window.currentActiveMatchTicket) return;
             const t = window.currentActiveMatchTicket;
-            const comp = (BLOOD_COMPATIBILITY[t.bloodGroup] || [t.bloodGroup]).join(', ');
             const msg = `🚨 *URGENT BLOOD ALERT - LIFESAVER-CARE* 🚨\n\n` +
                 `Patient urgently requires *${t.units || 1} Unit(s)* of *${t.bloodGroup} Blood*.\n\n` +
                 `🏥 *Hospital:* ${t.hospital}\n` +
                 `📍 *City:* ${t.city}\n` +
                 `📞 *Emergency Contact:* ${t.phone}\n\n` +
-                `🩸 *Acceptable Blood Groups:* ${comp}\n\n` +
+                `🩸 *Required Blood Group:* *${t.bloodGroup}*\n\n` +
                 `⚡ *If you or someone in your network can donate, please call immediately.*\n\n` +
                 `LifeSaver-Care Emergency Network:\n${window.location.origin}/blood.html`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
