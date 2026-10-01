@@ -15,8 +15,7 @@
  * - Single controlled listener, zero duplicate listeners
  */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { initializeApp, getDatabase, ref, onValue } from "./lifesaver-db.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",

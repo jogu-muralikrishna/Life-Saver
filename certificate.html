@@ -141,10 +141,9 @@
         <p>© 2026 LifeSaver-Care. Official Healthcare & Donor Registry Network. Together We Save Lives.</p>
     </footer>
 
-    <!-- FIREBASE & VERIFICATION LOGIC -->
+    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { initializeApp, getDatabase, ref, get } from "./lifesaver-db.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",

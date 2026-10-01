@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index.js" },
     { "source": "/google7f6c6857dafe10a0.html", "destination": "/google7f6c6857dafe10a0.html" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/robots.txt", "destination": "/robots.txt" },

@@ -756,11 +756,9 @@
         </div>
     </div>
 
-    <!-- FIREBASE MODULE SCRIPT -->
+    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update, get, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { initializeApp, getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword, getDatabase, ref, onValue, remove, update, get, push, set } from "./lifesaver-db.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
