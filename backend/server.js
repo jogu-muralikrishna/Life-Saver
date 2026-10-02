@@ -1540,14 +1540,21 @@ if (!process.env.VERCEL) {
         });
     });
 
+    process.on('SIGINT', () => {
+        console.log('🛑 Received SIGINT, closing server gracefully...');
+        server.close(() => {
+            process.exit(0);
+        });
+    });
+
     server.listen(PORT, '0.0.0.0', () => {
         console.log(`=======================================================`);
         console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
         console.log(`⚡ Real-Time Socket.IO Active on port ${PORT}`);
         console.log(`=======================================================`);
 
-        // Defer database initialization so HTTP server responds to Render health checks immediately
-        setImmediate(() => {
+        // Defer database initialization by 1s so HTTP server responds to Render health checks immediately
+        setTimeout(() => {
             initDatabase()
                 .then(() => {
                     console.log(`💾 PostgreSQL Connected and Database Schema Ready`);
@@ -1555,7 +1562,7 @@ if (!process.env.VERCEL) {
                 .catch(err => {
                     console.error('⚠️ Database connection notice during startup:', err.message);
                 });
-        });
+        }, 1000);
     });
 }
 

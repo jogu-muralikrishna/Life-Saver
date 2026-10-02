@@ -48,51 +48,41 @@ async function getDB() {
         };
         console.log('✅ Connected to external PostgreSQL via DATABASE_URL');
     } else {
-        const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_SERVICE_ID;
-        const defaultParams = ['--single','-F','-O','-j','-c','search_path=public','-c','exit_on_error=false','-c','log_checkpoints=false','-c','max_worker_processes=0','-c','max_parallel_workers=0','-c','max_parallel_workers_per_gather=0','-c','io_method=sync','-c','max_parallel_maintenance_workers=0'];
+        const dataDir = path.resolve(__dirname, '../data/postgres');
+        fs.mkdirSync(dataDir, { recursive: true });
+
+        const pidFile = path.join(dataDir, 'postmaster.pid');
+        if (fs.existsSync(pidFile)) {
+            try { fs.unlinkSync(pidFile); } catch (e) {}
+        }
 
         const { PGlite } = require('@electric-sql/pglite');
+        const PGLITE_OPTIONS = {
+            relaxedDurability: true,
+            postgresqlconf: [
+                'shared_buffers = 4MB',
+                'work_mem = 512kB',
+                'max_connections = 10',
+                'wal_buffers = 512kB'
+            ]
+        };
+
         let pglite;
-
-        // On Render free tier (ephemeral container, strict 512MB RAM limit), use in-memory PGlite (<380MB RAM)
-        // to prevent Linux kernel OOM-killer (SIGKILL) and file locking issues.
-        // For local development or environments with persistent storage, use dataDir with reduced buffers.
-        if (isRender || process.env.PGLITE_IN_MEMORY === 'true') {
-            pglite = new PGlite();
+        try {
+            pglite = new PGlite(dataDir, PGLITE_OPTIONS);
             await pglite.waitReady;
-            console.log('✅ Initialized native PostgreSQL engine (Render RAM-optimized <380MB)');
-        } else {
-            const dataDir = path.resolve(__dirname, '../data/postgres');
-            fs.mkdirSync(dataDir, { recursive: true });
-
-            const pidFile = path.join(dataDir, 'postmaster.pid');
-            if (fs.existsSync(pidFile)) {
-                try { fs.unlinkSync(pidFile); } catch (e) {}
-            }
-
+        } catch (err) {
+            console.warn('⚠️ PGlite directory initialization warning, resetting clean database store:', err.message);
             try {
-                pglite = new PGlite(dataDir, {
-                    relaxedDurability: true,
-                    startParams: [...defaultParams, '-c', 'shared_buffers=16MB', '-c', 'work_mem=1MB']
-                });
+                fs.rmSync(dataDir, { recursive: true, force: true });
+                fs.mkdirSync(dataDir, { recursive: true });
+                pglite = new PGlite(dataDir, PGLITE_OPTIONS);
                 await pglite.waitReady;
-            } catch (err) {
-                console.warn('⚠️ PGlite directory initialization warning, resetting clean database store:', err.message);
-                try {
-                    fs.rmSync(dataDir, { recursive: true, force: true });
-                    fs.mkdirSync(dataDir, { recursive: true });
-                    pglite = new PGlite(dataDir, {
-                        relaxedDurability: true,
-                        startParams: [...defaultParams, '-c', 'shared_buffers=16MB', '-c', 'work_mem=1MB']
-                    });
-                    await pglite.waitReady;
-                } catch (err2) {
-                    console.warn('⚠️ Falling back to in-memory PostgreSQL engine:', err2.message);
-                    pglite = new PGlite();
-                    await pglite.waitReady;
-                }
+            } catch (err2) {
+                console.warn('⚠️ Falling back to in-memory PostgreSQL engine:', err2.message);
+                pglite = new PGlite(PGLITE_OPTIONS);
+                await pglite.waitReady;
             }
-            console.log('✅ Initialized native PostgreSQL engine at', dataDir);
         }
         isPgPool = false;
 
@@ -116,6 +106,7 @@ async function getDB() {
                 });
             }
         };
+        console.log('✅ Initialized native PostgreSQL engine at', dataDir);
     }
 
     return dbInstance;
@@ -127,7 +118,16 @@ async function initDatabase(options = {}) {
         try {
             const db = await getDB();
             const schemaPath = path.resolve(__dirname, 'schema.sql');
-            if (fs.existsSync(schemaPath)) {
+
+            // Check if tables already exist to avoid re-parsing 330 DDL lines on every restart
+            let tablesExist = false;
+            try {
+                const check = await db.query("SELECT to_regclass('public.users') as exists");
+                tablesExist = !!check.rows[0]?.exists;
+            } catch (e) {}
+
+            if (!tablesExist && fs.existsSync(schemaPath)) {
+                console.log('🔄 First boot: creating schema tables...');
                 const schemaSql = fs.readFileSync(schemaPath, 'utf8');
                 await db.exec(schemaSql);
                 try {
@@ -137,25 +137,25 @@ async function initDatabase(options = {}) {
                         UPDATE users SET password = 'admin123' WHERE email = 'admin@lifesaver.com' AND password IS NULL;
                     `);
                 } catch (e) {}
-
-                // Auto-seed if database is empty and backup file is present (skip if called from migrate.js)
-                if (!options.skipAutoSeed) {
-                    try {
-                        const userCheck = await db.query('SELECT COUNT(*) as count FROM users');
-                        if (parseInt(userCheck.rows[0].count) === 0) {
-                            const backupPath = path.resolve(__dirname, '../firebase_backup.json');
-                            if (fs.existsSync(backupPath)) {
-                                console.log('🔄 Fresh database detected. Auto-seeding from firebase_backup.json...');
-                                const { runMigration } = require('./migrate');
-                                await runMigration({ skipInit: true });
-                            }
-                        }
-                    } catch (e) {
-                        console.error('Auto-seed check notice:', e.message);
-                    }
-                }
-                console.log('✅ Database schema verified and initialized (raw text passwords)');
             }
+
+            // Auto-seed if database is empty and backup file is present (skip if called from migrate.js)
+            if (!options.skipAutoSeed) {
+                try {
+                    const userCheck = await db.query('SELECT COUNT(*) as count FROM users');
+                    if (parseInt(userCheck.rows[0].count) === 0) {
+                        const backupPath = path.resolve(__dirname, '../firebase_backup.json');
+                        if (fs.existsSync(backupPath)) {
+                            console.log('🔄 Fresh database detected. Auto-seeding from firebase_backup.json...');
+                            const { runMigration } = require('./migrate');
+                            await runMigration({ skipInit: true });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Auto-seed check notice:', e.message);
+                }
+            }
+            console.log('✅ Database schema verified and initialized (raw text passwords)');
             return db;
         } catch (err) {
             console.error('⚠️ Database init error:', err.message);

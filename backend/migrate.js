@@ -52,50 +52,54 @@ async function runMigration(options = {}) {
         ai_learning_dataset: 0
     };
 
-    // 1. Users
-    if (firebaseData.users) {
-        for (const [id, u] of Object.entries(firebaseData.users)) {
-            await db.query(`
-                INSERT INTO users (
-                    id, name, full_name, email, password, phone, dob, blood_group, city, location,
-                    account_type, is_blood_donor, referral_code, referred_by, referral_count, role,
-                    instagram, social_profiles, visibility_settings, donor_privacy, timestamp,
-                    created_at, updated_at
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
-                ON CONFLICT (id) DO UPDATE SET
-                    name = EXCLUDED.name,
-                    email = EXCLUDED.email,
-                    password = EXCLUDED.password,
-                    phone = EXCLUDED.phone,
-                    updated_at = CURRENT_TIMESTAMP;
-            `, [
-                id,
-                u.name || u.fullName || 'Anonymous',
-                u.fullName || u.name || 'Anonymous',
-                u.email || null,
-                u.password || null,
-                u.phone || null,
-                u.dob || null,
-                u.bloodGroup || u.blood_group || null,
-                u.city || u.location || null,
-                u.location || u.city || null,
-                u.accountType || 'public',
-                !!u.isBloodDonor,
-                u.referralCode || null,
-                u.referredBy || null,
-                u.referralCount || 0,
-                u.role || 'user',
-                u.instagram || null,
-                JSON.stringify(u.socialProfiles || {}),
-                JSON.stringify(u.visibilitySettings || {}),
-                JSON.stringify(u.donorPrivacy || {}),
-                parseTimestamp(u.timestamp || u.createdAt),
-                parseDate(u.createdAt),
-                parseDate(u.updatedAt)
-            ]);
-            counts.users++;
+    // Execute all insertions inside a single transaction to eliminate disk sync overhead and keep memory low
+    await db.query('BEGIN');
+    try {
+        // 1. Users
+        if (firebaseData.users) {
+            for (const [id, u] of Object.entries(firebaseData.users)) {
+                await db.query(`
+                    INSERT INTO users (
+                        id, name, full_name, email, password, phone, dob, blood_group, city, location,
+                        account_type, is_blood_donor, referral_code, referred_by, referral_count, role,
+                        instagram, social_profiles, visibility_settings, donor_privacy, timestamp,
+                        created_at, updated_at
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        email = EXCLUDED.email,
+                        password = EXCLUDED.password,
+                        phone = EXCLUDED.phone,
+                        updated_at = CURRENT_TIMESTAMP;
+                `, [
+                    id,
+                    u.name || u.fullName || 'Anonymous',
+                    u.fullName || u.name || 'Anonymous',
+                    u.email || null,
+                    u.password || null,
+                    u.phone || null,
+                    u.dob || null,
+                    u.bloodGroup || u.blood_group || null,
+                    u.city || u.location || null,
+                    u.location || u.city || null,
+                    u.accountType || 'public',
+                    !!u.isBloodDonor,
+                    u.referralCode || null,
+                    u.referredBy || null,
+                    u.referralCount || 0,
+                    u.role || 'user',
+                    u.instagram || null,
+                    JSON.stringify(u.socialProfiles || {}),
+                    JSON.stringify(u.visibilitySettings || {}),
+                    JSON.stringify(u.donorPrivacy || {}),
+                    parseTimestamp(u.timestamp || u.createdAt),
+                    parseDate(u.createdAt),
+                    parseDate(u.updatedAt)
+                ]);
+                counts.users++;
+            }
         }
-    }
+
 
     // 2. Admins
     if (firebaseData.admins) {
@@ -503,6 +507,12 @@ async function runMigration(options = {}) {
             ]);
             counts.contact_requests++;
         }
+    }
+
+        await db.query('COMMIT');
+    } catch (err) {
+        try { await db.query('ROLLBACK'); } catch (rbErr) {}
+        throw err;
     }
 
     console.log('✅ Migration data insertion complete!');
