@@ -17,8 +17,8 @@ server.keepAliveTimeout = 120000;
 server.headersTimeout = 125000;
 
 const allowedOrigins = [
-    'https://lifesaver.us.kg',
-    'https://www.lifesaver.us.kg',
+    'https://lifesaver.qd.je',
+    'https://www.lifesaver.qd.je',
     /\.onrender\.com$/,
     /\.vercel\.app$/,
     /localhost/,
@@ -37,7 +37,7 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.qd.je';
 
 // Dedicated health check endpoints returning {"status":"ok"}
 app.get(['/health', '/api/health'], (req, res) => {

@@ -13,9 +13,9 @@ services:
       - key: JWT_SECRET
         value: lifesaver-secure-database-key-2026-production
       - key: FRONTEND_URL
-        value: https://lifesaver.us.kg
+        value: https://lifesaver.qd.je
       - key: API_URL
-        value: https://lifesaver.us.kg
+        value: https://lifesaver.qd.je
       - key: DATABASE_URL
         sync: false
 

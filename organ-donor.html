@@ -960,7 +960,7 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://life-saver-cyan.vercel.app/';
+                return 'https://lifesaver.qd.je/';
             }
 
             function getCertificateVerifyUrl(id, bg, donorName) {
@@ -1042,7 +1042,7 @@
             const id = document.getElementById("passID").textContent;
             const bg = document.getElementById("passBg").textContent;
             const name = document.getElementById("passName").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             navigator.clipboard.writeText(verifyUrl).then(() => {
                 alert("Organ Certificate Verification Link copied: " + verifyUrl);
@@ -1053,7 +1053,7 @@
             const id = document.getElementById("passID").textContent;
             const bg = document.getElementById("passBg").textContent;
             const name = document.getElementById("passName").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             const msg = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\n` +
                 `Pledger: *${name}*\n` +

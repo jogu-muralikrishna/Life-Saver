@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin-login.html
 
-Sitemap: https://life-saver-care.vercel.app/sitemap.xml
+Sitemap: https://lifesaver.qd.je/sitemap.xml

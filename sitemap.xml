@@ -1,67 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://life-saver-care.vercel.app/index.html</loc>
+    <loc>https://lifesaver.qd.je/index.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.00</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/blood.html</loc>
+    <loc>https://lifesaver.qd.je/blood.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>always</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/emergency.html</loc>
+    <loc>https://lifesaver.qd.je/emergency.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/find-donor.html</loc>
+    <loc>https://lifesaver.qd.je/find-donor.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/message.html</loc>
+    <loc>https://lifesaver.qd.je/message.html</loc>
     <lastmod>2026-09-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/register-donor.html</loc>
+    <loc>https://lifesaver.qd.je/register-donor.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/organ.html</loc>
+    <loc>https://lifesaver.qd.je/organ.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/organ-donor.html</loc>
+    <loc>https://lifesaver.qd.je/organ-donor.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/hospitals.html</loc>
+    <loc>https://lifesaver.qd.je/hospitals.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/ambulance.html</loc>
+    <loc>https://lifesaver.qd.je/ambulance.html</loc>
     <lastmod>2026-09-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://life-saver-care.vercel.app/ai-triage.html</loc>
+    <loc>https://lifesaver.qd.je/ai-triage.html</loc>
     <lastmod>2026-09-25</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.95</priority>

@@ -1113,7 +1113,7 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://life-saver-cyan.vercel.app/';
+                return 'https://lifesaver.qd.je/';
             }
 
             function getCertificateVerifyUrl(id, bloodGrp, donorName) {
@@ -1213,7 +1213,7 @@
             const name = document.getElementById("certName").textContent;
             const bg = document.getElementById("certBg").textContent;
             const id = document.getElementById("certID").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             const msg = `🏆 *Official Voluntary Blood Donor Certificate*\n\n` +
                 `Hero Donor: *${name}*\n` +
