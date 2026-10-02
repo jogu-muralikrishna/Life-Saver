@@ -61,16 +61,6 @@ async function getDB() {
             try { fs.unlinkSync(pidFile); } catch (e) {}
         }
 
-        // Force Vercel Node File Trace (NFT) to bundle PGlite binary assets
-        try {
-            const pgliteDataPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/pglite.data');
-            const pgliteWasmPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/pglite.wasm');
-            const pgliteInitPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/initdb.wasm');
-            if (fs.existsSync(pgliteDataPath)) fs.readFileSync(pgliteDataPath);
-            if (fs.existsSync(pgliteWasmPath)) fs.readFileSync(pgliteWasmPath);
-            if (fs.existsSync(pgliteInitPath)) fs.readFileSync(pgliteInitPath);
-        } catch (e) {}
-
         const { PGlite } = require('@electric-sql/pglite');
         const PGLITE_OPTIONS = {
             relaxedDurability: true,
@@ -81,6 +71,25 @@ async function getDB() {
                 'wal_buffers = 512kB'
             ]
         };
+
+        // Attach pre-bundled fsBundle and wasmModule for seamless Vercel Serverless Function execution
+        try {
+            const bundledData = path.resolve(__dirname, 'assets/pglite.data');
+            const bundledWasm = path.resolve(__dirname, 'assets/pglite.wasm');
+            const bundledInitWasm = path.resolve(__dirname, 'assets/initdb.wasm');
+
+            if (fs.existsSync(bundledData)) {
+                PGLITE_OPTIONS.fsBundle = new Blob([fs.readFileSync(bundledData)]);
+            }
+            if (fs.existsSync(bundledWasm)) {
+                PGLITE_OPTIONS.wasmModule = new WebAssembly.Module(fs.readFileSync(bundledWasm));
+            }
+            if (fs.existsSync(bundledInitWasm)) {
+                PGLITE_OPTIONS.initdbWasmModule = new WebAssembly.Module(fs.readFileSync(bundledInitWasm));
+            }
+        } catch (assetErr) {
+            console.warn('PGlite custom asset loading notice:', assetErr.message);
+        }
 
         let pglite;
         try {
