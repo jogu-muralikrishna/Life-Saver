@@ -1517,6 +1517,18 @@ app.get('/api/search', authenticateToken, async (req, res) => {
 
 // Start Server locally or on Render (skip server.listen on Vercel serverless)
 if (!process.env.VERCEL) {
+    server.on('error', (err) => {
+        console.error('❌ Server startup/runtime error:', err);
+    });
+
+    process.on('uncaughtException', (err) => {
+        console.error('⚠️ Uncaught Exception:', err);
+    });
+
+    process.on('unhandledRejection', (reason) => {
+        console.error('⚠️ Unhandled Rejection:', reason);
+    });
+
     server.listen(PORT, '0.0.0.0', () => {
         console.log(`=======================================================`);
         console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
@@ -1534,3 +1546,4 @@ if (!process.env.VERCEL) {
 }
 
 module.exports = { app, server };
+
