@@ -20,6 +20,9 @@ async function getDB() {
             connectionString: databaseUrl,
             ssl: isSsl ? { rejectUnauthorized: false } : false
         });
+        pool.on('error', (err) => {
+            console.error('PostgreSQL idle client notice:', err.message);
+        });
         isPgPool = true;
         dbInstance = {
             async query(sql, params = []) {

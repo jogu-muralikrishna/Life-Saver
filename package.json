@@ -8,6 +8,9 @@
     "migrate": "node backend/migrate.js",
     "test": "node backend/test_all_features.js"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jogu-muralikrishna/Life-Saver.git"

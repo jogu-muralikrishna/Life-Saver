@@ -6,7 +6,7 @@ services:
     region: oregon
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -17,13 +17,5 @@ services:
       - key: API_URL
         value: https://lifesaver.us.kg
       - key: DATABASE_URL
-        fromDatabase:
-          name: lifesaver-db
-          property: connectionString
+        sync: false
 
-databases:
-  - name: lifesaver-db
-    plan: free
-    region: oregon
-    databaseName: lifesaver
-    user: lifesaver_user

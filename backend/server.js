@@ -42,19 +42,24 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Dedicated health check endpoint for Render and uptime monitors
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date() });
+});
+
+// Serve frontend static files immediately without waiting for DB
+app.use(express.static(path.resolve(__dirname, '..')));
+
 // Ensure database is initialized before handling API requests
-app.use(async (req, res, next) => {
+app.use('/api', async (req, res, next) => {
     try {
         await initDatabase();
         next();
     } catch (err) {
-        console.error('Database connection / init error:', err);
+        console.error('Database connection / init error:', err.message);
         next(err);
     }
 });
-
-// Serve frontend static files
-app.use(express.static(path.resolve(__dirname, '..')));
 
 // Socket.io Real-Time Hub
 io.on('connection', (socket) => {
@@ -1500,19 +1505,22 @@ app.get('/api/search', authenticateToken, async (req, res) => {
     }
 });
 
-// Start Server locally or in container (skip server.listen on Vercel serverless)
+// Start Server locally or on Render (skip server.listen on Vercel serverless)
 if (!process.env.VERCEL) {
-    initDatabase().then(() => {
-        server.listen(PORT, '0.0.0.0', () => {
-            console.log(`=======================================================`);
-            console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
-            console.log(`💾 PostgreSQL Connected as Primary Source of Truth`);
-            console.log(`⚡ Real-Time Socket.IO Active on port ${PORT}`);
-            console.log(`=======================================================`);
-        });
-    }).catch(err => {
-        console.error('Failed to start server:', err);
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`=======================================================`);
+        console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
+        console.log(`⚡ Real-Time Socket.IO Active on port ${PORT}`);
+        console.log(`=======================================================`);
     });
+
+    initDatabase()
+        .then(() => {
+            console.log(`💾 PostgreSQL Connected and Database Schema Ready`);
+        })
+        .catch(err => {
+            console.error('⚠️ Database connection notice during startup:', err.message);
+        });
 }
 
 module.exports = { app, server };
