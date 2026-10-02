@@ -61,6 +61,16 @@ async function getDB() {
             try { fs.unlinkSync(pidFile); } catch (e) {}
         }
 
+        // Force Vercel Node File Trace (NFT) to bundle PGlite binary assets
+        try {
+            const pgliteDataPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/pglite.data');
+            const pgliteWasmPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/pglite.wasm');
+            const pgliteInitPath = path.resolve(__dirname, '../node_modules/@electric-sql/pglite/dist/initdb.wasm');
+            if (fs.existsSync(pgliteDataPath)) fs.readFileSync(pgliteDataPath);
+            if (fs.existsSync(pgliteWasmPath)) fs.readFileSync(pgliteWasmPath);
+            if (fs.existsSync(pgliteInitPath)) fs.readFileSync(pgliteInitPath);
+        } catch (e) {}
+
         const { PGlite } = require('@electric-sql/pglite');
         const PGLITE_OPTIONS = {
             relaxedDurability: true,

@@ -4,10 +4,6 @@
   "functions": {
     "api/*.js": {
       "includeFiles": [
-        "node_modules/@electric-sql/pglite/dist/pglite.data",
-        "node_modules/@electric-sql/pglite/dist/pglite.wasm",
-        "node_modules/@electric-sql/pglite/dist/initdb.wasm",
-        "node_modules/@electric-sql/pglite/dist/**",
         "backend/schema.sql",
         "firebase_backup.json"
       ],
