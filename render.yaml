@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: lifesaver-care
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: lifesaver-secure-database-key-2026-production
+      - key: FRONTEND_URL
+        value: https://lifesaver.us.kg
+      - key: API_URL
+        value: https://lifesaver.us.kg
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lifesaver-db
+          property: connectionString
+
+databases:
+  - name: lifesaver-db
+    plan: free
+    region: oregon
+    databaseName: lifesaver
+    user: lifesaver_user

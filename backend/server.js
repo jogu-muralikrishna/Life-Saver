@@ -11,9 +11,20 @@ const { getDB, initDatabase } = require('./db');
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = [
+    'https://lifesaver.us.kg',
+    'https://www.lifesaver.us.kg',
+    /\.onrender\.com$/,
+    /\.vercel\.app$/,
+    /localhost/,
+    /127\.0\.0\.1/
+];
+if (process.env.RENDER_EXTERNAL_URL) allowedOrigins.push(process.env.RENDER_EXTERNAL_URL);
+if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
+
 const io = new Server(server, {
     cors: {
-        origin: ['https://lifesaver.us.kg', 'https://www.lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
+        origin: allowedOrigins,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true
     }
@@ -24,7 +35,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
 
 app.use(cors({
-    origin: ['https://lifesaver.us.kg', 'https://www.lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 }));
@@ -1492,9 +1503,9 @@ app.get('/api/search', authenticateToken, async (req, res) => {
 // Start Server locally or in container (skip server.listen on Vercel serverless)
 if (!process.env.VERCEL) {
     initDatabase().then(() => {
-        server.listen(PORT, () => {
+        server.listen(PORT, '0.0.0.0', () => {
             console.log(`=======================================================`);
-            console.log(`🩸 LifeSaver-Care Server running on http://localhost:${PORT}`);
+            console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
             console.log(`💾 PostgreSQL Connected as Primary Source of Truth`);
             console.log(`⚡ Real-Time Socket.IO Active on port ${PORT}`);
             console.log(`=======================================================`);

@@ -14,7 +14,8 @@ async function getDB() {
 
     if (databaseUrl && !databaseUrl.includes('placeholder')) {
         const isLocal = databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1');
-        const isSsl = process.env.DB_SSL === 'true' || (!isLocal && process.env.DB_SSL !== 'false');
+        const isRenderInternal = databaseUrl.includes('dpg-') && !databaseUrl.includes('.render.com');
+        const isSsl = process.env.DB_SSL === 'true' || (!isLocal && !isRenderInternal && process.env.DB_SSL !== 'false');
         const pool = new Pool({
             connectionString: databaseUrl,
             ssl: isSsl ? { rejectUnauthorized: false } : false
