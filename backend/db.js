@@ -48,31 +48,51 @@ async function getDB() {
         };
         console.log('✅ Connected to external PostgreSQL via DATABASE_URL');
     } else {
-        const dataDir = path.resolve(__dirname, '../data/postgres');
-        fs.mkdirSync(dataDir, { recursive: true });
-
-        const pidFile = path.join(dataDir, 'postmaster.pid');
-        if (fs.existsSync(pidFile)) {
-            try { fs.unlinkSync(pidFile); } catch (e) {}
-        }
+        const isRender = process.env.RENDER === 'true' || !!process.env.RENDER_SERVICE_ID;
+        const defaultParams = ['--single','-F','-O','-j','-c','search_path=public','-c','exit_on_error=false','-c','log_checkpoints=false','-c','max_worker_processes=0','-c','max_parallel_workers=0','-c','max_parallel_workers_per_gather=0','-c','io_method=sync','-c','max_parallel_maintenance_workers=0'];
 
         const { PGlite } = require('@electric-sql/pglite');
         let pglite;
-        try {
-            pglite = new PGlite(dataDir);
+
+        // On Render free tier (ephemeral container, strict 512MB RAM limit), use in-memory PGlite (<380MB RAM)
+        // to prevent Linux kernel OOM-killer (SIGKILL) and file locking issues.
+        // For local development or environments with persistent storage, use dataDir with reduced buffers.
+        if (isRender || process.env.PGLITE_IN_MEMORY === 'true') {
+            pglite = new PGlite();
             await pglite.waitReady;
-        } catch (err) {
-            console.warn('⚠️ PGlite directory initialization warning, resetting clean database store:', err.message);
-            try {
-                fs.rmSync(dataDir, { recursive: true, force: true });
-                fs.mkdirSync(dataDir, { recursive: true });
-                pglite = new PGlite(dataDir);
-                await pglite.waitReady;
-            } catch (err2) {
-                console.warn('⚠️ Falling back to in-memory PostgreSQL engine:', err2.message);
-                pglite = new PGlite();
-                await pglite.waitReady;
+            console.log('✅ Initialized native PostgreSQL engine (Render RAM-optimized <380MB)');
+        } else {
+            const dataDir = path.resolve(__dirname, '../data/postgres');
+            fs.mkdirSync(dataDir, { recursive: true });
+
+            const pidFile = path.join(dataDir, 'postmaster.pid');
+            if (fs.existsSync(pidFile)) {
+                try { fs.unlinkSync(pidFile); } catch (e) {}
             }
+
+            try {
+                pglite = new PGlite(dataDir, {
+                    relaxedDurability: true,
+                    startParams: [...defaultParams, '-c', 'shared_buffers=16MB', '-c', 'work_mem=1MB']
+                });
+                await pglite.waitReady;
+            } catch (err) {
+                console.warn('⚠️ PGlite directory initialization warning, resetting clean database store:', err.message);
+                try {
+                    fs.rmSync(dataDir, { recursive: true, force: true });
+                    fs.mkdirSync(dataDir, { recursive: true });
+                    pglite = new PGlite(dataDir, {
+                        relaxedDurability: true,
+                        startParams: [...defaultParams, '-c', 'shared_buffers=16MB', '-c', 'work_mem=1MB']
+                    });
+                    await pglite.waitReady;
+                } catch (err2) {
+                    console.warn('⚠️ Falling back to in-memory PostgreSQL engine:', err2.message);
+                    pglite = new PGlite();
+                    await pglite.waitReady;
+                }
+            }
+            console.log('✅ Initialized native PostgreSQL engine at', dataDir);
         }
         isPgPool = false;
 
@@ -96,7 +116,6 @@ async function getDB() {
                 });
             }
         };
-        console.log('✅ Initialized native PostgreSQL engine at', dataDir);
     }
 
     return dbInstance;
