@@ -157,6 +157,9 @@ async function initDatabase(options = {}) {
                 try {
                     await db.exec(`
                         ALTER TABLE admins ADD COLUMN IF NOT EXISTS password VARCHAR(255) DEFAULT 'admin123';
+                        INSERT INTO admins (id, email, name, role, is_admin, password)
+                        VALUES ('b2c54a2lPSR4l7CYFt8s1fb7Qwi1', 'admin@lifesaver.com', 'Super Admin', 'SUPER_ADMIN', true, 'admin123')
+                        ON CONFLICT (id) DO NOTHING;
                         UPDATE admins SET password = 'admin123' WHERE password IS NULL;
                         UPDATE users SET password = 'admin123' WHERE email = 'admin@lifesaver.com' AND password IS NULL;
                     `);
@@ -172,7 +175,11 @@ async function initDatabase(options = {}) {
                         if (fs.existsSync(backupPath)) {
                             console.log('🔄 Fresh database detected. Auto-seeding from firebase_backup.json...');
                             const { runMigration } = require('./migrate');
-                            await runMigration({ skipInit: true });
+                            if (process.env.VERCEL && !isPgPool) {
+                                runMigration({ skipInit: true }).catch(e => console.error('Serverless seed notice:', e.message));
+                            } else {
+                                await runMigration({ skipInit: true });
+                            }
                         }
                     }
                 } catch (e) {
