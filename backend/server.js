@@ -11,6 +11,11 @@ const { getDB, initDatabase } = require('./db');
 
 const app = express();
 const server = http.createServer(app);
+
+// Keep-alive timeouts for Render reverse proxy compatibility
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 125000;
+
 const allowedOrigins = [
     'https://lifesaver.us.kg',
     'https://www.lifesaver.us.kg',
@@ -30,7 +35,7 @@ const io = new Server(server, {
     }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
 
@@ -42,9 +47,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Dedicated health check endpoint for Render and uptime monitors
+// Dedicated health check endpoint for Render returning {"status":"ok"}
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'healthy', uptime: process.uptime(), timestamp: new Date() });
+    res.status(200).json({ status: 'ok' });
+});
+
+// Explicit root route returning the LifeSaver application
+app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../index.html'));
 });
 
 // Serve frontend static files immediately without waiting for DB

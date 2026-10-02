@@ -1,6 +1,8 @@
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 
+const TEST_PORT = process.env.PORT || 10000;
+
 function request(method, path, body = null, headers = {}) {
     return new Promise((resolve, reject) => {
         const payload = body ? JSON.stringify(body) : null;
@@ -11,7 +13,7 @@ function request(method, path, body = null, headers = {}) {
         }
         const req = http.request({
             hostname: 'localhost',
-            port: 3000,
+            port: TEST_PORT,
             path,
             method,
             headers: reqHeaders
@@ -47,6 +49,16 @@ async function runTestSuite() {
             failedTests++;
         }
     }
+
+    // -------------------------------------------------------------
+    // TEST GROUP 0: Render Health Check & Root Application
+    // -------------------------------------------------------------
+    console.log('\n--- 0. RENDER HEALTH CHECK & APPLICATION ROOT ---');
+    const healthRes = await request('GET', '/health');
+    assert(healthRes.status === 200 && healthRes.data && healthRes.data.status === 'ok', 'GET /health returns 200 and {"status":"ok"}');
+
+    const rootRes = await request('GET', '/');
+    assert(rootRes.status === 200 && typeof rootRes.data === 'string' && rootRes.data.includes('LifeSaver'), 'GET / returns 200 and the LifeSaver application');
 
     // -------------------------------------------------------------
     // TEST GROUP 1 & 2: Authentication & Database Verification
@@ -282,7 +294,7 @@ async function runTestSuite() {
     console.log('\n--- 4. REAL-TIME SOCKET.IO NOTIFICATION TEST ---');
 
     await new Promise((resolve) => {
-        const clientSocket = ioClient('http://localhost:3000');
+        const clientSocket = ioClient(`http://localhost:${TEST_PORT}`);
         let received = false;
 
         clientSocket.on('connect', async () => {
