@@ -39,6 +39,20 @@ const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
 
+// Dedicated health check endpoints for Render returning {"status":"ok"}
+// Placed before body parsers and heavy middleware for immediate sub-millisecond response
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+app.head('/health', (req, res) => {
+    res.status(200).end();
+});
+
+// Explicit root route returning the LifeSaver application
+app.get('/', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../index.html'));
+});
+
 app.use(cors({
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -46,16 +60,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Dedicated health check endpoint for Render returning {"status":"ok"}
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
-
-// Explicit root route returning the LifeSaver application
-app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../index.html'));
-});
 
 // Serve frontend static files immediately without waiting for DB
 app.use(express.static(path.resolve(__dirname, '..')));
@@ -1529,21 +1533,32 @@ if (!process.env.VERCEL) {
         console.error('⚠️ Unhandled Rejection:', reason);
     });
 
+    process.on('SIGTERM', () => {
+        console.log('🛑 Received SIGTERM from Render, closing server gracefully...');
+        server.close(() => {
+            process.exit(0);
+        });
+    });
+
     server.listen(PORT, '0.0.0.0', () => {
         console.log(`=======================================================`);
         console.log(`🩸 LifeSaver-Care Server running on port ${PORT}`);
         console.log(`⚡ Real-Time Socket.IO Active on port ${PORT}`);
         console.log(`=======================================================`);
-    });
 
-    initDatabase()
-        .then(() => {
-            console.log(`💾 PostgreSQL Connected and Database Schema Ready`);
-        })
-        .catch(err => {
-            console.error('⚠️ Database connection notice during startup:', err.message);
+        // Defer database initialization so HTTP server responds to Render health checks immediately
+        setImmediate(() => {
+            initDatabase()
+                .then(() => {
+                    console.log(`💾 PostgreSQL Connected and Database Schema Ready`);
+                })
+                .catch(err => {
+                    console.error('⚠️ Database connection notice during startup:', err.message);
+                });
         });
+    });
 }
 
 module.exports = { app, server };
+
 

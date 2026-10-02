@@ -57,7 +57,23 @@ async function getDB() {
         }
 
         const { PGlite } = require('@electric-sql/pglite');
-        const pglite = new PGlite(dataDir);
+        let pglite;
+        try {
+            pglite = new PGlite(dataDir);
+            await pglite.waitReady;
+        } catch (err) {
+            console.warn('⚠️ PGlite directory initialization warning, resetting clean database store:', err.message);
+            try {
+                fs.rmSync(dataDir, { recursive: true, force: true });
+                fs.mkdirSync(dataDir, { recursive: true });
+                pglite = new PGlite(dataDir);
+                await pglite.waitReady;
+            } catch (err2) {
+                console.warn('⚠️ Falling back to in-memory PostgreSQL engine:', err2.message);
+                pglite = new PGlite();
+                await pglite.waitReady;
+            }
+        }
         isPgPool = false;
 
         dbInstance = {
@@ -89,38 +105,45 @@ async function getDB() {
 async function initDatabase(options = {}) {
     if (initPromise) return initPromise;
     initPromise = (async () => {
-        const db = await getDB();
-        const schemaPath = path.resolve(__dirname, 'schema.sql');
-        if (fs.existsSync(schemaPath)) {
-            const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-            await db.exec(schemaSql);
-            try {
-                await db.exec(`
-                    ALTER TABLE admins ADD COLUMN IF NOT EXISTS password VARCHAR(255) DEFAULT 'admin123';
-                    UPDATE admins SET password = 'admin123' WHERE password IS NULL;
-                    UPDATE users SET password = 'admin123' WHERE email = 'admin@lifesaver.com' AND password IS NULL;
-                `);
-            } catch (e) {}
-
-            // Auto-seed if database is empty and backup file is present (skip if called from migrate.js)
-            if (!options.skipAutoSeed) {
+        try {
+            const db = await getDB();
+            const schemaPath = path.resolve(__dirname, 'schema.sql');
+            if (fs.existsSync(schemaPath)) {
+                const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+                await db.exec(schemaSql);
                 try {
-                    const userCheck = await db.query('SELECT COUNT(*) as count FROM users');
-                    if (parseInt(userCheck.rows[0].count) === 0) {
-                        const backupPath = path.resolve(__dirname, '../firebase_backup.json');
-                        if (fs.existsSync(backupPath)) {
-                            console.log('🔄 Fresh database detected. Auto-seeding from firebase_backup.json...');
-                            const { runMigration } = require('./migrate');
-                            await runMigration({ skipInit: true });
+                    await db.exec(`
+                        ALTER TABLE admins ADD COLUMN IF NOT EXISTS password VARCHAR(255) DEFAULT 'admin123';
+                        UPDATE admins SET password = 'admin123' WHERE password IS NULL;
+                        UPDATE users SET password = 'admin123' WHERE email = 'admin@lifesaver.com' AND password IS NULL;
+                    `);
+                } catch (e) {}
+
+                // Auto-seed if database is empty and backup file is present (skip if called from migrate.js)
+                if (!options.skipAutoSeed) {
+                    try {
+                        const userCheck = await db.query('SELECT COUNT(*) as count FROM users');
+                        if (parseInt(userCheck.rows[0].count) === 0) {
+                            const backupPath = path.resolve(__dirname, '../firebase_backup.json');
+                            if (fs.existsSync(backupPath)) {
+                                console.log('🔄 Fresh database detected. Auto-seeding from firebase_backup.json...');
+                                const { runMigration } = require('./migrate');
+                                await runMigration({ skipInit: true });
+                            }
                         }
+                    } catch (e) {
+                        console.error('Auto-seed check notice:', e.message);
                     }
-                } catch (e) {
-                    console.error('Auto-seed check notice:', e.message);
                 }
+                console.log('✅ Database schema verified and initialized (raw text passwords)');
             }
-            console.log('✅ Database schema verified and initialized (raw text passwords)');
+            return db;
+        } catch (err) {
+            console.error('⚠️ Database init error:', err.message);
+            // Allow retry if needed
+            initPromise = null;
+            return await getDB();
         }
-        return db;
     })();
     return initPromise;
 }

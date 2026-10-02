@@ -5,13 +5,10 @@
  */
 
 // Base API URL:
-// Automatically adapts to custom domains (https://yourdomain.com) in production,
-// Express port 3000, or local development servers.
+// Automatically adapts to whatever domain or port the application is hosted on (Render, Vercel, Custom Domain, or local)
 const API_BASE = (typeof window !== 'undefined' && window.__API_URL__)
     ? window.__API_URL__
-    : ((window.location.port === '3000' || window.location.port === '' || !window.location.port)
-        ? window.location.origin
-        : (window.location.protocol + '//' + window.location.hostname + ':3000'));
+    : (typeof window !== 'undefined' ? window.location.origin : '');
 
 // Local in-memory cache of database nodes
 let dbCache = {
