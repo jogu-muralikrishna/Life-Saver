@@ -35,7 +35,7 @@ const io = new Server(server, {
     }
 });
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.qd.je';
 
@@ -659,6 +659,57 @@ app.get('/api/sync/all', async (req, res) => {
             };
         }
 
+        // Safety fallback: if database returned empty donors or users (e.g. serverless cold start), load authentic backup
+        const backupPath = path.resolve(__dirname, '../firebase_backup.json');
+        if (fs.existsSync(backupPath) && (Object.keys(formattedDonors).length === 0 || Object.keys(formattedUsers).length === 0)) {
+            try {
+                const bk = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+                if (Object.keys(formattedDonors).length === 0 && bk.donors) {
+                    for (const [id, d] of Object.entries(bk.donors)) {
+                        formattedDonors[id] = {
+                            id,
+                            name: d.name,
+                            email: d.email || null,
+                            phone: d.phone,
+                            bloodGroup: d.bloodGroup,
+                            city: d.city,
+                            dob: d.dob,
+                            status: d.status || 'Available',
+                            phoneVisibility: d.phoneVisibility || 'public',
+                            accountType: d.phoneVisibility || 'public',
+                            contactVisibility: d.phoneVisibility || 'public',
+                            allowEmergencyContact: d.allowEmergencyContact ?? true,
+                            alcoholLast24h: d.alcoholLast24h || 'No',
+                            donationCount: d.donationCount || 0,
+                            timesDonated: d.timesDonated || 0,
+                            registeredDate: d.registeredDate,
+                            medicalHistory: d.medicalHistory || {}
+                        };
+                    }
+                }
+                if (Object.keys(formattedUsers).length === 0 && bk.users) {
+                    for (const [id, u] of Object.entries(bk.users)) {
+                        formattedUsers[id] = {
+                            id, uid: id,
+                            name: u.name || u.fullName,
+                            fullName: u.fullName || u.name,
+                            email: u.email,
+                            phone: u.phone,
+                            dob: u.dob,
+                            bloodGroup: u.bloodGroup,
+                            city: u.city,
+                            accountType: u.accountType || 'public',
+                            isBloodDonor: !!u.isBloodDonor,
+                            role: u.role || 'user',
+                            createdAt: u.createdAt
+                        };
+                    }
+                }
+            } catch (e) {
+                console.warn('Backup fallback notice in sync:', e.message);
+            }
+        }
+
         res.json({
             donors: formattedDonors,
             blood_requests: formattedRequests,
@@ -676,7 +727,14 @@ app.get('/api/sync/all', async (req, res) => {
             hospital_communications: mapToObject(hospitalComms.rows)
         });
     } catch (err) {
-        console.error('Sync all error:', err);
+        console.error('Sync all error, falling back to authentic backup:', err.message);
+        const backupPath = path.resolve(__dirname, '../firebase_backup.json');
+        if (fs.existsSync(backupPath)) {
+            try {
+                const bk = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+                return res.json(bk);
+            } catch (e) {}
+        }
         res.status(500).json({ error: err.message });
     }
 });

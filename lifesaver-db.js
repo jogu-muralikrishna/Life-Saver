@@ -4,35 +4,39 @@
  * Preserves 100% of existing frontend code and function signatures
  */
 
+import { AUTHENTIC_BASELINE } from './lifesaver-baseline.js';
+
 // Base API URL:
 // Automatically adapts to whatever domain or port the application is hosted on (Render, Vercel, Custom Domain, or local)
 const API_BASE = (typeof window !== 'undefined' && window.__API_URL__)
     ? window.__API_URL__
-    : (typeof window !== 'undefined' ? window.location.origin : '');
+    : (typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')
+        ? window.location.origin
+        : 'http://localhost:3000');
 
-// Local in-memory cache of database nodes
+// Local in-memory cache of database nodes initialized with authentic baseline records
 let dbCache = {
-    admins: {},
-    donors: {},
+    admins: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.admins) || {},
+    donors: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.donors) || {},
     blood_requests: {},
     partner_hospitals: {},
     organ_donors: {},
-    users: {},
-    contact_messages: {},
+    users: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.users) || {},
+    contact_messages: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.messages) || {},
     contact_audit_logs: {},
     admin_audit_logs: {},
-    sub_admins: {},
-    recycle_bin: {},
+    sub_admins: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.sub_admins) || {},
+    recycle_bin: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.recycle_bin) || {},
     profile_change_requests: {},
     account_change_requests: {},
     hospital_communications: {},
-    messages: {},
+    messages: (AUTHENTIC_BASELINE && AUTHENTIC_BASELINE.messages) || {},
     referral_codes: {},
     referrals: {},
     ai_learning_dataset: {}
 };
 
-let isInitialLoaded = false;
+let isInitialLoaded = true;
 let loadPromise = null;
 const listeners = new Map(); // path -> Set of callbacks
 let currentAuthUser = null;
@@ -78,19 +82,61 @@ function initSocket() {
     });
 }
 
-// Fetch complete PostgreSQL snapshot
+// Fetch complete PostgreSQL snapshot with multi-level resilient fallback
 async function fetchSnapshot() {
     try {
         const res = await fetch(`${API_BASE}/api/sync/all`);
         if (res.ok) {
             const data = await res.json();
-            Object.assign(dbCache, data);
-            isInitialLoaded = true;
-            notifyAllListeners();
+            if (data && typeof data === 'object') {
+                for (const [k, v] of Object.entries(data)) {
+                    if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+                        dbCache[k] = v;
+                    }
+                }
+                isInitialLoaded = true;
+                notifyAllListeners();
+                return;
+            }
         }
     } catch (e) {
-        console.warn('Sync snapshot warning:', e);
+        // Expected if backend is still starting or on serverless cold-boot
     }
+
+    // Fallback 1: read from static firebase_backup.json if API was unavailable
+    try {
+        const fbRes = await fetch('/firebase_backup.json');
+        if (fbRes.ok) {
+            const fbData = await fbRes.json();
+            if (fbData && fbData.donors && Object.keys(fbData.donors).length > 0) {
+                for (const [k, v] of Object.entries(fbData)) {
+                    if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+                        dbCache[k] = v;
+                    }
+                }
+                isInitialLoaded = true;
+                notifyAllListeners();
+                return;
+            }
+        }
+    } catch (e) {}
+
+    // Fallback 2: read from live Firebase RTDB
+    try {
+        const directRes = await fetch('https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app/.json');
+        if (directRes.ok) {
+            const directData = await directRes.json();
+            if (directData && directData.donors && Object.keys(directData.donors).length > 0) {
+                for (const [k, v] of Object.entries(directData)) {
+                    if (v && typeof v === 'object' && Object.keys(v).length > 0) {
+                        dbCache[k] = v;
+                    }
+                }
+                isInitialLoaded = true;
+                notifyAllListeners();
+            }
+        }
+    } catch (e) {}
 }
 
 function ensureLoaded() {

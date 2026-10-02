@@ -1,6 +1,12 @@
 node_modules/
 .env
-.env.local
-.env.production
+.env.*
 *.log
 data/
+*.pem
+*.key
+*.cert
+service-account*.json
+firebase-adminsdk*.json
+.DS_Store
+Thumbs.db

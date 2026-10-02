@@ -1,7 +1,7 @@
 const http = require('http');
 const { io: ioClient } = require('socket.io-client');
 
-const TEST_PORT = process.env.PORT || 10000;
+const TEST_PORT = process.env.PORT || 3000;
 
 function request(method, path, body = null, headers = {}) {
     return new Promise((resolve, reject) => {
@@ -344,6 +344,9 @@ async function runTestSuite() {
 
     // Clean up temporary test records via API
     await request('DELETE', `/api/blood-requests/${testReqId}`, null, { 'Authorization': `Bearer ${superToken}` });
+    const { getDB } = require('./db');
+    const cleanupDb = await getDB();
+    await cleanupDb.query("DELETE FROM blood_donors WHERE name LIKE '%Test Donor%'");
 
     console.log('\n===============================================================');
     console.log(`🏁 TEST RESULTS: ${passedTests} PASSED, ${failedTests} FAILED`);

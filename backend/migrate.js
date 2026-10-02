@@ -188,6 +188,35 @@ async function runMigration(options = {}) {
                 new Date()
             ]);
             counts.blood_donors++;
+
+            // Ensure authentic donor is also cataloged in users member directory
+            await db.query(`
+                INSERT INTO users (
+                    id, name, full_name, email, password, phone, dob, blood_group, city, location,
+                    account_type, is_blood_donor, role, timestamp, created_at, updated_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true, 'user', $12, $13, $14)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    blood_group = EXCLUDED.blood_group,
+                    phone = EXCLUDED.phone,
+                    city = EXCLUDED.city,
+                    is_blood_donor = true;
+            `, [
+                id,
+                d.name || 'Anonymous',
+                d.name || 'Anonymous',
+                d.email || null,
+                null,
+                d.phone || d.mobileNumber || null,
+                d.dob || null,
+                d.bloodGroup || 'O+',
+                d.city || null,
+                d.city || null,
+                d.phoneVisibility || 'public',
+                parseTimestamp(d.registeredDate || d.createdAt),
+                parseDate(d.registeredDate || d.createdAt),
+                parseDate(d.updatedAt || d.registeredDate || d.createdAt)
+            ]);
         }
     }
 
