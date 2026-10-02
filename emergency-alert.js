@@ -15,25 +15,41 @@
  * - Single controlled listener, zero duplicate listeners
  */
 
-import { initializeApp, getDatabase, ref, onValue } from "./lifesaver-db.js";
+// Node.js Execution Guard: If Render or CLI executes `node emergency-alert.js`, seamlessly launch the real production server!
+if (typeof window === 'undefined') {
+    module.exports = require('./backend/server.js');
+} else {
+    (async function initEmergencyAlertModule() {
+        let dbSdk = window.LifeSaverDB;
+        if (!dbSdk) {
+            try {
+                dbSdk = await import('./lifesaver-db.js');
+            } catch (e) {
+                dbSdk = window.LifeSaverDB || {};
+            }
+        }
+        const initializeApp = dbSdk.initializeApp;
+        const getDatabase = dbSdk.getDatabase;
+        const ref = dbSdk.ref;
+        const onValue = dbSdk.onValue;
 
-const firebaseConfig = {
-    apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-    authDomain: "life-saver-be5cf.firebaseapp.com",
-    databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "life-saver-be5cf",
-    storageBucket: "life-saver-be5cf.firebasestorage.app",
-    messagingSenderId: "549675407162",
-    appId: "1:549675407162:web:ba3c8878834cb4123ba203"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
 
-let app;
-try {
-    app = initializeApp(firebaseConfig);
-} catch (e) {
-    app = initializeApp(firebaseConfig, "emergency-alert-system");
-}
-const db = getDatabase(app);
+        let app;
+        try {
+            app = initializeApp(firebaseConfig);
+        } catch (e) {
+            app = initializeApp(firebaseConfig, "emergency-alert-system");
+        }
+        const db = getDatabase(app);
 
 // Guarded Phone Masking Helper
 function maskGuardedPhone(phone) {
@@ -476,3 +492,6 @@ if (document.readyState === 'loading') {
 } else {
     initEmergencyAlertSystem();
 }
+    })();
+}
+
