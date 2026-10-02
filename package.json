@@ -2,7 +2,7 @@
   "name": "life-saver-main",
   "version": "1.0.0",
   "description": "",
-  "main": "emergency-alert.js",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "migrate": "node backend/migrate.js",
