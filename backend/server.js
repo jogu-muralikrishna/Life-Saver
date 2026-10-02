@@ -39,19 +39,25 @@ const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
 
-// Dedicated health check endpoints for Render returning {"status":"ok"}
-// Placed before body parsers and heavy middleware for immediate sub-millisecond response
-app.get('/health', (req, res) => {
+// Dedicated health check endpoints returning {"status":"ok"}
+app.get(['/health', '/api/health'], (req, res) => {
     res.status(200).json({ status: 'ok' });
 });
-app.head('/health', (req, res) => {
+app.head(['/health', '/api/health'], (req, res) => {
     res.status(200).end();
 });
 
-// Explicit root route returning the LifeSaver application
-app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../index.html'));
+// Root API info endpoint
+app.get(['/api', '/api/'], (req, res) => {
+    res.status(200).json({ status: 'ok', service: 'LifeSaver-Care Backend API', version: '1.0.0' });
 });
+
+// Explicit root route returning the LifeSaver application (for local/standalone server)
+if (!process.env.VERCEL) {
+    app.get('/', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../index.html'));
+    });
+}
 
 app.use(cors({
     origin: allowedOrigins,
@@ -61,8 +67,18 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve frontend static files immediately without waiting for DB
-app.use(express.static(path.resolve(__dirname, '..')));
+// Serve frontend static files only in standalone server mode (Vercel CDN handles static assets natively)
+if (!process.env.VERCEL) {
+    app.use(express.static(path.resolve(__dirname, '..'), { redirect: false }));
+}
+
+// Serverless URL normalization: ensure routes match whether /api prefix is preserved or stripped
+app.use((req, res, next) => {
+    if (process.env.VERCEL && !req.url.startsWith('/api') && !req.url.startsWith('/health')) {
+        req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
+    }
+    next();
+});
 
 // Ensure database is initialized before handling API requests
 app.use('/api', async (req, res, next) => {

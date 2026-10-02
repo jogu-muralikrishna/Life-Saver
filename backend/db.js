@@ -48,8 +48,13 @@ async function getDB() {
         };
         console.log('✅ Connected to external PostgreSQL via DATABASE_URL');
     } else {
-        const dataDir = path.resolve(__dirname, '../data/postgres');
-        fs.mkdirSync(dataDir, { recursive: true });
+        const isVercel = !!process.env.VERCEL;
+        const dataDir = isVercel ? '/tmp/postgres' : path.resolve(__dirname, '../data/postgres');
+        try {
+            fs.mkdirSync(dataDir, { recursive: true });
+        } catch (e) {
+            console.warn('PostgreSQL data directory creation notice:', e.message);
+        }
 
         const pidFile = path.join(dataDir, 'postmaster.pid');
         if (fs.existsSync(pidFile)) {
