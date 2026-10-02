@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ['https://lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
+        origin: ['https://lifesaver.us.kg', 'https://www.lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
         credentials: true
     }
@@ -24,7 +24,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'lifesaver-secure-database-key-2026
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://lifesaver.us.kg';
 
 app.use(cors({
-    origin: ['https://lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
+    origin: ['https://lifesaver.us.kg', 'https://www.lifesaver.us.kg', /\.vercel\.app$/, /localhost/, /127\.0\.0\.1/],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true
 }));
