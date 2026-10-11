@@ -172,25 +172,34 @@
             };
 
             // Early check for mode & redirects
-            try {
-                const initParams = new URLSearchParams(window.location.search);
-                const reqMode = initParams.get('mode');
-                if (reqMode === 'register' || reqMode === 'signup') {
-                    window.addEventListener('DOMContentLoaded', () => window.setAuthMode('register'));
-                }
-                const redTarget = initParams.get('redirect') || '';
-                if (redTarget === 'post-blood') {
-                    window.addEventListener('DOMContentLoaded', () => {
+            window.syncAuthModeFromUrl = function() {
+                try {
+                    const initParams = new URLSearchParams(window.location.search);
+                    const reqMode = (initParams.get('mode') || initParams.get('tab') || '').toLowerCase();
+                    const reqHash = (window.location.hash || '').toLowerCase();
+                    if (reqMode === 'register' || reqMode === 'signup' || reqMode === 'create' || reqHash === '#register' || reqHash === '#signup') {
+                        window.setAuthMode('register');
+                    } else if (reqMode === 'login' || reqMode === 'signin' || reqHash === '#login' || reqHash === '#signin') {
+                        window.setAuthMode('login');
+                    }
+
+                    const redTarget = initParams.get('redirect') || '';
+                    if (redTarget === 'post-blood') {
                         const notice = document.getElementById('postBloodLoginNotice');
                         if (notice) notice.classList.remove('hidden');
-                    });
-                } else if (redTarget.startsWith('message.html') || redTarget.includes('message.html')) {
-                    window.addEventListener('DOMContentLoaded', () => {
+                    } else if (redTarget.startsWith('message.html') || redTarget.includes('message.html')) {
                         const notice = document.getElementById('chatLoginNotice');
                         if (notice) notice.classList.remove('hidden');
-                    });
-                }
-            } catch(e) {}
+                    }
+                } catch(e) {}
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', window.syncAuthModeFromUrl);
+            } else {
+                window.syncAuthModeFromUrl();
+            }
+            window.addEventListener('load', window.syncAuthModeFromUrl);
         </script>
         <div class="flex rounded-xl bg-slate-100 dark:bg-slate-950 p-1 mb-6 border border-slate-200 dark:border-slate-800 text-xs font-bold">
             <button type="button" id="tabSignin" onclick="window.setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm transition">
@@ -1591,6 +1600,10 @@
             }
         };
 
+        if (typeof window.syncAuthModeFromUrl === 'function') {
+            window.syncAuthModeFromUrl();
+        }
+
         const tabSignin = document.getElementById('tabSignin');
         const tabSignup = document.getElementById('tabSignup');
         if (tabSignin) tabSignin.onclick = (e) => { e.preventDefault(); window.setAuthMode('login'); };
@@ -2085,7 +2098,27 @@
         }
 
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reqMode = (urlParams.get('mode') || urlParams.get('tab') || '').toLowerCase();
+            const reqHash = (window.location.hash || '').toLowerCase();
+            const isExplicitRegister = (reqMode === 'register' || reqMode === 'signup' || reqMode === 'create' || reqHash === '#register');
+            const isExplicitLogin = (reqMode === 'login' || reqMode === 'signin' || reqHash === '#login');
+
+            if (isExplicitRegister) {
+                const authCard = document.getElementById("authCard");
+                const dashboardContainer = document.getElementById("dashboardContainer");
+                if (authCard) authCard.classList.remove("hidden");
+                if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                window.setAuthMode('register');
+                checkLeaderboardPromptBanner();
+            } else if (isExplicitLogin && !user && (!localStorage.getItem('ls_logged_user'))) {
+                const authCard = document.getElementById("authCard");
+                const dashboardContainer = document.getElementById("dashboardContainer");
+                if (authCard) authCard.classList.remove("hidden");
+                if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                window.setAuthMode('login');
+                checkLeaderboardPromptBanner();
+            } else if (user) {
                 await initUserDashboard(user);
                 checkLeaderboardAutoOpen();
             } else {
@@ -2098,6 +2131,9 @@
                     const dashboardContainer = document.getElementById("dashboardContainer");
                     if (authCard) authCard.classList.remove("hidden");
                     if (dashboardContainer) dashboardContainer.classList.add("hidden");
+                    if (typeof window.syncAuthModeFromUrl === 'function') {
+                        window.syncAuthModeFromUrl();
+                    }
                     checkLeaderboardPromptBanner();
                 }
             }
@@ -5281,15 +5317,19 @@
             history.scrollRestoration = 'manual';
         }
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        window.addEventListener('DOMContentLoaded', () => {
+        function applyRequestedAuthMode() {
             const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode') || urlParams.get('tab');
-            const action = urlParams.get('action');
+            const mode = (urlParams.get('mode') || urlParams.get('tab') || '').toLowerCase();
+            const action = (urlParams.get('action') || '').toLowerCase();
+            const hash = (window.location.hash || '').toLowerCase();
 
-            if (mode === 'register' || window.location.hash === '#register') {
+            if (mode === 'register' || mode === 'signup' || hash === '#register') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                setAuthMode('register');
-            } else if (action === 'reset' || window.location.hash === '#reset') {
+                window.setAuthMode('register');
+            } else if (mode === 'login' || mode === 'signin' || hash === '#login') {
+                window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                window.setAuthMode('login');
+            } else if (action === 'reset' || hash === '#reset') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 openResetModal();
             } else {
@@ -5297,7 +5337,12 @@
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
             }
-        });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyRequestedAuthMode);
+        } else {
+            applyRequestedAuthMode();
+        }
         window.addEventListener('load', () => {
             if (!window.location.hash || window.location.hash === '#') {
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });

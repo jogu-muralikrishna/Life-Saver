@@ -862,11 +862,35 @@
             }
             try {
                 const saved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
-                if (saved && (saved.uid || saved.id)) {
+                if (saved && (saved.uid || saved.id || saved.email)) {
                     return {
-                        uid: saved.uid || saved.id,
+                        uid: saved.uid || saved.id || ('ls_user_' + (saved.email || 'user').replace(/[^a-zA-Z0-9]/g, '_')),
                         email: (saved.email || '').toLowerCase(),
-                        name: saved.displayName || saved.name || 'Member',
+                        name: saved.displayName || saved.name || (saved.email ? saved.email.split('@')[0] : 'Member'),
+                        isGuest: false
+                    };
+                }
+            } catch(e) {}
+
+            try {
+                const bData = JSON.parse(localStorage.getItem('bloodDonorData') || 'null');
+                if (bData && (bData.email || bData.phone || bData.name)) {
+                    return {
+                        uid: bData.id || bData.uid || ('donor_' + (bData.email || bData.phone || 'blood').replace(/[^a-zA-Z0-9]/g, '_')),
+                        email: (bData.email || '').toLowerCase(),
+                        name: bData.name || 'Blood Donor',
+                        isGuest: false
+                    };
+                }
+            } catch(e) {}
+
+            try {
+                const oData = JSON.parse(localStorage.getItem('organDonorData') || 'null');
+                if (oData && (oData.email || oData.phone || oData.name)) {
+                    return {
+                        uid: oData.id || oData.uid || ('donor_' + (oData.email || oData.phone || 'organ').replace(/[^a-zA-Z0-9]/g, '_')),
+                        email: (oData.email || '').toLowerCase(),
+                        name: oData.name || 'Organ Donor',
                         isGuest: false
                     };
                 }
@@ -1402,7 +1426,10 @@
             const currentRel = window.location.pathname.split('/').pop() + window.location.search;
             const targetRedirect = encodeURIComponent(currentRel || 'message.html');
 
-            if (user) {
+            const resolvedIdentity = (!user && typeof getCurrentUserIdentity === 'function') ? getCurrentUserIdentity() : null;
+            const effectiveUser = user || (!resolvedIdentity?.isGuest && resolvedIdentity?.uid ? resolvedIdentity : null);
+
+            if (effectiveUser) {
                 if (banner) banner.classList.add('hidden');
                 closeChatAuthRequiredModal();
                 if (quickInput) {
@@ -1417,17 +1444,19 @@
                     btnSend.onclick = null;
                 }
 
-                let displayName = user.displayName;
-                try {
-                    const snap = await get(ref(db, `users/${user.uid}`));
-                    if (snap.exists() && snap.val()) {
-                        window.activeUserProfile = snap.val();
-                        if (snap.val().name) displayName = snap.val().name;
-                    }
-                } catch (e) {}
+                let displayName = effectiveUser.displayName || effectiveUser.name;
+                if (user) {
+                    try {
+                        const snap = await get(ref(db, `users/${user.uid}`));
+                        if (snap.exists() && snap.val()) {
+                            window.activeUserProfile = snap.val();
+                            if (snap.val().name) displayName = snap.val().name;
+                        }
+                    } catch (e) {}
+                }
 
-                if (!displayName && user.email) {
-                    displayName = user.email.split('@')[0];
+                if (!displayName && effectiveUser.email) {
+                    displayName = effectiveUser.email.split('@')[0];
                 }
                 displayName = (displayName || 'Member').trim();
 
@@ -1441,7 +1470,7 @@
                     senderNameInput.value = displayName;
                 }
                 if (senderContactInput && !senderContactInput.value) {
-                    senderContactInput.value = user.email || user.phoneNumber || '';
+                    senderContactInput.value = effectiveUser.email || effectiveUser.phoneNumber || '';
                 }
                 if (authStatus) authStatus.textContent = '✓ Verified Account';
             } else {
