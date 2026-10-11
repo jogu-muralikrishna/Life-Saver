@@ -611,13 +611,23 @@
             }
 
             // In-Platform Contact & Messaging for Private Accounts
+            let mySenderParams = '';
+            try {
+                const mySaved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (mySaved && (mySaved.email || mySaved.displayName || mySaved.name)) {
+                    mySenderParams = `&senderName=${encodeURIComponent(mySaved.displayName || mySaved.name || '')}&senderEmail=${encodeURIComponent(mySaved.email || '')}`;
+                } else if (window.currentUserAuth) {
+                    mySenderParams = `&senderName=${encodeURIComponent(window.currentUserAuth.displayName || '')}&senderEmail=${encodeURIComponent(window.currentUserAuth.email || '')}`;
+                }
+            } catch(e) {}
+
             const messageLinkHtml = `
                 <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                     <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
                 </a>
             `;
             const requestButtonHtml = `
-                <a href="connection-request.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}" target="_blank" rel="noopener noreferrer" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition cursor-pointer">
+                <a href="connection-request.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}${mySenderParams}" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition cursor-pointer">
                     <i data-lucide="shield" class="w-3.5 h-3.5"></i> 🔒 Send Connection Request
                 </a>
             `;
@@ -664,10 +674,19 @@
             return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Send Contact / Connection Request Logic (Opens in dedicated new page)
+        // Send Contact / Connection Request Logic (Navigates to dedicated page in same tab)
         window.openRequestToContactModal = function(donorUid, donorName, donorEmail, bg, city) {
-            const url = `connection-request.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&email=${encodeURIComponent(donorEmail || '')}&bg=${encodeURIComponent(bg || '')}&city=${encodeURIComponent(city || '')}`;
-            window.open(url, '_blank');
+            let mySenderParams = '';
+            try {
+                const mySaved = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (mySaved && (mySaved.email || mySaved.displayName || mySaved.name)) {
+                    mySenderParams = `&senderName=${encodeURIComponent(mySaved.displayName || mySaved.name || '')}&senderEmail=${encodeURIComponent(mySaved.email || '')}`;
+                } else if (window.currentUserAuth) {
+                    mySenderParams = `&senderName=${encodeURIComponent(window.currentUserAuth.displayName || '')}&senderEmail=${encodeURIComponent(window.currentUserAuth.email || '')}`;
+                }
+            } catch(e) {}
+            const url = `connection-request.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&email=${encodeURIComponent(donorEmail || '')}&bg=${encodeURIComponent(bg || '')}&city=${encodeURIComponent(city || '')}${mySenderParams}`;
+            window.location.href = url;
         };
 
         window.closeRequestToContactModal = function() {
@@ -688,15 +707,82 @@
             btn.innerText = "Sending Request...";
 
             const receiverUid = document.getElementById("targetDonorUid").value;
-            const receiverEmail = (document.getElementById("targetDonorEmail") ? document.getElementById("targetDonorEmail").value : '').trim();
+            const receiverEmail = (document.getElementById("targetDonorEmail") ? document.getElementById("targetDonorEmail").value : '').trim().toLowerCase();
             const receiverName = document.getElementById("targetDonorName").textContent;
-            const senderName = document.getElementById("reqSenderName").value.trim();
-            const senderEmail = document.getElementById("reqSenderEmail").value.trim();
+            let senderName = document.getElementById("reqSenderName").value.trim();
+            let senderEmail = document.getElementById("reqSenderEmail").value.trim().toLowerCase();
             const message = document.getElementById("reqSenderMessage").value.trim();
 
-            if (!window.currentUserAuth) {
+            // Multi-source Account Resolution
+            let resolvedUser = null;
+            if (window.currentUserAuth && (window.currentUserAuth.uid || window.currentUserAuth.email)) {
+                resolvedUser = {
+                    uid: window.currentUserAuth.uid,
+                    email: (window.currentUserAuth.email || '').toLowerCase().trim(),
+                    name: window.currentUserAuth.displayName || ''
+                };
+            }
+            if (!resolvedUser) {
+                try {
+                    const ls = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                    if (ls && (ls.uid || ls.id || ls.email)) {
+                        resolvedUser = { uid: ls.uid || ls.id || '', email: (ls.email || '').toLowerCase().trim(), name: ls.displayName || ls.name || '' };
+                    }
+                } catch(e) {}
+            }
+            if (!resolvedUser) {
+                try {
+                    const bd = JSON.parse(localStorage.getItem('bloodDonorData') || 'null');
+                    if (bd && (bd.email || bd.name)) {
+                        resolvedUser = { uid: bd.uid || bd.id || '', email: (bd.email || '').toLowerCase().trim(), name: bd.name || '' };
+                    }
+                } catch(e) {}
+            }
+
+            // Database lookup by email if UID not yet set
+            let senderUid = resolvedUser ? resolvedUser.uid : '';
+            if (!senderUid && senderEmail) {
+                try {
+                    const snap = await get(ref(db, 'users'));
+                    if (snap.exists()) {
+                        const users = snap.val();
+                        for (const [uKey, uData] of Object.entries(users)) {
+                            if (uData.email && uData.email.toLowerCase().trim() === senderEmail) {
+                                senderUid = uKey;
+                                if (!senderName) senderName = uData.fullName || uData.name || '';
+                                localStorage.setItem('ls_logged_user', JSON.stringify({ uid: uKey, email: senderEmail, displayName: senderName }));
+                                break;
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+            if (!senderUid && senderEmail) {
+                try {
+                    const dSnap = await get(ref(db, 'donors'));
+                    if (dSnap.exists()) {
+                        const donors = dSnap.val();
+                        for (const [dKey, dData] of Object.entries(donors)) {
+                            if (dData.email && dData.email.toLowerCase().trim() === senderEmail) {
+                                senderUid = dKey;
+                                if (!senderName) senderName = dData.name || '';
+                                localStorage.setItem('ls_logged_user', JSON.stringify({ uid: dKey, email: senderEmail, displayName: senderName }));
+                                break;
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            // If user filled in name & email, auto-provision session UID so they are never blocked
+            if (!senderUid && senderEmail && senderName) {
+                senderUid = 'USER-' + Math.floor(100000 + Math.random() * 900000);
+                localStorage.setItem('ls_logged_user', JSON.stringify({ uid: senderUid, email: senderEmail, displayName: senderName }));
+            }
+
+            if (!senderUid && !senderEmail) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
-                feedback.innerHTML = '⚠️ Please <a href="auth.html" class="underline font-bold text-amber-700 dark:text-amber-300">log in or sign up</a> first to send a connection request to private members.';
+                feedback.innerHTML = '⚠️ Please enter your name and email to send a connection request to private members.';
                 feedback.classList.remove('hidden');
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="shield" class="w-3.5 h-3.5"></i> Send Connection Request';
@@ -704,11 +790,10 @@
                 return;
             }
 
-            const senderUid = window.currentUserAuth.uid;
-
             // Self request validation
+            const currentSenderMail = senderEmail || (resolvedUser?.email || '');
             if ((receiverUid && senderUid === receiverUid) || 
-                (receiverEmail && window.currentUserAuth.email && receiverEmail.toLowerCase() === window.currentUserAuth.email.toLowerCase())) {
+                (receiverEmail && currentSenderMail && receiverEmail === currentSenderMail)) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                 feedback.textContent = "You cannot send a connection request to your own profile.";
                 feedback.classList.remove('hidden');

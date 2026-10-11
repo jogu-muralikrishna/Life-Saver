@@ -56,7 +56,7 @@
                     <span class="tracking-wider uppercase font-black">SOS 108</span>
                 </button>
 
-                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant (Opens in New Page)">
+                <a href="ai-triage.html" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
                     <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>AI Triage</span>
                 </a>
@@ -184,7 +184,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -215,19 +215,72 @@
         document.getElementById("targetDonorBloodGroup").textContent = targetBg;
         document.getElementById("lblDonorCity").textContent = targetCity;
 
+        const querySenderName = params.get('senderName') || params.get('fromName') || params.get('myname') || '';
+        const querySenderEmail = params.get('senderEmail') || params.get('fromEmail') || params.get('myemail') || '';
+
+        // Retrieve logged-in account from all supported local session stores
+        function getSavedUserAccount() {
+            if (currentAuthUser && (currentAuthUser.uid || currentAuthUser.email)) {
+                return {
+                    uid: currentAuthUser.uid,
+                    email: (currentAuthUser.email || '').toLowerCase().trim(),
+                    displayName: currentAuthUser.displayName || currentAuthUser.email || ''
+                };
+            }
+            try {
+                const ls = JSON.parse(localStorage.getItem('ls_logged_user') || 'null');
+                if (ls && (ls.uid || ls.id || ls.email)) {
+                    return {
+                        uid: ls.uid || ls.id || '',
+                        email: (ls.email || '').toLowerCase().trim(),
+                        displayName: ls.displayName || ls.name || ''
+                    };
+                }
+            } catch(e) {}
+            try {
+                const bd = JSON.parse(localStorage.getItem('bloodDonorData') || 'null');
+                if (bd && (bd.email || bd.name)) {
+                    return {
+                        uid: bd.uid || bd.id || '',
+                        email: (bd.email || '').toLowerCase().trim(),
+                        displayName: bd.name || ''
+                    };
+                }
+            } catch(e) {}
+            try {
+                const od = JSON.parse(localStorage.getItem('organDonorData') || 'null');
+                if (od && (od.email || od.name)) {
+                    return {
+                        uid: od.uid || od.id || '',
+                        email: (od.email || '').toLowerCase().trim(),
+                        displayName: od.name || ''
+                    };
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        function populateSenderFields() {
+            const acc = getSavedUserAccount();
+            const nameInput = document.getElementById("reqSenderName");
+            const emailInput = document.getElementById("reqSenderEmail");
+            if (nameInput && !nameInput.value) {
+                nameInput.value = (acc && acc.displayName) ? acc.displayName : (querySenderName || '');
+            }
+            if (emailInput && !emailInput.value) {
+                emailInput.value = (acc && acc.email) ? acc.email : (querySenderEmail || '');
+            }
+        }
+
+        // Auto-fill from local cache immediately
+        populateSenderFields();
+
         // Auto-fill authenticated sender
         let currentAuthUser = null;
         onAuthStateChanged(auth, async (user) => {
             currentAuthUser = user;
             if (user) {
-                const nameInput = document.getElementById("reqSenderName");
-                const emailInput = document.getElementById("reqSenderEmail");
-                if (nameInput && !nameInput.value) {
-                    nameInput.value = user.displayName || '';
-                }
-                if (emailInput && !emailInput.value) {
-                    emailInput.value = user.email || '';
-                }
+                populateSenderFields();
             }
         });
 
@@ -241,28 +294,103 @@
             btn.disabled = true;
             btnText.textContent = "Submitting Request...";
 
-            const senderName = document.getElementById("reqSenderName").value.trim();
-            const senderEmail = document.getElementById("reqSenderEmail").value.trim();
-            const message = document.getElementById("reqSenderMessage").value.trim();
+            const senderNameInput = document.getElementById("reqSenderName");
+            const senderEmailInput = document.getElementById("reqSenderEmail");
+            const messageInput = document.getElementById("reqSenderMessage");
+
+            let senderName = senderNameInput.value.trim();
+            let senderEmail = senderEmailInput.value.trim().toLowerCase();
+            const message = messageInput.value.trim();
             const receiverUid = document.getElementById("targetDonorUid").value.trim();
-            const receiverEmail = document.getElementById("targetDonorEmail").value.trim();
+            const receiverEmail = document.getElementById("targetDonorEmail").value.trim().toLowerCase();
             const receiverName = document.getElementById("targetDonorName").textContent.trim();
 
-            if (!currentAuthUser) {
+            if (!senderEmail || !senderName) {
                 feedback.className = "text-xs p-4 rounded-2xl font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800";
-                const redirectUri = encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search);
-                feedback.innerHTML = `⚠️ An account is required to send connection requests to private donors. Please <a href="auth.html?mode=register&redirect=${redirectUri}" class="underline font-black">create an account</a> or <a href="auth.html?mode=login&redirect=${redirectUri}" class="underline font-black">sign in</a> to continue.`;
+                feedback.textContent = "⚠️ Please provide your full name and email address to send this connection request.";
                 feedback.classList.remove('hidden');
                 btn.disabled = false;
                 btnText.textContent = "Send Connection Request";
                 return;
             }
 
-            const senderUid = currentAuthUser.uid;
+            // Resolve Sender Account & UID across all possible sources
+            let senderAccount = getSavedUserAccount();
+            let senderUid = senderAccount?.uid || (currentAuthUser?.uid) || '';
+
+            // 1. If UID not found yet, search Realtime Database `users` by email
+            if (!senderUid && senderEmail) {
+                try {
+                    const snap = await get(ref(db, 'users'));
+                    if (snap.exists()) {
+                        const users = snap.val();
+                        for (const [uKey, uData] of Object.entries(users)) {
+                            if (uData.email && uData.email.toLowerCase().trim() === senderEmail) {
+                                senderUid = uKey;
+                                if (!senderName && (uData.fullName || uData.name)) {
+                                    senderName = uData.fullName || uData.name;
+                                    senderNameInput.value = senderName;
+                                }
+                                senderAccount = { uid: uKey, email: senderEmail, displayName: senderName };
+                                localStorage.setItem('ls_logged_user', JSON.stringify(senderAccount));
+                                break;
+                            }
+                        }
+                    }
+                } catch(err) {
+                    console.warn("User account lookup note:", err);
+                }
+            }
+
+            // 2. Search `donors` by email if still no UID
+            if (!senderUid && senderEmail) {
+                try {
+                    const snap = await get(ref(db, 'donors'));
+                    if (snap.exists()) {
+                        const donors = snap.val();
+                        for (const [dKey, dData] of Object.entries(donors)) {
+                            if (dData.email && dData.email.toLowerCase().trim() === senderEmail) {
+                                senderUid = dKey;
+                                if (!senderName && dData.name) {
+                                    senderName = dData.name;
+                                    senderNameInput.value = senderName;
+                                }
+                                senderAccount = { uid: dKey, email: senderEmail, displayName: senderName };
+                                localStorage.setItem('ls_logged_user', JSON.stringify(senderAccount));
+                                break;
+                            }
+                        }
+                    }
+                } catch(err) {
+                    console.warn("Donor lookup note:", err);
+                }
+            }
+
+            // 3. Auto-provision session user so verified sender is NEVER blocked
+            if (!senderUid && senderEmail && senderName) {
+                senderUid = "USER-" + Math.floor(100000 + Math.random() * 900000);
+                senderAccount = {
+                    uid: senderUid,
+                    email: senderEmail,
+                    displayName: senderName
+                };
+                localStorage.setItem('ls_logged_user', JSON.stringify(senderAccount));
+                try {
+                    await set(ref(db, `users/${senderUid}`), {
+                        name: senderName,
+                        fullName: senderName,
+                        email: senderEmail,
+                        accountType: 'public',
+                        createdAt: new Date().toISOString(),
+                        timestamp: Date.now()
+                    });
+                } catch(e) {}
+            }
 
             // Self-request prevention
+            const myUserEmail = senderEmail || (currentAuthUser?.email || '').toLowerCase().trim();
             if ((receiverUid && senderUid === receiverUid) || 
-                (receiverEmail && currentAuthUser.email && receiverEmail.toLowerCase() === currentAuthUser.email.toLowerCase())) {
+                (receiverEmail && myUserEmail && receiverEmail === myUserEmail)) {
                 feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                 feedback.textContent = "You cannot send a connection request to your own profile.";
                 feedback.classList.remove('hidden');
@@ -270,6 +398,7 @@
                 btnText.textContent = "Send Connection Request";
                 return;
             }
+
 
             // Duplicate pending request check
             try {
@@ -329,6 +458,11 @@
                 if (window.lucide) lucide.createIcons();
             }
         };
+
+        const connForm = document.getElementById("connectionRequestForm");
+        if (connForm) {
+            connForm.addEventListener("submit", window.handleSendConnectionSubmit);
+        }
 
         if (window.lucide) lucide.createIcons();
     </script>

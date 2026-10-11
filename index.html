@@ -133,8 +133,8 @@
                     <span class="tracking-wider uppercase font-black">SOS 108</span>
                 </button>
 
-                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON (OPENS DEDICATED PAGE IN NEW TAB) -->
-                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant (Opens in New Page)">
+                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON (NAVIGATES TO DEDICATED PAGE) -->
+                <a href="ai-triage.html" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
                     <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>AI Triage</span>
                 </a>
@@ -177,7 +177,7 @@
                         <!-- MOBILE QUICK TOOLS (SHOWN ONLY ON SMALL SCREENS WHERE TOP BAR HIDES THEM) -->
                         <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
                             <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
-                            <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg text-left">
+                            <a href="ai-triage.html" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg text-left">
                                 <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant
                             </a>
                             <a href="contact.html" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg text-left">
@@ -286,7 +286,7 @@
                 <button onclick="toggleSOS(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-red-600 text-white p-2.5 rounded-xl text-xs font-bold shadow-md shadow-red-500/20">
                     <i data-lucide="alert-triangle" class="w-4 h-4"></i> Emergency SOS 108
                 </button>
-                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-900/50">
+                <a href="ai-triage.html" class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-900/50">
                     <i data-lucide="bot" class="w-4 h-4"></i> AI Triage Assistant
                 </a>
                 <a href="contact.html" class="w-full flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-2.5 rounded-xl text-xs font-bold border border-emerald-200 dark:border-emerald-900/50">
@@ -1696,7 +1696,7 @@
 
         function openTriageModal(defaultTab = 'triage') {
             const targetUrl = defaultTab ? `ai-triage.html?tab=${encodeURIComponent(defaultTab)}` : "ai-triage.html";
-            window.open(targetUrl, '_blank');
+            window.location.href = targetUrl;
         }
 
         function closeTriageModal() {

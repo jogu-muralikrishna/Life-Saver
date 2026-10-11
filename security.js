@@ -522,7 +522,7 @@ window.ensureSOSModal = ensureSOSModal;
 // Universal AI Triage Opener (Navigates directly to dedicated ai-triage.html page at top)
 function openTriageModal(defaultTab) {
     const targetUrl = defaultTab ? `ai-triage.html?tab=${encodeURIComponent(defaultTab)}` : "ai-triage.html";
-    window.open(targetUrl, '_blank');
+    window.location.href = targetUrl;
 }
 window.openTriageModal = openTriageModal;
 
