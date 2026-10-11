@@ -258,7 +258,9 @@
     </main>
 
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, onValue, get, push } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, get, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -317,6 +319,13 @@
                     window.location.reload();
                 });
             }
+        };
+
+        window.lockBodyScroll = window.lockBodyScroll || function() {
+            document.body.style.overflow = 'hidden';
+        };
+        window.unlockBodyScroll = window.unlockBodyScroll || function() {
+            document.body.style.overflow = '';
         };
 
         let donorsList = [];
@@ -546,7 +555,7 @@
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
                             </a>
                         </div>
-                        <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                        <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                             <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
                         </a>
                     </div>
@@ -603,14 +612,14 @@
 
             // In-Platform Contact & Messaging for Private Accounts
             const messageLinkHtml = `
-                <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
+                <a href="message.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}&role=donor" target="_blank" rel="noopener noreferrer" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition">
                     <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Message on LifeSaver-Care
                 </a>
             `;
             const requestButtonHtml = `
-                <button onclick="openRequestToContactModal('${escapeHtml(donorUid)}', '${escapeHtml(donorName)}')" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition">
-                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> 🔒 Send Contact Request
-                </button>
+                <a href="connection-request.html?to=${encodeURIComponent(donorUid)}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(donor.email || donor.userEmail || '')}&bg=${encodeURIComponent(donor.bloodGroup || '')}&city=${encodeURIComponent(donor.city || '')}" target="_blank" rel="noopener noreferrer" class="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-purple-500/20 transition cursor-pointer">
+                    <i data-lucide="shield" class="w-3.5 h-3.5"></i> 🔒 Send Connection Request
+                </a>
             `;
 
             if (actionButtons.length > 0) {
@@ -655,31 +664,19 @@
             return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Send Contact Request Logic
-        window.openRequestToContactModal = function(donorUid, donorName) {
-            window.lockBodyScroll();
-            document.getElementById("targetDonorUid").value = donorUid || '';
-            document.getElementById("targetDonorName").textContent = donorName || 'Voluntary Donor';
-            
-            if (window.currentUserAuth) {
-                document.getElementById("reqSenderName").value = window.currentUserAuth.displayName || '';
-                document.getElementById("reqSenderEmail").value = window.currentUserAuth.email || '';
-            }
-            
-            const modal = document.getElementById("sendContactRequestModal");
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-            if (window.lucide) lucide.createIcons();
+        // Send Contact / Connection Request Logic (Opens in dedicated new page)
+        window.openRequestToContactModal = function(donorUid, donorName, donorEmail, bg, city) {
+            const url = `connection-request.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&email=${encodeURIComponent(donorEmail || '')}&bg=${encodeURIComponent(bg || '')}&city=${encodeURIComponent(city || '')}`;
+            window.open(url, '_blank');
         };
 
         window.closeRequestToContactModal = function() {
-            window.unlockBodyScroll();
+            if (typeof window.unlockBodyScroll === 'function') window.unlockBodyScroll();
             const modal = document.getElementById("sendContactRequestModal");
             if (modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                modal.style.display = 'none';
             }
         };
 
@@ -691,11 +688,58 @@
             btn.innerText = "Sending Request...";
 
             const receiverUid = document.getElementById("targetDonorUid").value;
+            const receiverEmail = (document.getElementById("targetDonorEmail") ? document.getElementById("targetDonorEmail").value : '').trim();
             const receiverName = document.getElementById("targetDonorName").textContent;
             const senderName = document.getElementById("reqSenderName").value.trim();
             const senderEmail = document.getElementById("reqSenderEmail").value.trim();
             const message = document.getElementById("reqSenderMessage").value.trim();
-            const senderUid = window.currentUserAuth ? window.currentUserAuth.uid : 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
+
+            if (!window.currentUserAuth) {
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
+                feedback.innerHTML = '⚠️ Please <a href="auth.html" class="underline font-bold text-amber-700 dark:text-amber-300">log in or sign up</a> first to send a connection request to private members.';
+                feedback.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="shield" class="w-3.5 h-3.5"></i> Send Connection Request';
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            const senderUid = window.currentUserAuth.uid;
+
+            // Self request validation
+            if ((receiverUid && senderUid === receiverUid) || 
+                (receiverEmail && window.currentUserAuth.email && receiverEmail.toLowerCase() === window.currentUserAuth.email.toLowerCase())) {
+                feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                feedback.textContent = "You cannot send a connection request to your own profile.";
+                feedback.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="shield" class="w-3.5 h-3.5"></i> Send Connection Request';
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            // Prevent duplicate pending requests
+            try {
+                const snap = await get(ref(db, 'contact_requests'));
+                if (snap.exists()) {
+                    const reqs = snap.val();
+                    const isPendingDup = Object.values(reqs).some(r => {
+                        const matchSender = r.senderUid === senderUid || (r.senderEmail && r.senderEmail.toLowerCase() === senderEmail.toLowerCase());
+                        const matchReceiver = (receiverUid && r.receiverUid === receiverUid) || (receiverEmail && r.receiverEmail && r.receiverEmail.toLowerCase() === receiverEmail.toLowerCase());
+                        return matchSender && matchReceiver && r.status === 'pending';
+                    });
+                    if (isPendingDup) {
+                        feedback.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
+                        feedback.textContent = "You already have a pending connection request for this donor. Please wait for their response.";
+                        feedback.classList.remove('hidden');
+                        btn.disabled = true;
+                        btn.innerHTML = '✓ Request Already Sent';
+                        return;
+                    }
+                }
+            } catch(checkErr) {
+                console.warn("Could not check duplicate requests:", checkErr);
+            }
 
             const requestId = "REQ-CON-" + Math.floor(100000 + Math.random() * 900000);
             const payload = {
@@ -704,6 +748,7 @@
                 senderName: senderName,
                 senderEmail: senderEmail,
                 receiverUid: receiverUid,
+                receiverEmail: receiverEmail,
                 receiverName: receiverName,
                 message: message,
                 status: 'pending',
@@ -714,10 +759,12 @@
             try {
                 await push(ref(db, 'contact_requests'), payload);
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
-                feedback.textContent = "✅ Contact request sent securely! The member will review and accept it from their dashboard.";
+                feedback.textContent = "✅ Connection request sent securely! The member will review and accept it from their dashboard.";
                 feedback.classList.remove('hidden');
+                btn.disabled = true;
+                btn.innerHTML = '✓ Request Sent';
                 if (typeof window.showLifeSaverMsg === 'function') {
-                    window.showLifeSaverMsg("✅ Contact request sent securely! The member will review and accept it from their dashboard.", "success", "Contact Request Sent");
+                    window.showLifeSaverMsg("✅ Connection request sent securely! The member will review and accept it from their dashboard.", "success", "Connection Request Sent");
                 }
                 setTimeout(() => {
                     closeRequestToContactModal();
@@ -726,19 +773,19 @@
                 }, 1500);
             } catch (err) {
                 feedback.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
-                feedback.textContent = "Error sending contact request: " + err.message;
+                feedback.textContent = "Error sending connection request: " + err.message;
                 feedback.classList.remove('hidden');
-            } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Send Contact Request';
+                btn.innerHTML = '<i data-lucide="shield" class="w-3.5 h-3.5"></i> Send Connection Request';
+            } finally {
                 if (window.lucide) lucide.createIcons();
             }
         };
 
-        // Direct Message to Donor Handler (Forward to dedicated message.html)
+        // Direct Message to Donor Handler (Forward to dedicated message.html in new page)
         window.openDirectMessageToDonor = function(donorUid, donorName, bloodGroup, city, email) {
             const url = `message.html?to=${encodeURIComponent(donorUid || '')}&name=${encodeURIComponent(donorName || '')}&email=${encodeURIComponent(email || '')}&bg=${encodeURIComponent(bloodGroup || '')}&city=${encodeURIComponent(city || '')}&role=donor`;
-            window.location.href = url;
+            window.open(url, '_blank');
         };
 
         window.closeDirectMessageDonorModal = function() {
@@ -1090,8 +1137,8 @@
     </div>
 
     <!-- SEND CONTACT REQUEST MODAL (FOR PRIVATE DONORS) -->
-    <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 overflow-y-auto hidden">
-        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
+    <div id="sendContactRequestModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeRequestToContactModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
@@ -1106,6 +1153,7 @@
 
             <form id="contactRequestForm" onsubmit="submitContactRequest(event)" class="space-y-4">
                 <input type="hidden" id="targetDonorUid">
+                <input type="hidden" id="targetDonorEmail">
                 <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Donor:</span>
                     <span id="targetDonorName" class="text-xs font-black text-purple-600 dark:text-purple-400">Donor Name</span>
@@ -1142,8 +1190,8 @@
     </div>
 
     <!-- DIRECT MESSAGE MODAL (FOR PUBLIC MEMBERS) -->
-    <div id="directMessageDonorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-6 sm:pt-10 px-3 sm:px-4 overflow-y-auto hidden">
-        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
+    <div id="directMessageDonorModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-auto animate-slide-up text-slate-900 dark:text-white">
             <button onclick="closeDirectMessageDonorModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-xl transition">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>

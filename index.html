@@ -7,7 +7,7 @@
     <meta name="description" content="Life Saver is a 24/7 free emergency healthcare platform. Search blood donors by city and blood group (A+, B+, O+, AB-), pledge organ donation, find accredited ICU hospitals, locate ambulances, or post urgent blood requests.">
     <meta name="keywords" content="life saver, blood donation, organ donation, blood donor finder, emergency blood request, O+ blood donor, pledge organ, emergency ambulance, healthcare near me, find blood donor online">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://lifesaver.qd.je/index.html">
+    <link rel="canonical" href="https://life-saver-care.vercel.app/index.html">
 
     <!-- Google Search Console Verification Meta Tag -->
     <meta name="google-site-verification" content="google7f6c6857dafe10a0">
@@ -44,7 +44,7 @@
     <meta property="og:title" content="Life Saver - 24/7 Emergency Blood & Organ Donation Platform">
     <meta property="og:description" content="Find verified blood donors, request urgent blood supplies, pledge organs, and locate emergency hospitals & 108 ambulances instantly.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://lifesaver.qd.je/index.html">
+    <meta property="og:url" content="https://life-saver-care.vercel.app/index.html">
     <meta property="og:image" content="icon.png">
 
     <!-- Schema.org Medical & Emergency Service JSON-LD Structured Data -->
@@ -54,12 +54,12 @@
       "@type": "EmergencyService",
       "name": "Life Saver Healthcare & Blood Donation Network",
       "description": "24/7 Emergency Healthcare Services, Blood Donor Finder, Organ Donation Registry & Ambulance Network",
-      "url": "https://lifesaver.qd.je",
+      "url": "https://life-saver-care.vercel.app",
       "telephone": "+91-108",
       "areaServed": "Global",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://lifesaver.qd.je/blood.html?search={search_term_string}",
+        "target": "https://life-saver-care.vercel.app/blood.html?search={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }
@@ -133,11 +133,11 @@
                     <span class="tracking-wider uppercase font-black">SOS 108</span>
                 </button>
 
-                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON -->
-                <button type="button" onclick="openTriageModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant">
+                <!-- 🩺 AI TRIAGE ASSISTANT BUTTON (OPENS DEDICATED PAGE IN NEW TAB) -->
+                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant (Opens in New Page)">
                     <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>AI Triage</span>
-                </button>
+                </a>
             </div>
 
             <!-- RIGHT CONTROLS & NAVIGATION -->
@@ -177,9 +177,9 @@
                         <!-- MOBILE QUICK TOOLS (SHOWN ONLY ON SMALL SCREENS WHERE TOP BAR HIDES THEM) -->
                         <div class="sm:hidden mb-1.5 pb-1.5 border-b border-slate-100 dark:border-slate-800 space-y-1">
                             <div class="text-[10px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400 px-2.5 py-0.5">Quick Tools</div>
-                            <button onclick="openTriageModal(); toggleNavToolsMenu(event);" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg text-left">
+                            <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg text-left">
                                 <i data-lucide="bot" class="w-3.5 h-3.5"></i> AI Triage Assistant
-                            </button>
+                            </a>
                             <a href="contact.html" class="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg text-left">
                                 <i data-lucide="mail" class="w-3.5 h-3.5"></i> Contact Us
                             </a>
@@ -229,14 +229,14 @@
                             <a href="emergency.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
                                 <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> <span>Emergency Guide</span>
                             </a>
+                            <a href="https://www.instagram.com/life_saver.care/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-950/40 rounded-lg transition">
+                                <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-500 shrink-0"></i> <span>Official Instagram</span>
+                            </a>
                         </div>
 
                         <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
 
-                        <!-- ADMIN & SIGN OUT -->
-                        <a href="admin-login.html" class="flex items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i> <span>Admin Portal</span>
-                        </a>
+                        <!-- SIGN OUT -->
                         <button id="navSignOutBtn" onclick="handleUserSignOut()" class="w-full hidden items-center gap-2 px-2.5 py-1.5 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition text-left mt-0.5">
                             <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i> <span>Sign Out</span>
                         </button>
@@ -286,17 +286,17 @@
                 <button onclick="toggleSOS(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-red-600 text-white p-2.5 rounded-xl text-xs font-bold shadow-md shadow-red-500/20">
                     <i data-lucide="alert-triangle" class="w-4 h-4"></i> Emergency SOS 108
                 </button>
-                <button onclick="openTriageModal(); toggleMobileNav(event);" class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-900/50">
+                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 p-2.5 rounded-xl text-xs font-bold border border-blue-200 dark:border-blue-900/50">
                     <i data-lucide="bot" class="w-4 h-4"></i> AI Triage Assistant
-                </button>
+                </a>
                 <a href="contact.html" class="w-full flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-2.5 rounded-xl text-xs font-bold border border-emerald-200 dark:border-emerald-900/50">
                     <i data-lucide="mail" class="w-4 h-4"></i> Contact Us
                 </a>
                 <a href="auth.html" class="w-full flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 p-2.5 rounded-xl text-xs font-bold">
                     <i data-lucide="user" class="w-4 h-4"></i> Member Account
                 </a>
-                <a href="admin-login.html" class="w-full flex items-center gap-2 bg-slate-900 dark:bg-slate-800 text-white p-2.5 rounded-xl text-xs font-bold">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> Admin Portal
+                <a href="https://www.instagram.com/life_saver.care/" target="_blank" rel="noopener noreferrer" class="w-full flex items-center gap-2 bg-pink-50 dark:bg-pink-950/40 text-pink-600 dark:text-pink-400 p-2.5 rounded-xl text-xs font-bold border border-pink-200 dark:border-pink-900/50">
+                    <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i> Follow @life_saver.care
                 </a>
             </div>
         </div>
@@ -1048,7 +1048,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, onValue, push, get } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -1260,9 +1262,10 @@
 
                 // Update ticker broadcast
                 if (tickerWrap && tickerContent && reqs.length > 0) {
-                    tickerContent.innerHTML = reqs.map(r => `
-                        <span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • <a href="blood.html" class="hover:underline font-mono text-white/90">Contact: ${maskPhone(r.phone || r.contactNumber)} 🛡️</a></span>
-                    `).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
+                    tickerContent.innerHTML = reqs.map(r => {
+                        const phoneNum = r.phone || r.contactNumber || '108';
+                        return `<span>🩸 URGENT NEED: <strong>${r.bloodGroup}</strong> at ${r.hospital} (${r.city}) • <a href="tel:${phoneNum}" class="hover:underline font-mono font-bold text-white bg-red-800/80 px-2 py-0.5 rounded shadow-sm">📞 Call: ${phoneNum}</a></span>`;
+                    }).join(" &nbsp;&nbsp;•&nbsp;&nbsp; ");
                     tickerWrap.classList.remove("hidden");
                 } else if (tickerWrap) {
                     tickerWrap.classList.add("hidden");
@@ -1692,26 +1695,8 @@
         }
 
         function openTriageModal(defaultTab = 'triage') {
-            const modal = document.getElementById("triageModal");
-            if (modal) {
-                if (typeof window.lockBodyScroll === 'function') {
-                    try { window.lockBodyScroll(); } catch(e) {}
-                } else {
-                    document.body.style.overflow = 'hidden';
-                }
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-                switchAITab(defaultTab || 'triage');
-                setTimeout(() => {
-                    if (defaultTab === 'doctor') {
-                        const queryInput = document.getElementById("aiDoctorInput") || document.getElementById("aiQueryInput");
-                        if (queryInput) queryInput.focus({ preventScroll: true });
-                    }
-                    if (typeof scrollChatToBottom === 'function') {
-                        scrollChatToBottom(false);
-                    }
-                }, 150);
-            }
+            const targetUrl = defaultTab ? `ai-triage.html?tab=${encodeURIComponent(defaultTab)}` : "ai-triage.html";
+            window.open(targetUrl, '_blank');
         }
 
         function closeTriageModal() {
@@ -2672,21 +2657,15 @@
             alert("Medical report data deleted from active view.");
         }
 
-        /* MULTI-LANGUAGE SWITCHER */
+        /* LANGUAGE - STRICTLY ENGLISH ONLY */
         function changeLanguage(lang) {
-            if (lang === 'TE') {
-                document.getElementById("txtHeroTitle").innerHTML = `ప్రతి క్షణం అమూల్యం. <br/> ప్రాణాలను కాపాడండి.`;
-                document.getElementById("btnAIAssist").innerText = "AI ఎమర్జెన్సీ గైడ్";
-                document.getElementById("btnBecomeDonor").innerText = "డోనర్‌గా నమోదు చేయండి";
-            } else if (lang === 'HI') {
-                document.getElementById("txtHeroTitle").innerHTML = `हर सेकंड कीमती है। <br/> जीवन बचाएं।`;
-                document.getElementById("btnAIAssist").innerText = "AI आपातकालीन गाइड";
-                document.getElementById("btnBecomeDonor").innerText = "दाता बनें";
-            } else {
-                document.getElementById("txtHeroTitle").innerHTML = `Every Second Counts. <br class="hidden md:inline"/><span class="text-shimmer">Connect & Save Lives Nearby.</span>`;
-                document.getElementById("btnAIAssist").innerText = "AI Triage Assistant";
-                document.getElementById("btnBecomeDonor").innerText = "Become Donor";
-            }
+            localStorage.setItem('site_lang', 'EN');
+            const hero = document.getElementById("txtHeroTitle");
+            if (hero) hero.innerHTML = `Every Second Counts. <br class="hidden md:inline"/><span class="text-shimmer">Connect & Save Lives Nearby.</span>`;
+            const ai = document.getElementById("btnAIAssist");
+            if (ai) ai.innerText = "AI Triage Assistant";
+            const donor = document.getElementById("btnBecomeDonor");
+            if (donor) donor.innerText = "Become Donor";
         }
 
         function openSOS() {

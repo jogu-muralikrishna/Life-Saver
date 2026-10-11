@@ -131,6 +131,17 @@
             </div>
         </div>
 
+        <!-- CHAT LOGIN REQUIRED BANNER -->
+        <div id="chatLoginNotice" class="hidden mb-5 p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-700 text-xs text-blue-900 dark:text-blue-200 flex items-center gap-3 shadow-sm">
+            <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm font-black text-sm">
+                💬
+            </div>
+            <div>
+                <span class="font-black block text-blue-800 dark:text-blue-300">Account Required to Chat</span>
+                <span class="text-[11px] opacity-90">Please sign in or create an account to start and continue chat on LifeSaver. You will be redirected right back to your conversation.</span>
+            </div>
+        </div>
+
         <!-- MODE TOGGLE TABS (EARLY INTERACTION SAFE) -->
         <script>
             window.currentAuthMode = 'login';
@@ -160,16 +171,22 @@
                 }
             };
 
-            // Early check for mode & post-blood redirect
+            // Early check for mode & redirects
             try {
                 const initParams = new URLSearchParams(window.location.search);
                 const reqMode = initParams.get('mode');
-                if (reqMode === 'register') {
+                if (reqMode === 'register' || reqMode === 'signup') {
                     window.addEventListener('DOMContentLoaded', () => window.setAuthMode('register'));
                 }
-                if (initParams.get('redirect') === 'post-blood') {
+                const redTarget = initParams.get('redirect') || '';
+                if (redTarget === 'post-blood') {
                     window.addEventListener('DOMContentLoaded', () => {
                         const notice = document.getElementById('postBloodLoginNotice');
+                        if (notice) notice.classList.remove('hidden');
+                    });
+                } else if (redTarget.startsWith('message.html') || redTarget.includes('message.html')) {
+                    window.addEventListener('DOMContentLoaded', () => {
+                        const notice = document.getElementById('chatLoginNotice');
                         if (notice) notice.classList.remove('hidden');
                     });
                 }
@@ -185,9 +202,25 @@
         </div>
 
         <form id="authForm" class="space-y-4">
-            <div id="nameWrap" class="hidden">
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
-                <input type="text" id="name" placeholder="John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+            <div id="nameWrap" class="hidden space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" id="name" placeholder="John Doe" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Blood Group (All Blood Types)</label>
+                    <select id="registerBloodGroup" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-sm font-bold outline-none focus:border-red-500">
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+ (A Positive)</option>
+                        <option value="A-">A- (A Negative)</option>
+                        <option value="B+">B+ (B Positive)</option>
+                        <option value="B-">B- (B Negative)</option>
+                        <option value="O+">O+ (O Positive)</option>
+                        <option value="O-">O- (O Negative)</option>
+                        <option value="AB+">AB+ (AB Positive)</option>
+                        <option value="AB-">AB- (AB Negative)</option>
+                    </select>
+                </div>
             </div>
 
             <div>
@@ -303,26 +336,37 @@
 
             <!-- PROFILE DATA GRID (DIRECT MANUAL EDITABLE INPUTS) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 pt-4 border-t border-slate-200/80 dark:border-slate-800">
-                <!-- Blood Group -->
+                <!-- Blood Group with ALL 8 Blood Group Names -->
                 <div class="bg-white/90 dark:bg-slate-950/90 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
                     <div class="flex items-center justify-between mb-1.5">
                         <span class="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                             <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Group
                         </span>
-                        <span class="text-[9px] font-bold text-slate-400">Type / Pick</span>
+                        <span class="text-[9px] font-black text-red-600 dark:text-red-400">All 8 Groups</span>
                     </div>
                     <div class="relative">
-                        <input type="text" id="inlineProfileBloodGroup" list="inlineBgOptions" placeholder="e.g. O+, A+, B+" class="w-full bg-slate-50 dark:bg-slate-900 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-black text-sm p-2 rounded-xl outline-none uppercase focus:ring-2 focus:ring-red-500/20">
-                        <datalist id="inlineBgOptions">
-                            <option value="A+"></option>
-                            <option value="A-"></option>
-                            <option value="B+"></option>
-                            <option value="B-"></option>
-                            <option value="O+"></option>
-                            <option value="O-"></option>
-                            <option value="AB+"></option>
-                            <option value="AB-"></option>
-                        </datalist>
+                        <select id="inlineProfileBloodGroup" class="w-full bg-slate-50 dark:bg-slate-900 border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-black text-xs sm:text-sm p-2 rounded-xl outline-none uppercase focus:ring-2 focus:ring-red-500/20 cursor-pointer">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+ (A Positive)</option>
+                            <option value="A-">A- (A Negative)</option>
+                            <option value="B+">B+ (B Positive)</option>
+                            <option value="B-">B- (B Negative)</option>
+                            <option value="O+">O+ (O Positive)</option>
+                            <option value="O-">O- (O Negative)</option>
+                            <option value="AB+">AB+ (AB Positive)</option>
+                            <option value="AB-">AB- (AB Negative)</option>
+                        </select>
+                    </div>
+                    <!-- Quick Blood Group Names Badges -->
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        <button type="button" onclick="setInlineBloodGroup('A+')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">A+</button>
+                        <button type="button" onclick="setInlineBloodGroup('A-')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">A-</button>
+                        <button type="button" onclick="setInlineBloodGroup('B+')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">B+</button>
+                        <button type="button" onclick="setInlineBloodGroup('B-')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">B-</button>
+                        <button type="button" onclick="setInlineBloodGroup('O+')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">O+</button>
+                        <button type="button" onclick="setInlineBloodGroup('O-')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">O-</button>
+                        <button type="button" onclick="setInlineBloodGroup('AB+')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">AB+</button>
+                        <button type="button" onclick="setInlineBloodGroup('AB-')" class="px-1.5 py-0.5 rounded-md bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-[10px] hover:bg-red-600 hover:text-white transition">AB-</button>
                     </div>
                 </div>
 
@@ -635,7 +679,7 @@
                             </div>
 
                             <!-- Dynamic Blood Group -->
-                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
+                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-white pointer-events-none flex items-center justify-center text-center" style="left: 29.3%; top: 79.5%; width: 70px; height: 42px; transform: translate(-50%, -50%);" id="dashPanelBloodCertBg">
                                 A+
                             </div>
 
@@ -690,6 +734,9 @@
                                     <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
                                 </button>
                             </div>
+                            <button onclick="openCertificateInNewPage('blood')" class="w-full py-2.5 px-3 rounded-xl border border-red-300 dark:border-red-800 bg-white dark:bg-slate-900 hover:bg-red-50 dark:hover:bg-red-950/50 text-red-600 dark:text-red-400 text-xs font-black transition flex items-center justify-center gap-2 shadow-sm" title="Open official certificate in a new page">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> Open Official Certificate in New Page
+                            </button>
                             <button onclick="openCertificateEmailModal('blood')" class="w-full py-2 px-3 rounded-xl border border-red-200/80 dark:border-red-900/50 bg-red-50/60 dark:bg-red-950/30 hover:bg-red-100/70 dark:hover:bg-red-900/40 text-red-700 dark:text-red-300 text-xs font-bold transition flex items-center justify-center gap-2" title="Email official certificate and verified credential packet">
                                 <i data-lucide="mail" class="w-3.5 h-3.5 text-red-500"></i> Automated Certificate Delivery Hub (Email / Dispatch)
                             </button>
@@ -736,7 +783,7 @@
                             </div>
 
                             <!-- Dynamic Blood Group -->
-                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
+                            <div class="absolute font-sans font-black text-xs sm:text-sm md:text-base text-[#0f4c81] pointer-events-none flex items-center justify-center text-center" style="left: 70.8%; top: 77%; width: 50px; height: 42px; transform: translate(-50%, -50%);" id="dashPanelOrganCertBg">
                                 A+
                             </div>
 
@@ -761,6 +808,9 @@
                                     <i data-lucide="share-2" class="w-4 h-4"></i> Share on WhatsApp
                                 </button>
                             </div>
+                            <button onclick="openCertificateInNewPage('organ')" class="w-full py-2.5 px-3 rounded-xl border border-blue-300 dark:border-blue-800 bg-white dark:bg-slate-900 hover:bg-blue-50 dark:hover:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-black transition flex items-center justify-center gap-2 shadow-sm" title="Open official pledge certificate in a new page">
+                                <i data-lucide="external-link" class="w-4 h-4"></i> Open Official Pledge Certificate in New Page
+                            </button>
                             <button onclick="openCertificateEmailModal('organ')" class="w-full py-2 px-3 rounded-xl border border-blue-200/80 dark:border-blue-900/50 bg-blue-50/60 dark:bg-blue-950/30 hover:bg-blue-100/70 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-2" title="Email official pledge certificate and verified credential packet">
                                 <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> Automated Certificate Delivery Hub (Email / Dispatch)
                             </button>
@@ -971,22 +1021,22 @@
                         <input type="tel" id="editProfilePhone" placeholder="10-digit Mobile Number" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs font-bold outline-none focus:border-red-500">
                     </div>
 
-                    <!-- Blood Group -->
+                    <!-- Blood Group with All Names -->
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                             <i data-lucide="droplet" class="w-3.5 h-3.5 text-red-500"></i> Blood Group *
                         </label>
-                        <input type="text" id="editProfileBloodGroup" list="bloodGroupOptions" required placeholder="e.g. O+, A+, B+, AB-" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs font-bold outline-none focus:border-red-500 uppercase">
-                        <datalist id="bloodGroupOptions">
-                            <option value="A+"></option>
-                            <option value="A-"></option>
-                            <option value="B+"></option>
-                            <option value="B-"></option>
-                            <option value="O+"></option>
-                            <option value="O-"></option>
-                            <option value="AB+"></option>
-                            <option value="AB-"></option>
-                        </datalist>
+                        <select id="editProfileBloodGroup" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs font-bold outline-none focus:border-red-500 uppercase">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+ (A Positive)</option>
+                            <option value="A-">A- (A Negative)</option>
+                            <option value="B+">B+ (B Positive)</option>
+                            <option value="B-">B- (B Negative)</option>
+                            <option value="O+">O+ (O Positive)</option>
+                            <option value="O-">O- (O Negative)</option>
+                            <option value="AB+">AB+ (AB Positive)</option>
+                            <option value="AB-">AB- (AB Negative)</option>
+                        </select>
                     </div>
 
                     <!-- City / Location -->
@@ -1256,7 +1306,7 @@
                 </div>
 
                 <!-- Blood Group -->
-                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);" id="dashBloodCertBg">
+                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none flex items-center justify-center text-center" style="left: 29.3%; top: 79.5%; width: 70px; height: 42px; transform: translate(-50%, -50%);" id="dashBloodCertBg">
                     A+
                 </div>
 
@@ -1312,7 +1362,7 @@
                 </div>
 
                 <!-- Blood Group -->
-                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);" id="dashOrganCertBg">
+                <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none flex items-center justify-center text-center" style="left: 70.8%; top: 77%; width: 50px; height: 42px; transform: translate(-50%, -50%);" id="dashOrganCertBg">
                     A+
                 </div>
 
@@ -1424,7 +1474,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, getDatabase, ref, set, get, update, onValue, remove, push } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, set, get, update, onValue, remove, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -1802,13 +1854,20 @@
         async function initUserDashboard(user) {
             if (!user) return;
 
-            // Check if user came from "Post Need of Blood" link
+            // Check if user came from "Post Need of Blood" or Chat continuation link
             const urlParamsObj = new URLSearchParams(window.location.search);
             const redirectTarget = urlParamsObj.get('redirect') || sessionStorage.getItem('ls_auth_redirect');
-            if (redirectTarget === 'post-blood') {
-                sessionStorage.removeItem('ls_auth_redirect');
-                window.location.href = 'blood.html#postNeedBloodSection';
-                return;
+            if (redirectTarget) {
+                if (redirectTarget === 'post-blood') {
+                    sessionStorage.removeItem('ls_auth_redirect');
+                    window.location.href = 'blood.html#postNeedBloodSection';
+                    return;
+                }
+                if (redirectTarget.startsWith('message.html') || redirectTarget.includes('message.html')) {
+                    sessionStorage.removeItem('ls_auth_redirect');
+                    window.location.href = redirectTarget;
+                    return;
+                }
             }
 
             const authCard = document.getElementById("authCard");
@@ -2052,7 +2111,7 @@
                 alert("Generating your unique referral code. Please tap in 1 second!");
                 return;
             }
-            const referralUrl = `https://lifesaver.qd.je/auth.html?ref=${encodeURIComponent(code)}`;
+            const referralUrl = `https://life-saver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
             const message = `🩸 Join LifeSaver-Care\n\nHelp us build a stronger emergency donor network.\n\nRegister as a voluntary donor and explore our emergency healthcare platform.\n\nJoin using my referral link:\n${referralUrl}\n\nTogether, we can make emergency connections faster. ❤️`;
             const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
             window.open(waUrl, '_blank');
@@ -2065,7 +2124,7 @@
                 alert("Generating your referral link. Please try in 1 second!");
                 return;
             }
-            const referralUrl = `https://lifesaver.qd.je/auth.html?ref=${encodeURIComponent(code)}`;
+            const referralUrl = `https://life-saver-care.vercel.app/auth.html?ref=${encodeURIComponent(code)}`;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(referralUrl).then(() => {
                     const textSpan = document.getElementById("copyLinkText");
@@ -2320,20 +2379,21 @@
                             attributedReferrerUID = null;
                         }
 
+                        const selectedRegBg = (document.getElementById('registerBloodGroup')?.value || (scrapedDonorData && scrapedDonorData.bloodGroup) || '').trim();
                         const userPayload = {
                             name: name,
                             fullName: name,
                             email: email,
                             password: password,
                             phone: (scrapedDonorData && scrapedDonorData.phone) || '',
-                            bloodGroup: (scrapedDonorData && scrapedDonorData.bloodGroup) || '',
-                            blood_group: (scrapedDonorData && scrapedDonorData.bloodGroup) || '',
+                            bloodGroup: selectedRegBg,
+                            blood_group: selectedRegBg,
                             city: (scrapedDonorData && scrapedDonorData.city) || '',
                             location: (scrapedDonorData && scrapedDonorData.city) || '',
                             referralCode: myReferralCode,
                             referredBy: attributedReferrerUID ? refCodeFromStorage : null,
                             referralCount: 0,
-                            isBloodDonor: !!scrapedDonorData,
+                            isBloodDonor: !!scrapedDonorData || !!selectedRegBg,
                             accountType: 'public',
                             createdAt: new Date().toISOString(),
                             timestamp: Date.now()
@@ -2787,7 +2847,10 @@
             if (inlineName && document.activeElement !== inlineName) inlineName.value = profile.name || '';
 
             const inlineBg = document.getElementById("inlineProfileBloodGroup");
-            if (inlineBg && document.activeElement !== inlineBg) inlineBg.value = (profile.bloodGroup && profile.bloodGroup !== 'Not Recorded' && profile.bloodGroup !== 'Not Set') ? profile.bloodGroup : '';
+            if (inlineBg && document.activeElement !== inlineBg) {
+                const formatted = (typeof formatSingleBloodGroup === 'function') ? formatSingleBloodGroup(profile.bloodGroup) : profile.bloodGroup;
+                inlineBg.value = (typeof isValidBloodGroup === 'function' && isValidBloodGroup(profile.bloodGroup)) ? formatted : (profile.bloodGroup || '');
+            }
 
             const inlineCity = document.getElementById("inlineProfileCity");
             if (inlineCity && document.activeElement !== inlineCity) inlineCity.value = (profile.city && profile.city !== 'Not Specified') ? profile.city : '';
@@ -2887,6 +2950,29 @@
             } catch (err) {
                 console.error("updateAccountPrivacyDirectly error:", err);
             }
+        };
+
+        window.setInlineBloodGroup = function(bg) {
+            const el = document.getElementById("inlineProfileBloodGroup");
+            if (el) {
+                el.value = bg;
+            }
+        };
+
+        window.openCertificateInNewPage = function(type) {
+            const isBlood = (type !== 'organ');
+            const certId = isBlood
+                ? (document.getElementById('dashPanelBloodCertId')?.textContent?.trim() || window.userBloodDonorData?.certId || document.getElementById('dashBloodCertId')?.textContent?.trim() || 'LSC-BD-2026-00482')
+                : (document.getElementById('dashPanelOrganCertId')?.textContent?.trim() || window.userOrganDonorData?.certId || document.getElementById('dashOrganCertId')?.textContent?.trim() || 'LSC-OD-2026-00482');
+            const name = isBlood
+                ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || window.currentActiveUserProfile?.name || 'Member')
+                : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || window.currentActiveUserProfile?.name || 'Member');
+            const bg = (typeof formatSingleBloodGroup === 'function') ? formatSingleBloodGroup(isBlood
+                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || window.currentActiveUserProfile?.bloodGroup || 'A+')
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || window.currentActiveUserProfile?.bloodGroup || 'A+')) : 'A+';
+            
+            const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
+            window.open(verifyUrl, '_blank');
         };
 
         // ==========================================
@@ -3456,7 +3542,7 @@
                 let myRequests = [];
                 Object.keys(data).forEach(k => {
                     const r = data[k];
-                    if (r.receiverUid === user.uid || (r.receiverEmail && r.receiverEmail === user.email)) {
+                    if (r.receiverUid === user.uid || (r.receiverEmail && user.email && r.receiverEmail.trim().toLowerCase() === user.email.trim().toLowerCase())) {
                         myRequests.push({ ...r, key: k });
                     }
                 });
@@ -3492,7 +3578,7 @@
                         actionsHtml = `
                             <div class="flex items-center gap-2 shrink-0">
                                 <span class="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">Accepted</span>
-                                <a href="message.html?to=${encodeURIComponent(req.senderUid || '')}&name=${encodeURIComponent(req.senderName || 'Member')}&email=${encodeURIComponent(req.senderEmail || '')}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
+                                <a href="message.html?to=${encodeURIComponent(req.senderUid || '')}&name=${encodeURIComponent(req.senderName || 'Member')}&email=${encodeURIComponent(req.senderEmail || '')}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
                                     <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                                 </a>
                                 <button onclick="openReplyMessageModal('${escapeHtml(req.senderUid)}', '${escapeHtml(req.senderName || 'Member')}', '${escapeHtml(req.senderEmail || '')}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 shadow-sm border border-slate-200 dark:border-slate-700">
@@ -3628,7 +3714,7 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
-                            <a href="${continueChatUrl}" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-4 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer" title="Open live two-way chat">
+                            <a href="${continueChatUrl}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-4 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-blue-500/20 cursor-pointer" title="Open live two-way chat">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                             </a>
                             ${replyBtnHtml}
@@ -4378,7 +4464,7 @@
                     return base.endsWith('/') ? base : (base + '/');
                 }
             } catch(e) {}
-            return 'https://lifesaver.qd.je/';
+            return 'https://life-saver-cyan.vercel.app/';
         }
 
         function getCertificateVerifyUrl(id, bg, name) {
@@ -4457,7 +4543,7 @@
                 if (!bloodDonor && (isValidBloodGroup(profileBg) || userProfile?.isBloodDonor)) {
                     bloodDonor = {
                         name: profileName,
-                        bloodGroup: isValidBloodGroup(profileBg) ? formatSingleBloodGroup(profileBg) : 'O+',
+                        bloodGroup: isValidBloodGroup(profileBg) ? formatSingleBloodGroup(profileBg) : 'A+',
                         credentialID: fallbackCertIdBD,
                         donationCount: 1
                     };
@@ -4465,7 +4551,7 @@
 
                 if (bloodDonor && bloodDonor.name) {
                     const donorName = profileName || bloodDonor.name;
-                    const bloodGroup = resolveBestBloodGroup(bloodDonor.bloodGroup, profileBg);
+                    const bloodGroup = resolveBestBloodGroup(bloodDonor.bloodGroup, bloodDonor.bg, profileBg, 'A+');
                     const certId = bloodDonor.credentialID || bloodDonor.certificateID || bloodDonor.donorID || fallbackCertIdBD;
                     const donationCount = parseInt(bloodDonor.donationCount !== undefined ? bloodDonor.donationCount : (bloodDonor.timesDonated || 0), 10);
                     const tier = getMilestoneTier(donationCount);
@@ -4604,7 +4690,7 @@
 
                 if (organDonor && organDonor.name) {
                     const donorName = profileName || organDonor.name;
-                    const bloodGroup = resolveBestBloodGroup(organDonor.bloodGroup, window.userBloodDonorData?.bloodGroup, profileBg);
+                    const bloodGroup = resolveBestBloodGroup(organDonor.bloodGroup, organDonor.bg, window.userBloodDonorData?.bloodGroup, profileBg, 'A+');
                     const certId = organDonor.credentialID || organDonor.certificateID || organDonor.donorID || fallbackCertIdOD;
 
                     // Sync back to Firebase if older record had outdated bloodGroup (only with validated blood groups)
@@ -4770,12 +4856,18 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
 
+                // Clear/cover blood group spot on canvas first
+                ctx.fillStyle = '#95090e';
+                ctx.beginPath();
+                ctx.roundRect(265, 521, 70, 43, 6);
+                ctx.fill();
+
                 // Draw Single Blood Group in badge
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = '#ffffff';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(bg, 292, 535);
+                ctx.fillText(bg, 300, 542);
 
                 // Draw QR Code
                 const drawQR = (qrSource) => {
@@ -4933,12 +5025,16 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
 
+                // Clear/cover blood group spot on canvas first
+                ctx.fillStyle = '#fcfdff';
+                ctx.fillRect(701, 502, 47, 46);
+
                 // Draw Single Blood Group
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = '#0f4c81';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(bg, 722, 515);
+                ctx.fillText(bg, 725, 525);
 
                 // Draw QR Code
                 const drawQR = (qrSource) => {
@@ -5023,8 +5119,8 @@
                 : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
 
             const bg = formatSingleBloodGroup(isBlood
-                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
-                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+'));
+                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'A+')
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'A+'));
 
             const verifyUrl = getCertificateVerifyUrl(certId);
 
@@ -5102,8 +5198,8 @@
                 ? (document.getElementById('dashPanelBloodCertName')?.textContent?.trim() || window.userBloodDonorData?.name || profile.name || 'Member')
                 : (document.getElementById('dashPanelOrganCertName')?.textContent?.trim() || window.userOrganDonorData?.name || profile.name || 'Member');
             const bg = formatSingleBloodGroup(isBlood
-                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'O+')
-                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'O+'));
+                ? (document.getElementById('dashPanelBloodCertBg')?.textContent?.trim() || window.userBloodDonorData?.bloodGroup || profile.bloodGroup || 'A+')
+                : (document.getElementById('dashPanelOrganCertBg')?.textContent?.trim() || window.userOrganDonorData?.bloodGroup || profile.bloodGroup || 'A+'));
             const verifyUrl = getCertificateVerifyUrl(certId);
 
             return `Dear Recipient,\n\n` +
@@ -5225,7 +5321,10 @@
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                .then(reg => {
+                    reg.update();
+                    console.log('PWA Service Worker registered:', reg.scope);
+                })
                 .catch(err => console.warn('PWA Service Worker registration failed:', err));
         }
     </script>

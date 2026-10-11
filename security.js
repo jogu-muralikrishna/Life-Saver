@@ -519,10 +519,10 @@ window.toggleSOS = toggleSOS;
 window.ensureSOSModal = ensureSOSModal;
 
 
-// Universal AI Triage Direct Page Opener (Opens dedicated AI Triage page directly)
+// Universal AI Triage Opener (Navigates directly to dedicated ai-triage.html page at top)
 function openTriageModal(defaultTab) {
     const targetUrl = defaultTab ? `ai-triage.html?tab=${encodeURIComponent(defaultTab)}` : "ai-triage.html";
-    window.location.href = targetUrl;
+    window.open(targetUrl, '_blank');
 }
 window.openTriageModal = openTriageModal;
 
@@ -767,11 +767,11 @@ const i18nDict = {
  * Apply Site-wide Language Translation
  */
 function applySiteLanguage(lang) {
-    const targetLang = (lang && i18nDict[lang]) ? lang : 'EN';
-    localStorage.setItem('site_lang', targetLang);
-    const dict = i18nDict[targetLang];
+    const targetLang = 'EN';
+    localStorage.setItem('site_lang', 'EN');
+    const dict = (i18nDict && i18nDict['EN']) ? i18nDict['EN'] : {};
 
-    // Update all elements with data-i18n attribute
+    // Update all elements with data-i18n attribute to English
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
@@ -783,7 +783,7 @@ function applySiteLanguage(lang) {
         }
     });
 
-    // Backwards-compatibility element direct updates
+    // Backwards-compatibility element direct updates in English
     const titleEl = document.getElementById("txtHeroTitle");
     if (titleEl && dict.hero_title) titleEl.innerHTML = dict.hero_title;
 
@@ -800,31 +800,19 @@ function applySiteLanguage(lang) {
         window.switchProtocol(window.currentProtocolType || 'cpr');
     }
 
-    // Update active state indicator on language pill buttons
-    document.querySelectorAll('.lang-pill').forEach(btn => {
-        const btnLang = btn.getAttribute('data-lang');
-        if (btnLang === targetLang) {
-            btn.classList.add('bg-red-600', 'text-white');
-            btn.classList.remove('text-slate-700', 'dark:text-slate-200');
-        } else {
-            btn.classList.remove('bg-red-600', 'text-white');
-            btn.classList.add('text-slate-700', 'dark:text-slate-200');
-        }
-    });
-
     if (window.lucide) {
         lucide.createIcons();
     }
 }
 
 function changeLanguage(lang) {
-    applySiteLanguage(lang);
+    applySiteLanguage('EN');
 }
 
-// Auto-apply saved language preference on DOM ready
+// Auto-apply English language permanently on DOM ready
 document.addEventListener('DOMContentLoaded', function () {
-    const savedLang = localStorage.getItem('site_lang') || 'EN';
-    applySiteLanguage(savedLang);
+    localStorage.setItem('site_lang', 'EN');
+    applySiteLanguage('EN');
 });
 
 /* ==========================================================================

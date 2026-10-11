@@ -2,8 +2,9 @@
   "rules": {
     "users": {
       ".read": true,
+      ".write": true,
       "$uid": {
-        ".write": "auth != null && (auth.uid === $uid || !data.exists())"
+        ".write": true
       }
     },
     "donors": {
@@ -18,14 +19,12 @@
     },
     "blood_requests": {
       ".read": true,
-      ".indexOn": ["bloodGroup", "city", "status", "timestamp", "userId"],
-      "$requestId": {
-        ".write": "(!data.exists() && auth != null) || (data.exists() && auth != null && (data.child('userId').val() === auth.uid || data.child('userEmail').val() === auth.token.email || root.child('sub_admins').child(auth.uid).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin' || auth.token.email === 'jogumuralikrishna55@gmail.com'))"
-      }
+      ".write": true,
+      ".indexOn": ["bloodGroup", "city", "status", "timestamp", "userId"]
     },
     "partner_hospitals": {
       ".read": true,
-      ".write": "auth != null",
+      ".write": true,
       ".indexOn": ["city", "status"]
     },
     "admin_audit_logs": {
@@ -65,6 +64,18 @@
       ".write": true
     },
     "referral_codes": {
+      ".read": true,
+      ".write": true
+    },
+    "recycle_bin": {
+      ".read": true,
+      ".write": true
+    },
+    "contact_messages": {
+      ".read": true,
+      ".write": true
+    },
+    "admins": {
       ".read": true,
       ".write": true
     }

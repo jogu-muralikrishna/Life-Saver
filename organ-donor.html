@@ -586,7 +586,9 @@
         </div>
     </div>
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, push, onValue, get, update } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, get, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -849,11 +851,38 @@
             const currentUser = auth.currentUser;
             const allowContactChecked = document.getElementById('allowContact') ? document.getElementById('allowContact').checked : false;
 
+            // Capture live GPS location & device details for legal audit and statutory compliance
+            let liveLocation = {
+                captured: false,
+                latitude: null,
+                longitude: null,
+                accuracy: null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+
+            if (navigator.geolocation) {
+                try {
+                    const pos = await new Promise((resolve) => {
+                        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 4500, enableHighAccuracy: true });
+                    });
+                    if (pos && pos.coords) {
+                        liveLocation.captured = true;
+                        liveLocation.latitude = Number(pos.coords.latitude.toFixed(6));
+                        liveLocation.longitude = Number(pos.coords.longitude.toFixed(6));
+                        liveLocation.accuracy = Math.round(pos.coords.accuracy);
+                    }
+                } catch(geoErr) {
+                    console.warn("Geolocation capture warning:", geoErr);
+                }
+            }
+
             const pledgeData = {
                 uid: currentUser ? currentUser.uid : null,
                 userEmail: currentUser ? currentUser.email : email,
                 name: name,
                 bloodGroup: singleBg,
+                bg: singleBg,
                 age: document.getElementById('age').value,
                 dob: document.getElementById('dob').value,
                 organsPledged: organs,
@@ -865,6 +894,9 @@
                 smokingHabit: smoking,
                 medicalConditions: medical,
                 surgeryInfection: document.getElementById('surgeryInfection').value,
+                liveLocation: liveLocation,
+                coordinates: liveLocation.latitude ? `${liveLocation.latitude},${liveLocation.longitude}` : (city || 'Logged'),
+                legalNotice: "THOTA 1994 statutory consent and location recorded",
                 govLegalPermissions: {
                     statutoryGovernmentConsent: true,
                     thota1994Compliant: true,
@@ -907,6 +939,7 @@
                             organDonor: {
                                 name: name,
                                 bloodGroup: singleBg,
+                                bg: singleBg,
                                 organsPledged: organs,
                                 credentialID: credentialID,
                                 pledgeDate: pledgeData.pledgeDate,
@@ -926,6 +959,7 @@
                 localStorage.setItem('organDonorData', JSON.stringify({
                     name: name,
                     bloodGroup: singleBg,
+                    bg: singleBg,
                     organsPledged: organs,
                     credentialID: credentialID,
                     pledgeDate: pledgeData.pledgeDate
@@ -960,7 +994,7 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://lifesaver.qd.je/';
+                return 'https://life-saver-cyan.vercel.app/';
             }
 
             function getCertificateVerifyUrl(id, bg, donorName) {
@@ -978,9 +1012,17 @@
                 passQrEl.src = 'scanner-qr.png';
             }
 
-            document.getElementById("passModal").classList.remove("hidden");
-            document.getElementById("passModal").classList.add("flex");
-            document.body.style.overflow = "hidden";
+            // Open Official Pledge Certificate in a NEW PAGE with donor details
+            const certNewTab = window.open(verifyUrl, '_blank');
+            if (!certNewTab || certNewTab.closed || typeof certNewTab.closed === 'undefined') {
+                document.getElementById("passModal").classList.remove("hidden");
+                document.getElementById("passModal").classList.add("flex");
+                document.body.style.overflow = "hidden";
+            } else {
+                document.getElementById("passModal").classList.remove("hidden");
+                document.getElementById("passModal").classList.add("flex");
+                document.body.style.overflow = "hidden";
+            }
             if (window.lucide) lucide.createIcons();
             
             document.getElementById('organForm').reset();
@@ -989,7 +1031,7 @@
         });
 
         function formatSingleBloodGroup(rawBg) {
-            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            if (!rawBg || typeof rawBg !== 'string') return 'A+';
             const clean = rawBg.trim();
             const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
             if (match) {
@@ -999,15 +1041,15 @@
             if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
                 return singleWord;
             }
-            return 'O+';
+            return 'A+';
         }
 
         window.previewOrganCertificate = function() {
             const credentialID = "LSC-OD-2026-" + Math.floor(10000 + Math.random() * 90000);
-            const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
+            const rawBg = document.getElementById('bloodGroup')?.value || 'A+';
             const singleBg = formatSingleBloodGroup(rawBg);
-            const enteredName = document.getElementById('name')?.value?.trim() || 'Your Name';
-            const enteredOrgans = document.getElementById('organsPledged')?.value || 'All Organs & Tissues';
+            const enteredName = document.getElementById('name')?.value?.trim() || 'Hero Organ Pledger';
+            const enteredOrgans = document.getElementById('organsPledged')?.value || 'All Vital Organs & Tissues';
 
             const passNameEl = document.getElementById("passName");
             if (passNameEl) passNameEl.textContent = enteredName;
@@ -1023,11 +1065,18 @@
                 passQrEl.src = 'scanner-qr.png';
             }
 
-            window.lockBodyScroll();
-            const modal = document.getElementById("passModal");
-            if (modal) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
+            // Open Instant Preview in a NEW PAGE as requested
+            const previewUrl = `certificate.html?id=${encodeURIComponent(credentialID)}&name=${encodeURIComponent(enteredName)}&bg=${encodeURIComponent(singleBg)}&organs=${encodeURIComponent(enteredOrgans)}&preview=1`;
+            const previewWindow = window.open(previewUrl, '_blank');
+
+            // Fallback to in-page modal if popup was blocked
+            if (!previewWindow || previewWindow.closed || typeof previewWindow.closed === 'undefined') {
+                window.lockBodyScroll();
+                const modal = document.getElementById("passModal");
+                if (modal) {
+                    modal.classList.remove("hidden");
+                    modal.classList.add("flex");
+                }
             }
             if (window.lucide) lucide.createIcons();
         };
@@ -1042,7 +1091,7 @@
             const id = document.getElementById("passID").textContent;
             const bg = document.getElementById("passBg").textContent;
             const name = document.getElementById("passName").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             navigator.clipboard.writeText(verifyUrl).then(() => {
                 alert("Organ Certificate Verification Link copied: " + verifyUrl);
@@ -1053,7 +1102,7 @@
             const id = document.getElementById("passID").textContent;
             const bg = document.getElementById("passBg").textContent;
             const name = document.getElementById("passName").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             const msg = `💙 *LifeSaver-Care Organ Donation Pledge Certificate*\n\n` +
                 `Pledger: *${name}*\n` +
@@ -1093,7 +1142,7 @@
                                 ${p.phone ? `<div class="flex items-center gap-1">📞 <a href="tel:${escapeHtml(p.phone)}" class="font-bold hover:text-purple-600 text-slate-900 dark:text-white">${escapeHtml(p.phone)}</a></div>` : ''}
                                 ${p.email ? `<div class="flex items-center gap-1 font-mono text-[11px]">✉️ <a href="mailto:${escapeHtml(p.email)}" class="hover:text-purple-600 text-slate-600 dark:text-slate-400">${escapeHtml(p.email)}</a></div>` : ''}
                             </div>
-                            <a href="message.html?to=${encodeURIComponent(p.uid || p.userId || p.key || '')}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(p.email || p.userEmail || '')}&bg=${encodeURIComponent(bloodGroup)}&city=${encodeURIComponent(city)}&role=donor" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-1.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
+                            <a href="message.html?to=${encodeURIComponent(p.uid || p.userId || p.key || '')}&name=${encodeURIComponent(donorName)}&email=${encodeURIComponent(p.email || p.userEmail || '')}&bg=${encodeURIComponent(bloodGroup)}&city=${encodeURIComponent(city)}&role=donor" target="_blank" rel="noopener noreferrer" class="bg-purple-600 hover:bg-purple-700 text-white font-black py-1.5 px-3.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm shrink-0">
                                 <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Message on LifeSaver
                             </a>
                         </div>

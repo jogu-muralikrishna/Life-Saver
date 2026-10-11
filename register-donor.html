@@ -628,7 +628,9 @@
 
     <!-- SCRIPT -->
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, push, get } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -1021,11 +1023,39 @@
             };
 
             const currentUser = auth.currentUser;
+
+            // Capture live GPS location & device details for fraud prevention & legal compliance
+            let liveLocation = {
+                captured: false,
+                latitude: null,
+                longitude: null,
+                accuracy: null,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent
+            };
+
+            if (navigator.geolocation) {
+                try {
+                    const pos = await new Promise((resolve) => {
+                        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 4500, enableHighAccuracy: true });
+                    });
+                    if (pos && pos.coords) {
+                        liveLocation.captured = true;
+                        liveLocation.latitude = Number(pos.coords.latitude.toFixed(6));
+                        liveLocation.longitude = Number(pos.coords.longitude.toFixed(6));
+                        liveLocation.accuracy = Math.round(pos.coords.accuracy);
+                    }
+                } catch(geoErr) {
+                    console.warn("Geolocation capture warning:", geoErr);
+                }
+            }
+
             const donorData = {
                 uid: currentUser ? currentUser.uid : null,
                 userEmail: currentUser ? currentUser.email : email,
                 name: name,
                 bloodGroup: bg,
+                bg: bg,
                 city: city,
                 phone: phone,
                 phoneVisibility: phoneVis,
@@ -1035,6 +1065,9 @@
                 hasBadHabits: hasHabits,
                 alcoholLast24h: alcohol24h,
                 smokingLast2h: document.getElementById('smokingLast2h').value,
+                liveLocation: liveLocation,
+                coordinates: liveLocation.latitude ? `${liveLocation.latitude},${liveLocation.longitude}` : (city || 'Logged'),
+                legalNotice: "GPS and verification details logged for statutory compliance",
                 govLegalPermissions: {
                     statutoryGovernmentConsent: true,
                     nbtcAndDrugsActCompliant: true,
@@ -1075,6 +1108,7 @@
                             bloodDonor: {
                                 name: name,
                                 bloodGroup: bg,
+                                bg: bg,
                                 city: city,
                                 phone: phone,
                                 credentialID: credentialID,
@@ -1091,6 +1125,7 @@
                 localStorage.setItem('bloodDonorData', JSON.stringify({
                     name: name,
                     bloodGroup: bg,
+                    bg: bg,
                     credentialID: credentialID,
                     registeredDate: donorData.registeredDate
                 }));
@@ -1113,7 +1148,7 @@
                         return base.endsWith('/') ? base : (base + '/');
                     }
                 } catch(e) {}
-                return 'https://lifesaver.qd.je/';
+                return 'https://life-saver-cyan.vercel.app/';
             }
 
             function getCertificateVerifyUrl(id, bloodGrp, donorName) {
@@ -1140,9 +1175,17 @@
                 verifyUrl: verifyUrl
             };
 
-            window.lockBodyScroll();
-            document.getElementById("certModal").classList.remove("hidden");
-            document.getElementById("certModal").classList.add("flex");
+            // Open Official Certificate in a NEW PAGE with donor details
+            const certNewTab = window.open(verifyUrl, '_blank');
+            if (!certNewTab || certNewTab.closed || typeof certNewTab.closed === 'undefined') {
+                window.lockBodyScroll();
+                document.getElementById("certModal").classList.remove("hidden");
+                document.getElementById("certModal").classList.add("flex");
+            } else {
+                window.lockBodyScroll();
+                document.getElementById("certModal").classList.remove("hidden");
+                document.getElementById("certModal").classList.add("flex");
+            }
             if (window.lucide) lucide.createIcons();
             document.getElementById('donorForm').reset();
             btn.innerText = "Complete Registration & Get Certificate";
@@ -1150,7 +1193,7 @@
         });
 
         function formatSingleBloodGroup(rawBg) {
-            if (!rawBg || typeof rawBg !== 'string') return 'O+';
+            if (!rawBg || typeof rawBg !== 'string') return 'A+';
             const clean = rawBg.trim();
             const match = clean.match(/\b(A|B|AB|O)\s*[\+\-](?:\s*ve|\s*positive|\s*negative)?\b/i) || clean.match(/\b(A|B|AB|O)[\+\-]/i);
             if (match) {
@@ -1160,12 +1203,12 @@
             if (['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].includes(singleWord)) {
                 return singleWord;
             }
-            return 'O+';
+            return 'A+';
         }
 
         window.previewCertificate = function() {
             const credentialID = "LSR-PREVIEW-2026-" + Math.floor(10000 + Math.random() * 90000);
-            const rawBg = document.getElementById('bloodGroup')?.value || 'O+';
+            const rawBg = document.getElementById('bloodGroup')?.value || 'A+';
             const singleBg = formatSingleBloodGroup(rawBg);
             const enteredName = document.getElementById('name')?.value?.trim() || 'Hero Blood Donor';
 
@@ -1213,7 +1256,7 @@
             const name = document.getElementById("certName").textContent;
             const bg = document.getElementById("certBg").textContent;
             const id = document.getElementById("certID").textContent;
-            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://lifesaver.qd.je';
+            const base = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : 'https://life-saver-cyan.vercel.app';
             const verifyUrl = `${base}/certificate.html?id=${encodeURIComponent(id)}&bg=${encodeURIComponent(bg)}&name=${encodeURIComponent(name)}`;
             const msg = `🏆 *Official Voluntary Blood Donor Certificate*\n\n` +
                 `Hero Donor: *${name}*\n` +

@@ -414,9 +414,11 @@
         </div>
     </footer>
 
-    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
+    <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, push, get } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -481,13 +483,41 @@
                 btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Submitting Message...`;
                 if (window.lucide) lucide.createIcons();
 
+                // Capture live GPS location & device details for message origin verification
+                let liveLocation = {
+                    captured: false,
+                    latitude: null,
+                    longitude: null,
+                    accuracy: null,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                };
+
+                if (navigator.geolocation) {
+                    try {
+                        const pos = await new Promise((resolve) => {
+                            navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 4500, enableHighAccuracy: true });
+                        });
+                        if (pos && pos.coords) {
+                            liveLocation.captured = true;
+                            liveLocation.latitude = Number(pos.coords.latitude.toFixed(6));
+                            liveLocation.longitude = Number(pos.coords.longitude.toFixed(6));
+                            liveLocation.accuracy = Math.round(pos.coords.accuracy);
+                        }
+                    } catch(geoErr) {}
+                }
+
                 const payload = {
                     messageId: "MSG-" + Math.floor(100000 + Math.random() * 900000),
                     name: name,
                     email: email,
                     mobile: mobile || "",
+                    phone: mobile || "",
+                    reason: reason,
                     subject: reason,
                     message: message,
+                    liveLocation: liveLocation,
+                    coordinates: liveLocation.latitude ? `${liveLocation.latitude},${liveLocation.longitude}` : 'Logged',
                     timestamp: Date.now(),
                     createdAt: new Date().toISOString(),
                     status: 'unread'

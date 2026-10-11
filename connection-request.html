@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Connection Request — LifeSaver-Care</title>
+    <meta name="description" content="Send a secure and respectful connection request to contact private voluntary donors on LifeSaver-Care.">
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+        });
+        window.addEventListener('load', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+
+<body class="min-h-screen flex flex-col justify-between bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white">
+
+    <!-- NAVBAR -->
+    <nav class="glass-nav sticky top-0 z-40 px-3 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4 relative">
+            
+            <!-- BRAND LOGO -->
+            <div class="flex-1 flex items-center justify-start shrink-0">
+                <a href="index.html" class="flex items-center gap-1.5 sm:gap-2 text-red-600 font-black text-base sm:text-xl md:text-2xl tracking-tight shrink-0">
+                    <div class="bg-red-600 text-white p-1 sm:p-2 rounded-xl flex items-center justify-center shadow-md shadow-red-500/20">
+                        <i data-lucide="droplet" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                    </div>
+                    <span class="tracking-tight">Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+            </div>
+
+            <!-- TOP-MIDDLE EMERGENCY SOS & AI TRIAGE ACTION CENTER -->
+            <div class="flex items-center justify-center gap-1.5 sm:gap-2.5 shrink-0 mx-auto">
+                <button type="button" onclick="toggleSOS()" class="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-lg shadow-red-600/30 hover:shadow-red-600/50 border border-red-500 transition-all cursor-pointer shrink-0" title="Emergency SOS 108 Alert">
+                    <i data-lucide="phone-call" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white animate-pulse"></i>
+                    <span class="tracking-wider uppercase font-black">SOS 108</span>
+                </button>
+
+                <a href="ai-triage.html" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black shadow-md shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-500/90 transition-all cursor-pointer shrink-0" title="AI Medical & Triage Assistant (Opens in New Page)">
+                    <i data-lucide="bot" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                    <span>AI Triage</span>
+                </a>
+            </div>
+
+            <!-- RIGHT CONTROLS & NAVIGATION -->
+            <div class="flex-1 flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
+                <a href="find-donor.html" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-red-500"></i>
+                    <span>Donors</span>
+                </a>
+
+                <a href="auth.html" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-blue-500"></i>
+                    <span>Account</span>
+                </a>
+
+                <button type="button" onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition cursor-pointer" title="Toggle Dark/Light Mode">
+                    <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                </button>
+
+                <a href="index.html" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 transition" title="Back to Home">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN PAGE CONTAINER — POSITIONED AT TOP OF THE MIDDLE WITH COMPLETE VISIBILITY -->
+    <main class="max-w-xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 pb-12 w-full flex-1 flex flex-col items-center">
+        
+        <!-- CARD CONTAINER -->
+        <div class="glass-card w-full p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900 relative my-0 animate-slide-up text-slate-900 dark:text-white">
+            
+            <!-- HEADER -->
+            <div class="text-center mb-5">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-500/25 border border-purple-400/40">
+                    <i data-lucide="shield" class="w-7 h-7"></i>
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Request to Connect with Donor</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-xs mt-1.5 max-w-sm mx-auto">
+                    This voluntary donor has a private profile. Submit a respectful connection request to initiate secure communication.
+                </p>
+            </div>
+
+            <!-- TARGET DONOR DETAILS BADGE -->
+            <div class="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 mb-5 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <i data-lucide="user-check" class="w-3.5 h-3.5 text-purple-500"></i> Target Member
+                    </span>
+                    <span id="targetDonorBadge" class="text-[10px] bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 px-2.5 py-0.5 rounded-full font-black border border-purple-300 dark:border-purple-800">
+                        🔒 Private Profile
+                    </span>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <div>
+                        <h2 id="targetDonorName" class="text-base font-extrabold text-purple-700 dark:text-purple-400">Loading Donor...</h2>
+                        <p id="targetDonorLocation" class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
+                            <i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i> <span id="lblDonorCity">Emergency Area</span>
+                        </p>
+                    </div>
+                    <span id="targetDonorBloodGroup" class="bg-red-600 text-white font-black text-sm px-3 py-1 rounded-xl shadow-sm">
+                        O+
+                    </span>
+                </div>
+            </div>
+
+            <!-- CONNECTION REQUEST FORM -->
+            <form id="connectionRequestForm" onsubmit="handleSendConnectionSubmit(event)" class="space-y-4">
+                <input type="hidden" id="targetDonorUid">
+                <input type="hidden" id="targetDonorEmail">
+
+                <!-- SENDER IDENTITY DETAILS -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Full Name *</label>
+                        <input type="text" id="reqSenderName" required placeholder="e.g. Ramesh Kumar" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Your Verified Email *</label>
+                        <input type="email" id="reqSenderEmail" required placeholder="you@gmail.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-2.5 rounded-xl text-xs outline-none focus:border-purple-500 font-bold">
+                    </div>
+                </div>
+
+                <!-- PURPOSE / REASON -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span>Message / Medical Requirement *</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Confidential & Respectful</span>
+                    </label>
+                    <textarea id="reqSenderMessage" rows="4" required placeholder="State your urgent clinical requirement, hospital name, and blood group needed..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs outline-none focus:border-purple-500 font-medium leading-relaxed">Hello, I am reaching out through the LifeSaver Voluntary Network regarding an urgent medical requirement for blood. Could you please let us know if you or someone you know might be available to donate? Thank you for your noble voluntary support!</textarea>
+                </div>
+
+                <!-- PRIVACY PROTECTION NOTICE -->
+                <div class="p-3 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900/50 text-[11px] text-purple-900 dark:text-purple-300 flex items-start gap-2">
+                    <i data-lucide="lock" class="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5"></i>
+                    <span>Personal contact numbers remain protected. Once accepted by the donor, you can communicate directly inside your LifeSaver inbox.</span>
+                </div>
+
+                <!-- LIVE FEEDBACK BANNER -->
+                <div id="requestFeedback" class="hidden text-xs p-3.5 rounded-xl font-bold"></div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="flex items-center gap-3 pt-2">
+                    <a href="find-donor.html" class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition text-center cursor-pointer">
+                        Back to Donors
+                    </a>
+                    <button type="submit" id="btnSubmitConnection" class="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-95 text-white font-bold py-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/25 cursor-pointer">
+                        <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                        <span id="lblSubmitBtnText">Send Connection Request</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p>&copy; 2026 LifeSaver-Care. Rapid Emergency Healthcare Platform.</p>
+    </footer>
+
+    <!-- FIREBASE MODULE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Read URL Query Params
+        const params = new URLSearchParams(window.location.search);
+        const targetUid = params.get('to') || params.get('uid') || '';
+        const targetName = params.get('name') || 'Voluntary Donor';
+        const targetEmail = params.get('email') || '';
+        const targetBg = params.get('bg') || 'O+';
+        const targetCity = params.get('city') || 'Registered Area';
+
+        // Populate Target Donor UI
+        document.getElementById("targetDonorUid").value = targetUid;
+        document.getElementById("targetDonorEmail").value = targetEmail;
+        document.getElementById("targetDonorName").textContent = targetName;
+        document.getElementById("targetDonorBloodGroup").textContent = targetBg;
+        document.getElementById("lblDonorCity").textContent = targetCity;
+
+        // Auto-fill authenticated sender
+        let currentAuthUser = null;
+        onAuthStateChanged(auth, async (user) => {
+            currentAuthUser = user;
+            if (user) {
+                const nameInput = document.getElementById("reqSenderName");
+                const emailInput = document.getElementById("reqSenderEmail");
+                if (nameInput && !nameInput.value) {
+                    nameInput.value = user.displayName || '';
+                }
+                if (emailInput && !emailInput.value) {
+                    emailInput.value = user.email || '';
+                }
+            }
+        });
+
+        // Submit Connection Request
+        window.handleSendConnectionSubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("btnSubmitConnection");
+            const btnText = document.getElementById("lblSubmitBtnText");
+            const feedback = document.getElementById("requestFeedback");
+
+            btn.disabled = true;
+            btnText.textContent = "Submitting Request...";
+
+            const senderName = document.getElementById("reqSenderName").value.trim();
+            const senderEmail = document.getElementById("reqSenderEmail").value.trim();
+            const message = document.getElementById("reqSenderMessage").value.trim();
+            const receiverUid = document.getElementById("targetDonorUid").value.trim();
+            const receiverEmail = document.getElementById("targetDonorEmail").value.trim();
+            const receiverName = document.getElementById("targetDonorName").textContent.trim();
+
+            if (!currentAuthUser) {
+                feedback.className = "text-xs p-4 rounded-2xl font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800";
+                const redirectUri = encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search);
+                feedback.innerHTML = `⚠️ An account is required to send connection requests to private donors. Please <a href="auth.html?mode=register&redirect=${redirectUri}" class="underline font-black">create an account</a> or <a href="auth.html?mode=login&redirect=${redirectUri}" class="underline font-black">sign in</a> to continue.`;
+                feedback.classList.remove('hidden');
+                btn.disabled = false;
+                btnText.textContent = "Send Connection Request";
+                return;
+            }
+
+            const senderUid = currentAuthUser.uid;
+
+            // Self-request prevention
+            if ((receiverUid && senderUid === receiverUid) || 
+                (receiverEmail && currentAuthUser.email && receiverEmail.toLowerCase() === currentAuthUser.email.toLowerCase())) {
+                feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                feedback.textContent = "You cannot send a connection request to your own profile.";
+                feedback.classList.remove('hidden');
+                btn.disabled = false;
+                btnText.textContent = "Send Connection Request";
+                return;
+            }
+
+            // Duplicate pending request check
+            try {
+                const snap = await get(ref(db, 'contact_requests'));
+                if (snap.exists()) {
+                    const reqs = snap.val();
+                    const isPendingDup = Object.values(reqs).some(r => {
+                        const matchSender = r.senderUid === senderUid || (r.senderEmail && r.senderEmail.toLowerCase() === senderEmail.toLowerCase());
+                        const matchReceiver = (receiverUid && r.receiverUid === receiverUid) || (receiverEmail && r.receiverEmail && r.receiverEmail.toLowerCase() === receiverEmail.toLowerCase());
+                        return matchSender && matchReceiver && r.status === 'pending';
+                    });
+                    if (isPendingDup) {
+                        feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
+                        feedback.textContent = "You already have a pending connection request for this donor. Please wait for their response.";
+                        feedback.classList.remove('hidden');
+                        btn.disabled = true;
+                        btnText.textContent = "✓ Request Already Sent";
+                        return;
+                    }
+                }
+            } catch(checkErr) {
+                console.warn("Duplicate request check:", checkErr);
+            }
+
+            const requestId = "REQ-CON-" + Math.floor(100000 + Math.random() * 900000);
+            const payload = {
+                requestId: requestId,
+                senderUid: senderUid,
+                senderName: senderName,
+                senderEmail: senderEmail,
+                receiverUid: receiverUid || 'DONOR-PRIVATE',
+                receiverEmail: receiverEmail,
+                receiverName: receiverName,
+                message: message,
+                status: 'pending',
+                timestamp: Date.now(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await push(ref(db, 'contact_requests'), payload);
+                feedback.className = "text-xs p-4 rounded-2xl font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+                feedback.innerHTML = `✅ <strong>Connection request sent securely!</strong> The donor will review it in their LifeSaver dashboard.<br><div class="mt-3 flex items-center gap-2"><a href="find-donor.html" class="underline text-emerald-700 dark:text-emerald-300 font-extrabold">Return to Donors</a> • <a href="auth.html" class="underline text-emerald-700 dark:text-emerald-300 font-extrabold">View My Dashboard</a></div>`;
+                feedback.classList.remove('hidden');
+                btn.disabled = true;
+                btnText.textContent = "✓ Connection Request Sent";
+                if (typeof window.showLifeSaverMsg === 'function') {
+                    window.showLifeSaverMsg("✅ Connection request sent securely!", "success", "Request Sent");
+                }
+            } catch (err) {
+                feedback.className = "text-xs p-3.5 rounded-xl font-bold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                feedback.textContent = "Error sending request: " + err.message;
+                feedback.classList.remove('hidden');
+                btn.disabled = false;
+                btnText.textContent = "Send Connection Request";
+            } finally {
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        if (window.lucide) lucide.createIcons();
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifesaver-pwa-v8';
+const CACHE_NAME = 'lifesaver-pwa-v12';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -74,8 +74,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Same-origin assets: Network-first with cache fallback
+  const fetchPromise = (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html'))
+    ? fetch(event.request, { cache: 'no-cache' })
+    : fetch(event.request);
+
   event.respondWith(
-    fetch(event.request)
+    fetchPromise
       .then((response) => {
         if (response && response.status === 200) {
           const responseClone = response.clone();

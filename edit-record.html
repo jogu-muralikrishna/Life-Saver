@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Record - LifeSaver Admin Portal</title>
+    <script>
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="security.js" defer></script>
+</head>
+<body class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-24">
+
+    <!-- TOP HEADER -->
+    <header class="glass-nav sticky top-0 z-40 px-4 sm:px-8 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="admin.html" class="flex items-center gap-2 text-blue-600 font-black text-lg tracking-tight">
+                    <div class="bg-blue-600 text-white p-1.5 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    </div>
+                    <span>Life <span class="text-emerald-500">Saver</span></span>
+                </a>
+                <span class="text-slate-300 dark:text-slate-700 font-light">|</span>
+                <span class="text-xs font-mono font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-900" id="headerTypeBadge">RECORD EDITOR</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <a href="admin.html" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Back to Dashboard</span>
+                </a>
+                <button type="button" onclick="window.close()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer" title="Close this edit tab">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Close Tab</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+
+        <!-- RECORD META BANNER -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <span id="badgeCategory" class="text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400 border border-red-200 dark:border-red-900">
+                        Loading...
+                    </span>
+                    <span class="text-xs font-mono text-slate-500" id="recordKeyDisplay">ID: ...</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white" id="recordTitleDisplay">
+                    Loading Record Details...
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Direct live editing in new page. All changes are saved instantly to Firebase Realtime Database.
+                </p>
+            </div>
+
+            <!-- QUICK ACTIONS IN HEADER -->
+            <div class="flex items-center gap-2 flex-wrap shrink-0">
+                <button type="button" onclick="saveRecordLiveLocation()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span>📍 Save Live Location</span>
+                </button>
+                <button type="button" onclick="deleteCurrentRecord(false)" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Move to Recycle Bin">
+                    <i data-lucide="archive" class="w-4 h-4"></i>
+                    <span>🗑️ Move to Bin</span>
+                </button>
+                <button type="button" onclick="deleteCurrentRecord(true)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer" title="Permanently delete from database">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>❌ Permanent Delete</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NOTIFICATION / FEEDBACK BANNER -->
+        <div id="statusNotice" class="hidden mb-6 p-4 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
+            <span id="statusNoticeText"></span>
+            <button onclick="document.getElementById('statusNotice').classList.add('hidden')" class="opacity-70 hover:opacity-100 font-mono text-sm">✕</button>
+        </div>
+
+        <!-- DYNAMIC EDIT FORM -->
+        <form id="editRecordForm" onsubmit="handleSaveForm(event)" class="space-y-6">
+
+            <!-- SECTION 1: PRIMARY PROFILE / DETAILS -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i data-lucide="user-check" class="w-4 h-4 text-blue-600"></i>
+                    Primary Record Details
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="primaryFieldsGrid">
+                    <!-- Dynamic fields populated by JavaScript -->
+                    <div class="col-span-full py-8 text-center text-slate-400">Loading form fields...</div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: SPECIALIZED ATTRIBUTES (DONOR / ORGAN / HOSPITAL / USER / REQUEST) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4" id="specializedSection">
+                <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i data-lucide="sliders" class="w-4 h-4 text-purple-600"></i>
+                    Specific Attributes & Eligibility Settings
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="specializedFieldsGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- SECTION 3: LIVE LOCATION & LEGAL ANTI-FRAUD TRACKING -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border-2 border-blue-500/40 dark:border-blue-500/30 rounded-2xl shadow-sm space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-red-600 animate-pulse"></i>
+                        Live GPS Location & Legal Verification Trace
+                    </h3>
+                    <span class="text-[11px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-extrabold px-2.5 py-0.5 rounded-md border border-red-200 dark:border-red-900">
+                        ⚖️ Fraud Prevention & Legal Action Trace
+                    </span>
+                </div>
+
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Saves exact geographic coordinates with timestamps. In case of fraudulent claims, malicious posts, or cheating, this evidence is saved directly in Firebase Realtime Database for legal recourse.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Latitude</label>
+                        <input type="text" id="locLatitude" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 17.3850">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Longitude</label>
+                        <input type="text" id="locLongitude" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 78.4867">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">City / Region Reference</label>
+                        <input type="text" id="locCity" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Hyderabad, India">
+                    </div>
+                </div>
+
+                <!-- LIVE LOCATION PREVIEW & CAPTURE CONTROLS -->
+                <div class="flex items-center justify-between flex-wrap gap-3 bg-slate-50 dark:bg-slate-850 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                    <div id="liveLocationInfo" class="text-xs font-mono text-slate-600 dark:text-slate-300">
+                        No GPS coordinates logged yet.
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="captureLiveCoordinatesNow()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+                            <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+                            <span>Capture Current GPS</span>
+                        </button>
+                        <a id="btnOpenMaps" href="#" target="_blank" class="hidden bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            <span>View on Google Maps</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM SUBMIT BAR -->
+            <div class="sticky bottom-4 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+                    <span>Press "Save All Changes" to persist updates.</span>
+                </div>
+
+                <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="window.close()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer">
+                        Cancel & Close
+                    </button>
+                    <button type="submit" id="btnSaveSubmit" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-blue-500/25 transition flex items-center gap-2 cursor-pointer active:scale-95">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>💾 Save All Changes</span>
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </main>
+
+    <!-- FIREBASE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, get, set, update, push, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+            authDomain: "life-saver-be5cf.firebaseapp.com",
+            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "life-saver-be5cf",
+            storageBucket: "life-saver-be5cf.firebasestorage.app",
+            messagingSenderId: "549675407162",
+            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        const DB_BASE_URL = "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        // Query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const recordType = urlParams.get('type') || 'donors';
+        const recordId = urlParams.get('id');
+
+        window.currentRecordType = recordType;
+        window.currentRecordId = recordId;
+        window.loadedRecordData = {};
+
+        // Verify Super Admin Session
+        const role = localStorage.getItem('adminRole');
+        const adminEmail = localStorage.getItem('adminEmail');
+
+        if (!role || (role !== 'SUPER_ADMIN' && role !== 'SUB_ADMIN')) {
+            alert("Admin authentication required to access Record Editor.");
+            window.location.href = "admin-login.html";
+        }
+
+        // Check if Sub-Admin (Sub-Admin is read-only)
+        if (role === 'SUB_ADMIN') {
+            document.getElementById("btnSaveSubmit").disabled = true;
+            document.getElementById("btnSaveSubmit").classList.add("opacity-50", "cursor-not-allowed");
+            showNotice("warning", "Sub-Admin Read-Only Access: Viewing record in read-only mode.");
+        }
+
+        // Initialize Lucide icons
+        if (window.lucide) lucide.createIcons();
+
+        function showNotice(type, text) {
+            const el = document.getElementById("statusNotice");
+            const txt = document.getElementById("statusNoticeText");
+            if (!el || !txt) return;
+            el.className = "mb-6 p-4 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-sm " + 
+                (type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                 type === 'error' ? 'bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800' :
+                 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800');
+            txt.textContent = text;
+            el.classList.remove("hidden");
+        }
+        window.showNotice = showNotice;
+
+        // Fetch Record Data
+        async function fetchRecord() {
+            if (!recordId) {
+                showNotice("error", "Error: No record ID specified in URL.");
+                document.getElementById("recordTitleDisplay").textContent = "Record Not Found (Missing ID)";
+                return;
+            }
+
+            document.getElementById("recordKeyDisplay").textContent = `ID: ${recordId}`;
+
+            let data = null;
+            try {
+                const snap = await get(ref(db, `${recordType}/${recordId}`));
+                if (snap.exists()) {
+                    data = snap.val();
+                }
+            } catch (err) {
+                console.warn("SDK get failed, trying REST fallback:", err);
+            }
+
+            if (!data) {
+                try {
+                    const res = await fetch(`${DB_BASE_URL}/${recordType}/${recordId}.json`);
+                    if (res.ok) {
+                        data = await res.json();
+                    }
+                } catch (restErr) {
+                    console.error("REST fetch failed:", restErr);
+                }
+            }
+
+            if (!data) {
+                showNotice("error", `Record "${recordId}" could not be found in collection "${recordType}".`);
+                document.getElementById("recordTitleDisplay").textContent = "Record Not Found";
+                return;
+            }
+
+            window.loadedRecordData = data;
+            renderFormForRecord(recordType, data);
+        }
+
+        function renderFormForRecord(type, data) {
+            const badgeCategory = document.getElementById("badgeCategory");
+            const headerTypeBadge = document.getElementById("headerTypeBadge");
+            const recordTitleDisplay = document.getElementById("recordTitleDisplay");
+            const primaryGrid = document.getElementById("primaryFieldsGrid");
+            const specGrid = document.getElementById("specializedFieldsGrid");
+
+            let typeTitle = type.toUpperCase();
+            let recordTitle = data.name || data.hospitalName || data.userName || data.subject || data.email || `Record: ${recordId}`;
+
+            if (type === 'donors') {
+                typeTitle = '🩸 Blood Donor';
+                badgeCategory.className = "text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400 border border-red-200 dark:border-red-900";
+            } else if (type === 'organ_donors') {
+                typeTitle = '🫀 Organ Pledge Donor';
+                badgeCategory.className = "text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400 border border-purple-200 dark:border-purple-900";
+            } else if (type === 'users') {
+                typeTitle = '👤 Registered User';
+                badgeCategory.className = "text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900";
+            } else if (type === 'partner_hospitals') {
+                typeTitle = '🏥 Partner Hospital';
+                badgeCategory.className = "text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-400 border border-blue-200 dark:border-blue-900";
+            } else if (type === 'blood_requests') {
+                typeTitle = '🚨 Emergency Blood Request';
+                badgeCategory.className = "text-xs font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
+            }
+
+            badgeCategory.textContent = typeTitle;
+            headerTypeBadge.textContent = typeTitle;
+            recordTitleDisplay.textContent = recordTitle;
+
+            // Populate Primary Fields
+            primaryGrid.innerHTML = `
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name / Hospital Name</label>
+                    <input type="text" id="fName" value="${data.name || data.hospitalName || data.userName || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+                    <input type="email" id="fEmail" value="${data.email || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Contact Phone Number</label>
+                    <input type="tel" id="fPhone" value="${data.phone || data.mobileNumber || data.mobile || data.contactNumber || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Blood Group</label>
+                    <select id="fBloodGroup" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-black text-red-600 dark:text-red-400 outline-none focus:ring-2 focus:ring-blue-500">
+                        ${['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'N/A'].map(bg => `
+                            <option value="${bg}" ${(data.bloodGroup || '').toUpperCase() === bg ? 'selected' : ''}>${bg}</option>
+                        `).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Date of Birth (DOB) / Age</label>
+                    <input type="text" id="fDob" value="${data.dob || data.age || ''}" placeholder="YYYY-MM-DD or Age" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
+                    <input type="text" id="fStatus" value="${data.status || 'Available'}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            `;
+
+            // Populate Specialized Fields Based on Type
+            if (type === 'donors') {
+                specGrid.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">🍺 Drunk Alcohol in Last 24 Hours?</label>
+                        <select id="fAlcohol24" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="No" ${data.alcoholLast24h === 'No' ? 'selected' : ''}>🟢 No (Sober)</option>
+                            <option value="Yes" ${data.alcoholLast24h === 'Yes' ? 'selected' : ''}>🍺 Yes (Alcohol Consumed)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Alcohol Consumption Habit</label>
+                        <select id="fAlcoholHabit" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="Never" ${data.alcoholHabit === 'Never' ? 'selected' : ''}>Non-Drinker (Never)</option>
+                            <option value="Occasionally" ${data.alcoholHabit === 'Occasionally' ? 'selected' : ''}>Social / Occasionally</option>
+                            <option value="Regular" ${data.alcoholHabit === 'Regular' ? 'selected' : ''}>Regular</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Donation Count (Times Donated)</label>
+                        <input type="number" id="fDonationCount" value="${data.donationCount || data.timesDonated || 0}" min="0" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold font-mono text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Contact Phone Privacy</label>
+                        <select id="fPhoneVisibility" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="public" ${data.phoneVisibility === 'public' || data.accountType === 'public' ? 'selected' : ''}>🟢 Public (Everyone can call directly)</option>
+                            <option value="private" ${data.phoneVisibility === 'private' || data.accountType === 'private' ? 'selected' : ''}>🔒 Private (Guarded Contact)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Medical / Eligibility Notes</label>
+                        <input type="text" id="fNotes" value="${data.notes || data.medicalNotes || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="Medical history, weight, availability time">
+                    </div>
+                `;
+            } else if (type === 'organ_donors') {
+                specGrid.innerHTML = `
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">🫀 Organs Pledged for Donation</label>
+                        <input type="text" id="fOrgansPledged" value="${data.organsPledged || 'All Organs'}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="Kidneys, Heart, Liver, Corneas, Lungs, Pancreas">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Allow Emergency Contact</label>
+                        <select id="fAllowContact" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="true" ${data.allowContact === true || data.allowContact === 'true' ? 'selected' : ''}>🟢 Allowed (Visible to Attendants)</option>
+                            <option value="false" ${data.allowContact === false || data.allowContact === 'false' ? 'selected' : ''}>🔒 Private (Opted Out)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Emergency Nominee / Family Contact Details</label>
+                        <input type="text" id="fNominee" value="${data.nominee || data.emergencyContact || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="Nominee name, relation, contact phone number">
+                    </div>
+                `;
+            } else if (type === 'users') {
+                specGrid.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">🔑 Account Password</label>
+                        <input type="text" id="fPassword" value="${data.password || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-600 dark:text-amber-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Account Role</label>
+                        <select id="fRole" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                            <option value="user" ${data.role === 'user' || !data.role ? 'selected' : ''}>Standard User</option>
+                            <option value="donor" ${data.role === 'donor' ? 'selected' : ''}>Registered Donor</option>
+                            <option value="admin" ${data.role === 'admin' ? 'selected' : ''}>Administrator</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Instagram Profile</label>
+                        <input type="text" id="fInstagram" value="${data.instagram || (data.socialProfiles && data.socialProfiles.instagram) || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-pink-600 outline-none" placeholder="@username">
+                    </div>
+                `;
+            } else if (type === 'partner_hospitals') {
+                specGrid.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">🚑 Ambulance Hotline Phone</label>
+                        <input type="tel" id="fAmbulancePhone" value="${data.ambulancePhone || data.ambulance || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-600 dark:text-amber-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Hospital Branches / Locations</label>
+                        <input type="text" id="fSubBranches" value="${data.subBranches || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="Branches list">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Specialties & Facility Details</label>
+                        <input type="text" id="fDetails" value="${data.details || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="ICU, Blood Bank, Trauma Center, 24x7">
+                    </div>
+                `;
+            } else if (type === 'blood_requests') {
+                specGrid.innerHTML = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">🩸 Units Required</label>
+                        <input type="number" id="fUnits" value="${data.units || 1}" min="1" max="50" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold font-mono text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Hospital Name</label>
+                        <input type="text" id="fHospital" value="${data.hospital || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Hospital Address</label>
+                        <input type="text" id="fHospitalAddress" value="${data.hospitalAddress || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Urgency Level</label>
+                        <select id="fUrgency" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-black text-red-600 outline-none">
+                            <option value="Critical (Immediate)" ${data.urgency === 'Critical (Immediate)' ? 'selected' : ''}>🚨 Critical (Immediate Transfusion)</option>
+                            <option value="Urgent (Within 6 Hours)" ${data.urgency === 'Urgent (Within 6 Hours)' ? 'selected' : ''}>⚠️ Urgent (Within 6 Hours)</option>
+                            <option value="Standard" ${data.urgency === 'Standard' ? 'selected' : ''}>Standard (Within 24 Hours)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Patient Diagnosis & Emergency Notes</label>
+                        <input type="text" id="fEmergencyDetails" value="${data.emergencyDetails || ''}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white outline-none" placeholder="Emergency clinical reason">
+                    </div>
+                `;
+            }
+
+            // Populate Location Fields
+            const locLat = document.getElementById("locLatitude");
+            const locLng = document.getElementById("locLongitude");
+            const locCity = document.getElementById("locCity");
+            const liveLocInfo = document.getElementById("liveLocationInfo");
+            const btnOpenMaps = document.getElementById("btnOpenMaps");
+
+            locCity.value = data.city || data.location || '';
+
+            if (data.liveLocation && data.liveLocation.latitude) {
+                locLat.value = data.liveLocation.latitude;
+                locLng.value = data.liveLocation.longitude;
+                liveLocInfo.innerHTML = `<strong>📍 Saved GPS:</strong> ${data.liveLocation.latitude.toFixed(5)}, ${data.liveLocation.longitude.toFixed(5)} <span class="text-slate-400">(${data.liveLocation.capturedAt ? new Date(data.liveLocation.capturedAt).toLocaleTimeString() : 'Logged'})</span>`;
+                btnOpenMaps.href = `https://www.google.com/maps?q=${data.liveLocation.latitude},${data.liveLocation.longitude}`;
+                btnOpenMaps.classList.remove("hidden");
+            } else if (data.coordinates && data.coordinates.includes(',')) {
+                const parts = data.coordinates.split(',');
+                locLat.value = parts[0].trim();
+                locLng.value = parts[1].trim();
+                liveLocInfo.innerHTML = `<strong>📍 Coordinates:</strong> ${data.coordinates}`;
+                btnOpenMaps.href = `https://www.google.com/maps?q=${encodeURIComponent(data.coordinates)}`;
+                btnOpenMaps.classList.remove("hidden");
+            } else {
+                liveLocInfo.textContent = "No GPS coordinates logged yet. Click 'Capture Current GPS' to record live coordinates.";
+            }
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Live GPS Capture
+        window.captureLiveCoordinatesNow = function() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            const liveLocInfo = document.getElementById("liveLocationInfo");
+            liveLocInfo.textContent = "Requesting high-accuracy GPS coordinates...";
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = Math.round(pos.coords.accuracy);
+
+                    document.getElementById("locLatitude").value = lat.toFixed(6);
+                    document.getElementById("locLongitude").value = lng.toFixed(6);
+
+                    liveLocInfo.innerHTML = `<strong>📍 Captured GPS:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)} <span class="text-emerald-600 font-bold">(±${acc}m accuracy)</span>`;
+                    
+                    const btnOpenMaps = document.getElementById("btnOpenMaps");
+                    btnOpenMaps.href = `https://www.google.com/maps?q=${lat},${lng}`;
+                    btnOpenMaps.classList.remove("hidden");
+
+                    showNotice("success", `📍 Current GPS location detected (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}). Click "Save All Changes" to persist.`);
+                },
+                (err) => {
+                    liveLocInfo.textContent = `GPS error: ${err.message}. You can manually type coordinates above.`;
+                    showNotice("warning", `GPS request failed: ${err.message}. You can manually enter Latitude and Longitude.`);
+                },
+                { enableHighAccuracy: true, timeout: 12000 }
+            );
+        };
+
+        // Save Live Location directly
+        window.saveRecordLiveLocation = async function() {
+            if (!navigator.geolocation) {
+                const manualCity = prompt("Enter location name or city to save:");
+                if (manualCity) {
+                    await updateRecordLocationField({ city: manualCity });
+                }
+                return;
+            }
+
+            showNotice("info", "Detecting live GPS location to save to record...");
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = Math.round(pos.coords.accuracy);
+
+                    const locationObj = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: acc,
+                        capturedAt: new Date().toISOString(),
+                        capturedBy: localStorage.getItem('adminEmail') || 'SUPER_ADMIN',
+                        mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`
+                    };
+
+                    document.getElementById("locLatitude").value = lat.toFixed(6);
+                    document.getElementById("locLongitude").value = lng.toFixed(6);
+
+                    await updateRecordLocationField({
+                        liveLocation: locationObj,
+                        lastLocationUpdate: new Date().toISOString()
+                    });
+
+                    document.getElementById("liveLocationInfo").innerHTML = `<strong>📍 Saved GPS:</strong> ${lat.toFixed(5)}, ${lng.toFixed(5)} <span class="text-emerald-600 font-bold">(Saved in DB)</span>`;
+                    const btnOpenMaps = document.getElementById("btnOpenMaps");
+                    btnOpenMaps.href = locationObj.mapsUrl;
+                    btnOpenMaps.classList.remove("hidden");
+
+                    alert(`📍 Live location successfully recorded and saved to database!\nLatitude: ${lat}\nLongitude: ${lng}\nAccuracy: ±${acc}m\n\nLegal location trace timestamp logged.`);
+                    showNotice("success", `📍 Live location saved successfully to database!`);
+                },
+                async (err) => {
+                    const manualCity = prompt(`Could not get automatic GPS (${err.message}). Enter location/city to save:`);
+                    if (manualCity) {
+                        await updateRecordLocationField({ city: manualCity });
+                        showNotice("success", `City "${manualCity}" saved to record.`);
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 12000 }
+            );
+        };
+
+        async function updateRecordLocationField(updatePayload) {
+            try {
+                await update(ref(db, `${recordType}/${recordId}`), updatePayload);
+            } catch (e) {
+                console.warn("SDK update failed, falling back to REST:", e);
+            }
+            try {
+                await fetch(`${DB_BASE_URL}/${recordType}/${recordId}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+            } catch (restErr) {
+                console.error("REST update error:", restErr);
+            }
+        }
+
+        // Form Submit Handler
+        window.handleSaveForm = async function(e) {
+            e.preventDefault();
+
+            if (role === 'SUB_ADMIN') {
+                alert("Permission Denied: Sub-Admin cannot save edits.");
+                return;
+            }
+
+            const btnSave = document.getElementById("btnSaveSubmit");
+            btnSave.disabled = true;
+            btnSave.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Saving to Firebase...`;
+
+            try {
+                const payload = { ...window.loadedRecordData };
+
+                // Primary fields
+                const fName = document.getElementById("fName")?.value.trim();
+                const fEmail = document.getElementById("fEmail")?.value.trim();
+                const fPhone = document.getElementById("fPhone")?.value.trim();
+                const fBloodGroup = document.getElementById("fBloodGroup")?.value;
+                const fDob = document.getElementById("fDob")?.value.trim();
+                const fStatus = document.getElementById("fStatus")?.value.trim();
+
+                if (fName) {
+                    if (recordType === 'partner_hospitals') payload.hospitalName = fName;
+                    else payload.name = fName;
+                }
+                if (fEmail) payload.email = fEmail;
+                if (fPhone) {
+                    payload.phone = fPhone;
+                    payload.mobileNumber = fPhone;
+                    payload.mobile = fPhone;
+                    payload.contactNumber = fPhone;
+                }
+                if (fBloodGroup) payload.bloodGroup = fBloodGroup;
+                if (fDob) {
+                    payload.dob = fDob;
+                    if (!isNaN(parseInt(fDob))) payload.age = parseInt(fDob);
+                }
+                if (fStatus) payload.status = fStatus;
+
+                // Specialized fields
+                if (recordType === 'donors') {
+                    payload.alcoholLast24h = document.getElementById("fAlcohol24")?.value || 'No';
+                    payload.alcoholHabit = document.getElementById("fAlcoholHabit")?.value || 'Never';
+                    payload.donationCount = parseInt(document.getElementById("fDonationCount")?.value || 0, 10);
+                    payload.phoneVisibility = document.getElementById("fPhoneVisibility")?.value || 'public';
+                    payload.accountType = payload.phoneVisibility;
+                    payload.notes = document.getElementById("fNotes")?.value.trim() || '';
+                } else if (recordType === 'organ_donors') {
+                    payload.organsPledged = document.getElementById("fOrgansPledged")?.value.trim() || 'All Organs';
+                    payload.allowContact = document.getElementById("fAllowContact")?.value === 'true';
+                    payload.nominee = document.getElementById("fNominee")?.value.trim() || '';
+                } else if (recordType === 'users') {
+                    const pass = document.getElementById("fPassword")?.value.trim();
+                    if (pass) payload.password = pass;
+                    payload.role = document.getElementById("fRole")?.value || 'user';
+                    const insta = document.getElementById("fInstagram")?.value.trim();
+                    if (insta) {
+                        payload.instagram = insta;
+                        payload.socialProfiles = payload.socialProfiles || {};
+                        payload.socialProfiles.instagram = insta;
+                    }
+                } else if (recordType === 'partner_hospitals') {
+                    payload.ambulancePhone = document.getElementById("fAmbulancePhone")?.value.trim() || fPhone;
+                    payload.subBranches = document.getElementById("fSubBranches")?.value.trim() || '';
+                    payload.details = document.getElementById("fDetails")?.value.trim() || '';
+                } else if (recordType === 'blood_requests') {
+                    payload.units = parseInt(document.getElementById("fUnits")?.value || 1, 10);
+                    payload.hospital = document.getElementById("fHospital")?.value.trim() || '';
+                    payload.hospitalAddress = document.getElementById("fHospitalAddress")?.value.trim() || '';
+                    payload.urgency = document.getElementById("fUrgency")?.value || 'Critical (Immediate)';
+                    payload.emergencyDetails = document.getElementById("fEmergencyDetails")?.value.trim() || '';
+                }
+
+                // Location fields
+                const latStr = document.getElementById("locLatitude")?.value.trim();
+                const lngStr = document.getElementById("locLongitude")?.value.trim();
+                const cityStr = document.getElementById("locCity")?.value.trim();
+
+                if (cityStr) payload.city = cityStr;
+                if (latStr && lngStr) {
+                    const latNum = parseFloat(latStr);
+                    const lngNum = parseFloat(lngStr);
+                    if (!isNaN(latNum) && !isNaN(lngNum)) {
+                        payload.liveLocation = {
+                            latitude: latNum,
+                            longitude: lngNum,
+                            accuracy: 10,
+                            capturedAt: new Date().toISOString(),
+                            capturedBy: localStorage.getItem('adminEmail') || 'SUPER_ADMIN',
+                            mapsUrl: `https://www.google.com/maps?q=${latNum},${lngNum}`
+                        };
+                        payload.coordinates = `${latNum},${lngNum}`;
+                    }
+                }
+
+                payload.updatedAt = new Date().toISOString();
+                payload.lastUpdatedBy = localStorage.getItem('adminEmail') || 'SUPER_ADMIN';
+
+                // Save to Firebase RTDB via SDK
+                let saved = false;
+                try {
+                    await set(ref(db, `${recordType}/${recordId}`), payload);
+                    saved = true;
+                } catch (e) {
+                    console.warn("SDK set fallback:", e);
+                }
+
+                // Fallback / Guarantee via REST PUT
+                try {
+                    const res = await fetch(`${DB_BASE_URL}/${recordType}/${recordId}.json`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) saved = true;
+                } catch (restErr) {
+                    console.error("REST save error:", restErr);
+                }
+
+                // Audit log
+                try {
+                    await push(ref(db, 'admin_audit_logs'), {
+                        action: 'EDIT_RECORD',
+                        targetNode: recordType,
+                        targetKey: recordId,
+                        adminEmail: localStorage.getItem('adminEmail') || 'SUPER_ADMIN',
+                        timestamp: Date.now(),
+                        isoDate: new Date().toISOString(),
+                        details: `Updated record details in ${recordType}`
+                    });
+                } catch(e) {}
+
+                window.loadedRecordData = payload;
+                showNotice("success", "✅ Record successfully updated in database!");
+                alert("✅ Changes saved successfully to database!");
+
+                // Refresh opener window if admin opened this
+                if (window.opener && !window.opener.closed) {
+                    try {
+                        window.opener.location.reload();
+                    } catch(e) {}
+                }
+
+            } catch (err) {
+                console.error("Save error:", err);
+                showNotice("error", "Error saving record: " + err.message);
+                alert("Error: " + err.message);
+            } finally {
+                btnSave.disabled = false;
+                btnSave.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> <span>💾 Save All Changes</span>`;
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        // Delete from edit page
+        window.deleteCurrentRecord = async function(isPermanent) {
+            if (role === 'SUB_ADMIN') {
+                alert("Permission Denied: Sub-Admin cannot delete records.");
+                return;
+            }
+
+            const title = window.loadedRecordData.name || window.loadedRecordData.hospitalName || recordId;
+
+            if (isPermanent) {
+                const conf = confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to PERMANENTLY ERASE "${title}"?\n\nThis bypasses the Recycle Bin and cannot be recovered!`);
+                if (!conf) return;
+
+                await deleteDirectFromFirebase(`${recordType}/${recordId}`);
+                alert(`"${title}" has been permanently deleted from database.`);
+            } else {
+                const conf = confirm(`Move "${title}" to Recycle Bin?\n\nYou can restore this record anytime from the Recycle Bin tab in the Admin Dashboard.`);
+                if (!conf) return;
+
+                const recycleItem = {
+                    originalNode: recordType,
+                    originalKey: recordId,
+                    recordData: window.loadedRecordData,
+                    deletedBy: localStorage.getItem('adminEmail') || 'SUPER_ADMIN',
+                    deletedAt: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+
+                // Push to recycle bin
+                try {
+                    await push(ref(db, 'recycle_bin'), recycleItem);
+                } catch(e) {
+                    await fetch(`${DB_BASE_URL}/recycle_bin.json`, {
+                        method: 'POST',
+                        body: JSON.stringify(recycleItem)
+                    });
+                }
+
+                await deleteDirectFromFirebase(`${recordType}/${recordId}`);
+                alert(`"${title}" moved to Recycle Bin successfully! 🗑️`);
+            }
+
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.location.reload();
+                } catch(e) {}
+            }
+
+            window.close();
+            // If window.close() blocked by browser, redirect to admin.html
+            setTimeout(() => {
+                window.location.href = "admin.html";
+            }, 500);
+        };
+
+        async function deleteDirectFromFirebase(path) {
+            try {
+                await remove(ref(db, path));
+            } catch(e) {
+                console.warn("SDK remove failed, using REST:", e);
+            }
+            try {
+                await fetch(`${DB_BASE_URL}/${path}.json`, { method: 'DELETE' });
+            } catch(e) {}
+        }
+
+        // Initialize fetch
+        fetchRecord();
+    </script>
+</body>
+</html>

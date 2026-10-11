@@ -386,7 +386,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, push, get, onValue } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, get, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -504,11 +506,31 @@
                     zoomControl: true
                 });
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                const googleRoadmap = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['0', '1', '2', '3'],
+                    attribution: '© Google Maps'
+                });
+
+                const googleHybrid = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['0', '1', '2', '3'],
+                    attribution: '© Google Maps Satellite'
+                });
+
+                const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                     maxZoom: 19,
                     subdomains: 'abcd',
-                    attribution: '© OpenStreetMap © CARTO'
-                }).addTo(map);
+                    attribution: '© CARTO'
+                });
+
+                googleRoadmap.addTo(map);
+
+                L.control.layers({
+                    "🗺️ Google Maps": googleRoadmap,
+                    "🛰️ Google Satellite": googleHybrid,
+                    "🏥 Clean Emergency": cartoVoyager
+                }, null, { position: 'topright' }).addTo(map);
 
                 markersGroup = L.layerGroup().addTo(map);
                 trafficOverlayGroup = L.layerGroup().addTo(map);

@@ -11,6 +11,14 @@
             history.scrollRestoration = 'manual';
         }
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        window.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            document.documentElement.scrollTop = 0;
+            if (document.body) document.body.scrollTop = 0;
+        });
+        window.addEventListener('load', () => {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        });
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
@@ -77,43 +85,43 @@
         </div>
     </nav>
 
-    <!-- MAIN PAGE CONTENT (VISIBLE CLEARLY AT TOP AS REQUESTED) -->
-    <main class="max-w-5xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6 w-full flex-1">
+    <!-- MAIN PAGE CONTENT — POSITIONED AT TOP OF THE MIDDLE WITH COMPLETE VISIBILITY -->
+    <main class="max-w-4xl mx-auto px-3 sm:px-5 pt-2.5 sm:pt-4 pb-8 w-full flex-1 flex flex-col">
         
-        <!-- TOP CLINICAL BADGE & HEADER (VISIBLE CLEARLY AT TOP) -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-slate-800">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
-                    <i data-lucide="bot" class="w-6 h-6"></i>
+        <!-- TOP CLINICAL BADGE & HEADER -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2.5 pb-2.5 border-b border-slate-200 dark:border-slate-800">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/30">
+                    <i data-lucide="bot" class="w-5 h-5"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">AI Clinical Triage & Medical Specialist</h1>
-                        <span class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase border border-emerald-300 dark:border-emerald-800">Live 24/7 Clinical Intelligence</span>
+                        <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">AI Clinical Triage & Medical Specialist</h1>
+                        <span class="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-emerald-300 dark:border-emerald-800">Live 24/7 Intelligence</span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rapid emergency symptom assessment, AI doctor guidance & medical lab report OCR analyzer</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Emergency symptom assessment, AI doctor guidance & medical lab report OCR analyzer</p>
                 </div>
             </div>
 
             <!-- QUICK EMERGENCY 108 CALLOUT -->
             <div class="flex items-center gap-2 shrink-0">
-                <a href="tel:108" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-md shadow-red-500/20 transition cursor-pointer">
+                <a href="tel:108" class="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-black shadow-md shadow-red-500/20 transition cursor-pointer">
                     <i data-lucide="phone-call" class="w-3.5 h-3.5 animate-pulse"></i>
-                    <span>Call 108 Ambulance</span>
+                    <span>Call 108</span>
                 </a>
             </div>
         </div>
 
         <!-- MEDICAL DISCLAIMER NOTICE -->
-        <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 p-3 rounded-2xl text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 mb-4">
-            <i data-lucide="info" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
-            <p class="leading-relaxed">
-                <strong>Clinical Triage Protocol Notice:</strong> This AI system assesses clinical urgency and provides educational first-aid protocol guidance based on validated emergency medicine workflows. It does not replace an in-person emergency physician evaluation. For life-threatening emergencies, call <strong>108</strong> immediately.
+        <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 p-2.5 rounded-xl text-[11px] text-amber-900 dark:text-amber-200 flex items-center gap-2 mb-3">
+            <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0"></i>
+            <p class="leading-tight">
+                <strong>Protocol Notice:</strong> Evaluates urgency based on clinical algorithms. For life-threatening emergencies, dial <strong>108</strong> immediately.
             </p>
         </div>
 
         <!-- AI TRIAGE MASTER CARD CONTAINER -->
-        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col min-h-[640px]">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col flex-1">
             
             <!-- TAB BAR SWITCHER -->
             <div class="flex border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/70 p-1.5 gap-1.5 text-xs font-bold">

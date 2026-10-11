@@ -141,9 +141,10 @@
         <p>© 2026 LifeSaver-Care. Official Healthcare & Donor Registry Network. Together We Save Lives.</p>
     </footer>
 
-    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
+    <!-- FIREBASE & VERIFICATION LOGIC -->
     <script type="module">
-        import { initializeApp, getDatabase, ref, get } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -170,7 +171,7 @@
                     return base.endsWith('/') ? base : (base + '/');
                 }
             } catch(e) {}
-            return 'https://lifesaver.qd.je/';
+            return 'https://life-saver-cyan.vercel.app/';
         }
 
         function getCertificateVerifyUrl(id, bg, name) {
@@ -215,6 +216,15 @@
             return 'A+';
         }
 
+        // Safe check for organ donor vs blood donor certificates (prevents 'BLOOD' matching 'OD')
+        function isOrganCertificateId(id, organsParam) {
+            if (organsParam && organsParam.trim()) return true;
+            if (!id || typeof id !== 'string') return false;
+            const upper = id.trim().toUpperCase();
+            if (upper.includes('BLOOD') || upper.includes('BD-') || upper.includes('-BD') || upper.includes('LSC-BD') || upper.includes('LS-BD')) return false;
+            return upper.includes('-OD-') || upper.includes('LSC-OD') || upper.includes('LS-OD') || upper.includes('OD-') || upper.includes('ORGAN');
+        }
+
         // STRICT PAGE TOP INITIALIZATION
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -257,7 +267,7 @@
             // Instant Preview Bypass for zero-latency preview in new page
             const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'true' || cleanIdLower.includes('preview');
             if (isPreview) {
-                const isOrgan = cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN') || !!urlOrgans;
+                const isOrgan = isOrganCertificateId(cleanId, urlOrgans);
                 activeCertData = {
                     name: urlName || (isOrgan ? "Voluntary Organ Pledger" : "Voluntary Blood Donor"),
                     bloodGroup: resolveBestBloodGroup(urlBg, "A+"),
@@ -353,7 +363,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: resolveBestBloodGroup(foundRecord.bloodGroup, foundRecord.bg, urlBg, 'A+'),
+                    bloodGroup: resolveBestBloodGroup(urlBg, foundRecord.bloodGroup, foundRecord.bg, foundRecord.blood_group, 'A+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -385,7 +395,7 @@
                 }
 
                 // Check organ_donors table in Firebase
-                if (!foundRecord || cleanId.includes('OD') || cleanId.includes('ORGAN')) {
+                if (!foundRecord || isOrganCertificateId(cleanId, urlOrgans)) {
                     const organSnap = await get(ref(db, 'organ_donors'));
                     if (organSnap.exists()) {
                         const pledges = organSnap.val();
@@ -415,7 +425,7 @@
                             const u = users[uKey];
                             const bd = u.bloodDonor || {};
                             const od = u.organDonor || {};
-                            const isOd = cleanIdLower.includes('od') || cleanIdLower.includes('organ');
+                            const isOd = isOrganCertificateId(cleanId, urlOrgans);
                             const userMatches = (
                                 uKey.toLowerCase() === cleanIdLower ||
                                 (u.uid && u.uid.toLowerCase() === cleanIdLower) ||
@@ -461,7 +471,7 @@
 
                 // Clean fallback if valid format but not in DB yet
                 if (!foundRecord) {
-                    if (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) {
+                    if (isOrganCertificateId(cleanId, urlOrgans)) {
                         foundRecord = {
                             name: urlName || "Voluntary Organ Pledger",
                             organsPledged: urlOrgans || "All Vital Organs & Tissues",
@@ -484,7 +494,7 @@
                 activeCertData = { 
                     ...foundRecord, 
                     name: urlName || foundRecord.name || 'Hero Donor',
-                    bloodGroup: resolveBestBloodGroup(foundRecord.bloodGroup, foundRecord.bg, urlBg, 'A+'),
+                    bloodGroup: resolveBestBloodGroup(urlBg, foundRecord.bloodGroup, foundRecord.bg, foundRecord.blood_group, 'A+'),
                     certType, 
                     certId: cleanId 
                 };
@@ -500,8 +510,8 @@
                     // Fallback render with target ID
                     activeCertData = {
                         name: urlName || "Voluntary Hero Donor",
-                        bloodGroup: formatSingleBloodGroup(urlBg || "A+"),
-                        certType: (cleanId.toUpperCase().includes('OD') || cleanId.toUpperCase().includes('ORGAN')) ? 'organ' : 'blood',
+                        bloodGroup: resolveBestBloodGroup(urlBg, "A+"),
+                        certType: isOrganCertificateId(cleanId, urlOrgans) ? 'organ' : 'blood',
                         certId: cleanId
                     };
                     renderCertificate(activeCertData);
@@ -527,8 +537,8 @@
                     </div>
 
                     <!-- Single Blood Group (Clean & Bold Only) -->
-                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none text-center" style="left: 28.5%; top: 78.5%; transform: translate(-50%, -50%);">
-                        ${singleBg}
+                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-white pointer-events-none flex items-center justify-center text-center" style="left: 29.3%; top: 79.5%; width: 70px; height: 42px; transform: translate(-50%, -50%);">
+                        <span class="leading-none drop-shadow-sm">${singleBg}</span>
                     </div>
 
                     <!-- QR Code (Official Scanner) -->
@@ -551,8 +561,8 @@
                     </div>
 
                     <!-- Single Blood Group (Clean & Bold Only) -->
-                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none text-center" style="left: 70.5%; top: 75.5%; transform: translate(-50%, -50%);">
-                        ${singleBg}
+                    <div class="absolute font-sans font-black text-xs sm:text-base md:text-xl text-[#0f4c81] pointer-events-none flex items-center justify-center text-center" style="left: 70.8%; top: 77%; width: 50px; height: 42px; transform: translate(-50%, -50%);">
+                        <span class="leading-none drop-shadow-sm">${singleBg}</span>
                     </div>
 
                     <!-- QR Code (Official Scanner) -->
@@ -576,7 +586,7 @@
             if (!activeCertData) return;
             const isBlood = activeCertData.certType === 'blood';
             const name = activeCertData.name || (isBlood ? 'Blood Donor' : 'Organ Pledger');
-            const bg = formatSingleBloodGroup(activeCertData.bloodGroup || 'A+');
+            const bg = formatSingleBloodGroup(activeCertData.bloodGroup || urlBg || 'A+');
             const certId = activeCertData.certId || 'LSC-2026-00482';
 
             const canvas = document.createElement('canvas');
@@ -605,12 +615,23 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(name, 512, 274);
 
+                // Clear/cover blood group slot on canvas first
+                if (isBlood) {
+                    ctx.fillStyle = '#95090e';
+                    ctx.beginPath();
+                    ctx.roundRect(265, 521, 70, 43, 6);
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = '#fcfdff';
+                    ctx.fillRect(701, 502, 47, 46);
+                }
+
                 // Draw Single Blood Group
                 ctx.font = '900 24px system-ui, -apple-system, sans-serif';
                 ctx.fillStyle = isBlood ? '#ffffff' : '#0f4c81';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(bg, isBlood ? 292 : 722, isBlood ? 535 : 515);
+                ctx.fillText(bg, isBlood ? 300 : 725, isBlood ? 542 : 525);
 
                 const verifyUrl = getCertificateVerifyUrl(certId, bg, name);
                 const qrImg = new Image();

@@ -107,6 +107,9 @@
                             <button onclick="openSettingsModal()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-left">
                                 <i data-lucide="settings" class="w-4 h-4 text-blue-500"></i> <span>Security Settings</span>
                             </button>
+                            <button onclick="saveAdminSessionLiveLocation()" class="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-left" title="Capture and log admin live GPS location for legal audit trail">
+                                <i data-lucide="map-pin" class="w-4 h-4 text-emerald-500"></i> <span>📍 Save Admin Live Location</span>
+                            </button>
                         </div>
 
                         <div class="my-1 border-t border-slate-100 dark:border-slate-800 admin-only-tool"></div>
@@ -293,7 +296,7 @@
                     <i data-lucide="building-2" class="w-4 h-4"></i> 🤝 Colab Hospitals
                 </button>
                 <button onclick="switchTab('messages')" id="tabMessagesBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                    <i data-lucide="mail" class="w-4 h-4"></i> Contact Messages
+                    <i data-lucide="mail" class="w-4 h-4"></i> Contact Messages (<span id="contactMessagesBadge" class="bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]">0</span>)
                 </button>
                 <button onclick="switchTab('admin_activity')" id="tabAdminActivityBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                     <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> 🛡️ Admin Activity
@@ -756,9 +759,11 @@
         </div>
     </div>
 
-    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
+    <!-- FIREBASE MODULE SCRIPT -->
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword, getDatabase, ref, onValue, remove, update, get, push, set } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateEmail, updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove, update, get, push, set } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -939,6 +944,12 @@
                     adminRole = 'SUB_ADMIN';
                 } catch(e) {
                     console.error("Sub-admin verification error:", e);
+                }
+            } else if (storedRole === 'SUPER_ADMIN' && storedSubAdminEmail && storedSubAdminEmail.toLowerCase() === 'admin@lifesaver.com') {
+                // Verified Super Admin Session via stored admin credentials
+                adminRole = 'SUPER_ADMIN';
+                if (!currentAdminUser && user) {
+                    currentAdminUser = user;
                 }
             } else if (user) {
                 // Super Admin verification via Firebase Auth & RTDB
@@ -1124,7 +1135,36 @@
             document.getElementById("statRequests").textContent = Object.keys(requestsData).filter(k => (requestsData[k].status || 'Pending') !== 'Resolved').length;
             document.getElementById("statOrganDonors").textContent = Object.keys(organDonorsData).length;
             document.getElementById("statLogs").textContent = Object.keys(auditLogsData).length + Object.keys(adminAuditLogsData).length;
-            document.getElementById("statMessages").textContent = Object.keys(contactMessagesData).filter(k => (contactMessagesData[k].status || 'new').toLowerCase() === 'new').length;
+            
+            const msgKeys = Object.keys(contactMessagesData);
+            const unreadMessages = msgKeys.filter(k => {
+                const s = (contactMessagesData[k].status || 'new').toLowerCase();
+                return s === 'new' || s === 'unread' || s === 'pending';
+            });
+            const msgCount = unreadMessages.length > 0 ? unreadMessages.length : msgKeys.length;
+            document.getElementById("statMessages").textContent = msgCount;
+
+            const msgBadge = document.getElementById("contactMessagesBadge");
+            if (msgBadge) {
+                msgBadge.textContent = msgCount;
+                if (unreadMessages.length > 0) {
+                    msgBadge.className = "bg-red-600 text-white font-black px-1.5 py-0.5 rounded-full text-[10px] animate-pulse shadow-sm";
+                } else {
+                    msgBadge.className = "bg-pink-100 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 font-extrabold px-1.5 py-0.2 rounded-full text-[10px]";
+                }
+            }
+
+            const topNotif = document.getElementById("adminNavNotifBadge");
+            if (topNotif) {
+                const totalAlerts = (unreadMessages.length) + (Object.keys(profileRequestsData || {}).length) + (Object.keys(accountRequestsData || {}).length);
+                if (totalAlerts > 0) {
+                    topNotif.textContent = totalAlerts;
+                    topNotif.classList.remove("hidden");
+                } else {
+                    topNotif.classList.add("hidden");
+                }
+            }
+
             updateProfileRequestBadges();
         }
 
@@ -1162,9 +1202,20 @@
 
                 const actionsCell = isSubAdmin 
                     ? ''
-                    : `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
-                       <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">⚙️ Preference</button>
-                       <button onclick="deleteRecord('donors', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+                    : `<button onclick="openEditInNewPage('donors', '${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit donor details in new page">✏️ Edit</button>
+                       <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Change contact privacy">⚙️ Pref</button>
+                       <button onclick="deleteRecord('donors', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete record (Move to Recycle Bin)">🗑️ Delete</button>
+                       <button onclick="permanentlyDeleteRecordDirectly('donors', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete from database">❌ Permanent</button>`;
+
+                let donorLocDisplay = `<span class="font-semibold">${item.city || '-'}</span>`;
+                if (item.liveLocation && item.liveLocation.latitude) {
+                    donorLocDisplay += `<br/><span class="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold inline-flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i><a href="https://www.google.com/maps?q=${item.liveLocation.latitude},${item.liveLocation.longitude}" target="_blank" class="hover:underline font-mono" title="Live GPS coordinates logged for legal verification">GPS: ${item.liveLocation.latitude.toFixed(4)}, ${item.liveLocation.longitude.toFixed(4)}</a></span>`;
+                } else if (item.coordinates && item.coordinates.includes(',')) {
+                    donorLocDisplay += `<br/><span class="text-[10px] font-mono text-blue-600 font-bold"><a href="https://www.google.com/maps?q=${encodeURIComponent(item.coordinates)}" target="_blank" class="hover:underline">📍 GPS: ${item.coordinates}</a></span>`;
+                }
+                if (!isSubAdmin) {
+                    donorLocDisplay += `<br/><button onclick="captureAndSaveRecordLiveLocation('donors', '${key}')" class="mt-1 text-[10px] bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded font-bold transition cursor-pointer inline-flex items-center gap-1" title="Capture and save live GPS coordinates for this record">📍 Save Location</button>`;
+                }
 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">
@@ -1172,7 +1223,7 @@
                     </td>
                     <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${item.dob || '-'}</td>
                     <td class="p-4"><span class="bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/50">${item.bloodGroup || 'O+'}</span></td>
-                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs">${item.city || '-'}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs">${donorLocDisplay}</td>
                     <td class="p-4 text-xs">${phoneCellContent}</td>
                     <td class="p-4">${alcoholBadge}</td>
                     <td class="p-4 td-preference">
@@ -1231,13 +1282,22 @@
 
                 const actionsCell = isSubAdmin
                     ? ''
-                    : `<button onclick="openEditOrganDonorModal('${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
-                       <button onclick="deleteRecord('organ_donors', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+                    : `<button onclick="openEditInNewPage('organ_donors', '${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit organ pledge in new page">✏️ Edit</button>
+                       <button onclick="deleteRecord('organ_donors', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete record (Move to Recycle Bin)">🗑️ Delete</button>
+                       <button onclick="permanentlyDeleteRecordDirectly('organ_donors', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete from database">❌ Permanent</button>`;
+
+                let organLoc = `<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city || '-'}</span>`;
+                if (item.liveLocation && item.liveLocation.latitude) {
+                    organLoc += `<br/><span class="text-[10px] font-mono text-purple-600 dark:text-purple-400 font-bold inline-flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 text-purple-500"></i><a href="https://www.google.com/maps?q=${item.liveLocation.latitude},${item.liveLocation.longitude}" target="_blank" class="hover:underline">GPS: ${item.liveLocation.latitude.toFixed(4)}, ${item.liveLocation.longitude.toFixed(4)}</a></span>`;
+                }
+                if (!isSubAdmin) {
+                    organLoc += `<br/><button onclick="captureAndSaveRecordLiveLocation('organ_donors', '${key}')" class="mt-1 text-[10px] bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded font-bold transition cursor-pointer inline-flex items-center gap-1" title="Capture and save live GPS coordinates for this record">📍 Save Location</button>`;
+                }
 
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">
                         ${item.name || 'Anonymous'}<br/>
-                        ${contactSubLine}<span class="text-xs text-slate-500 dark:text-slate-400 font-normal font-mono">📍 ${item.city || '-'}</span>
+                        ${contactSubLine}${organLoc}
                     </td>
                     <td class="p-4 text-xs font-mono font-bold text-slate-700 dark:text-slate-300 td-dob">${rawDobDisplay}</td>
                     <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-900/50">${item.organsPledged || 'All'}</span></td>
@@ -1303,9 +1363,10 @@
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.phone || item.dob || '-'}</td>
                     <td class="p-4">${socialDisplay}</td>
                     <td class="p-4 text-xs text-slate-500 font-bold">${dateStr}</td>
-                    <td class="p-4 text-right space-x-1.5 td-actions">
-                        <button onclick="openEditUserModal('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">✏️ Edit</button>
-                        <button onclick="deleteRecord('users', '${safeKey}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>
+                    <td class="p-4 text-right space-x-1 td-actions">
+                        <button onclick="openEditInNewPage('users', '${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit user profile in new page">✏️ Edit</button>
+                        <button onclick="deleteRecord('users', '${safeKey}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete user (Move to Recycle Bin)">🗑️ Delete</button>
+                        <button onclick="permanentlyDeleteRecordDirectly('users', '${safeKey}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete user from database">❌ Permanent</button>
                     </td>
                 `;
                 body.appendChild(tr);
@@ -1411,17 +1472,29 @@
 
                 const actionsCell = isSubAdmin
                     ? ''
-                    : `<button onclick="deleteRecord('blood_requests', '${key}')" class="bg-red-50 dark:bg-red-950/40 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+                    : `<button onclick="openEditInNewPage('blood_requests', '${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit request details in new page">✏️ Edit</button>
+                       <button onclick="deleteRecord('blood_requests', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete record (Move to Recycle Bin)">🗑️ Delete</button>
+                       <button onclick="permanentlyDeleteRecordDirectly('blood_requests', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete from database">❌ Permanent</button>`;
+
+                let reqLocHtml = `<span class="text-xs text-slate-500 font-normal">${item.city || '-'}</span>`;
+                if (item.liveLocation && item.liveLocation.latitude) {
+                    reqLocHtml += `<br/><span class="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold inline-flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i><a href="https://www.google.com/maps?q=${item.liveLocation.latitude},${item.liveLocation.longitude}" target="_blank" class="hover:underline">Live GPS: ${item.liveLocation.latitude.toFixed(4)}, ${item.liveLocation.longitude.toFixed(4)}</a> <span class="bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 text-[9px] px-1 rounded font-black" title="Coordinates logged for fraud prevention & legal action">⚖️ Legal Trace</span></span>`;
+                } else if (item.coordinates && item.coordinates.includes(',')) {
+                    reqLocHtml += `<br/><span class="text-[10px] font-mono text-blue-600 font-bold"><a href="https://www.google.com/maps?q=${encodeURIComponent(item.coordinates)}" target="_blank" class="hover:underline">📍 GPS: ${item.coordinates}</a></span>`;
+                }
+                if (!isSubAdmin) {
+                    reqLocHtml += `<br/><button onclick="captureAndSaveRecordLiveLocation('blood_requests', '${key}')" class="mt-1 text-[10px] bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded font-bold transition cursor-pointer inline-flex items-center gap-1" title="Capture and save live GPS coordinates for this record">📍 Save Location</button>`;
+                }
 
                 tr.innerHTML = `
                     <td class="p-4 font-black text-red-600 dark:text-red-400">${item.bloodGroup}</td>
-                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.hospital || '-'}<br/><span class="text-xs text-slate-500 font-normal">${item.city || '-'}</span></td>
+                    <td class="p-4 font-bold text-slate-900 dark:text-white">${item.hospital || '-'}<br/>${reqLocHtml}</td>
                     <td class="p-4 font-bold text-slate-900 dark:text-white">${item.units || 1} Units</td>
-                    <td class="p-4 font-mono text-slate-600 dark:text-slate-300">${item.phone || '-'}</td>
+                    <td class="p-4 font-mono text-slate-600 dark:text-slate-300"><a href="tel:${item.phone || ''}" class="font-bold text-slate-800 dark:text-slate-200 hover:text-red-600">${item.phone || '-'}</a></td>
                     <td class="p-4">
                         ${statusDisplay}
                     </td>
-                    <td class="p-4 text-right td-actions">
+                    <td class="p-4 text-right space-x-1 td-actions">
                         ${actionsCell}
                     </td>
                 `;
@@ -1478,23 +1551,34 @@
                     ? `<div class="text-xs text-slate-700 dark:text-slate-300 max-w-xs line-clamp-2" title="${(item.details || '').replace(/"/g, '&quot;')}">${item.details}</div>`
                     : `<span class="text-slate-400 text-xs italic">-</span>`;
 
+                let hospLocHtml = `📍 ${item.location || item.city || '-'}`;
+                if (item.liveLocation && item.liveLocation.latitude) {
+                    hospLocHtml += `<br/><span class="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold inline-flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i><a href="https://www.google.com/maps?q=${item.liveLocation.latitude},${item.liveLocation.longitude}" target="_blank" class="hover:underline">GPS: ${item.liveLocation.latitude.toFixed(4)}, ${item.liveLocation.longitude.toFixed(4)}</a></span>`;
+                }
+                if (adminRole !== 'SUB_ADMIN') {
+                    hospLocHtml += `<br/><button onclick="captureAndSaveRecordLiveLocation('partner_hospitals', '${key}')" class="mt-1 text-[10px] bg-emerald-50 hover:bg-emerald-600 hover:text-white dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded font-bold transition cursor-pointer inline-flex items-center gap-1" title="Capture and save live GPS coordinates for this record">📍 Save Location</button>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">🏥 ${item.name || 'Hospital Name'}</td>
-                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-semibold">📍 ${item.location || item.city || '-'}</td>
+                    <td class="p-4 text-slate-600 dark:text-slate-300 text-xs font-semibold">${hospLocHtml}</td>
                     <td class="p-4 text-slate-700 dark:text-slate-300 text-xs font-mono font-bold">📞 ${phoneDisplay}</td>
                     <td class="p-4 text-amber-600 dark:text-amber-400 text-xs font-mono font-bold">🚑 ${ambulanceDisplay}</td>
                     <td class="p-4">${subBranchesHtml}</td>
                     <td class="p-4">${detailsHtml}</td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-right space-x-1.5 td-actions">
-                        <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
+                        <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
                             ${isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button onclick="openEditPartnerHospitalModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
-                            Edit
+                        <button onclick="openEditInNewPage('partner_hospitals', '${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Edit hospital details in new page">
+                            ✏️ Edit
                         </button>
-                        <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-red-50 dark:bg-red-950/40 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 dark:border-red-900/50 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
-                            Remove
+                        <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Delete hospital (Move to Recycle Bin)">
+                            🗑️ Delete
+                        </button>
+                        <button onclick="permanentlyDeleteRecordDirectly('partner_hospitals', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Permanently delete hospital">
+                            ❌ Permanent
                         </button>
                     </td>
                 `;
@@ -1582,25 +1666,7 @@
 
         let activeEditHospKey = null;
         window.openEditPartnerHospitalModal = function(key) {
-            checkWritePermission('edit Colab Hospital');
-            activeEditHospKey = key;
-            const hosp = hospitalsData[key];
-            if (!hosp) return;
-            document.getElementById("editHospName").value = hosp.name || "";
-            document.getElementById("editHospMobile").value = hosp.mobile || hosp.phone || hosp.contact || hosp.note || "";
-            if (document.getElementById("editHospAmbulance")) {
-                document.getElementById("editHospAmbulance").value = hosp.ambulancePhone || hosp.ambulanceNumber || hosp.mobile || "";
-            }
-            document.getElementById("editHospLocation").value = hosp.location || hosp.city || "";
-            document.getElementById("editHospSubBranches").value = hosp.subBranches || "";
-            document.getElementById("editHospDetails").value = hosp.details || "";
-            document.getElementById("editHospStatus").value = (hosp.status === 'Active Partner' || hosp.status === 'Verified Partner' || hosp.status === 'Active') ? 'Active Partner' : 'Inactive';
-            document.getElementById("editHospFeedback").textContent = "";
-            document.getElementById("editHospFeedback").classList.add("hidden");
-
-            const modal = document.getElementById("editPartnerHospitalModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            window.openEditInNewPage('partner_hospitals', key);
         };
 
         window.closeEditPartnerHospitalModal = function() {
@@ -1704,6 +1770,222 @@
             }
         };
 
+        const DB_BASE_URL = "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+        window.executeDbDelete = async function(path) {
+            let deleted = false;
+            try {
+                await remove(ref(db, path));
+                deleted = true;
+            } catch (sdkErr) {
+                console.warn(`SDK remove fallback for ${path}:`, sdkErr);
+            }
+            try {
+                const res = await fetch(`${DB_BASE_URL}/${path}.json`, { method: 'DELETE' });
+                if (res.ok) deleted = true;
+            } catch (restErr) {
+                console.warn(`REST delete fallback for ${path}:`, restErr);
+            }
+            return deleted;
+        };
+
+        window.executeDbSet = async function(path, data) {
+            let saved = false;
+            try {
+                await set(ref(db, path), data);
+                saved = true;
+            } catch (e) {
+                console.warn(`SDK set fallback for ${path}:`, e);
+            }
+            try {
+                const res = await fetch(`${DB_BASE_URL}/${path}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) saved = true;
+            } catch (restErr) {
+                console.warn(`REST set fallback for ${path}:`, restErr);
+            }
+            return saved;
+        };
+
+        window.executeDbUpdate = async function(path, data) {
+            let updated = false;
+            try {
+                await update(ref(db, path), data);
+                updated = true;
+            } catch (e) {
+                console.warn(`SDK update fallback for ${path}:`, e);
+            }
+            try {
+                const res = await fetch(`${DB_BASE_URL}/${path}.json`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) updated = true;
+            } catch (restErr) {
+                console.warn(`REST update fallback for ${path}:`, restErr);
+            }
+            return updated;
+        };
+
+        // OPEN RECORD IN STANDALONE NEW PAGE FOR EDITING
+        window.openEditInNewPage = function(type, key) {
+            if (adminRole === 'SUB_ADMIN') {
+                alert("🔒 Read-Only Sub-Admin Access: Permission Denied to edit data. Only Super Admin can modify records.");
+                return;
+            }
+            window.open(`edit-record.html?type=${encodeURIComponent(type)}&id=${encodeURIComponent(key)}`, '_blank');
+        };
+
+        // SAVE LIVE LOCATION FOR A SPECIFIC RECORD IN REALTIME DATABASE
+        window.captureAndSaveRecordLiveLocation = async function(node, key) {
+            if (adminRole === 'SUB_ADMIN') {
+                alert("🔒 Read-Only Sub-Admin Access: Permission Denied to modify data.");
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                const manual = prompt("Geolocation is not supported by your browser. Enter city/location to save for this record:");
+                if (manual) {
+                    await executeDbUpdate(`${node}/${key}`, { city: manual });
+                    if (node === 'donors' && bloodDonorsData[key]) bloodDonorsData[key].city = manual;
+                    if (node === 'organ_donors' && organDonorsData[key]) organDonorsData[key].city = manual;
+                    if (node === 'users' && usersData[key]) usersData[key].city = manual;
+                    if (node === 'partner_hospitals' && hospitalsData[key]) hospitalsData[key].location = manual;
+                    if (node === 'blood_requests' && requestsData[key]) requestsData[key].city = manual;
+                    renderBloodTable();
+                    renderOrganTable();
+                    renderUsersTable();
+                    renderHospitalsTable();
+                    renderRequestsTable();
+                    alert(`Location "${manual}" saved.`);
+                }
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = Math.round(pos.coords.accuracy);
+
+                    const locationObj = {
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: acc,
+                        capturedAt: new Date().toISOString(),
+                        capturedBy: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminEmail') || 'SUPER_ADMIN'),
+                        mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`
+                    };
+
+                    await executeDbUpdate(`${node}/${key}`, {
+                        liveLocation: locationObj,
+                        coordinates: `${lat},${lng}`,
+                        lastLocationUpdate: new Date().toISOString()
+                    });
+
+                    if (node === 'donors' && bloodDonorsData[key]) bloodDonorsData[key].liveLocation = locationObj;
+                    if (node === 'organ_donors' && organDonorsData[key]) organDonorsData[key].liveLocation = locationObj;
+                    if (node === 'users' && usersData[key]) usersData[key].liveLocation = locationObj;
+                    if (node === 'partner_hospitals' && hospitalsData[key]) hospitalsData[key].liveLocation = locationObj;
+                    if (node === 'blood_requests' && requestsData[key]) requestsData[key].liveLocation = locationObj;
+
+                    renderBloodTable();
+                    renderOrganTable();
+                    renderUsersTable();
+                    renderHospitalsTable();
+                    renderRequestsTable();
+
+                    try {
+                        await logAdminAction('SAVED_LIVE_LOCATION', node, key, {
+                            newValue: `${lat},${lng} (±${acc}m)`,
+                            reason: 'Captured & saved live GPS location for legal audit'
+                        });
+                    } catch(e) {}
+
+                    alert(`📍 Live GPS Location saved successfully!\n\nLatitude: ${lat.toFixed(5)}\nLongitude: ${lng.toFixed(5)}\nAccuracy: ±${acc}m\n\nCoordinates saved to record for legal audit & fraud prevention.`);
+                },
+                async (err) => {
+                    const manual = prompt(`Automatic GPS detection failed (${err.message}). Enter location name or coordinates to save:`);
+                    if (manual) {
+                        await executeDbUpdate(`${node}/${key}`, { city: manual, coordinates: manual });
+                        if (node === 'donors' && bloodDonorsData[key]) bloodDonorsData[key].city = manual;
+                        if (node === 'organ_donors' && organDonorsData[key]) organDonorsData[key].city = manual;
+                        if (node === 'users' && usersData[key]) usersData[key].city = manual;
+                        if (node === 'partner_hospitals' && hospitalsData[key]) hospitalsData[key].location = manual;
+                        if (node === 'blood_requests' && requestsData[key]) requestsData[key].city = manual;
+                        renderBloodTable();
+                        renderOrganTable();
+                        renderUsersTable();
+                        renderHospitalsTable();
+                        renderRequestsTable();
+                        alert(`Location "${manual}" saved successfully.`);
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 12000 }
+            );
+        };
+
+        window.saveAdminSessionLiveLocation = async function() {
+            if (!navigator.geolocation) {
+                alert("Geolocation not supported by browser.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const acc = Math.round(pos.coords.accuracy);
+                    const auditEntry = {
+                        action: 'ADMIN_GPS_VERIFIED',
+                        adminEmail: (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : (localStorage.getItem('adminEmail') || 'SUPER_ADMIN'),
+                        timestamp: Date.now(),
+                        isoDate: new Date().toISOString(),
+                        latitude: lat,
+                        longitude: lng,
+                        accuracy: acc,
+                        mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+                        details: 'Admin verified active live session coordinates'
+                    };
+                    await executeDbPush('admin_audit_logs', auditEntry);
+                    alert(`📍 Admin Live Location saved to audit trail!\nLatitude: ${lat.toFixed(5)}\nLongitude: ${lng.toFixed(5)}\nAccuracy: ±${acc}m`);
+                },
+                (err) => {
+                    alert("GPS detection error: " + err.message);
+                },
+                { enableHighAccuracy: true, timeout: 12000 }
+            );
+        };
+
+        window.executeDbPush = async function(path, data) {
+            let key = null;
+            try {
+                const pushRef = await push(ref(db, path), data);
+                if (pushRef && pushRef.key) key = pushRef.key;
+            } catch (e) {
+                console.warn(`SDK push fallback for ${path}:`, e);
+            }
+            if (!key) {
+                try {
+                    const res = await fetch(`${DB_BASE_URL}/${path}.json`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (res.ok) {
+                        const json = await res.json();
+                        key = json.name;
+                    }
+                } catch (restErr) {
+                    console.warn(`REST push fallback for ${path}:`, restErr);
+                }
+            }
+            return key;
+        };
+
         window.deleteRecord = async function(node, key) {
             try {
                 checkWritePermission(`delete record from ${node}`);
@@ -1722,7 +2004,7 @@
 
                 const itemTitle = itemData ? (itemData.name || itemData.hospitalName || itemData.subject || itemData.userName || itemData.requestId || itemData.email || key) : key;
 
-                const confirmed = confirm(`Move "${itemTitle}" to Recycle Bin?\n\nYou can restore this record anytime from the Recycle Bin tab.`);
+                const confirmed = confirm(`Are you sure you want to delete "${itemTitle}"?\n\nThis will remove the record from active view. A backup will also be safely preserved in the Recycle Bin.`);
                 if (!confirmed) return;
 
                 const recycleItem = {
@@ -1734,17 +2016,12 @@
                     timestamp: Date.now()
                 };
 
-                try {
-                    await push(ref(db, 'recycle_bin'), recycleItem);
-                } catch(e) {
-                    console.warn("Recycle bin push warning:", e);
+                const newRecycleKey = await executeDbPush('recycle_bin', recycleItem);
+                if (newRecycleKey) {
+                    recycleBinData[newRecycleKey] = recycleItem;
                 }
 
-                try {
-                    await remove(ref(db, `${node}/${key}`));
-                } catch(e) {
-                    console.warn("Live node remove warning:", e);
-                }
+                await executeDbDelete(`${node}/${key}`);
 
                 // Local state update fallback
                 if (node === 'users' && usersData[key]) delete usersData[key];
@@ -1770,13 +2047,68 @@
                 try {
                     await logAdminAction('MOVED_TO_RECYCLE_BIN', node, key, {
                         newValue: itemTitle,
-                        reason: `Soft-deleted record and moved to Recycle Bin`
+                        reason: `Deleted record and moved to Recycle Bin`
                     });
                 } catch(e) {}
 
-                alert(`"${itemTitle}" moved to Recycle Bin successfully! 🗑️`);
+                alert(`"${itemTitle}" deleted successfully! 🗑️`);
             } catch (err) {
                 console.error("Delete record error:", err);
+                alert("Notice: " + err.message);
+            }
+        };
+
+        window.permanentlyDeleteRecordDirectly = async function(node, key) {
+            try {
+                checkWritePermission(`permanently erase record from ${node}`);
+
+                let itemData = null;
+                if (node === 'donors') itemData = bloodDonorsData[key];
+                else if (node === 'organ_donors') itemData = organDonorsData[key];
+                else if (node === 'users') itemData = usersData[key];
+                else if (node === 'partner_hospitals') itemData = hospitalsData[key];
+                else if (node === 'blood_requests') itemData = requestsData[key];
+                else if (node === 'contact_messages') itemData = contactMessagesData[key];
+                else if (node === 'hospital_communications') itemData = hospitalCommsData[key];
+                else if (node === 'admin_audit_logs') itemData = adminAuditLogsData[key];
+                else if (node === 'profile_change_requests') itemData = profileRequestsData[key];
+                else if (node === 'account_change_requests') itemData = accountRequestsData[key];
+
+                const itemTitle = itemData ? (itemData.name || itemData.hospitalName || itemData.subject || itemData.userName || itemData.requestId || itemData.email || key) : key;
+
+                if (!confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to PERMANENTLY ERASE "${itemTitle}" from the database?\n\nThis bypasses the Recycle Bin and CANNOT be recovered.`)) return;
+
+                await executeDbDelete(`${node}/${key}`);
+
+                if (node === 'users' && usersData[key]) delete usersData[key];
+                if (node === 'donors' && bloodDonorsData[key]) delete bloodDonorsData[key];
+                if (node === 'organ_donors' && organDonorsData[key]) delete organDonorsData[key];
+                if (node === 'partner_hospitals' && hospitalsData[key]) delete hospitalsData[key];
+                if (node === 'blood_requests' && requestsData[key]) delete requestsData[key];
+                if (node === 'contact_messages' && contactMessagesData[key]) delete contactMessagesData[key];
+                if (node === 'profile_change_requests' && profileRequestsData[key]) delete profileRequestsData[key];
+                if (node === 'account_change_requests' && accountRequestsData[key]) delete accountRequestsData[key];
+
+                renderUsersTable();
+                renderBloodTable();
+                renderOrganTable();
+                renderHospitalsTable();
+                renderRequestsTable();
+                renderMessagesTable();
+                renderProfileRequestsTable();
+                renderAccountRequestsTable();
+                updateStats();
+
+                try {
+                    await logAdminAction('PERMANENTLY_DELETED_DIRECT', node, key, {
+                        newValue: itemTitle,
+                        reason: `Permanently erased ${node} record`
+                    });
+                } catch(e) {}
+
+                alert(`"${itemTitle}" has been permanently deleted! ❌`);
+            } catch (err) {
+                console.error("Direct permanent delete error:", err);
                 alert("Notice: " + err.message);
             }
         };
@@ -1792,34 +2124,38 @@
                 const recordData = item.recordData || {};
                 const name = recordData.name || recordData.hospitalName || origKey;
 
-                if (confirm(`Restore "${name}" back to live database collection "${node}"?`)) {
-                    if (origKey && origKey.startsWith('-')) {
-                        await set(ref(db, `${node}/${origKey}`), recordData);
-                    } else {
-                        await set(ref(db, `${node}/${origKey || Date.now()}`), recordData);
-                    }
-                    await remove(ref(db, `recycle_bin/${recycleKey}`));
-                    
-                    if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
-                    if (node === 'users') usersData[origKey || Date.now()] = recordData;
-                    if (node === 'donors') bloodDonorsData[origKey || Date.now()] = recordData;
-                    if (node === 'organ_donors') organDonorsData[origKey || Date.now()] = recordData;
+                if (!confirm(`Restore "${name}" back to live database collection "${node}"?`)) return;
 
-                    renderUsersTable();
-                    renderBloodTable();
-                    renderOrganTable();
-                    renderRecycleBinTable();
-                    updateStats();
+                const targetKey = (origKey && origKey.length > 2) ? origKey : Date.now().toString();
+                await executeDbSet(`${node}/${targetKey}`, recordData);
+                await executeDbDelete(`recycle_bin/${recycleKey}`);
+                
+                if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
+                if (node === 'users') usersData[targetKey] = recordData;
+                if (node === 'donors') bloodDonorsData[targetKey] = recordData;
+                if (node === 'organ_donors') organDonorsData[targetKey] = recordData;
+                if (node === 'partner_hospitals') hospitalsData[targetKey] = recordData;
+                if (node === 'blood_requests') requestsData[targetKey] = recordData;
+                if (node === 'contact_messages') contactMessagesData[targetKey] = recordData;
 
-                    try {
-                        await logAdminAction('RESTORED_FROM_RECYCLE_BIN', node, origKey, {
-                            newValue: name,
-                            reason: `Restored record from Recycle Bin to ${node}`
-                        });
-                    } catch(e) {}
-                    alert(`"${name}" restored successfully to ${node}!`);
-                }
+                renderUsersTable();
+                renderBloodTable();
+                renderOrganTable();
+                renderHospitalsTable();
+                renderRequestsTable();
+                renderMessagesTable();
+                renderRecycleBinTable();
+                updateStats();
+
+                try {
+                    await logAdminAction('RESTORED_FROM_RECYCLE_BIN', node, targetKey, {
+                        newValue: name,
+                        reason: `Restored record from Recycle Bin to ${node}`
+                    });
+                } catch(e) {}
+                alert(`"${name}" restored successfully to ${node}!`);
             } catch (err) {
+                console.error("Restore Notice:", err);
                 alert("Restore Notice: " + err.message);
             }
         };
@@ -1829,20 +2165,22 @@
                 checkWritePermission('permanently delete from Recycle Bin');
                 const item = recycleBinData[recycleKey];
                 const name = item?.recordData?.name || item?.originalKey || 'record';
-                if (confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently erase "${name}"? This action CANNOT be undone.`)) {
-                    await remove(ref(db, `recycle_bin/${recycleKey}`));
-                    if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
-                    renderRecycleBinTable();
-                    updateStats();
+                if (!confirm(`⚠️ PERMANENT DELETE WARNING: Are you sure you want to permanently erase "${name}"? This action CANNOT be undone.`)) return;
 
-                    try {
-                        await logAdminAction('PERMANENTLY_DELETED', 'recycle_bin', recycleKey, {
-                            newValue: name,
-                            reason: 'Permanently erased record from Recycle Bin'
-                        });
-                    } catch(e) {}
-                }
+                await executeDbDelete(`recycle_bin/${recycleKey}`);
+                if (recycleBinData[recycleKey]) delete recycleBinData[recycleKey];
+                renderRecycleBinTable();
+                updateStats();
+
+                try {
+                    await logAdminAction('PERMANENTLY_DELETED', 'recycle_bin', recycleKey, {
+                        newValue: name,
+                        reason: 'Permanently erased record from Recycle Bin'
+                    });
+                } catch(e) {}
+                alert(`"${name}" permanently deleted from Recycle Bin! 🗑️`);
             } catch (err) {
+                console.error("Permanent delete error:", err);
                 alert("Notice: " + err.message);
             }
         };
@@ -1850,19 +2188,21 @@
         window.emptyRecycleBin = async function() {
             try {
                 checkWritePermission('empty Recycle Bin');
-                if (confirm('⚠️ PERMANENT ERASE WARNING: Are you sure you want to permanently erase ALL items in the Recycle Bin? This action CANNOT be undone.')) {
-                    await remove(ref(db, 'recycle_bin'));
-                    recycleBinData = {};
-                    renderRecycleBinTable();
-                    updateStats();
+                if (!confirm('⚠️ PERMANENT ERASE WARNING: Are you sure you want to permanently erase ALL items in the Recycle Bin? This action CANNOT be undone.')) return;
 
-                    try {
-                        await logAdminAction('EMPTY_RECYCLE_BIN', 'recycle_bin', 'ALL', {
-                            reason: 'SuperAdmin emptied Recycle Bin'
-                        });
-                    } catch(e) {}
-                }
+                await executeDbDelete('recycle_bin');
+                recycleBinData = {};
+                renderRecycleBinTable();
+                updateStats();
+
+                try {
+                    await logAdminAction('EMPTY_RECYCLE_BIN', 'recycle_bin', 'ALL', {
+                        reason: 'SuperAdmin emptied Recycle Bin'
+                    });
+                } catch(e) {}
+                alert("Recycle bin emptied successfully! All items permanently removed.");
             } catch (err) {
+                console.error("Empty recycle bin error:", err);
                 alert("Notice: " + err.message);
             }
         };
@@ -2401,16 +2741,22 @@
                 const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '-';
                 const contactInfoDisplay = isSubAdmin ? (item.mobile ? item.mobile : '-') : `${item.email || '-'}${item.mobile ? '<br><span class="text-slate-400">'+item.mobile+'</span>' : ''}`;
 
+                let msgLocDisplay = '';
+                if (item.liveLocation && item.liveLocation.latitude) {
+                    msgLocDisplay = `<br/><span class="text-[10px] text-blue-600 dark:text-blue-400 font-bold inline-flex items-center gap-1 mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 text-red-500"></i><a href="https://www.google.com/maps?q=${item.liveLocation.latitude},${item.liveLocation.longitude}" target="_blank" class="hover:underline">GPS: ${item.liveLocation.latitude.toFixed(4)}, ${item.liveLocation.longitude.toFixed(4)}</a></span>`;
+                }
+
                 const actionsCell = isSubAdmin 
                     ? ''
-                    : `<button onclick="viewContactMessage('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">View</button>
-                       <button onclick="deleteRecord('contact_messages', '${key}')" class="bg-red-50 dark:bg-red-950 text-red-600 hover:bg-red-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">Delete</button>`;
+                    : `<button onclick="viewContactMessage('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">View</button>
+                       <button onclick="deleteRecord('contact_messages', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Delete message (Move to Recycle Bin)">🗑️ Delete</button>
+                       <button onclick="permanentlyDeleteRecordDirectly('contact_messages', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Permanently delete message">❌ Permanent</button>`;
 
                 tr.innerHTML = `
                     <td class="p-4 font-mono text-xs font-bold text-slate-500">${item.messageId || key.slice(0,8)}</td>
                     <td class="p-4 font-bold text-slate-900 dark:text-white">${item.name || 'Anonymous'}</td>
-                    <td class="p-4"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-2 py-0.5 rounded text-xs">${item.reason || 'General'}</span></td>
-                    <td class="p-4 text-xs font-mono">${contactInfoDisplay}</td>
+                    <td class="p-4"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold px-2 py-0.5 rounded text-xs">${item.reason || item.subject || 'General'}</span></td>
+                    <td class="p-4 text-xs font-mono">${contactInfoDisplay}${msgLocDisplay}</td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-xs text-slate-500">${dateStr}</td>
                     <td class="p-4 text-right space-x-1 td-actions">
@@ -2598,56 +2944,10 @@
             }
         };
 
-        /* EDIT BLOOD DONOR MODAL FUNCTIONS */
+        /* EDIT BLOOD DONOR FUNCTIONS */
         let activeEditDonorKey = null;
         window.openEditDonorModal = function(key) {
-            if (adminRole === 'SUB_ADMIN') return;
-            activeEditDonorKey = key;
-            const donor = bloodDonorsData[key];
-            if (!donor) return;
-
-            const isSubAdmin = (adminRole === 'SUB_ADMIN');
-
-            document.getElementById("editDonorName").value = donor.name || "";
-            document.getElementById("editDonorEmail").value = donor.email || "";
-            document.getElementById("editDonorDob").value = donor.dob || "";
-            document.getElementById("editDonorPhone").value = donor.phone || donor.mobileNumber || "";
-            document.getElementById("editDonorBloodGroup").value = donor.bloodGroup || "O+";
-            document.getElementById("editDonorCity").value = donor.city || "";
-            document.getElementById("editDonorAlcohol24h").value = donor.alcoholLast24h || "No";
-            document.getElementById("editDonorHasHabits").value = donor.hasBadHabits || "No";
-            document.getElementById("editDonorStatus").value = donor.status || "Available";
-            document.getElementById("editDonorDonationCount").value = (donor.donationCount !== undefined) ? donor.donationCount : (donor.timesDonated || 0);
-
-            // Sub-Admin permissions: can edit donationCount and status; identity fields are read-only
-            const restrictedFields = ["editDonorName", "editDonorEmail", "editDonorDob", "editDonorPhone", "editDonorBloodGroup", "editDonorCity", "editDonorAlcohol24h", "editDonorHasHabits"];
-            restrictedFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.disabled = isSubAdmin;
-                    if (isSubAdmin) {
-                        el.classList.add("opacity-60", "cursor-not-allowed");
-                    } else {
-                        el.classList.remove("opacity-60", "cursor-not-allowed");
-                    }
-                }
-            });
-
-            const notice = document.getElementById("editDonorSubAdminNotice");
-            if (notice) {
-                if (isSubAdmin) {
-                    notice.classList.remove("hidden");
-                } else {
-                    notice.classList.add("hidden");
-                }
-            }
-
-            document.getElementById("editDonorFeedback").textContent = "";
-
-            const modal = document.getElementById("editDonorModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            if (window.lucide) lucide.createIcons();
+            window.openEditInNewPage('donors', key);
         };
 
         window.closeEditDonorModal = function() {
@@ -2730,30 +3030,10 @@
             }
         };
 
-        /* EDIT ORGAN DONOR MODAL FUNCTIONS */
+        /* EDIT ORGAN DONOR FUNCTIONS */
         let activeEditOrganKey = null;
         window.openEditOrganDonorModal = function(key) {
-            if (adminRole === 'SUB_ADMIN') return;
-            checkWritePermission('edit Organ Donor details');
-            activeEditOrganKey = key;
-            const donor = organDonorsData[key];
-            if (!donor) return;
-
-            document.getElementById("editOrganName").value = donor.name || "";
-            document.getElementById("editOrganEmail").value = donor.email || "";
-            document.getElementById("editOrganPhone").value = donor.phone || "";
-            document.getElementById("editOrganAge").value = donor.age || 25;
-            document.getElementById("editOrganDob").value = donor.dob || "";
-            document.getElementById("editOrganOrgansPledged").value = donor.organsPledged || "All Organs & Tissues";
-            document.getElementById("editOrganCity").value = donor.city || "";
-            document.getElementById("editOrganAlcoholHabit").value = donor.alcoholHabit || "Never / Non-Drinker";
-            document.getElementById("editOrganSmokingHabit").value = donor.smokingHabit || "Non-Smoker";
-            document.getElementById("editOrganFeedback").textContent = "";
-
-            const modal = document.getElementById("editOrganDonorModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            if (window.lucide) lucide.createIcons();
+            window.openEditInNewPage('organ_donors', key);
         };
 
         window.closeEditOrganDonorModal = function() {
@@ -2814,26 +3094,10 @@
             }
         };
 
-        /* EDIT REGISTERED USER MODAL FUNCTIONS */
+        /* EDIT REGISTERED USER FUNCTIONS */
         let activeEditUserKey = null;
         window.openEditUserModal = function(key) {
-            checkWritePermission('edit Registered User details');
-            activeEditUserKey = key;
-            const user = usersData[key];
-            if (!user) return;
-
-            document.getElementById("editUserName").value = user.name || "";
-            document.getElementById("editUserEmail").value = user.email || "";
-            document.getElementById("editUserPassword").value = user.password || "";
-            document.getElementById("editUserPhone").value = user.phone || "";
-            document.getElementById("editUserDob").value = user.dob || "";
-            document.getElementById("editUserInstagram").value = user.instagram || (user.socialProfiles && user.socialProfiles.instagram) || "";
-            document.getElementById("editUserFeedback").textContent = "";
-
-            const modal = document.getElementById("editUserModal");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-            if (window.lucide) lucide.createIcons();
+            window.openEditInNewPage('users', key);
         };
 
         window.closeEditUserModal = function() {

@@ -15,41 +15,26 @@
  * - Single controlled listener, zero duplicate listeners
  */
 
-// Node.js Execution Guard: If Render or CLI executes `node emergency-alert.js`, seamlessly launch the real production server!
-if (typeof window === 'undefined') {
-    module.exports = require('./backend/server.js');
-} else {
-    (async function initEmergencyAlertModule() {
-        let dbSdk = window.LifeSaverDB;
-        if (!dbSdk) {
-            try {
-                dbSdk = await import('./lifesaver-db.js');
-            } catch (e) {
-                dbSdk = window.LifeSaverDB || {};
-            }
-        }
-        const initializeApp = dbSdk.initializeApp;
-        const getDatabase = dbSdk.getDatabase;
-        const ref = dbSdk.ref;
-        const onValue = dbSdk.onValue;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
-            authDomain: "life-saver-be5cf.firebaseapp.com",
-            databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "life-saver-be5cf",
-            storageBucket: "life-saver-be5cf.firebasestorage.app",
-            messagingSenderId: "549675407162",
-            appId: "1:549675407162:web:ba3c8878834cb4123ba203"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
+    authDomain: "life-saver-be5cf.firebaseapp.com",
+    databaseURL: "https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "life-saver-be5cf",
+    storageBucket: "life-saver-be5cf.firebasestorage.app",
+    messagingSenderId: "549675407162",
+    appId: "1:549675407162:web:ba3c8878834cb4123ba203"
+};
 
-        let app;
-        try {
-            app = initializeApp(firebaseConfig);
-        } catch (e) {
-            app = initializeApp(firebaseConfig, "emergency-alert-system");
-        }
-        const db = getDatabase(app);
+let app;
+try {
+    app = initializeApp(firebaseConfig);
+} catch (e) {
+    app = initializeApp(firebaseConfig, "emergency-alert-system");
+}
+const db = getDatabase(app);
 
 // Guarded Phone Masking Helper
 function maskGuardedPhone(phone) {
@@ -287,9 +272,9 @@ function openEmergencyViewHelpModal(req) {
 
             <!-- Action Buttons: Call, WhatsApp, Match Donors -->
             <div class="space-y-1.5">
-                ${!isExplicitlyPrivate && cleanPhone ? `
+                ${rawPhone ? `
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                    <a href="tel:${cleanPhone}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer text-center no-underline">
+                    <a href="tel:${cleanPhone || rawPhone}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-3 rounded-xl text-xs transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-1.5 cursor-pointer text-center no-underline">
                         <i data-lucide="phone-call" class="w-3.5 h-3.5"></i>
                         <span>Call: ${rawPhone}</span>
                     </a>
@@ -300,7 +285,7 @@ function openEmergencyViewHelpModal(req) {
                 </div>
                 ` : `
                 <div class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-center text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                    🛡️ Requester Phone: <span class="font-mono font-bold">${maskGuardedPhone(rawPhone)}</span> (Guarded Contact)
+                    Emergency Helpline: <a href="tel:108" class="font-mono font-bold text-red-600">108</a>
                 </div>
                 `}
 
@@ -373,11 +358,10 @@ function renderEmergencyCards(activeList) {
         const rawPhone = req.contactNumber || req.phone || '';
         const timeAgo = formatTimeAgo(req.createdAt || req.timestamp);
 
-        // Privacy System Adherence:
-        const isExplicitlyPrivate = req.privacy === 'private' || req.phonePrivacy === 'private' || req.isPublic === false;
-        const phoneDisplay = !isExplicitlyPrivate && rawPhone 
-            ? `<a href="tel:${rawPhone}" class="font-mono text-red-600 dark:text-red-400 font-bold hover:underline" onclick="event.stopPropagation();">${rawPhone}</a>`
-            : `<strong class="font-mono text-slate-700 dark:text-slate-300">${maskGuardedPhone(rawPhone)}</strong> <span class="text-[8px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-1 py-0.1 rounded font-bold">🛡️</span>`;
+        // Emergency Broadcast: Always display complete phone number for direct life-saving response
+        const phoneDisplay = rawPhone 
+            ? `<a href="tel:${cleanPhone || rawPhone}" class="font-mono text-red-600 dark:text-red-400 font-black hover:underline" onclick="event.stopPropagation();">📞 ${rawPhone}</a>`
+            : `<span class="font-mono text-slate-500">📞 108 (Helpline)</span>`;
 
         card.innerHTML = `
             <div>
@@ -492,6 +476,3 @@ if (document.readyState === 'loading') {
 } else {
     initEmergencyAlertSystem();
 }
-    })();
-}
-

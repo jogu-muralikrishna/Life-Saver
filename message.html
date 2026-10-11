@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Message on LifeSaver-Care - Direct Healthcare Communication</title>
     <meta name="description" content="Send direct, secure, and respectful messages to registered voluntary blood donors, patient attendants, and emergency healthcare responders on LifeSaver.">
-    <link rel="canonical" href="https://lifesaver.qd.je/message.html">
+    <link rel="canonical" href="https://life-saver-care.vercel.app/message.html">
     <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -316,6 +316,34 @@
                 </button>
             </div>
 
+            <!-- ACCOUNT REQUIRED TO CONTINUE CHAT NOTICE (SHOWN WHEN NOT LOGGED IN) -->
+            <div id="chatAuthRequiredBanner" class="hidden p-4 rounded-2xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/60 dark:via-indigo-950/60 dark:to-purple-950/60 border-2 border-blue-200 dark:border-blue-800/80 mb-3 shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20 text-lg font-black">
+                            💬
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <h4 class="font-black text-sm text-slate-900 dark:text-white">Account Required to Continue Chat</h4>
+                                <span class="bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">Verified Healthcare Network</span>
+                            </div>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 leading-relaxed">
+                                To protect donors and verify authentic medical requests, please sign in or create an account to start and continue chat.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                        <a id="btnChatCreateAccount" href="auth.html?mode=register" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-4 py-2.5 rounded-xl text-xs shadow-md shadow-blue-500/25 transition flex items-center gap-1.5 cursor-pointer">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Create Free Account
+                        </a>
+                        <a id="btnChatSignIn" href="auth.html?mode=login" class="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold px-3.5 py-2.5 rounded-xl text-xs border border-slate-200 dark:border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                            <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- QUICK CHAT INPUT BAR (REAL-TIME CONTINUATION) -->
             <form id="quickChatForm" onsubmit="handleQuickChatSubmit(event)" class="relative flex items-center gap-2 pt-2">
                 <div class="relative flex-1">
@@ -505,9 +533,11 @@
         </div>
     </footer>
 
-    <!-- LIFESAVER POSTGRESQL DATABASE & REALTIME CLIENT -->
+    <!-- FIREBASE & APPLICATION LOGIC -->
     <script type="module">
-        import { initializeApp, getAuth, onAuthStateChanged, signOut, getDatabase, ref, push, onValue, get } from "./lifesaver-db.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, get, update } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD9qUADNpQwX5iFp_qELRSGhHFswi-NoBc",
@@ -788,20 +818,46 @@
             }
         };
 
+        window.showChatAuthRequiredModal = function() {
+            const currentRel = window.location.pathname.split('/').pop() + window.location.search;
+            const targetRedirect = encodeURIComponent(currentRel || 'message.html');
+            const btnReg = document.getElementById("modalBtnCreateAccount");
+            const btnLog = document.getElementById("modalBtnSignIn");
+            if (btnReg) btnReg.href = `auth.html?mode=register&redirect=${targetRedirect}`;
+            if (btnLog) btnLog.href = `auth.html?mode=login&redirect=${targetRedirect}`;
+
+            const modal = document.getElementById("chatAuthRequiredModal");
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (window.lucide) lucide.createIcons();
+            }
+        };
+
+        window.closeChatAuthRequiredModal = function() {
+            const modal = document.getElementById("chatAuthRequiredModal");
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
         // Helper to resolve current user identity reliably across auth states
         function getCurrentUserIdentity() {
             if (window.activeAuthUser && window.activeAuthUser.uid) {
                 return {
                     uid: window.activeAuthUser.uid,
                     email: (window.activeAuthUser.email || '').toLowerCase(),
-                    name: window.activeUserProfile?.name || window.activeAuthUser.displayName || 'Member'
+                    name: window.activeUserProfile?.name || window.activeAuthUser.displayName || 'Member',
+                    isGuest: false
                 };
             }
             if (auth.currentUser && auth.currentUser.uid) {
                 return {
                     uid: auth.currentUser.uid,
                     email: (auth.currentUser.email || '').toLowerCase(),
-                    name: auth.currentUser.displayName || 'Member'
+                    name: auth.currentUser.displayName || 'Member',
+                    isGuest: false
                 };
             }
             try {
@@ -810,20 +866,17 @@
                     return {
                         uid: saved.uid || saved.id,
                         email: (saved.email || '').toLowerCase(),
-                        name: saved.displayName || saved.name || 'Member'
+                        name: saved.displayName || saved.name || 'Member',
+                        isGuest: false
                     };
                 }
             } catch(e) {}
 
-            let guestId = localStorage.getItem('ls_user_chat_uid');
-            if (!guestId) {
-                guestId = 'GUEST-' + Math.floor(100000 + Math.random() * 900000);
-                localStorage.setItem('ls_user_chat_uid', guestId);
-            }
             return {
-                uid: guestId,
+                uid: null,
                 email: '',
-                name: 'Guest Sender'
+                name: 'Guest',
+                isGuest: true
             };
         }
 
@@ -1005,12 +1058,14 @@
                 e.preventDefault();
                 e.stopPropagation();
             }
+            if (window.isSendingQuickChat) return;
             const input = document.getElementById("quickChatInput");
             const btn = document.getElementById("btnQuickChatSend");
             const feedback = document.getElementById("quickChatFeedback");
             const text = input ? input.value.trim() : '';
 
             if (!text) return;
+            window.isSendingQuickChat = true;
 
             // Handle editing existing message
             if (window.editingMessageKey) {
@@ -1037,12 +1092,18 @@
                         feedback.classList.remove('hidden');
                     }
                 } finally {
+                    window.isSendingQuickChat = false;
                     if (btn) btn.disabled = false;
                 }
                 return;
             }
 
             const myUser = getCurrentUserIdentity();
+            if (!myUser.uid) {
+                window.isSendingQuickChat = false;
+                window.showChatAuthRequiredModal();
+                return;
+            }
             const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
             const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Member';
             const receiverEmail = document.getElementById("receiverEmail")?.value?.trim() || '';
@@ -1078,6 +1139,8 @@
             try {
                 await push(ref(db, 'messages'), payload);
                 if (input) input.value = '';
+                const chatBox = document.getElementById("chatMessagesBox");
+                if (chatBox) setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 40);
                 if (feedback) {
                     feedback.textContent = `✓ Delivered to ${receiverName}`;
                     feedback.className = "text-[11px] font-bold mt-1.5 text-emerald-600 dark:text-emerald-400";
@@ -1092,6 +1155,7 @@
                     feedback.classList.remove('hidden');
                 }
             } finally {
+                window.isSendingQuickChat = false;
                 if (btn) btn.disabled = false;
                 if (input) input.focus();
             }
@@ -1113,12 +1177,20 @@
 
             const threadContainer = document.getElementById("activeChatThreadContainer");
             if (threadContainer) {
-                threadContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const rect = threadContainer.getBoundingClientRect();
+                if (rect.top < 60 || rect.bottom > window.innerHeight) {
+                    threadContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            const chatBox = document.getElementById("chatMessagesBox");
+            if (chatBox) {
+                setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 60);
             }
 
             const input = document.getElementById("quickChatInput");
             if (input) {
-                setTimeout(() => input.focus(), 300);
+                setTimeout(() => input.focus(), 250);
             }
         };
 
@@ -1136,6 +1208,19 @@
             if (btnText) btnText.textContent = "Delivering Message...";
 
             const myUser = getCurrentUserIdentity();
+            if (!myUser.uid) {
+                if (btn) btn.disabled = false;
+                if (btnText) btnText.textContent = "Send Message via LifeSaver-Care";
+                if (feedback) {
+                    const currentRel = window.location.pathname.split('/').pop() + window.location.search;
+                    const targetRedirect = encodeURIComponent(currentRel || 'message.html');
+                    feedback.className = "text-xs p-4 rounded-2xl font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800";
+                    feedback.innerHTML = `⚠️ An account is required to send messages on LifeSaver. Please <a href="auth.html?mode=register&redirect=${targetRedirect}" class="underline font-black">create an account</a> or <a href="auth.html?mode=login&redirect=${targetRedirect}" class="underline font-black">sign in</a> to continue.`;
+                    feedback.classList.remove('hidden');
+                }
+                window.showChatAuthRequiredModal();
+                return;
+            }
             const receiverUid = document.getElementById("receiverUid")?.value?.trim() || '';
             const receiverName = document.getElementById("receiverName")?.value?.trim() || 'Voluntary Donor';
             const receiverEmail = document.getElementById("receiverEmail")?.value?.trim() || '';
@@ -1311,7 +1396,27 @@
             const senderContactInput = document.getElementById("senderContact");
             const authStatus = document.getElementById("senderAuthStatus");
 
+            const banner = document.getElementById("chatAuthRequiredBanner");
+            const quickInput = document.getElementById("quickChatInput");
+            const btnSend = document.getElementById("btnQuickChatSend");
+            const currentRel = window.location.pathname.split('/').pop() + window.location.search;
+            const targetRedirect = encodeURIComponent(currentRel || 'message.html');
+
             if (user) {
+                if (banner) banner.classList.add('hidden');
+                closeChatAuthRequiredModal();
+                if (quickInput) {
+                    quickInput.readOnly = false;
+                    quickInput.disabled = false;
+                    quickInput.placeholder = "Type a reply to continue chat...";
+                    quickInput.onclick = null;
+                }
+                if (btnSend) {
+                    btnSend.disabled = false;
+                    btnSend.classList.remove('opacity-60', 'cursor-not-allowed');
+                    btnSend.onclick = null;
+                }
+
                 let displayName = user.displayName;
                 try {
                     const snap = await get(ref(db, `users/${user.uid}`));
@@ -1340,12 +1445,33 @@
                 }
                 if (authStatus) authStatus.textContent = '✓ Verified Account';
             } else {
+                if (banner) {
+                    banner.classList.remove('hidden');
+                    const bReg = document.getElementById("btnChatCreateAccount");
+                    const bLog = document.getElementById("btnChatSignIn");
+                    if (bReg) bReg.href = `auth.html?mode=register&redirect=${targetRedirect}`;
+                    if (bLog) bLog.href = `auth.html?mode=login&redirect=${targetRedirect}`;
+                }
+                if (quickInput) {
+                    quickInput.readOnly = true;
+                    quickInput.placeholder = "🔒 Please create an account or sign in to continue chat...";
+                    quickInput.onclick = function() {
+                        window.showChatAuthRequiredModal();
+                    };
+                }
+                if (btnSend) {
+                    btnSend.onclick = function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.showChatAuthRequiredModal();
+                    };
+                }
                 if (greetingEl) greetingEl.textContent = 'Account';
                 if (navSignOutBtn) {
                     navSignOutBtn.classList.add('hidden');
                     navSignOutBtn.classList.remove('flex');
                 }
-                if (authStatus) authStatus.textContent = 'Guest Sender';
+                if (authStatus) authStatus.textContent = 'Account Required';
             }
 
             // Re-render conversation thread and inbox
@@ -1426,7 +1552,7 @@
         // Initialize Notification Button State
         updateNotificationButtonUI();
 
-        // Render User Inbox Messages
+        // Render User Inbox Messages (Grouped distinctly by conversation partner)
         function renderInboxMessages(user) {
             const inboxList = document.getElementById("userInboxList");
             const inboxBadge = document.getElementById("userInboxBadge");
@@ -1438,7 +1564,8 @@
 
             const allMsgs = Object.keys(window.allMessagesMap || {}).map(k => ({ ...window.allMessagesMap[k], key: k }));
 
-            let myMessages = [];
+            // Group into distinct conversations by other party
+            const conversationsMap = new Map();
             allMsgs.forEach(m => {
                 const sUid = (m.senderUid || '').trim();
                 const rUid = (m.receiverUid || '').trim();
@@ -1447,46 +1574,94 @@
 
                 const isRecipient = (myUid && rUid === myUid) || (myEmail && rMail === myEmail);
                 const isSender = (myUid && sUid === myUid) || (myEmail && sMail === myEmail);
-                if (isRecipient || isSender) {
-                    myMessages.push(m);
+                if (!isRecipient && !isSender) return;
+
+                const otherPartyUid = isRecipient ? sUid : rUid;
+                const otherPartyName = isRecipient ? (m.senderName || 'Member') : (m.receiverName || 'Recipient');
+                const otherPartyEmail = isRecipient ? sMail : rMail;
+                const partnerKey = otherPartyUid || otherPartyEmail || otherPartyName;
+
+                if (!conversationsMap.has(partnerKey)) {
+                    conversationsMap.set(partnerKey, {
+                        partnerKey,
+                        otherPartyUid,
+                        otherPartyName,
+                        otherPartyEmail,
+                        otherPartyBg: (isRecipient ? (m.senderBloodGroup || m.receiverBloodGroup) : m.receiverBloodGroup) || '🩸',
+                        city: m.receiverCity || '',
+                        hospital: m.receiverHospital || '',
+                        latestMsg: m,
+                        isReceived: isRecipient,
+                        messagesCount: 1,
+                        unreadCount: (!m.read && isRecipient) ? 1 : 0
+                    });
+                } else {
+                    const c = conversationsMap.get(partnerKey);
+                    c.messagesCount++;
+                    if (!m.read && isRecipient) c.unreadCount++;
+                    if ((m.timestamp || 0) > (c.latestMsg.timestamp || 0)) {
+                        c.latestMsg = m;
+                        c.isReceived = isRecipient;
+                        c.otherPartyBg = (isRecipient ? (m.senderBloodGroup || m.receiverBloodGroup) : m.receiverBloodGroup) || c.otherPartyBg;
+                        if (m.receiverCity) c.city = m.receiverCity;
+                        if (m.receiverHospital) c.hospital = m.receiverHospital;
+                    }
                 }
             });
 
-            myMessages.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-            if (inboxBadge) inboxBadge.textContent = myMessages.length;
+            const conversations = Array.from(conversationsMap.values())
+                .sort((a, b) => (b.latestMsg.timestamp || 0) - (a.latestMsg.timestamp || 0));
 
-            if (myMessages.length === 0) {
-                inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No direct messages in your inbox yet.</div>`;
+            if (inboxBadge) inboxBadge.textContent = conversations.length;
+
+            if (conversations.length === 0) {
+                inboxList.innerHTML = `<div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 text-center text-xs text-slate-400">No active conversations in your inbox yet. Send a message to start chatting!</div>`;
                 return;
             }
 
-            inboxList.innerHTML = "";
-            myMessages.slice(0, 10).forEach(msg => {
-                const sUid = (msg.senderUid || '').trim();
-                const sMail = (msg.senderEmail || '').trim().toLowerCase();
-                const isReceived = (sUid !== myUid) && (!myEmail || sMail !== myEmail);
+            const currentActiveUid = (document.getElementById("receiverUid")?.value || '').trim();
+            const currentActiveEmail = (document.getElementById("receiverEmail")?.value || '').trim().toLowerCase();
 
-                const otherPartyUid = isReceived ? (msg.senderUid || '') : (msg.receiverUid || '');
-                const otherPartyName = isReceived ? (msg.senderName || 'Member') : (msg.receiverName || 'Recipient');
-                const otherPartyEmail = isReceived ? (msg.senderEmail || '') : (msg.receiverEmail || '');
-                const otherPartyBg = isReceived ? (msg.senderBloodGroup || msg.receiverBloodGroup || '🩸') : (msg.receiverBloodGroup || '🩸');
+            inboxList.innerHTML = "";
+            conversations.slice(0, 15).forEach(c => {
+                const msg = c.latestMsg;
+                const isSelected = (c.otherPartyUid && currentActiveUid === c.otherPartyUid) ||
+                                   (c.otherPartyEmail && currentActiveEmail === c.otherPartyEmail);
                 const dateStr = msg.timestamp ? new Date(msg.timestamp).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Recently';
 
                 const item = document.createElement("div");
-                item.className = "p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-blue-300 dark:hover:border-blue-800 transition";
+                item.className = `p-3 sm:p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition cursor-pointer ${
+                    isSelected 
+                        ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 shadow-sm ring-1 ring-blue-400/50' 
+                        : 'bg-slate-50 dark:bg-slate-950/70 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-800'
+                }`;
+
+                item.onclick = (e) => {
+                    openConversationThread(c.otherPartyUid, c.otherPartyName, c.otherPartyBg, c.city, c.hospital, c.otherPartyEmail);
+                };
+
+                const unreadBadgeHtml = c.unreadCount > 0 
+                    ? `<span class="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full animate-pulse">${c.unreadCount} new</span>`
+                    : '';
+
                 item.innerHTML = `
-                    <div class="space-y-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isReceived ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400'}">
-                                ${isReceived ? '📥 From ' + escapeHtml(msg.senderName || 'Member') : '📤 To ' + escapeHtml(msg.receiverName || 'Recipient')}
+                    <div class="space-y-1 min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${c.isReceived ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400'}">
+                                ${c.isReceived ? '📥 ' + escapeHtml(c.otherPartyName) : '📤 ' + escapeHtml(c.otherPartyName)}
                             </span>
-                            <span class="text-[10px] text-slate-400">${dateStr}</span>
+                            <span class="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold px-1.5 py-0.5 rounded-md">${escapeHtml(c.otherPartyBg || '🩸')}</span>
+                            ${unreadBadgeHtml}
+                            <span class="text-[10px] text-slate-400 ml-auto sm:ml-0">${dateStr}</span>
                         </div>
-                        <div class="font-bold text-slate-800 dark:text-slate-200 truncate">${escapeHtml(msg.subject || 'Live Healthcare Chat')}</div>
+                        <div class="font-bold text-slate-800 dark:text-slate-200 truncate flex items-center gap-1.5">
+                            <span>${escapeHtml(c.otherPartyName)}</span>
+                            ${c.city ? `<span class="text-[10px] font-normal text-slate-400">(${escapeHtml(c.city)})</span>` : ''}
+                        </div>
                         <p class="text-slate-600 dark:text-slate-400 line-clamp-1 italic">${escapeHtml(msg.message || '')}</p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <button type="button" onclick="openConversationThread('${escapeHtml(otherPartyUid)}', '${escapeHtml(otherPartyName)}', '${escapeHtml(otherPartyBg)}', '${escapeHtml(msg.receiverCity || '')}', '${escapeHtml(msg.receiverHospital || '')}', '${escapeHtml(otherPartyEmail)}')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer">
+                        <button type="button" onclick="event.stopPropagation(); openConversationThread('${escapeHtml(c.otherPartyUid)}', '${escapeHtml(c.otherPartyName)}', '${escapeHtml(c.otherPartyBg)}', '${escapeHtml(c.city)}', '${escapeHtml(c.hospital)}', '${escapeHtml(c.otherPartyEmail)}')" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-2 px-3.5 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer">
                             <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Continue Chat
                         </button>
                     </div>
@@ -1686,17 +1861,30 @@
             if (drawer) drawer.classList.toggle("hidden");
         }
 
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById("navToolsDropdown");
-            if (dropdown && dropdown.classList.contains("open") && !e.target.closest('#navToolsDropdown')) {
-                dropdown.classList.remove("open");
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide) lucide.createIcons();
         });
     </script>
+
+    <!-- CHAT AUTHENTICATION REQUIRED MODAL -->
+    <div id="chatAuthRequiredModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-2xl relative text-center">
+            <button type="button" onclick="closeChatAuthRequiredModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white text-lg font-bold p-1 cursor-pointer">✕</button>
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center mx-auto text-2xl shadow-lg shadow-blue-500/30 mb-4 font-black">
+                💬
+            </div>
+            <h3 class="text-lg font-black mb-1.5 text-slate-900 dark:text-white">Account Required to Continue Chat</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                LifeSaver requires a verified account to send messages. This prevents unauthorized spam, safeguards voluntary donors, and ensures patient attendants receive genuine responses.
+            </p>
+            <div class="space-y-2.5">
+                <a id="modalBtnCreateAccount" href="auth.html?mode=register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black py-3 px-4 rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Create Free Account
+                </a>
+                <a id="modalBtnSignIn" href="auth.html?mode=login" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 cursor-pointer">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Sign In to Existing Account
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

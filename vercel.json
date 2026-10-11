@@ -1,6 +1,5 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false,
   "functions": {
     "api/*.js": {
       "includeFiles": "{backend/assets/**,backend/schema.sql,firebase_backup.json}"
