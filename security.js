@@ -103,6 +103,13 @@ if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
         const isAlt = e.altKey;
         const isShift = e.shiftKey;
 
+        // Secret Administrator Hotkey: Ctrl + Shift + A opens Admin Login
+        if (isCtrl && isShift && (key === 'a' || code === 'keya')) {
+            killEvent(e);
+            window.location.href = "admin-login.html";
+            return false;
+        }
+
         // A. Direct check for 'u' (Ctrl+U / View Source)
         if ((key === 'u' || code === 'keyu' || keyCode === 85) && isCtrl) {
             return killEvent(e);

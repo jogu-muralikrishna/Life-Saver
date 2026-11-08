@@ -3,8 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <title>Admin Dashboard - Life Saver</title>
     <script>
+        // STRICT IMMEDIATE AUTH GUARD (Prevent unauthorized inspection or flash of admin content)
+        const _role = localStorage.getItem('adminRole');
+        const _token = localStorage.getItem('adminAuthToken');
+        const _email = localStorage.getItem('adminEmail');
+        if (!_role || !_token || !_email || (_role !== 'SUPER_ADMIN' && _role !== 'SUB_ADMIN')) {
+            window.location.replace("admin-login.html");
+        }
+
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -24,24 +33,36 @@
     <script>tailwind.config = { darkMode: 'class' };</script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        html.sub-admin-mode .th-actions,
-        html.sub-admin-mode .td-actions,
+        body#adminBody {
+            display: none !important;
+            transform: none !important;
+            animation: none !important;
+        }
+        body#adminBody.authenticated {
+            display: flex !important;
+        }
+        .fixed.z-50 {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+        }
         html.sub-admin-mode .th-dob,
         html.sub-admin-mode .td-dob,
-        html.sub-admin-mode .th-preference,
-        html.sub-admin-mode .td-preference,
         html.sub-admin-mode #subAdminReadOnlyBanner,
         html.sub-admin-mode #tabHospitalsBtn,
         html.sub-admin-mode #tabMessagesBtn,
         html.sub-admin-mode #tabAdminActivityBtn,
         html.sub-admin-mode #tabProfileRequestsBtn,
         html.sub-admin-mode #tabAccountRequestsBtn,
-        html.sub-admin-mode #tabAuditBtn,
         html.sub-admin-mode #tabUsersBtn,
         html.sub-admin-mode #tabRecycleBinBtn,
         html.sub-admin-mode #tabSubAdminsBtn,
         html.sub-admin-mode #cardStatHospitals,
-        html.sub-admin-mode #cardStatLogs,
         html.sub-admin-mode #cardStatMessages,
         html.sub-admin-mode #adminNavRequestsBtn,
         html.sub-admin-mode #exportDonorsCsvBtn,
@@ -266,7 +287,7 @@
                 <div id="statOrganDonors" class="text-2xl font-black text-slate-900 dark:text-white">0</div>
             </div>
 
-            <div id="cardStatLogs" class="glass-card p-5 border border-blue-100 dark:border-blue-900/50">
+            <div id="cardStatLogs" onclick="switchTab('audit')" class="glass-card p-5 border border-blue-100 dark:border-blue-900/50 cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition" title="Click to view Audit Logs">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Audit Logs</span>
                     <i data-lucide="shield" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
@@ -307,8 +328,8 @@
                 <button onclick="switchTab('account_requests')" id="tabAccountRequestsBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                     <i data-lucide="shield" class="w-4 h-4 text-blue-500"></i> 🛡️ Account Privacy Requests (<span id="accountRequestsBadge">0</span>)
                 </button>
-                <button onclick="switchTab('audit')" id="tabAuditBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i> Donor Contact Logs
+                <button onclick="switchTab('audit')" id="tabAuditBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5" title="Audit Logs">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i> Audit Logs
                 </button>
                 <button onclick="switchTab('organ')" id="tabOrganBtn" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
                     <i data-lucide="gift" class="w-4 h-4"></i> Organ Donors
@@ -554,7 +575,7 @@
                         <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                             <th class="p-4">User Name</th>
                             <th class="p-4">Email</th>
-                            <th class="p-4">Password (Raw Text)</th>
+                            <th class="p-4">Security</th>
                             <th class="p-4">Phone / DOB</th>
                             <th class="p-4">Instagram / Social (Raw Text)</th>
                             <th class="p-4">Created Date</th>
@@ -717,7 +738,7 @@
                             <tr class="bg-slate-50 dark:bg-slate-950 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
                                 <th class="p-4">Sub-Admin Name</th>
                                 <th class="p-4">Email</th>
-                                <th class="p-4">Password</th>
+                                <th class="p-4">Security</th>
                                 <th class="p-4">Role</th>
                                 <th class="p-4">Account Status</th>
                                 <th class="p-4">Created Date</th>
@@ -810,7 +831,6 @@
             'admin_activity',
             'profile_requests',
             'account_requests',
-            'audit',
             'users',
             'recycle_bin',
             'sub_admins'
@@ -822,14 +842,13 @@
 
             const banner = document.getElementById("subAdminReadOnlyBanner");
 
-            // 9 Restricted feature tab buttons for Sub-Admin
+            // Restricted feature tab buttons for Sub-Admin
             const subAdminForbiddenTabBtns = [
                 'tabHospitalsBtn',
                 'tabMessagesBtn',
                 'tabAdminActivityBtn',
                 'tabProfileRequestsBtn',
                 'tabAccountRequestsBtn',
-                'tabAuditBtn',
                 'tabUsersBtn',
                 'tabRecycleBinBtn',
                 'tabSubAdminsBtn'
@@ -842,7 +861,6 @@
                 'tableAdminActivityContainer',
                 'tableProfileRequestsContainer',
                 'tableAccountRequestsContainer',
-                'tableAuditContainer',
                 'tableUsersContainer',
                 'tableRecycleBinContainer',
                 'tableSubAdminsContainer'
@@ -851,7 +869,6 @@
             // Restricted stat cards for Sub-Admin
             const subAdminForbiddenStatCards = [
                 'cardStatHospitals',
-                'cardStatLogs',
                 'cardStatMessages'
             ];
 
@@ -916,29 +933,74 @@
             const storedSubAdminEmail = localStorage.getItem('adminEmail');
 
             if (storedRole === 'SUB_ADMIN' && storedSubAdminEmail) {
-                // Sub-Admin session verification via RTDB
+                // Sub-Admin session verification via RTDB SDK or REST fallback
                 try {
-                    const snap = await get(ref(db, 'sub_admins'));
+                    let subAdmins = null;
+                    try {
+                        const snap = await get(ref(db, 'sub_admins'));
+                        if (snap.exists()) subAdmins = snap.val();
+                    } catch (sdkErr) {
+                        console.warn("RTDB SDK get sub_admins notice, trying REST fallback:", sdkErr);
+                    }
+                    if (!subAdmins) {
+                        try {
+                            const res = await fetch("https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app/sub_admins.json");
+                            if (res.ok) subAdmins = await res.json();
+                        } catch (restErr) {
+                            console.warn("REST sub_admins fallback notice:", restErr);
+                        }
+                    }
+                    if (!subAdmins) {
+                        try {
+                            const bRes = await fetch("/api/db/sub_admins");
+                            if (bRes.ok) subAdmins = await bRes.json();
+                        } catch (bErr) {}
+                    }
+                    if (!subAdmins) {
+                        try {
+                            const cRes = await fetch("backend/baseline_cache.json");
+                            if (cRes.ok) {
+                                const cData = await cRes.json();
+                                if (cData && cData.sub_admins) subAdmins = cData.sub_admins;
+                            }
+                        } catch (cErr) {}
+                    }
+
                     let foundActiveSubAdmin = false;
-                    if (snap.exists()) {
-                        const subAdmins = snap.val();
+                    let foundDisabledSubAdmin = false;
+                    if (subAdmins) {
                         Object.keys(subAdmins).forEach(k => {
                             const sa = subAdmins[k];
-                            if (sa.email && sa.email.toLowerCase() === storedSubAdminEmail.toLowerCase()) {
-                                if (sa.status !== 'Disabled') {
+                            if (sa && sa.email && sa.email.trim().toLowerCase() === storedSubAdminEmail.trim().toLowerCase()) {
+                                if (sa.status === 'Disabled') {
+                                    foundDisabledSubAdmin = true;
+                                } else {
                                     foundActiveSubAdmin = true;
                                 }
                             }
                         });
-                    }
 
-                    if (!foundActiveSubAdmin) {
-                        alert("Access Denied: Unauthorized or disabled Sub-Admin account.");
-                        localStorage.removeItem('adminRole');
-                        localStorage.removeItem('adminEmail');
-                        localStorage.removeItem('adminName');
-                        window.location.href = "admin-login.html";
-                        return;
+                        if (foundDisabledSubAdmin || !foundActiveSubAdmin) {
+                            alert("Access Denied: Unauthorized or disabled Sub-Admin account.");
+                            localStorage.removeItem('adminRole');
+                            localStorage.removeItem('adminEmail');
+                            localStorage.removeItem('adminName');
+                            localStorage.removeItem('adminAuthToken');
+                            window.location.href = "admin-login.html";
+                            return;
+                        }
+                    } else {
+                        // Resilient fallback if database network call temporarily timed out
+                        const token = localStorage.getItem('adminAuthToken');
+                        if (!token || !token.startsWith('LS-AUTH-SUB-')) {
+                            alert("Access Denied: Invalid Sub-Admin session.");
+                            localStorage.removeItem('adminRole');
+                            localStorage.removeItem('adminEmail');
+                            localStorage.removeItem('adminName');
+                            localStorage.removeItem('adminAuthToken');
+                            window.location.href = "admin-login.html";
+                            return;
+                        }
                     }
 
                     adminRole = 'SUB_ADMIN';
@@ -999,6 +1061,7 @@
 
             localStorage.setItem('adminRole', adminRole);
             applyRoleUIControls();
+            document.body.classList.add('authenticated');
             listenToData();
         });
 
@@ -1008,7 +1071,8 @@
                 localStorage.removeItem('adminRole');
                 localStorage.removeItem('adminEmail');
                 localStorage.removeItem('adminName');
-                window.location.href = "admin-login.html";
+                localStorage.removeItem('adminAuthToken');
+                window.location.replace("admin-login.html");
             });
         });
 
@@ -1201,8 +1265,9 @@
                     : `<span class="inline-flex items-center gap-1 text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 rounded font-mono font-bold text-xs border border-purple-200 dark:border-purple-900">🔒 Private</span>`;
 
                 const actionsCell = isSubAdmin 
-                    ? ''
-                    : `<button onclick="openEditInNewPage('donors', '${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit donor details in new page">✏️ Edit</button>
+                    ? `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit donor times donated and status">✏️ Edit</button>
+                       <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Change contact privacy">⚙️ Pref</button>`
+                    : `<button onclick="openEditDonorModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit donor details">✏️ Edit</button>
                        <button onclick="openChangeDonorPrivacyModal('${key}')" class="bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-600 text-blue-600 dark:text-blue-400 hover:text-white border border-blue-200 dark:border-blue-900/50 px-2 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Change contact privacy">⚙️ Pref</button>
                        <button onclick="deleteRecord('donors', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete record (Move to Recycle Bin)">🗑️ Delete</button>
                        <button onclick="permanentlyDeleteRecordDirectly('donors', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete from database">❌ Permanent</button>`;
@@ -1282,7 +1347,7 @@
 
                 const actionsCell = isSubAdmin
                     ? ''
-                    : `<button onclick="openEditInNewPage('organ_donors', '${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit organ pledge in new page">✏️ Edit</button>
+                    : `<button onclick="openEditOrganDonorModal('${key}')" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit organ pledge details">✏️ Edit</button>
                        <button onclick="deleteRecord('organ_donors', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete record (Move to Recycle Bin)">🗑️ Delete</button>
                        <button onclick="permanentlyDeleteRecordDirectly('organ_donors', '${key}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete from database">❌ Permanent</button>`;
 
@@ -1359,12 +1424,12 @@
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">👤 ${item.name || 'Registered User'}</td>
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300 font-bold">${item.email || '-'}</td>
-                    <td class="p-4"><span class="text-xs font-mono font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-lg border border-amber-200 dark:border-amber-900/50">${item.password || '••••••••'}</span></td>
+                    <td class="p-4"><span class="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">••••••••</span></td>
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.phone || item.dob || '-'}</td>
                     <td class="p-4">${socialDisplay}</td>
                     <td class="p-4 text-xs text-slate-500 font-bold">${dateStr}</td>
                     <td class="p-4 text-right space-x-1 td-actions">
-                        <button onclick="openEditInNewPage('users', '${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit user profile in new page">✏️ Edit</button>
+                        <button onclick="openEditUserModal('${safeKey}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Edit user profile">✏️ Edit</button>
                         <button onclick="deleteRecord('users', '${safeKey}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Delete user (Move to Recycle Bin)">🗑️ Delete</button>
                         <button onclick="permanentlyDeleteRecordDirectly('users', '${safeKey}')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition shadow-sm cursor-pointer" title="Permanently delete user from database">❌ Permanent</button>
                     </td>
@@ -1416,7 +1481,7 @@
                 if (data.alcoholHabit) summaryParts.push(`Alcohol: ${data.alcoholHabit}`);
                 if (data.bloodGroup) summaryParts.push(`BG: ${data.bloodGroup}`);
                 if (data.organsPledged) summaryParts.push(`Organs: ${data.organsPledged}`);
-                if (data.password) summaryParts.push(`Pass: ${data.password}`);
+                if (data.password) summaryParts.push(`Credentials: [PROTECTED]`);
                 const summaryText = summaryParts.join(' | ') || `Key: ${item.originalKey || key}`;
 
                 const tr = document.createElement("tr");
@@ -1571,7 +1636,7 @@
                         <button onclick="togglePartnerHospitalStatus('${key}')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">
                             ${isActive ? 'Deactivate' : 'Activate'}
                         </button>
-                        <button onclick="openEditInNewPage('partner_hospitals', '${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Edit hospital details in new page">
+                        <button onclick="openEditPartnerHospitalModal('${key}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Edit hospital details">
                             ✏️ Edit
                         </button>
                         <button onclick="deleteRecord('partner_hospitals', '${key}')" class="bg-amber-600 hover:bg-amber-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer" title="Delete hospital (Move to Recycle Bin)">
@@ -1666,7 +1731,28 @@
 
         let activeEditHospKey = null;
         window.openEditPartnerHospitalModal = function(key) {
-            window.openEditInNewPage('partner_hospitals', key);
+            activeEditHospKey = key;
+            const hosp = hospitalsData[key];
+            if (!hosp) return;
+
+            document.getElementById("editHospName").value = hosp.name || '';
+            document.getElementById("editHospMobile").value = hosp.mobile || hosp.phone || hosp.contact || '';
+            document.getElementById("editHospAmbulance").value = hosp.ambulancePhone || hosp.ambulanceNumber || hosp.mobile || '';
+            document.getElementById("editHospLocation").value = hosp.location || '';
+            document.getElementById("editHospSubBranches").value = hosp.subBranches || '';
+            document.getElementById("editHospDetails").value = hosp.details || '';
+            document.getElementById("editHospStatus").value = hosp.status || 'Active';
+
+            const feedback = document.getElementById("editHospFeedback");
+            if (feedback) {
+                feedback.className = "hidden";
+                feedback.textContent = "";
+            }
+
+            const modal = document.getElementById("editPartnerHospitalModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
         };
 
         window.closeEditPartnerHospitalModal = function() {
@@ -2561,18 +2647,21 @@
         // DONOR CONTACT PREFERENCE ADMIN OVERRIDE (PART 11-16)
         let activeDonorPrivacyKey = null;
         window.openChangeDonorPrivacyModal = function(key) {
-            if (adminRole === 'SUB_ADMIN') return;
             activeDonorPrivacyKey = key;
             const donor = bloodDonorsData[key];
             if (!donor) return;
 
-            const isPublic = donor.allowEmergencyContact === true || donor.contactVisibility === 'public';
+            const isPublic = donor.phoneVisibility === 'public' || donor.accountType === 'public' || donor.contactVisibility === 'public' || donor.allowEmergencyContact === true || (!donor.phoneVisibility && !donor.accountType && donor.contactVisibility !== 'private' && donor.allowEmergencyContact !== false);
             document.getElementById("privacyModalDonorName").textContent = donor.name || 'Anonymous Donor';
             document.getElementById("privacyModalCurrentPref").textContent = isPublic ? '🟢 PUBLIC (Allow Contact)' : '🔒 PRIVATE (Keep Number Hidden)';
             document.getElementById("privacyModalCurrentPref").className = isPublic ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'text-red-600 dark:text-red-400 font-black';
             document.getElementById("privacyModalNewPref").value = isPublic ? 'private' : 'public';
             document.getElementById("privacyModalReason").value = "";
-            document.getElementById("privacyModalFeedback").textContent = "";
+            const feedback = document.getElementById("privacyModalFeedback");
+            if (feedback) {
+                feedback.textContent = "";
+                feedback.className = "hidden";
+            }
 
             const modal = document.getElementById("changeDonorPrivacyModal");
             modal.classList.remove("hidden");
@@ -2844,7 +2933,7 @@
                 tr.innerHTML = `
                     <td class="p-4 font-bold text-slate-900 dark:text-white">👤 ${item.name || 'Sub-Admin'}</td>
                     <td class="p-4 text-xs font-mono text-slate-600 dark:text-slate-300">${item.email || '-'}</td>
-                    <td class="p-4 text-xs font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-bold">${item.password || '••••••••'}</td>
+                    <td class="p-4 text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-bold">••••••••</td>
                     <td class="p-4"><span class="bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-400 text-xs font-bold px-2 py-0.5 rounded">SUB_ADMIN (Read-Only)</span></td>
                     <td class="p-4">${statusBadge}</td>
                     <td class="p-4 text-xs text-slate-500">${dateStr}</td>
@@ -2947,7 +3036,57 @@
         /* EDIT BLOOD DONOR FUNCTIONS */
         let activeEditDonorKey = null;
         window.openEditDonorModal = function(key) {
-            window.openEditInNewPage('donors', key);
+            activeEditDonorKey = key;
+            const donor = bloodDonorsData[key];
+            if (!donor) return;
+
+            document.getElementById("editDonorName").value = donor.name || '';
+            document.getElementById("editDonorEmail").value = donor.email || '';
+            document.getElementById("editDonorDob").value = donor.dob || '';
+            document.getElementById("editDonorPhone").value = donor.phone || donor.mobileNumber || '';
+            document.getElementById("editDonorBloodGroup").value = donor.bloodGroup || 'O+';
+            document.getElementById("editDonorCity").value = donor.city || '';
+            document.getElementById("editDonorAlcohol24h").value = donor.alcoholLast24h || 'No';
+            document.getElementById("editDonorHasHabits").value = donor.hasBadHabits || 'None';
+            document.getElementById("editDonorDonationCount").value = donor.donationCount || donor.timesDonated || 0;
+            document.getElementById("editDonorStatus").value = donor.status || 'Available';
+            
+            const feedback = document.getElementById("editDonorFeedback");
+            if (feedback) {
+                feedback.className = "hidden";
+                feedback.textContent = "";
+            }
+
+            const subAdminNotice = document.getElementById("editDonorSubAdminNotice");
+            const personalInputs = [
+                "editDonorName", "editDonorEmail", "editDonorDob", "editDonorPhone",
+                "editDonorBloodGroup", "editDonorCity", "editDonorAlcohol24h", "editDonorHasHabits"
+            ];
+
+            if (adminRole === 'SUB_ADMIN') {
+                if (subAdminNotice) subAdminNotice.classList.remove("hidden");
+                personalInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.disabled = true;
+                        el.classList.add("opacity-60", "bg-slate-100", "dark:bg-slate-800", "cursor-not-allowed");
+                    }
+                });
+            } else {
+                if (subAdminNotice) subAdminNotice.classList.add("hidden");
+                personalInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.disabled = false;
+                        el.classList.remove("opacity-60", "bg-slate-100", "dark:bg-slate-800", "cursor-not-allowed");
+                    }
+                });
+            }
+
+            const modal = document.getElementById("editDonorModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
         };
 
         window.closeEditDonorModal = function() {
@@ -3033,7 +3172,30 @@
         /* EDIT ORGAN DONOR FUNCTIONS */
         let activeEditOrganKey = null;
         window.openEditOrganDonorModal = function(key) {
-            window.openEditInNewPage('organ_donors', key);
+            activeEditOrganKey = key;
+            const donor = organDonorsData[key];
+            if (!donor) return;
+
+            document.getElementById("editOrganName").value = donor.name || '';
+            document.getElementById("editOrganEmail").value = donor.email || '';
+            document.getElementById("editOrganPhone").value = donor.phone || '';
+            document.getElementById("editOrganAge").value = donor.age || '';
+            document.getElementById("editOrganDob").value = donor.dob || '';
+            document.getElementById("editOrganOrgansPledged").value = donor.organsPledged || 'All Organs';
+            document.getElementById("editOrganCity").value = donor.city || '';
+            document.getElementById("editOrganAlcoholHabit").value = donor.alcoholHabit || 'No';
+            document.getElementById("editOrganSmokingHabit").value = donor.smokingHabit || 'No';
+
+            const feedback = document.getElementById("editOrganFeedback");
+            if (feedback) {
+                feedback.className = "hidden";
+                feedback.textContent = "";
+            }
+
+            const modal = document.getElementById("editOrganDonorModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
         };
 
         window.closeEditOrganDonorModal = function() {
@@ -3097,7 +3259,27 @@
         /* EDIT REGISTERED USER FUNCTIONS */
         let activeEditUserKey = null;
         window.openEditUserModal = function(key) {
-            window.openEditInNewPage('users', key);
+            activeEditUserKey = key;
+            const user = usersData[key];
+            if (!user) return;
+
+            document.getElementById("editUserName").value = user.name || '';
+            document.getElementById("editUserEmail").value = user.email || '';
+            document.getElementById("editUserPassword").value = user.password || '';
+            document.getElementById("editUserPhone").value = user.phone || '';
+            document.getElementById("editUserDob").value = user.dob || '';
+            document.getElementById("editUserInstagram").value = user.instagram || (user.socialProfiles && user.socialProfiles.instagram) || '';
+
+            const feedback = document.getElementById("editUserFeedback");
+            if (feedback) {
+                feedback.className = "hidden";
+                feedback.textContent = "";
+            }
+
+            const modal = document.getElementById("editUserModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            if (window.lucide) lucide.createIcons();
         };
 
         window.closeEditUserModal = function() {
@@ -3147,7 +3329,7 @@
 
                 await logAdminAction('REGISTERED_USER_EDITED', 'user', activeEditUserKey, {
                     previousValue: (oldItem.name || 'User') + ' (' + (oldItem.email || '') + ')',
-                    newValue: name + ' (' + email + ', Raw Pass: ' + password + ', IG: ' + insta + ')',
+                    newValue: name + ' (' + email + ', Password: [PROTECTED], IG: ' + insta + ')',
                     reason: 'SuperAdmin updated user account details & Instagram profile'
                 });
 
@@ -4085,8 +4267,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Password (Raw Text) *</label>
-                    <input type="text" id="editUserPassword" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-mono font-bold outline-none focus:border-emerald-500">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Account Password *</label>
+                    <input type="password" id="editUserPassword" required class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white p-3 rounded-xl text-xs font-mono font-bold outline-none focus:border-emerald-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">

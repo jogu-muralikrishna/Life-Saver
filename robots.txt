@@ -2,5 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /admin-login.html
+Disallow: /edit-record.html
+Disallow: /mk.html
+Disallow: /api/
+Disallow: /backend/
 
 Sitemap: https://life-saver-care.vercel.app/sitemap.xml

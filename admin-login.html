@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
     <title>Admin Portal Login - Life Saver</title>
     <script>
         if ('scrollRestoration' in history) {
@@ -201,23 +202,51 @@
             msgBox.classList.add('hidden');
 
             try {
-                if (role === 'SUB_ADMIN') {
+                // Fetch sub-admins with multi-layer fallback
+                let subAdmins = null;
+                try {
                     const snap = await get(ref(db, 'sub_admins'));
-                    let foundKey = null;
-                    let foundData = null;
+                    if (snap.exists()) subAdmins = snap.val();
+                } catch (e) {
+                    console.warn("RTDB SDK get sub_admins failed during reset verification, trying REST fallback:", e);
+                }
+                if (!subAdmins) {
+                    try {
+                        const res = await fetch("https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app/sub_admins.json");
+                        if (res.ok) subAdmins = await res.json();
+                    } catch (e) {}
+                }
+                if (!subAdmins) {
+                    try {
+                        const bRes = await fetch("/api/db/sub_admins");
+                        if (bRes.ok) subAdmins = await bRes.json();
+                    } catch (e) {}
+                }
+                if (!subAdmins) {
+                    try {
+                        const cRes = await fetch("backend/baseline_cache.json");
+                        if (cRes.ok) {
+                            const cData = await cRes.json();
+                            if (cData && cData.sub_admins) subAdmins = cData.sub_admins;
+                        }
+                    } catch (e) {}
+                }
 
-                    if (snap.exists()) {
-                        const subAdmins = snap.val();
-                        Object.keys(subAdmins).forEach(k => {
-                            const sa = subAdmins[k];
-                            if ((sa.email && sa.email.toLowerCase() === email.toLowerCase()) ||
-                                (k.toLowerCase() === name.toLowerCase())) {
-                                foundKey = k;
-                                foundData = sa;
-                            }
-                        });
-                    }
+                let foundKey = null;
+                let foundData = null;
 
+                if (subAdmins) {
+                    Object.keys(subAdmins).forEach(k => {
+                        const sa = subAdmins[k];
+                        if (sa && ((sa.email && sa.email.trim().toLowerCase() === email.toLowerCase()) ||
+                            (k.toLowerCase() === name.toLowerCase()))) {
+                            foundKey = k;
+                            foundData = sa;
+                        }
+                    });
+                }
+
+                if (role === 'SUB_ADMIN' || foundKey) {
                     if (!foundKey) {
                         msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900";
                         msgBox.textContent = "No Sub-Admin account found matching this email address.";
@@ -236,13 +265,26 @@
                         msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
                         msgBox.textContent = "❌ Security Identity Failed: The Admin Name does not match records for this email.";
                         msgBox.classList.remove('hidden');
+                        btn.innerText = "Verify Admin Identity →";
+                        btn.disabled = false;
                         return;
                     }
 
-                    targetResetSubAdminKey = foundKey;
-                    targetResetRole = 'SUB_ADMIN';
-                    document.getElementById('verifiedAdminLabel').textContent = `Sub-Admin Verified: ${foundData.name || email}`;
+                    msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900";
+                    msgBox.textContent = "🔒 Security Notice: Sub-Admin credentials can only be reset or reissued directly by the Super Admin from the Admin Management Panel.";
+                    msgBox.classList.remove('hidden');
+                    btn.innerText = "Verify Admin Identity →";
+                    btn.disabled = false;
+                    return;
                 } else {
+                    if (email.toLowerCase() !== 'admin@lifesaver.com') {
+                        msgBox.className = "text-xs p-3 rounded-xl font-semibold bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900";
+                        msgBox.textContent = "❌ Unauthorized: No administrator account registered for this email.";
+                        msgBox.classList.remove('hidden');
+                        btn.innerText = "Verify Admin Identity →";
+                        btn.disabled = false;
+                        return;
+                    }
                     targetResetRole = 'SUPER_ADMIN';
                     await sendPasswordResetEmail(auth, email);
                     alert(`📧 Password reset email sent to ${email}.\nPlease check your inbox to reset your Super Admin password.`);
@@ -323,53 +365,92 @@
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
-            const role = document.getElementById('adminRoleSelect').value;
+            const roleSelect = document.getElementById('adminRoleSelect');
+            const role = roleSelect ? roleSelect.value : 'SUPER_ADMIN';
 
-            if (role === 'SUB_ADMIN') {
+            // Helper to get sub-admins data with multi-layer fallback
+            async function fetchAllSubAdmins() {
                 try {
                     const snap = await get(ref(db, 'sub_admins'));
-                    let matchedSubAdmin = null;
-
-                    if (snap.exists()) {
-                        const subAdmins = snap.val();
-                        Object.keys(subAdmins).forEach(key => {
-                            const sa = subAdmins[key];
-                            if (sa.email && sa.email.toLowerCase() === email.toLowerCase() && sa.password === password) {
-                                matchedSubAdmin = sa;
-                            }
-                        });
+                    if (snap.exists()) return snap.val();
+                } catch (sdkErr) {
+                    console.warn("RTDB SDK get sub_admins notice, trying REST fallback:", sdkErr);
+                }
+                try {
+                    const res = await fetch("https://life-saver-be5cf-default-rtdb.asia-southeast1.firebasedatabase.app/sub_admins.json");
+                    if (res.ok) return await res.json();
+                } catch (restErr) {
+                    console.warn("REST sub_admins fallback notice:", restErr);
+                }
+                try {
+                    const bRes = await fetch("/api/db/sub_admins");
+                    if (bRes.ok) return await bRes.json();
+                } catch (bErr) {}
+                try {
+                    const cRes = await fetch("backend/baseline_cache.json");
+                    if (cRes.ok) {
+                        const cData = await cRes.json();
+                        if (cData && cData.sub_admins) return cData.sub_admins;
                     }
+                } catch (cErr) {}
+                return null;
+            }
 
-                    if (!matchedSubAdmin) {
-                        alert("Invalid email or password.");
-                        btn.innerText = "Authenticate Admin Access";
-                        btn.disabled = false;
-                        return;
+            // Check if account is a Sub-Admin
+            let isSubAdminAccount = (role === 'SUB_ADMIN');
+            let subAdmins = await fetchAllSubAdmins();
+            let matchedSubAdmin = null;
+
+            if (subAdmins) {
+                Object.keys(subAdmins).forEach(key => {
+                    const sa = subAdmins[key];
+                    if (sa && sa.email && sa.email.trim().toLowerCase() === email.toLowerCase()) {
+                        matchedSubAdmin = sa;
+                        isSubAdminAccount = true;
                     }
+                });
+            }
 
-                    if (matchedSubAdmin.status === 'Disabled') {
-                        alert("Access Denied: Your Sub-Admin account has been disabled by Super Admin.");
-                        btn.innerText = "Authenticate Admin Access";
-                        btn.disabled = false;
-                        return;
-                    }
+            // Cryptographic SHA-256 hash helper so plain-text passwords never appear in source code
+            async function computeSha256(text) {
+                const enc = new TextEncoder().encode(text);
+                const buf = await crypto.subtle.digest('SHA-256', enc);
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
 
-                    localStorage.setItem('adminRole', 'SUB_ADMIN');
-                    localStorage.setItem('adminEmail', email);
-                    localStorage.setItem('adminName', matchedSubAdmin.name || 'Sub Admin');
-                    window.location.href = "admin.html";
-                    return;
-                } catch (err) {
-                    console.error("Sub-admin login error:", err);
-                    alert("Error authenticating Sub-Admin. Please try again.");
+            const passHash = await computeSha256(password);
+            // 256-bit cryptographic hash for Super Admin authorization
+            const SUPER_ADMIN_DIGEST = 'cf429dbaca68f3280cd5cd7daf4d1838fc235ae631df29b0b3526b55ebb11c52';
+
+            if (isSubAdminAccount) {
+                const subAdminPass = (matchedSubAdmin ? (matchedSubAdmin.password || '') : '').trim();
+                const isPasswordValid = (subAdminPass === password || subAdminPass === passHash);
+                if (!matchedSubAdmin || !isPasswordValid) {
+                    alert("Invalid email or password.");
                     btn.innerText = "Authenticate Admin Access";
                     btn.disabled = false;
                     return;
                 }
+
+                if (matchedSubAdmin.status === 'Disabled') {
+                    alert("Access Denied: Your Sub-Admin account has been disabled by Super Admin.");
+                    btn.innerText = "Authenticate Admin Access";
+                    btn.disabled = false;
+                    return;
+                }
+
+                localStorage.setItem('adminRole', 'SUB_ADMIN');
+                localStorage.setItem('adminEmail', matchedSubAdmin.email || email);
+                localStorage.setItem('adminName', matchedSubAdmin.name || 'Sub Admin');
+                localStorage.setItem('adminAuthToken', 'LS-AUTH-SUB-' + Date.now());
+                if (roleSelect) roleSelect.value = 'SUB_ADMIN';
+
+                window.location.href = "admin.html";
+                return;
             }
 
-            // SUPER_ADMIN login flow
-            const isTargetSuperAdmin = (email.toLowerCase() === 'admin@lifesaver.com' && password === 'MURALI^93927$');
+            // SUPER_ADMIN login flow (Zero plaintext passwords in code)
+            const isTargetSuperAdmin = (email.toLowerCase() === 'admin@lifesaver.com' && passHash === SUPER_ADMIN_DIGEST);
 
             try {
                 let userCredential = null;
